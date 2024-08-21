@@ -1,0 +1,68 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class OrdenInterna extends Model
+{
+    public $timestamps = true;
+    protected $table = 'tblordenesinternascab_oic';
+    protected $primaryKey = 'oic_id';
+
+    protected $fillable = [
+        'oic_numero',
+        'oic_fecha',
+        'odt_numero',
+        'cli_id',
+        'are_codigo',
+        'oic_equipo_descripcion',
+        'oic_estado',
+        'tra_idorigen',
+        'tra_idmaestro',
+        'tra_idalmacen',
+        'usu_usucreacion',
+        'usu_feccreacion',
+        'usu_usumodificacion',
+        'usu_fecmodificacion'
+    ];
+
+    const CREATED_AT = 'usu_feccreacion';
+    const UPDATED_AT = 'usu_fecmodificacion';
+
+    // Orden de Trabajo
+    public function ordenTrabajo()
+    {
+        return $this->belongsTo(OrdenTrabajo::class, 'odt_numero');
+    }
+
+    // Cliente
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class, 'cli_id')->selectFields();
+    }
+
+    // Area
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'are_codigo')->selectFields();
+    }
+
+    // Trabajador Origen
+    public function trabajadorOrigen()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_idorigen')->selectFields();
+    }
+
+    // Trabajador Maestro
+    public function trabajadorMaestro()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_idmaestro')->selectFields();
+    }
+
+    // Trabajador Almacen
+    public function trabajadorAlmacen()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_idalmacen')->selectFields();
+    }
+}
