@@ -1,0 +1,96 @@
+#tbl-usuarios {
+    font-size: 12px;
+}
+#tbl-usuarios th, #tbl-usuarios td {
+    white-space: nowrap;
+}
+#selectedProcesosTable {
+    font-size: 12px;
+}
+#selectedProcesosTable th, #selectedProcesosTable td {
+    white-space: nowrap;
+}
+#selectedProductsTable {
+    font-size: 12px;
+}
+#selectedProductsTable th, #selectedProductsTable td {
+    white-space: nowrap;
+}
+.btn-agregar {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-agregar:hover {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+    color: white;
+    transform: scale(1.05);
+}
+.btn-editar {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-editar:hover {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+    color: white;
+    transform: scale(1.05);
+}
+.btn-eliminar {
+    background-color: #001c58;
+    border-color: #001c58;
+    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-eliminar:hover {
+    background-color: #001c58;
+    border-color: #001c58;
+    color: white;
+    transform: scale(1.05);
+}
+.btn-exportar {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-exportar:hover {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+    color: white;
+    transform: scale(1.05);
+}
+.btn-guardar {
+    background-color: #2ec754;
+    border-color: #2ec754;
+    color: white;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-guardar:hover {
+    background-color: #2ec754;
+    border-color: #2ec754;
+    color: white;
+    transform: scale(1.05);
+}
+.input-small {
+    font-size: 12px;
+}
+.input-group-text {
+    background-color: #ff4f00;
+    border: 1px solid #ff4f00;
+    color: white;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+}
+.form-check-input {
+    background-color: #ffffff;
+}
+
+.form-check-input:checked {
+    background-color: #ff4f00;
+    border-color: #ff4f00;
+}

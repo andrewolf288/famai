@@ -30,7 +30,7 @@ class Proveedor extends Model
 
     public function scopeSelectFields($query)
     {
-        return $query->select('prv_nrodocumento', 'prv_nombre');
+        return $query->select('prv_id','prv_nrodocumento', 'prv_nombre');
     }
 
     // Tipo de documento

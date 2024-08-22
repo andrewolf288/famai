@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\TrabajadorController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// rutas de autenticacion
 Route::group([
     'middleware' => 'api',
     'prefix' => 'auth'
@@ -32,8 +34,12 @@ Route::group([
 
 });
 
-Route::get('/status', function () {
-    return 'Hello World';
+// rutas de productos
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('productos', [ProductoController::class, 'index']);
 });
 
-Route::apiResource('productos', 'ProductoController');
+// rutas de trabajadores
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('trabajadores', [TrabajadorController::class, 'index']);
+});

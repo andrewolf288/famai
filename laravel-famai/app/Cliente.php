@@ -26,7 +26,7 @@ class Cliente extends Model
 
     public function scopeSelectFields($query)
     {
-        return $query->select('cli_nrodocumento','cli_nombre');
+        return $query->select('cli_id', 'cli_nrodocumento','cli_nombre');
     }
 
     // tipo documento

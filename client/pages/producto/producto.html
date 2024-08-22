@@ -1,0 +1,47 @@
+<h2 class="mb-3 fs-4">Lista de Productos</h2>
+<div class="row justify-content-end mb-4">
+    <div class="col-auto">
+        <a class="btn btn-agregar" id="btn-link-create-producto">
+            Crear Producto
+        </a>
+    </div>
+</div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Filtros a la izquierda -->
+    <div class="filters">
+        <select id="filter-selector" class="form-select d-inline-block w-auto">
+            <option value="">Seleccione un filtro</option>
+            <option value="pro_descripcion">Descripción</option>
+        </select>
+
+        <input type="text" id="filter-input" class="form-control d-inline-block w-auto ml-2" placeholder="Buscar...">
+
+        <button id="filter-button" class="btn btn-primary ml-2">Filtrar</button>
+    </div>
+
+    <!-- Paginación a la derecha -->
+    <div id="pagination-container" class="pagination-container"></div>
+</div>
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <tr>
+            <th>Cod. Producto</th>
+            <th>Grupo</th>
+            <th>Familia</th>
+            <th>Sub familia</th>
+            <th>Descripción</th>
+            <th>Unidad</th>
+            <th>Acciones</th>
+            <th>Fec. Compra</th>
+            <th>Prc. Compra</th>
+            <th>Raz. Social</th>
+            <th>Estado</th>
+            <th>Usu. Creador</th>
+            <th>Fec. Creación</th>
+            <th>Usu. Actualizador</th>
+            <th>Fec. Actualización</th>
+        </tr>
+    </thead>
+    <tbody id="data-container-body">
+    </tbody>
+</table>

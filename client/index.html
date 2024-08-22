@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAMAI</title>
+    <link href="./assets/css/all.min.css" rel="stylesheet">
+    <link href="./estilos/app.css" rel="stylesheet">
+    <link href="./estilos/nav-bar.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.8/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/bootstrap.min.css">
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+    <!-- ESTILOS GENERALES -->
+     <link rel="stylesheet" href="./estilos/app.css">
+    <!-- PAGINATION CSS -->
+     <link rel="stylesheet" href="./estilos/pagination.css">
+</head>
+
+<body>
+    <!-- SECCION DE CONTENIDO -->
+    <div class="d-flex flex-column min-vh-100">
+        <!-- NAVBAR -->
+        <nav class="navbar navbar-expand-lg custom-navbar">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <img src="./iconos/famai-negativo.jpg" alt="Logo FAMAI" class="img-fluid"
+                        style="max-width: 150px; height: auto;">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <!-- Catálogos Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="catalogosDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Catálogos
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="catalogosDropdown">
+                                <li><a class="dropdown-item" href="/usuarios" id="usuariosLink">Usuarios</a></li>
+                                <li><a class="dropdown-item" href="/productos" id="productosLink">Productos</a></li>
+                                <li><a class="dropdown-item" href="/trabajadores" id="trabajadoresLink">Trabajadores</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Procesos Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="procesosDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Procesos
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="procesosDropdown">
+                                <li><a class="dropdown-item" href="#ordenInterna" id="list-orden-interna">Orden
+                                        Interna</a></li>
+                            </ul>
+                        </li>
+                        <!-- Sesión Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="sesionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Sesión
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="sesionDropdown">
+                                <li><a class="dropdown-item" href="/perfil" id="perfilLink">Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="/logout" id="logoutLink">Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- CONTENIDO -->
+        <div class="container my-5 flex-grow-1">
+            <div id="content"></div>
+        </div>
+        <!-- FOOTER -->
+        <footer class="custom-footer text-white text-center py-3 mt-auto">
+            <p>&copy; 2024 Famai</p>
+        </footer>
+    </div>
+
+    <!-- SECCION DE SCRIPTS -->
+    <!-- JQUERY -->
+    <script src="./assets/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/js/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
+    <!-- script de axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="scripts/axiosClient.js"></script>
+    <!-- scripts que se usaran en toda la aplicacion -->
+    <script src="scripts/utils/helpers.js"></script>
+    <!-- scripts de navegacion Single Page Application -->
+    <script src="https://unpkg.com/navigo"></script>
+    <script src="scripts/app.js"></script>
+    <!-- DataTable JS -->
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.8/datatables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.bootstrap5.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.11/sorting/date-eu.js"></script>
+    <!-- Pagination.js -->
+     <script src="./assets/js/pagination.min.js"></script>
+     <!-- scripts de paginacion -->
+     <script src="scripts/customPagination.js"></script>
+</body>
+
+</html>

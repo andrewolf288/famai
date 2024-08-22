@@ -1,0 +1,40 @@
+<div class="modal fade" id="editarUsuarioModal" tabindex="-1" aria-labelledby="editarUsuarioModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h1 class="modal-title fs-5" id="editarUsuarioModalLabel">Editar Usuario</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body orange-form">
+              <form id="editarUsuarioForm" method="post">
+                  <div class="mb-3">
+                      <label for="usu_codigo" class="form-label">Código:</label>
+                      <input type="text" name="usu_codigo" id="usu_codigo" class="form-control" required readonly>
+                  </div>
+                  <div class="mb-3">
+                      <label for="usu_nombre" class="form-label">Nombre:</label>
+                      <input type="text" name="usu_nombre" id="usu_nombre" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="usu_contrasena" class="form-label">Contraseña:</label>
+                      <div class="input-group">
+                        <input type="password" name="usu_contrasena" id="usu_contrasena" class="form-control" maxlength="32" required>
+                        <span class="input-group-text toggle-password" style="cursor: pointer;">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                      </div>
+                  </div>
+                  <div class="mb-3 form-check">
+                      <input type="checkbox" class="form-check-input" id="usu_activo" name="usu_activo">
+                      <label class="form-check-label" for="usu_activo">Activo</label>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-eliminar" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                      <button type="submit" class="btn btn-agregar"><i class="fa-solid fa-floppy-disk"></i> Editar usuario</button>
+                  </div>
+              </form>
+              <script src="./scripts/editarUsuario.js"></script>
+          </div>
+      </div>
+  </div>
+</div>
