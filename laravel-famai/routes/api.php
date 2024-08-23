@@ -5,6 +5,7 @@ use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\GrupoInventarioController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProductoProveedorController;
 use App\Http\Controllers\SubFamiliaController;
 use App\Http\Controllers\TrabajadorController;
@@ -49,6 +50,12 @@ Route::group(['middleware' => ['auth.jwt']], function() {
    Route::put('usuario/{id}', [UsuarioController::class, 'update']);
    Route::post('usuarios', [UsuarioController::class, 'store']);
 });
+
+
+//Route::apiResource('productos', 'ProductoController');
+
+Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
+
 
 // rutas de productos
 Route::group(['middleware' => ['auth.jwt']], function() {
@@ -97,3 +104,4 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('gruposinventarios', [GrupoInventarioController::class, 'index']);
     Route::get('gruposinventariosSimple', [GrupoInventarioController::class, 'indexSimple']);
 });
+
