@@ -18,6 +18,8 @@ class Proveedor extends Model
         'ubi_codigo',
         'prv_telefono',
         'prv_contacto',
+        'prv_correo',
+        'prv_whatsapp',
         'prv_activo',
         'prv_usucreacion',
         'prv_feccreacion',
