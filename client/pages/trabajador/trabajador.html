@@ -1,19 +1,19 @@
 <h2 class="mb-3 fs-4">Lista de Trabajadores</h2>
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
     <!-- Filtros a la izquierda -->
-    <div class="filters">
-        <select id="filter-selector" class="form-select d-inline-block w-auto">
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">
+        <select id="filter-selector" class="form-select w-100 w-md-auto">
             <option value="">Seleccione un filtro</option>
             <option value="tra_nombre">Nombre</option>
         </select>
 
-        <input type="text" id="filter-input" class="form-control d-inline-block w-auto ml-2" placeholder="Buscar...">
-        
-        <button id="filter-button" class="btn btn-primary ml-2">Filtrar</button>
-    </div>
+        <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
+            placeholder="Buscar...">
 
+        <button id="filter-button" class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2">Filtrar</button>
+    </div>
     <!-- Paginación a la derecha -->
-    <div id="pagination-container" class="pagination-container"></div>
+    <div id="pagination-container" class="pagination-container mt-3 mt-md-0"></div>
 </div>
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
     <thead>

@@ -9,6 +9,7 @@ function initPagination(URL, initDataTable, dataTableOptions = {}) {
             return response.count
         },
         pageSize: 10,
+        pageRange: 1,
         showPageNumbers: true,
         showPrevious: true,
         showNext: true,

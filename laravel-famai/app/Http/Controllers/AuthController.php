@@ -19,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login']]);
     }
 
     /**
@@ -47,7 +47,7 @@ class AuthController extends Controller
         }
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Username incorrecto o contraseña incorrecta'], 401);
+            return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
 
         // actualizamos el ultimo acceso

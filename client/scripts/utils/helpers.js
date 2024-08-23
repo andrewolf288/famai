@@ -30,3 +30,14 @@ const hideLoaderModal = () => {
         console.log("El modal ya no existe")
     }
 }
+
+function formatErrorsFromString(errorString) {
+    const errors = JSON.parse(errorString);
+    let errorMessage = '';
+
+    for (const [field, messages] of Object.entries(errors)) {
+        errorMessage += messages.join('\n') + '\n';
+    }
+
+    return errorMessage.trim();
+}

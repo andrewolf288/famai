@@ -1,0 +1,161 @@
+<h2 class="mb-3 fs-4">Lista de Usuarios</h2>
+<div class="row justify-content-end mb-4">
+    <div class="col-auto">
+        <a class="btn btn-agregar" id="btn-link-create-usuario">
+            Crear Usuario
+        </a>
+    </div>
+</div>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+    <!-- Filtros a la izquierda -->
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">
+        <select id="filter-selector" class="form-select w-100 w-md-auto">
+            <option value="">Seleccione un filtro</option>
+            <option value="usu_codigo">Usuario</option>
+            <option value="usu_nombre">Nombre</option>
+        </select>
+
+        <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
+            placeholder="Buscar...">
+
+        <button id="filter-button" class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2">Filtrar</button>
+    </div>
+    <!-- Paginación a la derecha -->
+    <div id="pagination-container" class="pagination-container mt-3 mt-md-0"></div>
+</div>
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nombres</th>
+            <th>Estado</th>
+            <th>Último acceso</th>
+            <th>Usu. Creador</th>
+            <th>Fec. Creación</th>
+            <th>Acciones</th>
+            <th>Usu. Actualizador</th>
+            <th>Fec. Actualización</th>
+        </tr>
+    </thead>
+    <tbody id="data-container-body">
+    </tbody>
+</table>
+
+<!-- CREACION DE USUARIOS -->
+<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="crearUsuarioModalLabel">Añadir Usuario</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body orange-form">
+                <form id="crearUsuarioForm">
+                    <!-- Código usuario -->
+                    <div class="mb-3">
+                        <label for="usu_codigo" class="form-label">Código usuario:</label>
+                        <input type="text" name="usu_codigo" id="usu_codigo" class="form-control" maxlength="8"
+                            required>
+                    </div>
+                    <!-- Nombres y Apellidos -->
+                    <div class="mb-3">
+                        <label for="usu_nombre" class="form-label">Nombres y Apellidos:</label>
+                        <input type="text" name="usu_nombre" id="usu_nombre" class="form-control" required>
+                    </div>
+                    <!-- Contraseña -->
+                    <div class="mb-3">
+                        <label for="usu_contrasena" class="form-label">Contraseña:</label>
+                        <div class="input-group">
+                            <input type="password" name="usu_contrasena" id="usu_contrasena" class="form-control"
+                                maxlength="32" required>
+                            <span class="input-group-text toggle-password" style="cursor: pointer;">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Confirmar contraseña -->
+                    <div class="mb-3">
+                        <label for="usu_contrasena_confirmar" class="form-label">Confirmar contraseña:</label>
+                        <div class="input-group">
+                            <input type="password" name="usu_contrasena_confirmar" id="usu_contrasena_confirmar" class="form-control"
+                                maxlength="32" required>
+                            <span class="input-group-text toggle-password" style="cursor: pointer;">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-eliminar" data-bs-dismiss="modal"><i
+                                class="fa-solid fa-xmark"></i> Cerrar</button>
+                        <button class="btn btn-agregar" id="btn-create-usuario"><i class="fa-solid fa-floppy-disk"></i>
+                            Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- EDITAR USUARIO -->
+<div class="modal fade" id="editarUsuarioModal" tabindex="-1" aria-labelledby="editarUsuarioModalLabel"
+aria-hidden="true">
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="editarUsuarioModalLabel">Editar Usuario</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body orange-form">
+            <form id="editarUsuarioForm">
+                <!-- INPUT PRODUCTO ID -->
+                <input type="hidden" id="usu_codigo_hidden">
+                <!-- Código usuario -->
+                <div class="mb-3">
+                    <label for="usu_codigo_editar" class="form-label">Código usuario:</label>
+                    <input type="text" name="usu_codigo" id="usu_codigo_editar" class="form-control" maxlength="8"
+                        required>
+                </div>
+                <!-- Nombres y Apellidos -->
+                <div class="mb-3">
+                    <label for="usu_nombre_editar" class="form-label">Nombres y Apellidos:</label>
+                    <input type="text" name="usu_nombre" id="usu_nombre_editar" class="form-control" required>
+                </div>
+                <!-- Contraseña -->
+                <div class="mb-3">
+                    <label for="usu_contrasena_editar" class="form-label">Contraseña:</label>
+                    <div class="input-group">
+                        <input type="password" name="usu_contrasena" id="usu_contrasena_editar" class="form-control"
+                            maxlength="32" required>
+                        <span class="input-group-text toggle-password" style="cursor: pointer;">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                <!-- Confirmar contraseña -->
+                <div class="mb-3">
+                    <label for="usu_contrasena_confirmar_editar" class="form-label">Confirmar contraseña:</label>
+                    <div class="input-group">
+                        <input type="password" name="usu_contrasena_confirmar" id="usu_contrasena_confirmar_editar" class="form-control"
+                            maxlength="32" required>
+                        <span class="input-group-text toggle-password" style="cursor: pointer;">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                <!-- CHECKBOX ACTIVO -->
+                 <div class="mb-3">
+                    <input type="checkbox" class="form-check-input me-2" id="activoUsuarioEdit" checked>
+                    <label class="form-check-label" for="activoUsuarioEdit">Activo</label>
+                 </div>
+                 <!-- BOTONES -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-eliminar" data-bs-dismiss="modal"><i
+                            class="fa-solid fa-xmark"></i> Cerrar</button>
+                    <button class="btn btn-agregar" id="btn-editar-usuario"><i class="fa-solid fa-floppy-disk"></i>
+                        Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>

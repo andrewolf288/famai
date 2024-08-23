@@ -17,6 +17,7 @@ $(document).ready(() => {
     }
 
     const initDataTable = (data) => {
+        let content = ''
         data.forEach((producto, index) => {
             content += `
             <tr>
@@ -44,9 +45,9 @@ $(document).ready(() => {
                         </button>
                     </div>
                 </td>
-                <td>${producto.prp_fechaultimacompra === null ? 'No aplica' : parseDate(producto.prp_fechaultimacompra)}</td>
-                <td>${producto.prp_preciounitario === null ? 'No aplica' : producto.prp_preciounitario}</td>
-                <td>${producto.prv_nrodocumento === null ? 'No aplica' : producto.prv_nrodocumento}</td>
+                <td>${producto.ultima_compra === null ? 'No aplica' : parseDate(producto.ultima_compra.prp_fechaultimacompra)}</td>
+                <td>${producto.ultima_compra === null ? 'No aplica' : producto.ultima_compra.prp_preciounitario}</td>
+                <td>${producto.ultima_compra === null ? 'No aplica' : producto.ultima_compra.proveedor.prv_nrodocumento}</td>
                 <td>${producto.pro_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
                 <td>${producto.pro_usucreacion === null ? 'No aplica' : producto.pro_usucreacion}</td>
                 <td>${producto.pro_feccreacion === null ? 'No aplica' : parseDate(producto.pro_feccreacion)}</td>
@@ -69,6 +70,7 @@ $(document).ready(() => {
         if (filterField.length !== 0 && filterValue.length !== 0) {
             filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
         }
+        console.log(filteredURL)
 
         initPagination(filteredURL, initDataTable, dataTableOptions)
     });
@@ -80,28 +82,14 @@ $(document).ready(() => {
     async function cargarOpcionesSelect(url, $selectElement, nombre, codigo, defaultOption) {
         try {
             // Realiza la solicitud fetch al servidor
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-
-            // Verifica si la respuesta fue exitosa
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-            }
-
-            // Convierte la respuesta a JSON
-            const data = await response.json()
-            const dataSelect = data.data
+            const {data} = await client.get(url)
 
             $selectElement.empty()
             $selectElement.append($('<option>', {
                 value: "",
                 text: defaultOption
             }))
-            $.each(dataSelect, function (index, item) {
+            $.each(data, function (index, item) {
                 $selectElement.append($('<option>', {
                     value: item[codigo],
                     text: item[nombre]
@@ -127,24 +115,24 @@ $(document).ready(() => {
 
         // CARGAMOS MARCAS
         const solicitudes = [
-            cargarOpcionesSelect('./php/vistas/leerproductosmarcasadvanced.php', selects.marca, 'pma_descripcion', 'pma_codigo', 'Seleccione una marca'),
-            cargarOpcionesSelect('./php/vistas/leerproductosfamiliasadvanced.php', selects.familia, 'pfa_descripcion', 'pfa_codigo', 'Seleccione una familia'),
-            cargarOpcionesSelect('./php/vistas/leerproductossubfamiliasadvanced.php', selects.subfamilia, 'psf_descripcion', 'psf_codigo', 'Seleccione una subfamilia'),
-            cargarOpcionesSelect('./php/vistas/leerproductosgruposinventarioadvanced.php', selects.grupo, 'pgi_descripcion', 'pgi_codigo', 'Seleccione un grupo'),
-            cargarOpcionesSelect('./php/vistas/leerunidadesadvanced.php', selects.unidad, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad'),
-            cargarOpcionesSelect('./php/vistas/leerunidadesadvanced.php', selects.unidadMayor, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad')
+            cargarOpcionesSelect('/marcasSimple', selects.marca, 'pma_descripcion', 'pma_codigo', 'Seleccione una marca'),
+            cargarOpcionesSelect('/familiasSimple', selects.familia, 'pfa_descripcion', 'pfa_codigo', 'Seleccione una familia'),
+            cargarOpcionesSelect('/subfamiliasSimple', selects.subfamilia, 'psf_descripcion', 'psf_codigo', 'Seleccione una subfamilia'),
+            cargarOpcionesSelect('/gruposinventariosSimple', selects.grupo, 'pgi_descripcion', 'pgi_codigo', 'Seleccione un grupo'),
+            cargarOpcionesSelect('/unidadesSimple', selects.unidad, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad'),
+            cargarOpcionesSelect('/unidadesSimple', selects.unidadMayor, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad')
         ]
 
-        showLoaderModal()
+        // showLoaderModal()
         try {
             await Promise.all(solicitudes)
 
-            hideLoaderModal()
+            // hideLoaderModal()
             const loaderModalCreate = new bootstrap.Modal(document.getElementById('productosCrearModal'))
             loaderModalCreate.show()
         } catch (error) {
             console.error('Error en una o más solicitudes:', error)
-            hideLoaderModal()
+            // hideLoaderModal()
         }
     })
 
@@ -167,6 +155,10 @@ $(document).ready(() => {
         const generaStockProducto = $('#generaStockProducto').is(':checked') // default - seleccionado
         const codigoSunatProducto = $.trim($('#codigoSunatProducto').val()) // opcional
         const codigoSAP = $.trim($('#codigoSAP').val()) // opcional
+        const codigoMarcaProducto = $.trim($('#codigoMarcaProducto').val()) // opcional
+        const medidasProducto = $.trim($('#medidasProducto').val()) // opcional
+        const modeloMaquinaProducto = $.trim($('#modeloMaquinaProducto').val()) // opcional
+        const observacionProducto = $.trim($('#observacionProducto').val()) // opcional
 
         // Validaciones básicas
         if (!codigoProducto) {
@@ -196,7 +188,7 @@ $(document).ready(() => {
             return
         }
 
-        showLoaderModal()
+        // showLoaderModal()
         // Preparar el payload para enviar al backend
         const productData = {
             pro_codigo: codigoProducto,
@@ -211,52 +203,38 @@ $(document).ready(() => {
             pro_stockminimo: stockMinimoProducto || null,
             pro_generastock: generaStockProducto,
             pro_codigosunat: codigoSunatProducto || null,
-            pro_codigosap: codigoSAP || null
+            pro_codigosap: codigoSAP || null,
+            pro_codigomarca: codigoMarcaProducto || null,
+            pro_medidas: medidasProducto || null,
+            pro_modelomaquina: modeloMaquinaProducto || null,
+            pro_observacion: observacionProducto || null
         }
+
+        console.log(productData)
 
         // Realizar la consulta AJAX para guardar los datos
         try {
-            const response = await fetch('./php/vistas/crearproducto.php', {
-                method: 'POST',
-                body: JSON.stringify(productData),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-
-            const responseData = await response.json()
-            console.log(responseData)
-
-            if (responseData.varRespuesta && responseData.varRespuesta.length !== 0) {
-                alert(responseData.varRespuesta)
-            } else {
-                // reseteamos el formulario
-                $('#crearProductoForm')[0].reset()
-                // oculatamos el modal
-                const loaderModalCreate = bootstrap.Modal.getInstance(document.getElementById('productosCrearModal'))
-                loaderModalCreate.hide()
-                // traemos de nuevo la data
-                await initDataTable()
-            }
+            const {data} = await client.post('/productos', productData)
+            console.log(data)
+            // reseteamos el formulario
+            $('#crearProductoForm')[0].reset()
+            // oculatamos el modal
+            const loaderModalCreate = bootstrap.Modal.getInstance(document.getElementById('productosCrearModal'))
+            loaderModalCreate.hide()
+            // traemos de nuevo la data
+            initPagination(apiURL, initDataTable, dataTableOptions)
         } catch (error) {
             console.log(error)
+            // alert()
         } finally {
-            hideLoaderModal()
+            // hideLoaderModal()
         }
     })
 
     // ------------MODAL EDIT--------------
     async function cargarDetalleProductoById(id_producto) {
-        const formatData = {
-            pro_id: id_producto
-        }
-        console.log(formatData)
         try {
-            const response = await fetch('./php/vistas/leerunproducto.php', {
-                method: 'POST',
-                body: JSON.stringify(formatData)
-            })
-            const data = await response.json()
+            const {data} = await client.get(`/producto/${id_producto}`)
             console.log(data)
 
             // actualizamos el formulario de edicion
@@ -271,16 +249,21 @@ $(document).ready(() => {
             $("#unidadMayorProductoEdit").val(data.uni_codigomayor || "")
             $("#factorUnidadMayorProductoEdit").val(data.pro_factorunidadmayor || "")
             $("#stockMinimoProductoEdit").val(data.pro_stockminimo)
-            $("#generaStockProductoEdit").prop("checked", data.pro_generastock === 1 ? true : false)
+            $("#generaStockProductoEdit").prop("checked", data.pro_generastock == 1 ? true : false)
             $("#codigoSunatProductoEdit").val(data.pro_codigosunat || "")
             $("#codigoSAPEdit").val(data.pro_codigosap || "")
+            $("#codigoMarcaProductoEdit").val(data.pro_codigomarca || "")
+            $("#medidasProductoEdit").val(data.pro_medidas || "")
+            $("#modeloMaquinaProductoEdit").val(data.pro_modelomaquina || "")
+            $("#observacionProductoEdit").val(data.pro_observacion || "")
+            $("#activoProductoEdit").prop("checked", data.pro_activo == 1 ? true : false)
 
         } catch (error) {
             console.log(error)
         }
     }
 
-    $('#datatable_productos').on('click', '.btn-producto-editar', async function () {
+    $('#data-container').on('click', '.btn-producto-editar', async function () {
         // reseteamos el formulario
         $('#editarProductoForm')[0].reset()
         const id_producto = $(this).data('id-producto')
@@ -297,30 +280,30 @@ $(document).ready(() => {
 
         // CARGAMOS MARCAS
         const solicitudes = [
-            cargarOpcionesSelect('./php/vistas/leerproductosmarcasadvanced.php', selects.marca, 'pma_descripcion', 'pma_codigo', 'Seleccione una marca'),
-            cargarOpcionesSelect('./php/vistas/leerproductosfamiliasadvanced.php', selects.familia, 'pfa_descripcion', 'pfa_codigo', 'Seleccione una familia'),
-            cargarOpcionesSelect('./php/vistas/leerproductossubfamiliasadvanced.php', selects.subfamilia, 'psf_descripcion', 'psf_codigo', 'Seleccione una subfamilia'),
-            cargarOpcionesSelect('./php/vistas/leerproductosgruposinventarioadvanced.php', selects.grupo, 'pgi_descripcion', 'pgi_codigo', 'Seleccione un grupo'),
-            cargarOpcionesSelect('./php/vistas/leerunidadesadvanced.php', selects.unidad, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad'),
-            cargarOpcionesSelect('./php/vistas/leerunidadesadvanced.php', selects.unidadMayor, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad')
+            cargarOpcionesSelect('/marcasSimple', selects.marca, 'pma_descripcion', 'pma_codigo', 'Seleccione una marca'),
+            cargarOpcionesSelect('/familiasSimple', selects.familia, 'pfa_descripcion', 'pfa_codigo', 'Seleccione una familia'),
+            cargarOpcionesSelect('/subfamiliasSimple', selects.subfamilia, 'psf_descripcion', 'psf_codigo', 'Seleccione una subfamilia'),
+            cargarOpcionesSelect('/gruposinventariosSimple', selects.grupo, 'pgi_descripcion', 'pgi_codigo', 'Seleccione un grupo'),
+            cargarOpcionesSelect('/unidadesSimple', selects.unidad, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad'),
+            cargarOpcionesSelect('/unidadesSimple', selects.unidadMayor, 'uni_descripcion', 'uni_codigo', 'Seleccione una unidad')
         ]
 
-        showLoaderModal()
+        // showLoaderModal()
         try {
             await Promise.all(solicitudes)
             await cargarDetalleProductoById(id_producto)
 
-            hideLoaderModal()
+            // hideLoaderModal()
             const loaderModalEdit = new bootstrap.Modal(document.getElementById('editarProductoModal'))
             loaderModalEdit.show()
         } catch (error) {
             console.error('Error en una o más solicitudes:', error)
-            hideLoaderModal()
+            // hideLoaderModal()
         }
 
     })
 
-    // Función para crear producto
+    // Función para editar producto
     $('#btnEditarProducto').on('click', async (event) => {
         event.preventDefault()
         let handleError = ''
@@ -340,6 +323,11 @@ $(document).ready(() => {
         const generaStockProducto = $('#generaStockProductoEdit').is(':checked') // default - seleccionado
         const codigoSunatProducto = $.trim($('#codigoSunatProductoEdit').val()) // opcional
         const codigoSAP = $.trim($('#codigoSAPEdit').val()) // opcional
+        const codigoMarcaProducto = $.trim($('#codigoMarcaProductoEdit').val()) // opcional
+        const medidasProducto = $.trim($('#medidasProductoEdit').val()) // opcional
+        const modeloMaquinaProducto = $.trim($('#modeloMaquinaProductoEdit').val()) // opcional
+        const observacionProducto = $.trim($('#observacionProductoEdit').val()) // opcional
+        const activoProducto = $('#activoProductoEdit').is(':checked') // default - seleccionado
 
         // Validaciones básicas
         if (!codigoProducto) {
@@ -369,7 +357,7 @@ $(document).ready(() => {
             return
         }
 
-        showLoaderModal()
+        // showLoaderModal()
         // Preparar el payload para enviar al backend
         const productData = {
             pro_id: idProducto,
@@ -385,33 +373,35 @@ $(document).ready(() => {
             pro_stockminimo: stockMinimoProducto || null,
             pro_generastock: generaStockProducto,
             pro_codigosunat: codigoSunatProducto || null,
-            pro_codigosap: codigoSAP || null
+            pro_codigosap: codigoSAP || null,
+            pro_codigomarca: codigoMarcaProducto || null,
+            pro_medidas: medidasProducto || null,
+            pro_modelomaquina: modeloMaquinaProducto || null,
+            pro_observacion: observacionProducto || null,
+            pro_activo: activoProducto
         }
 
         console.log(productData)
         // Realizar la consulta AJAX para editar los datos
         try {
-            const response = await fetch('./php/vistas/editarproducto.php', {
-                method: 'POST',
-                body: JSON.stringify(productData),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-
-            const responseData = await response.json()
-            console.log(responseData)
+            await client.put(`/producto/${idProducto}`, productData)
             // reseteamos el formulario
             $('#editarProductoForm')[0].reset()
             // oculatamos el modal
             const loaderModalEditar = bootstrap.Modal.getInstance(document.getElementById('editarProductoModal'))
             loaderModalEditar.hide()
             // traemos de nuevo la data
-            await initDataTable()
+            initPagination(apiURL, initDataTable, dataTableOptions)
         } catch (error) {
-            console.log(error)
+            const {response} = error
+            if(response.status === 400) {
+                const handleError = formatErrorsFromString(response.data.error)
+                alert(handleError)
+            } else {
+                alert(response.data.error)
+            }
         } finally {
-            hideLoaderModal()
+            // hideLoaderModal()
         }
     })
 
@@ -420,20 +410,14 @@ $(document).ready(() => {
         const formatData = {
             pro_id: id_producto
         }
-        console.log(formatData)
         try {
-            const response = await fetch('./php/vistas/leerproductosproveedoresproid.php', {
-                method: 'POST',
-                body: JSON.stringify(formatData)
-            })
-            const { data } = await response.json()
-            console.log(data)
+            const {data} = await client.post('/comprasByProducto', formatData)
             let content = ''
             data.forEach((compra, index) => {
                 content += `
                 <tr>
-                    <td>${compra.prv_nombre}</td>
-                    <td>${compra.prv_nrodocumento}</td>
+                    <td>${compra.proveedor.prv_nombre}</td>
+                    <td>${compra.proveedor.prv_nrodocumento}</td>
                     <td>${compra.prp_fechaultimacompra === null ? "No aplica" : parseDate(compra.prp_fechaultimacompra)}</td>
                     <td>${compra.prp_preciounitario}</td>
                     <td>${compra.prp_observaciones || ""}</td>
@@ -445,7 +429,7 @@ $(document).ready(() => {
         }
     }
 
-    $('#datatable_productos').on('click', '.btn-producto-historico', async function () {
+    $('#data-container').on('click', '.btn-producto-historico', async function () {
         const id_producto = $(this).data('id-producto')
         // showLoaderModal()
         await cargarHistoricoComprasById(id_producto)

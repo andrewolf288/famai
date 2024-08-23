@@ -69,7 +69,7 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="sesionDropdown">
                                 <li><a class="dropdown-item" href="/perfil" id="perfilLink">Mi Perfil</a></li>
-                                <li><a class="dropdown-item" href="/logout" id="logoutLink">Cerrar Sesión</a></li>
+                                <button class="dropdown-item" id="logoutButton" onclick="handleLogout()">Cerrar Sesión</button>
                             </ul>
                         </li>
                     </ul>
@@ -96,6 +96,8 @@
     <script src="scripts/axiosClient.js"></script>
     <!-- scripts que se usaran en toda la aplicacion -->
     <script src="scripts/utils/helpers.js"></script>
+    <!-- scripts de autenticacion -->
+    <script src="scripts/auth/auth.js"></script>
     <!-- scripts de navegacion Single Page Application -->
     <script src="https://unpkg.com/navigo"></script>
     <script src="scripts/app.js"></script>

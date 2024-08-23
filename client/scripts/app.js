@@ -23,8 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return localStorage.getItem('authToken') !== null
     }
 
+    // Funcion para verificar que el usuario no este autenticado
+    const notAuthenticated = () => {
+        return localStorage.getItem('authToken') === null
+    }
+
     // Middleware para rutas protegidas
-    const requireAuth = (callback) => {
+    const privateRoute = (callback) => {
         if (isAuthenticated()) {
             callback();
         } else {
@@ -32,9 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Middleware para rutas no protegidas
+    const publicRoute = (callback) => {
+        if (notAuthenticated()) {
+            callback();
+        } else {
+            window.location.href = '/';
+        }
+    }
+
     // Definir las rutas
     router.on('/', () => {
-        requireAuth(() => {
+        privateRoute(() => {
             loadContent('pages/home.html', '')
         })
         // document.getElementById('content').innerHTML = '<h1>Bienvenido a la Página de Inicio</h1>'
@@ -42,15 +56,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ruta para el listado de productos
     router.on('/productos', () => {
-        requireAuth(() => {
+        privateRoute(() => {
             loadContent('pages/producto/producto.html', 'scripts/producto/productos.js')
         })
     })
 
     // Ruta para el listado de trabajadores
     router.on('/trabajadores', () => {
-        requireAuth(() => {
+        privateRoute(() => {
             loadContent('pages/trabajador/trabajador.html', 'scripts/trabajador/trabajadores.js')
+        })
+    })
+
+    // Ruta para el listado de usuarios
+    router.on('/usuarios', () => {
+        privateRoute(() => {
+            loadContent('pages/usuario/usuario.html', 'scripts/usuario/usuarios.js')
+        })
+    })
+
+    // Ruta para el perfil
+    router.on('/perfil', () => {
+        privateRoute(() => {
+            loadContent('pages/perfil.html', '')
         })
     })
 

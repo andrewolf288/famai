@@ -6,22 +6,26 @@
         </a>
     </div>
 </div>
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
     <!-- Filtros a la izquierda -->
-    <div class="filters">
-        <select id="filter-selector" class="form-select d-inline-block w-auto">
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">
+        <select id="filter-selector" class="form-select w-100 w-md-auto">
             <option value="">Seleccione un filtro</option>
             <option value="pro_descripcion">Descripción</option>
+            <option value="pro_modelomaquina">Modelo máquina</option>
+            <option value="pro_codigomarca">Código marca</option>
+            <option value="pma_descripcion">Marca</option>
         </select>
 
-        <input type="text" id="filter-input" class="form-control d-inline-block w-auto ml-2" placeholder="Buscar...">
+        <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
+            placeholder="Buscar...">
 
-        <button id="filter-button" class="btn btn-primary ml-2">Filtrar</button>
+        <button id="filter-button" class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2">Filtrar</button>
     </div>
-
     <!-- Paginación a la derecha -->
-    <div id="pagination-container" class="pagination-container"></div>
+    <div id="pagination-container" class="pagination-container mt-3 mt-md-0"></div>
 </div>
+
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
     <thead>
         <tr>
@@ -45,3 +49,290 @@
     <tbody id="data-container-body">
     </tbody>
 </table>
+
+<!-- MODALES PARA EDITAR, ELIMINAR Y CREAR -->
+<!-- MODAL DE EDITAR -->
+<div class="modal modal-lg fade" id="productosEditarModal" tabindex="-1" aria-labelledby="productosEditarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 class="modal-title" id="productosEditarModalLabel">Editar Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CREACION DE PRODUCTO-->
+<div class="modal modal-lg fade" id="productosCrearModal" tabindex="-1" aria-labelledby="productosCrearModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productosCrearModalLabel">Crear producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORMULARIO DE CREACION -->
+                <form id="crearProductoForm">
+                    <div class="row">
+                        <!-- INPUT DESCRIPCION DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="descripcionProducto" class="form-label">Descripción del producto</label>
+                            <input type="text" class="form-control" id="descripcionProducto" required>
+                        </div>
+                        <!-- INPUT CODIGO DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoProducto" class="form-label">Código del producto</label>
+                            <input type="text" class="form-control" id="codigoProducto" required>
+                        </div>
+                        <!-- SELECT DE UNIDAD DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="unidadProducto" class="form-label">Unidad</label>
+                            <select class="form-select" id="unidadProducto" required></select>
+                        </div>
+                        <!-- SELECT GRUPO DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="grupoProducto" class="form-label">Grupo</label>
+                            <select class="form-select" id="grupoProducto" required></select>
+                        </div>
+                        <!-- SELECT FAMILIA DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="familiaProducto" class="form-label">Familia</label>
+                            <select class="form-select" id="familiaProducto" required></select>
+                        </div>
+                        <!-- SELECT SUBFAMILIA DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="subfamiliaProducto" class="form-label">Subfamilia</label>
+                            <select class="form-select" id="subfamiliaProducto" required></select>
+                        </div>
+                        <!-- SELECT MARCA -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="marcaProducto" class="form-label">Marca</label>
+                            <select class="form-select" id="marcaProducto" required></select>
+                        </div>
+                        <!-- SELECT UNIDAD MAYOR -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="unidadMayorProducto" class="form-label">Unidad Mayor</label>
+                            <select class="form-select" id="unidadMayorProducto"></select>
+                        </div>
+                        <!-- INPUT FACTOR UNIDAD MAYOR PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="factorUnidadMayorProducto" class="form-label">Factor Unidad Mayor</label>
+                            <input type="number" class="form-control" id="factorUnidadMayorProducto">
+                        </div>
+                        <!-- INPUT STOCK MINIMO PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="stockMinimoProducto" class="form-label">Stock Mínimo</label>
+                            <input type="number" class="form-control" id="stockMinimoProducto" value="0">
+                        </div>
+                        <!-- INPUT CODIGO SUNAT -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoSunatProducto" class="form-label">Código SUNAT</label>
+                            <input type="text" class="form-control" id="codigoSunatProducto">
+                        </div>
+                        <!-- INPUT CODIGO SAP -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoSAP" class="form-label">Código SAP</label>
+                            <input type="text" class="form-control" id="codigoSAP">
+                        </div>
+                        <!-- INPUT BOOLEAN GENERA STOCK -->
+                        <div class="col-6 mb-3">
+                            <input type="checkbox" class="form-check-input me-2" id="generaStockProducto" checked>
+                            <label class="form-check-label" for="generaStockProducto">Genera Stock</label>
+                        </div>
+                        <!-- INPUT ARCHIVO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="archivoProducto" class="form-label">Archivo</label>
+                            <input type="file" class="form-control" id="archivoProducto">
+                        </div>
+                        <!-- CODIGO MARCA -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoMarcaProducto" class="form-label">Código Marca</label>
+                            <input type="text" class="form-control" id="codigoMarcaProducto">
+                        </div>
+                        <!-- MEDIDAS -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="medidasProducto" class="form-label">Medidas</label>
+                            <input type="text" class="form-control" id="medidasProducto">
+                        </div>
+                        <!-- MODELO MAQUINA -->
+                        <div class="col-12 mb-3">
+                            <label for="modeloMaquinaProducto" class="form-label">Modelo Máquina</label>
+                            <input type="text" class="form-control" id="modeloMaquinaProducto">
+                        </div>
+                        <!-- OBSERVACIONES -->
+                        <div class="col-12 mb-3">
+                            <label for="observacionProducto" class="form-label">Observación</label>
+                            <input type="text" class="form-control" id="observacionProducto">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnCrearProducto"
+                    form="crearProductoForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR PRODUCTO -->
+<div class="modal modal-lg fade" id="editarProductoModal" tabindex="-1" aria-labelledby="editarProductoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarProductoModalLabel">Editar producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="form_editarProducto">
+                <form id="editarProductoForm">
+                    <div class="row">
+                        <!-- INPUT PRODUCTO ID -->
+                        <input type="hidden" id="productoIDEdit">
+                        <!-- INPUT DESCRIPCION DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="descripcionProductoEdit" class="form-label">Descripción del producto</label>
+                            <input type="text" class="form-control" id="descripcionProductoEdit" required>
+                        </div>
+                        <!-- INPUT CODIGO DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoProductoEdit" class="form-label">Código del producto</label>
+                            <input type="text" class="form-control" id="codigoProductoEdit" required>
+                        </div>
+                        <!-- SELECT DE UNIDAD DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="unidadProductoEdit" class="form-label">Unidad</label>
+                            <select class="form-select" id="unidadProductoEdit" required></select>
+                        </div>
+                        <!-- SELECT GRUPO DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="grupoProductoEdit" class="form-label">Grupo</label>
+                            <select class="form-select" id="grupoProductoEdit" required></select>
+                        </div>
+                        <!-- SELECT FAMILIA DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="familiaProductoEdit" class="form-label">Familia</label>
+                            <select class="form-select" id="familiaProductoEdit" required></select>
+                        </div>
+                        <!-- SELECT SUBFAMILIA DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="subfamiliaProductoEdit" class="form-label">Subfamilia</label>
+                            <select class="form-select" id="subfamiliaProductoEdit" required></select>
+                        </div>
+                        <!-- SELECT MARCA -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="marcaProductoEdit" class="form-label">Marca</label>
+                            <select class="form-select" id="marcaProductoEdit" required></select>
+                        </div>
+                        <!-- SELECT UNIDAD MAYOR -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="unidadMayorProductoEdit" class="form-label">Unidad Mayor</label>
+                            <select class="form-select" id="unidadMayorProductoEdit"></select>
+                        </div>
+                        <!-- INPUT FACTOR UNIDAD MAYOR PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="factorUnidadMayorProductoEdit" class="form-label">Factor Unidad Mayor</label>
+                            <input type="number" class="form-control" id="factorUnidadMayorProductoEdit">
+                        </div>
+                        <!-- INPUT STOCK MINIMO PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="stockMinimoProductoEdit" class="form-label">Stock Mínimo</label>
+                            <input type="number" class="form-control" id="stockMinimoProductoEdit" value="0">
+                        </div>
+                        <!-- INPUT CODIGO SUNAT -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoSunatProductoEdit" class="form-label">Código SUNAT</label>
+                            <input type="text" class="form-control" id="codigoSunatProductoEdit">
+                        </div>
+                        <!-- INPUT CODIGO SAP -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoSAPEdit" class="form-label">Código SAP</label>
+                            <input type="text" class="form-control" id="codigoSAPEdit">
+                        </div>
+                        <!-- INPUT BOOLEAN GENERA STOCK -->
+                        <div class="col-6 mb-3">
+                            <input type="checkbox" class="form-check-input me-2" id="generaStockProductoEdit" checked>
+                            <label class="form-check-label" for="generaStockProductoEdit">Genera Stock</label>
+                        </div>
+                        <!-- INPUT ARCHIVO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="archivoProductoEdit" class="form-label">Archivo</label>
+                            <input type="file" class="form-control" id="archivoProductoEdit">
+                        </div>
+                        <!-- CODIGO MARCA -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoMarcaProductoEdit" class="form-label">Código Marca</label>
+                            <input type="text" class="form-control" id="codigoMarcaProductoEdit">
+                        </div>
+                        <!-- MEDIDAS -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="medidasProductoEdit" class="form-label">Medidas</label>
+                            <input type="text" class="form-control" id="medidasProductoEdit">
+                        </div>
+                        <!-- MODELO MAQUINA -->
+                        <div class="col-12 mb-3">
+                            <label for="modeloMaquinaProductoEdit" class="form-label">Modelo Máquina</label>
+                            <input type="text" class="form-control" id="modeloMaquinaProductoEdit">
+                        </div>
+                        <!-- OBSERVACIONES -->
+                        <div class="col-12 mb-3">
+                            <label for="observacionProductoEdit" class="form-label">Observación</label>
+                            <input type="text" class="form-control" id="observacionProductoEdit">
+                        </div>
+                        <!-- INPUT ESTADO -->
+                        <div class="col-6 mb-3">
+                            <input type="checkbox" class="form-check-input me-2" id="activoProductoEdit" checked>
+                            <label class="form-check-label" for="activoProductoEdit">Activo</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnEditarProducto"
+                    form="editarProductoForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL HISTORICO PRODUCTOS -->
+<div class="modal modal-lg fade" id="historicoProductoModal" tabindex="-1"
+    aria-labelledby="historicoProductosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historicoProductosModalLabel">Historico compra producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive mt-3">
+                    <table id="table_historicoProductos" class="table">
+                        <thead>
+                            <tr>
+                                <th class="col-lg-3">Proveedor</th>
+                                <th class="col-lg-2">Documento</th>
+                                <th class="col-lg-3">Fec. Ultima Compra</th>
+                                <th class="col-lg-1">Precio</th>
+                                <th class="col-lg-3">Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody_historico_compras">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
