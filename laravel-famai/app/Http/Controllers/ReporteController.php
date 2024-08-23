@@ -201,12 +201,12 @@ class ReporteController extends Controller
 			} else {
 				header('Content-Type: application/json');
 				http_response_code(500); 
-				echo json_encode(['Error' => 'Error al obtener el array de partes']);
+				echo json_encode(['error' => 'Error al obtener el array de partes']);
 			}
 		} else {
 			header('Content-Type: application/json');
 			http_response_code(500); 
-			echo json_encode(['Error' => 'Error al obtener el array de cabecera']);
+			echo json_encode(['error' => 'Error al obtener el array de cabecera']);
 		}
 	}
 }
