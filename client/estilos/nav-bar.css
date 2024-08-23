@@ -1,0 +1,59 @@
+.custom-navbar {
+    background-color: #041c5c;
+    color: white;
+    border-color: white;
+}
+
+.custom-navbar .nav-link {
+    color: white;
+}
+
+.custom-navbar .nav-link:hover {
+    color: #fc4e06;
+}
+
+.custom-navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgb(252, 78, 6)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+.custom-toggler.navbar-toggler {
+    border-color: white;
+}
+
+.custom-navbar .navbar-toggler:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(208, 104, 27, 0.5);
+    border-color: #d0681b;
+}
+
+.custom-navbar .dropdown-menu {
+    background-color: #073f8a;
+    color: white;
+}
+
+.custom-navbar .dropdown-menu .dropdown-item {
+    color: white;
+}
+
+.custom-navbar .dropdown-menu .dropdown-item:hover {
+    background-color: #041c5c;
+    color: #fc4e06;
+}
+.custom-navbar .navbar-brand img {
+    max-width: 150px;
+}
+.welcome-bar {
+    background-color: #fc4e06;
+    color: white;
+    padding: 10px;
+}
+
+.welcome-bar .btn {
+    background-color: #041c5c;
+    border: none;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.welcome-bar .btn:hover {
+    transform: scale(1.05);
+}

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\User;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -18,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login']]);
     }
 
     /**
@@ -46,7 +47,7 @@ class AuthController extends Controller
         }
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Username incorrecto o contraseña incorrecta'], 401);
+            return response()->json(['error' => 'Credenciales incorrectas'], 401);
         }
 
         // actualizamos el ultimo acceso
@@ -75,7 +76,7 @@ class AuthController extends Controller
     public function logout()
     {
         auth()->logout();
-
+        // Respuesta JSON para indicar éxito
         return response()->json(['message' => 'Successfully logged out']);
     }
 

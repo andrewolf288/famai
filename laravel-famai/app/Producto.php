@@ -25,6 +25,10 @@ class Producto extends Model
         'pro_stockminimo',
         'pro_generastock',
         'pro_codigosunat',
+        'pro_codigomarca',
+        'pro_medidas',
+        'pro_modelomaquina',
+        'pro_observacion',
         'pro_activo',
         'pro_usucreacion',
         'pro_feccreacion',
@@ -42,7 +46,7 @@ class Producto extends Model
 
     public function scopeSelectFields($query)
     {
-        return $query->select('pro_codigo', 'pro_descripcion');
+        return $query->select('pro_id', 'pro_codigo', 'pro_descripcion');
     }
 
     // relacion de unidad
@@ -79,5 +83,11 @@ class Producto extends Model
     public function unidadMayor()
     {
         return $this->belongsTo(Unidad::class, 'uni_codigomayor')->selectFields();
+    }
+
+    // ultima compra
+    public function ultimaCompra()
+    {
+        return $this->hasOne(ProductoProveedor::class, 'pro_id')->latest('prp_fechaultimacompra');
     }
 }

@@ -1,0 +1,239 @@
+<!-- ESTILOS CSS -->
+<link href="estilos/listView.css" rel="stylesheet">
+
+<div class="row justify-content-end mb-4">
+    <div class="col-auto">
+        <a class="btn btn-agregar" id="btn-link-create-producto">
+            Crear Producto
+        </a>
+    </div>
+</div>
+<div>
+    <table id="datatable_productos" class="table table-striped nowrap" style="width:100%">
+        <thead>
+            <tr>
+                <th>Cod. Producto</th>
+                <th>Grupo</th>
+                <th>Familia</th>
+                <th>Sub familia</th>
+                <th>Descripción</th>
+                <th>Unidad</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+                <th>Usu. Creador</th>
+                <th>Fec. Creación</th>
+                <th>Usu. Actualizador</th>
+                <th>Fec. Actualización</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody_productos">
+        </tbody>
+    </table>
+</div>
+<!-- MODALES PARA EDITAR, ELIMINAR Y CREAR -->
+<!-- MODAL DE EDITAR -->
+<div class="modal modal-lg fade" id="productosEditarModal" tabindex="-1" aria-labelledby="productosEditarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 class="modal-title" id="productosEditarModalLabel">Editar Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ELIMINAR -->
+<div class="modal modal-lg fade" id="productosEliminarModal" tabindex="-1" aria-labelledby="productosEliminarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productosEliminarModalLabel">Eliminar producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-center" id="descripcion-eliminacion-producto"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-danger" id="btnEliminarProducto"
+                    form="crearProductoForm">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CREACION DE PRODUCTO-->
+<div class="modal modal-lg fade" id="productosCrearModal" tabindex="-1" aria-labelledby="productosCrearModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productosCrearModalLabel">Crear producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORMULARIO DE CREACION -->
+                <form id="crearProductoForm">
+                    <div class="row">
+                        <!-- INPUT DESCRIPCION DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="descripcionProducto" class="form-label">Descripción del producto</label>
+                            <input type="text" class="form-control" id="descripcionProducto" required>
+                        </div>
+                        <!-- INPUT CODIGO DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoProducto" class="form-label">Código del producto</label>
+                            <input type="text" class="form-control" id="codigoProducto" required>
+                        </div>
+                        <!-- SELECT DE UNIDAD DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="unidadProducto" class="form-label">Unidad</label>
+                            <select class="form-select" id="unidadProducto" required></select>
+                        </div>
+                        <!-- SELECT GRUPO DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="grupoProducto" class="form-label">Grupo</label>
+                            <select class="form-select" id="grupoProducto" required></select>
+                        </div>
+                        <!-- SELECT FAMILIA DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="familiaProducto" class="form-label">Familia</label>
+                            <select class="form-select" id="familiaProducto" required></select>
+                        </div>
+                        <!-- SELECT SUBFAMILIA DE PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="subfamiliaProducto" class="form-label">Subfamilia</label>
+                            <select class="form-select" id="subfamiliaProducto" required></select>
+                        </div>
+                        <!-- SELECT MARCA -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="marcaProducto" class="form-label">Marca</label>
+                            <select class="form-select" id="marcaProducto" required></select>
+                        </div>
+                        <!-- SELECT UNIDAD MAYOR -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="unidadMayorProducto" class="form-label">Unidad Mayor</label>
+                            <select class="form-select" id="unidadMayorProducto"></select>
+                        </div>
+                        <!-- INPUT FACTOR UNIDAD MAYOR PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="factorUnidadMayorProducto" class="form-label">Factor Unidad Mayor</label>
+                            <input type="number" class="form-control" id="factorUnidadMayorProducto">
+                        </div>
+                        <!-- INPUT STOCK MINIMO PRODUCTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="stockMinimoProducto" class="form-label">Stock Mínimo</label>
+                            <input type="number" class="form-control" id="stockMinimoProducto" value="0">
+                        </div>
+                        <!-- INPUT BOOLEAN GENERA STOCK -->
+                        <div class="d-flex flex-row align-items-center col-md-6 col-12 mb-3 form-check">
+                            <input type="checkbox" class="form-check-input me-2" id="generaStockProducto" checked>
+                            <label class="form-check-label" for="generaStockProducto">Genera Stock</label>
+                        </div>
+                        <!-- INPUT CODIGO SUNAT -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoSunatProducto" class="form-label">Código SUNAT</label>
+                            <input type="text" class="form-control" id="codigoSunatProducto">
+                        </div>
+                        <!-- INPUT CODIGO SAP -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="codigoSAP" class="form-label">Código SAP</label>
+                            <input type="text" class="form-control" id="codigoSAP">
+                        </div>
+                        <!-- INPUT ARCHIVO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="archivoProducto" class="form-label">Archivo</label>
+                            <input type="file" class="form-control" id="archivoProducto">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnCrearProducto"
+                    form="crearProductoForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR PRODUCTO -->
+<div class="modal modal-lg fade" id="editarProductoModal" tabindex="-1"
+    aria-labelledby="editarProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarProductoModalLabel">Editar producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="form_editarProducto">
+                <form id="editarProductoForm">
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnEditarProducto"
+                    form="editarProductoForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL HISTORICO PRODUCTOS -->
+<div class="modal modal-lg fade" id="historicoProductoModal" tabindex="-1"
+    aria-labelledby="historicoProductosModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historicoProductosModalLabel">Historico compra producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="table_historicoProductos">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL LOADER -->
+<div class="modal fade" id="loaderModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
+    data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-3">Procesando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script>
+    // VISUALIZACION DE HISTORICO PRODUCTO
+    function verHistoricoProducto(id_producto) {
+        // $("#historicoProductosModalLabel").text(`Historico de compras producto - ${nombre}`)
+        const historicoModal = new bootstrap.Modal($("#historicoProductoModal"))
+        historicoModal.show()
+    }
+
+    // VISUALIZACION DE EDICION DE PRODUCTO
+    function editarProducto(id_producto) {
+        const editarProductoModal = new bootstrap.Modal("#editarProductoModal")
+        editarProductoModal.show()
+    }
+</script>
+<script src="./scripts/productos/listProductos.js"></script>
