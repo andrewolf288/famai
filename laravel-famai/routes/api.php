@@ -12,6 +12,7 @@ use App\Http\Controllers\SubFamiliaController;
 use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\ProveedorController;
 use App\ProductoProveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -107,3 +108,10 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 
 Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
 
+// rutas de proveedores
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('proveedores', [ProveedorController::class, 'index']);
+    Route::get('proveedor/{id}', [ProveedorController::class, 'show']);
+    Route::post('proveedores', [ProveedorController::class, 'store']);
+    Route::put('proveedor/{id}', [ProveedorController::class, 'update']);
+});
