@@ -1,17 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('login-form')
 
-    $('.toggle-password').on('click', function() {
-        const passwordField = $(this).siblings('input');
-        const passwordFieldType = passwordField.attr('type') === 'password' ? 'text' : 'password';
-        passwordField.attr('type', passwordFieldType);
-        
-        const icon = $(this).find('i');
-        if (passwordFieldType === 'text') {
-            icon.removeClass('fa-eye').addClass('fa-eye-slash');
-        } else {
-            icon.removeClass('fa-eye-slash').addClass('fa-eye');
-        }
+    document.querySelectorAll('.toggle-password').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const passwordField = this.previousElementSibling;
+            const passwordFieldType = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', passwordFieldType);
+    
+            const icon = this.querySelector('i');
+            if (passwordFieldType === 'text') {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
     });
 
     form.addEventListener('submit', async (event) => {

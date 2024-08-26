@@ -37,7 +37,7 @@ class OrdenInternaPartes extends Model
     // relacion con materiales
     public function materiales()
     {
-        return $this->hasMany(OrdenInternaMateriales::class);
+        return $this->hasMany(OrdenInternaMateriales::class, 'opd_id');
     }
 
     // relacion con procesos

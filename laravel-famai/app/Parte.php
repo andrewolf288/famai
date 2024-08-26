@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Parte extends Model
 {
     public $timestamps = true;
-    protected $table = 'tblordenesinternasdetpartes_opd';
+    protected $table = 'tblordenesinternaspartes_oip';
     protected $primaryKey = 'oip_id';
 
     protected $fillable = [

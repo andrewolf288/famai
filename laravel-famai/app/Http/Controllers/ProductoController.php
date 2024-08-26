@@ -38,7 +38,7 @@ class ProductoController extends Controller
         }
 
         if ($marcaDescripcion !== null) {
-            $query->whereHas('marca', function($q) use ($marcaDescripcion) {
+            $query->whereHas('marca', function ($q) use ($marcaDescripcion) {
                 $q->where('pma_descripcion', 'like', '%' . $marcaDescripcion . '%');
             });
         }
@@ -50,6 +50,19 @@ class ProductoController extends Controller
             'data' => $productos->items(),
             'count' => $productos->total()
         ]);
+    }
+
+    public function findProductoByQuery(Request $request)
+    {
+        $query = $request->input('query', null);
+        // Realiza la búsqueda de materiales por nombre o código
+        $materiales = Producto::where('pro_descripcion', 'like', '%' . $query . '%')
+            ->orWhere('pro_codigo', 'like', '%' . $query . '%')
+            ->select('pro_id', 'pro_codigo', 'pro_descripcion')
+            ->get();
+
+        // Devuelve los materiales en formato JSON
+        return response()->json($materiales);
     }
 
     /**
