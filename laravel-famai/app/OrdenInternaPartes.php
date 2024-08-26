@@ -33,4 +33,16 @@ class OrdenInternaPartes extends Model
     {
         return $this->belongsTo(Parte::class, 'oip_id')->selectFields();
     }
+
+    // relacion con materiales
+    public function materiales()
+    {
+        return $this->hasMany(OrdenInternaMateriales::class);
+    }
+
+    // relacion con procesos
+    public function procesos()
+    {
+        return $this->hasMany(OrdenInternaProcesos::class);
+    }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\GrupoInventarioController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\OrdenInternaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProductoProveedorController;
@@ -51,30 +52,6 @@ Route::group(['middleware' => ['auth.jwt']], function() {
    Route::post('usuarios', [UsuarioController::class, 'store']);
 });
 
-
-//Route::apiResource('productos', 'ProductoController');
-
-Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
-
-
-// rutas de productos
-Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('productos', [ProductoController::class, 'index']);
-    Route::get('producto/{id}', [ProductoController::class, 'show']);
-    Route::post('productos', [ProductoController::class, 'store']);
-    Route::put('producto/{id}', [ProductoController::class, 'update']);
-});
-
-// rutas de trabajadores
-Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('trabajadores', [TrabajadorController::class, 'index']);
-});
-
-// rutas de compras
-Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::post('comprasByProducto', [ProductoProveedorController::class, 'comprasByProducto']);
-});
-
 // rutas de familias
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('familias', [FamiliaController::class, 'index']);
@@ -104,4 +81,29 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('gruposinventarios', [GrupoInventarioController::class, 'index']);
     Route::get('gruposinventariosSimple', [GrupoInventarioController::class, 'indexSimple']);
 });
+
+// rutas de productos
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('productos', [ProductoController::class, 'index']);
+    Route::get('producto/{id}', [ProductoController::class, 'show']);
+    Route::post('productos', [ProductoController::class, 'store']);
+    Route::put('producto/{id}', [ProductoController::class, 'update']);
+});
+
+// rutas de trabajadores
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('trabajadores', [TrabajadorController::class, 'index']);
+});
+
+// rutas de compras
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::post('comprasByProducto', [ProductoProveedorController::class, 'comprasByProducto']);
+});
+
+// rutas de ordenes internas
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('ordenesinternas', [OrdenInternaController::class, 'index']);
+});
+
+Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
 

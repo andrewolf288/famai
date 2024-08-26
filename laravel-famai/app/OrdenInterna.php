@@ -65,4 +65,16 @@ class OrdenInterna extends Model
     {
         return $this->belongsTo(Trabajador::class, 'tra_idalmacen')->selectFields();
     }
+
+    // orden interna partes
+    public function partes()
+    {
+        return $this->hasMany(OrdenInternaPartes::class, 'oic_id');
+    }
+
+    // metodo para contar el total de materiales
+    public function totalMateriales()
+    {
+        return $this->partes()->withCount('materiales')->get()->sum('materiales_count');
+    }
 }

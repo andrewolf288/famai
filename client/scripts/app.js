@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Crear instancia de Navigo
-    const router = new Navigo('/', false)
+    const router = new Navigo('/')
 
     // Función para cargar contenido en el elemento #content
     const loadContent = (path, scriptURL) => {
@@ -72,6 +72,20 @@ document.addEventListener('DOMContentLoaded', () => {
     router.on('/usuarios', () => {
         privateRoute(() => {
             loadContent('pages/usuario/usuario.html', 'scripts/usuario/usuarios.js')
+        })
+    })
+
+    // Ruta para ordenes internas
+    router.on('/orden-interna', () => {
+        privateRoute(() => {
+            loadContent('pages/orden-interna/ordenInterna.html', 'scripts/orden-interna/ordenesInternas.js')
+        })
+    })
+    // Ruta para la creacion de orden interna
+    router.on('/orden-interna/crear', () => {
+        console.log("entro")
+        privateRoute(() => {
+            loadContent('pages/orden-interna/crearOrdenInterna.html', 'scripts/orden-interna/crearOrdenInterna.js')
         })
     })
 

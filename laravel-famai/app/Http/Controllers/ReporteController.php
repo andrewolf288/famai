@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Reporte;
+use DateTime;
 use Illuminate\Http\Request;
 use mPDF;
 
@@ -199,14 +200,14 @@ class ReporteController extends Controller
 				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: '. $varUsuModificacion . ' Fecha: '. $varFecModificacion.' | | Pag. {PAGENO}/{nbpg}');
 				$varMpdf->Output();
 			} else {
-				header('Content-Type: application/json');
-				http_response_code(500); 
-				echo json_encode(['Error' => 'Error al obtener el array de partes']);
+				return response()->json([
+					"error" => "Error al obtener el array de partes"
+				], 500);
 			}
 		} else {
-			header('Content-Type: application/json');
-			http_response_code(500); 
-			echo json_encode(['Error' => 'Error al obtener el array de cabecera']);
+			return response()->json([
+				"error" => "Error al obtener el array de cabecera"
+			], 500);
 		}
 	}
 }
