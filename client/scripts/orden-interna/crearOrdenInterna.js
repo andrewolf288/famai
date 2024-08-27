@@ -41,8 +41,9 @@ $(document).ready(function () {
 
         showLoaderModal()
         try {
-            const { data } = await client.get(`/ordenesinternasByNumero/${otValue}`)
-            $('#clienteInput').val(data.cliente.cli_nombre).attr('data-id-cliente', data.cliente.cli_id)
+            const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
+            $('#clienteInput').val(data.cliente.cli_nombre)
+            $('#idClienteInput').val(data.cliente.cli_id)
         } catch (error) {
             const { response } = error
             if (response.status === 404) {
@@ -52,8 +53,9 @@ $(document).ready(function () {
             }
 
             // actualizamos la referencia
-            $('#clienteInput').val("").attr('data-id-cliente', -1)
             $('#otInput').val("")
+            $('#clienteInput').val("")
+            $('#idClienteInput').val("")
         } finally {
             hideLoaderModal()
         }
@@ -116,12 +118,6 @@ $(document).ready(function () {
         dateFormat: 'dd/mm/yy',
         setDate: new Date()
     }).datepicker("setDate", new Date())
-
-    // funcion para formatear date
-    function transformarFecha(fecha) {
-        const [dia, mes, año] = fecha.split('/');
-        return `${año}-${mes}-${dia}`;
-    }
 
     // --------- CARGA INICIAL DE DATA DE PARTES ----------
     const cargarTablaOrdenInterna = async () => {
@@ -641,8 +637,7 @@ $(document).ready(function () {
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
         let handleError = ''
-        const $oiCliente = $('#clienteInput').data('id-cliente')
-        console.log($oiCliente)
+        const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
         const $oiValorEquipo = $('#equipoInput').val().trim()
         const $oiCodigoArea = $('#areaSelect').val()
@@ -652,8 +647,7 @@ $(document).ready(function () {
         const $oiEncargadoAlmacen = $('#responsableAlmacen').val()
 
         if (
-            // $oiCliente.length === 0 ||
-            $oiCliente == "-1" ||
+            $oiCliente.length === 0 ||
             $otInput.length === 0 ||
             $oiValorEquipo.length === 0 ||
             $oiCodigoArea.length === 0 ||
@@ -665,7 +659,7 @@ $(document).ready(function () {
             if ($otInput.length === 0) {
                 handleError += '- Se debe ingresar información de orden trabajo\n'
             }
-            if ($oiCliente == "-1") {
+            if ($oiCliente.length === 0) {
                 handleError += '- Se debe ingresar información del cliente\n'
             }
             if ($oiCodigoArea.length === 0) {
@@ -700,9 +694,7 @@ $(document).ready(function () {
                 tra_idalmacen: $oiEncargadoAlmacen,
                 oic_equipo_descripcion: $oiValorEquipo,
                 detalle_partes: ordenInterna.detalle_partes,
-                oic_estado: 1,
             }
-
 
             // // formateamos la data de numero de orden
             formatData.detalle_partes.forEach(element => {
@@ -720,16 +712,15 @@ $(document).ready(function () {
                     showLoaderModal()
                     try {
                         console.log(formatData)
-                        // const response = await fetch('./php/vistas/generarOI.php',
-                        //     {
-                        //         method: 'POST',
-                        //         body: JSON.stringify(formatData)
-                        //     }
-                        // )
-                        // const { varRespuesta } = await response.json()
+                        await client.post('/ordenesinternas', formatData)
                         window.location.href = '/orden-interna'
                     } catch (error) {
-                        alert('Error en la solicitud')
+                        const {response} = error
+                        if(response.status === 500){
+                            alert(response.data.error)
+                        } else {
+                            alert('Hubo un error en la creacion de orden interna')
+                        }
                     } finally {
                         hideLoaderModal()
                     }

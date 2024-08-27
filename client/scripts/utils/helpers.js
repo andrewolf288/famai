@@ -14,6 +14,11 @@ function parseDate(dateString) {
     return formattedDate
 }
 
+function transformarFecha(fecha) {
+    const [dia, mes, año] = fecha.split('/');
+    return `${año}-${mes}-${dia}`;
+}
+
 const showLoaderModal = () => {
     const loaderModal = new bootstrap.Modal(document.getElementById('loaderModal'), {
         backdrop: 'static',

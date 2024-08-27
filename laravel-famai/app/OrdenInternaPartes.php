@@ -10,7 +10,7 @@ class OrdenInternaPartes extends Model
     protected $table = 'tblordenesinternasdetpartes_opd';
     protected $primaryKey = 'opd_id';
 
-    protected $fillables = [
+    protected $fillable = [
         'oip_id',
         'oic_id',
         'usu_usucreacion',
