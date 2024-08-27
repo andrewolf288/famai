@@ -168,6 +168,8 @@ class OrdenInternaController extends Controller
         ));
 
         return true;
+    
+    }
     public function store(Request $request)
     {
         $user = auth()->user();
