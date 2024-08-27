@@ -57,55 +57,66 @@ class OrdenInternaController extends Controller
         ]);
     }
 
-    public function editarProductoMateriales(Request $request)
+    public function editarProductoMateriales(Request $request, $opd)
 {
     $user = auth()->user();
 
     // Extraer parámetros de la solicitud
-    $varDatosEntrada = $request->input('datos_entrada');
-    $oip = $request->input('oip');
+    $detalle_materiales = $request->input('detalle_materiales', []);
+    $detalle_procesos = $request->input('detalle_procesos', []);
 
-    $OrdenInternaPartes = OrdenInternaPartes::find($oip);
+    if (is_null($opd)) {
+        return response()->json([
+            'error' => 'El campo opd no puede ser nulo',
+        ], 400);
+    }
+
+    // Verificar si ambos arrays están vacíos
+    if (empty($detalle_materiales) && empty($detalle_procesos)) {
+        return response()->json([
+            'error' => 'No se proporcionaron materiales ni procesos para actualizar',
+        ], 400);
+    }
+
+    $OrdenInternaPartes = OrdenInternaPartes::find($opd);
 
     if (!$OrdenInternaPartes) {
         return response()->json([
-            'message' => 'Parte de Orden Interna no encontrada',
+            'error' => 'La OPD no fue encontrada',
         ], 404);
     }
 
-    $detalle_partes = json_decode($varDatosEntrada, true);
-    $detalle_materiales = $detalle_partes['detalle_materiales'] ?? [];
-    $detalle_procesos = $detalle_partes['detalle_procesos'] ?? [];
-
     foreach ($detalle_materiales as $material) {
         $data = [
-            'odm_id' => $material['odm_id'],
-            'opd_id' => $material['opd_id'],
+            'opd_id' => $opd,
             'pro_id' => $material['pro_id'],
             'odm_item' => $material['odm_item'],
             'odm_cantidad' => $material['odm_cantidad'],
             'odm_observacion' => $material['odm_observacion'],
             'odm_tipo' => $material['odm_tipo'] ?? 1,
+            'odm_estado' => $material['odm_estado'],
         ];
 
-        if (!$this->updateMaterial($data, $material['odm_id'])) {
+        $updateResult = $this->update_material($data, $material['odm_id']);
+        if (isset($updateResult['success']) && !$updateResult['success']) {
             return response()->json([
-                'message' => 'Error actualizando materiales',
+                'error' => $updateResult['error'],
             ], 500);
         }
     }
 
     foreach ($detalle_procesos as $proceso) {
         $data = [
-            'odp_id' => $proceso['odp_id'],
-            'opd_id' => $proceso['opd_id'],
+            'opd_id' => $opd,
             'opp_id' => $proceso['opp_id'],
             'odp_observacion' => $proceso['odp_observacion'],
+            'odp_estado' => $proceso['odp_estado'],
         ];
 
-        if (!$this->updateProceso($data, $proceso['odp_id'])) {
+        $updateResult = $this->update_proceso($data, $proceso['odp_id']);
+        if (isset($updateResult['success']) && !$updateResult['success']) {
             return response()->json([
-                'message' => 'Error actualizando procesos',
+                'error' => $updateResult['error'],
             ], 500);
         }
     }
@@ -122,22 +133,27 @@ class OrdenInternaController extends Controller
         $OrdenInternaMateriales = OrdenInternaMateriales::find($id);
 
         if (!$OrdenInternaMateriales) {
-            return false;
+            return [
+                'success' => false,
+                'error' => 'La ODM no existe',
+            ];
         }
-
-        // Validamos los datos
+        
         $validator = Validator::make($data, [
-            'pro_id' => 'nullable|integer|exists:tblproductos_pro,pro_id',
-            'odm_item' => 'nullable|integer',
+            'pro_id' => 'required|integer|exists:tblproductos_pro,pro_id',
+            'odm_item' => 'required|integer',
             'odm_descripcion' => 'nullable|string|max:250',
-            'odm_cantidad' => 'nullable|numeric|min:0',
+            'odm_cantidad' => 'required|numeric|min:0',
             'odm_observacion' => 'nullable|string|max:250',
             'odm_tipo' => 'nullable|integer',
-            'odm_estado' => 'required|boolean',
+            'odm_estado' => 'required|integer|in:0,1',
         ]);
 
         if ($validator->fails()) {
-            return false;
+            return [
+                'success' => false,
+                'error' => 'Error en la validación de los campos de materiales',
+            ];
         }
 
         $OrdenInternaMateriales->update(array_merge(
@@ -157,18 +173,24 @@ class OrdenInternaController extends Controller
         $OrdenInternaProcesos = OrdenInternaProcesos::find($id);
 
         if (!$OrdenInternaProcesos) {
-            return false;
+            return [
+                'success' => false,
+                'error' => 'El ODP no existe',
+            ];
         }
 
         // Validamos los datos
         $validator = Validator::make($data, [
             'opp_id' => 'required|integer|exists:tblordenesinternasprocesos_opp,opp_id',
             'odp_observacion' => 'nullable|string|max:250',
-            'odp_estado' => 'nullable|boolean',
+            'odp_estado' => 'required|integer|in:0,1',
         ]);
 
         if ($validator->fails()) {
-            return false;
+            return [
+                'success' => false,
+                'error' => 'Error en la validación de los campos de procesos',
+            ];
         }
 
         $OrdenInternaProcesos->update(array_merge(
