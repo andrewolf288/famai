@@ -57,52 +57,63 @@ class OrdenInternaController extends Controller
         ]);
     }
 
-    private function editar_producto_materiales($varDatosEntrada, $oip)
-    {
-        $user = auth()->user();
+    public function editarProductoMateriales(Request $request)
+{
+    $user = auth()->user();
 
-        $OrdenInternaPartes = OrdenInternaPartes::find($oip);
+    // Extraer parámetros de la solicitud
+    $varDatosEntrada = $request->input('datos_entrada');
+    $oip = $request->input('oip');
 
-        if (!$OrdenInternaPartes) {
-            return false;
-        }
+    $OrdenInternaPartes = OrdenInternaPartes::find($oip);
 
-        $detalle_partes = json_decode($varDatosEntrada, true);
-        $detalle_materiales = $detalle_partes['detalle_materiales'] ?? [];
-        $detalle_procesos = $detalle_partes['detalle_procesos'] ?? [];
-
-        foreach ($detalle_materiales as $material) {
-            $data = [
-                'pro_id' => $material['pro_id'] ?? null,
-                'odm_item' => $material['odm_item'] ?? null,
-                'odm_descripcion' => $material['odm_descripcion'] ?? null,
-                'odm_cantidad' => $material['odm_cantidad'] ?? null,
-                'odm_observacion' => $material['odm_observacion'] ?? null,
-                'odm_tipo' => $material['odm_tipo'] ?? 1,
-                'odm_estado' => $material['odm_estado'] ?? 1,
-            ];
-
-            $odm_id = $material['odm_id'];
-            if (!$this->update_material($data, $odm_id)) {
-                return false;
-            }
-        }
-
-        foreach ($detalle_procesos as $proceso) {
-            $data = [
-                'opp_id' => $proceso['opp_id'] ?? null,
-                'odp_observacion' => $proceso['odp_observacion'] ?? null,
-                'odp_estado' => $proceso['odp_estado'] ?? null,
-            ];
-
-            $odp_id = $proceso['odp_id'];
-            if (!$this->update_proceso($data, $odp_id)) {
-                return false;
-            }
-        }
-
-        return true;
+    if (!$OrdenInternaPartes) {
+        return response()->json([
+            'message' => 'Parte de Orden Interna no encontrada',
+        ], 404);
     }
+
+    $detalle_partes = json_decode($varDatosEntrada, true);
+    $detalle_materiales = $detalle_partes['detalle_materiales'] ?? [];
+    $detalle_procesos = $detalle_partes['detalle_procesos'] ?? [];
+
+    foreach ($detalle_materiales as $material) {
+        $data = [
+            'odm_id' => $material['odm_id'],
+            'opd_id' => $material['opd_id'],
+            'pro_id' => $material['pro_id'],
+            'odm_item' => $material['odm_item'],
+            'odm_cantidad' => $material['odm_cantidad'],
+            'odm_observacion' => $material['odm_observacion'],
+            'odm_tipo' => $material['odm_tipo'] ?? 1,
+        ];
+
+        if (!$this->updateMaterial($data, $material['odm_id'])) {
+            return response()->json([
+                'message' => 'Error actualizando materiales',
+            ], 500);
+        }
+    }
+
+    foreach ($detalle_procesos as $proceso) {
+        $data = [
+            'odp_id' => $proceso['odp_id'],
+            'opd_id' => $proceso['opd_id'],
+            'opp_id' => $proceso['opp_id'],
+            'odp_observacion' => $proceso['odp_observacion'],
+        ];
+
+        if (!$this->updateProceso($data, $proceso['odp_id'])) {
+            return response()->json([
+                'message' => 'Error actualizando procesos',
+            ], 500);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Materiales y procesos actualizados correctamente',
+    ]);
+}
 
     private function update_material(array $data, $id)
     {
