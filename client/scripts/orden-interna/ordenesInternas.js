@@ -83,33 +83,28 @@ $(document).ready(() => {
         const oi_numero = $(event.currentTarget).data('orden-interna')
         const ot_numero = $(event.currentTarget).data('orden-trabajo')
         console.log(oi_numero, ot_numero)
-
-        fetch('./generarReporteOrdenTrabajo' + new URLSearchParams({ ot_numero, oi_numero }), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/pdf'
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok')
-                }
-                return response.blob()
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `reporte_orden_trabajo_${oi_numero}.pdf`
-                document.body.appendChild(a)
-                a.click()
-                window.URL.revokeObjectURL(url)
-                document.body.removeChild(a)
-            })
-            .catch(error => {
-                console.error('Error:', error)
-            })
-            .finally(() => {
-            })
+        try {
+            const response = await client.get(`/generarReporteOrdenTrabajo`, {
+                params: {
+                    oi_numero: oi_numero,
+                    ot_numero: ot_numero
+                },
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            });
+    
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `reporte_orden_trabajo_${oi_numero}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     })
 })
