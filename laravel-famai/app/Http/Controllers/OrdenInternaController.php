@@ -57,6 +57,130 @@ class OrdenInternaController extends Controller
         ]);
     }
 
+    public function editarProductoMateriales(Request $request)
+{
+    $user = auth()->user();
+
+    // Extraer parámetros de la solicitud
+    $varDatosEntrada = $request->input('datos_entrada');
+    $oip = $request->input('oip');
+
+    $OrdenInternaPartes = OrdenInternaPartes::find($oip);
+
+    if (!$OrdenInternaPartes) {
+        return response()->json([
+            'message' => 'Parte de Orden Interna no encontrada',
+        ], 404);
+    }
+
+    $detalle_partes = json_decode($varDatosEntrada, true);
+    $detalle_materiales = $detalle_partes['detalle_materiales'] ?? [];
+    $detalle_procesos = $detalle_partes['detalle_procesos'] ?? [];
+
+    foreach ($detalle_materiales as $material) {
+        $data = [
+            'odm_id' => $material['odm_id'],
+            'opd_id' => $material['opd_id'],
+            'pro_id' => $material['pro_id'],
+            'odm_item' => $material['odm_item'],
+            'odm_cantidad' => $material['odm_cantidad'],
+            'odm_observacion' => $material['odm_observacion'],
+            'odm_tipo' => $material['odm_tipo'] ?? 1,
+        ];
+
+        if (!$this->updateMaterial($data, $material['odm_id'])) {
+            return response()->json([
+                'message' => 'Error actualizando materiales',
+            ], 500);
+        }
+    }
+
+    foreach ($detalle_procesos as $proceso) {
+        $data = [
+            'odp_id' => $proceso['odp_id'],
+            'opd_id' => $proceso['opd_id'],
+            'opp_id' => $proceso['opp_id'],
+            'odp_observacion' => $proceso['odp_observacion'],
+        ];
+
+        if (!$this->updateProceso($data, $proceso['odp_id'])) {
+            return response()->json([
+                'message' => 'Error actualizando procesos',
+            ], 500);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Materiales y procesos actualizados correctamente',
+    ]);
+}
+
+    private function update_material(array $data, $id)
+    {
+        $user = auth()->user();
+
+        $OrdenInternaMateriales = OrdenInternaMateriales::find($id);
+
+        if (!$OrdenInternaMateriales) {
+            return false;
+        }
+
+        // Validamos los datos
+        $validator = Validator::make($data, [
+            'pro_id' => 'nullable|integer|exists:tblproductos_pro,pro_id',
+            'odm_item' => 'nullable|integer',
+            'odm_descripcion' => 'nullable|string|max:250',
+            'odm_cantidad' => 'nullable|numeric|min:0',
+            'odm_observacion' => 'nullable|string|max:250',
+            'odm_tipo' => 'nullable|integer',
+            'odm_estado' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return false;
+        }
+
+        $OrdenInternaMateriales->update(array_merge(
+            $validator->validated(),
+            [
+                "usu_usumodificacion" => $user->usu_codigo,
+            ]
+        ));
+
+        return true;
+    }
+
+    private function update_proceso(array $data, $id)
+    {
+        $user = auth()->user();
+
+        $OrdenInternaProcesos = OrdenInternaProcesos::find($id);
+
+        if (!$OrdenInternaProcesos) {
+            return false;
+        }
+
+        // Validamos los datos
+        $validator = Validator::make($data, [
+            'opp_id' => 'required|integer|exists:tblordenesinternasprocesos_opp,opp_id',
+            'odp_observacion' => 'nullable|string|max:250',
+            'odp_estado' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return false;
+        }
+
+        $OrdenInternaProcesos->update(array_merge(
+            $validator->validated(),
+            [
+                "usu_usumodificacion" => $user->usu_codigo,
+            ]
+        ));
+
+        return true;
+    
+    }
     public function store(Request $request)
     {
         $user = auth()->user();

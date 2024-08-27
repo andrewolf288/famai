@@ -143,6 +143,7 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('ordenesinternas', [OrdenInternaController::class, 'index']);
     Route::post('ordenesinternas', [OrdenInternaController::class, 'store']);
+    Route::post('editarordenesinternas', [OrdenInternaController::class, 'editarProductoMateriales']);
 });
 
 Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
