@@ -1,0 +1,186 @@
+<h2 class="mb-3 fs-4">Lista de Proveedores</h2>
+<div class="row justify-content-end mb-4">
+    <div class="col-auto">
+        <a class="btn btn-agregar" id="btn-link-create-proveedor">
+            Crear Proveedor
+        </a>
+    </div>
+</div>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+    <!-- Filtros a la izquierda -->
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">
+        <select id="filter-selector" class="form-select w-100 w-md-auto">
+            <option value="">Seleccione un filtro</option>
+            <option value="prv_nombre">Nombre proveedor</option>
+            <option value="prv_nrodocumento">Numero documento</option>
+        </select>
+
+        <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
+            placeholder="Buscar...">
+
+        <button id="filter-button" class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2">Filtrar</button>
+    </div>
+    <!-- Paginación a la derecha -->
+    <div id="pagination-container" class="pagination-container mt-3 mt-md-0"></div>
+</div>
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <tr>
+            <th>Nombres</th>
+            <th>Num. Documento</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+            <th>Usu. Creador</th>
+            <th>Fec. Creación</th>
+            <th>Usu. Actualizador</th>
+            <th>Fec. Actualización</th>
+        </tr>
+    </thead>
+    <tbody id="data-container-body">
+    </tbody>
+</table>
+
+<!-- CREACION DE PROVEEDOR -->
+<div class="modal fade" id="crearProveedorModal" tabindex="-1" aria-labelledby="crearProveedorModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="crearProveedorModalLabel">Añadir Proveedor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body orange-form">
+                <form id="crearProveedorForm">
+                    <div class="row">
+                        <!-- SELECT DE TIPO DE DOCUMENTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="tipoDocumentoProveedor" class="form-label">Tipo Documento</label>
+                            <select class="form-select" id="tipoDocumentoProveedor" required></select>
+                        </div>
+                        <!-- INPUT NUMERO DOCUMENTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="numeroDocumentoProveedor" class="form-label">Número documento</label>
+                            <input type="text" class="form-control" id="numeroDocumentoProveedor" required>
+                        </div>
+                        <!-- INPUT NOMBRE -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="nombreProveedor" class="form-label">Nombre proveedor</label>
+                            <input type="text" class="form-control" id="nombreProveedor" required>
+                        </div>
+                        <!-- INPUT UBIGEO CODIGO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="ubigeoProveedor" class="form-label">Ubigeo</label>
+                            <input type="text" class="form-control" id="ubigeoProveedor">
+                        </div>
+                        <!-- INPUT TELEFONO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="telefonoProveedor" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="telefonoProveedor">
+                        </div>
+                        <!-- INPUT CONTACTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="contactoProveedor" class="form-label">Contacto</label>
+                            <input type="text" class="form-control" id="contactoProveedor">
+                        </div>
+                        <!-- INPUT CORREO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="correoProveedor" class="form-label">Correo</label>
+                            <input type="text" class="form-control" id="correoProveedor">
+                        </div>
+                        <!-- INPUT WHATSAPP -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="whatsappProveedor" class="form-label">Whatsapp</label>
+                            <input type="text" class="form-control" id="whatsappProveedor">
+                        </div>
+                        <!-- OBSERVACIONES -->
+                        <div class="col-12 mb-3">
+                            <label for="direccionProveedor" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccionProveedor">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnCrearProveedor"
+                    form="crearProveedorForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- EDITAR PROVEEDOR -->
+<div class="modal fade" id="editarProveedorModal" tabindex="-1" aria-labelledby="editarProveedorModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editarProveedorModalLabel">Editar Proveedor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body orange-form">
+                <form id="editarProveedorForm">
+                    <div class="row">
+                        <input type="hidden" id="id_proveedor_hidden">
+                        <!-- SELECT DE TIPO DE DOCUMENTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="tipoDocumentoProveedorEdit" class="form-label">Tipo Documento</label>
+                            <select class="form-select" id="tipoDocumentoProveedorEdit" required></select>
+                        </div>
+                        <!-- INPUT NUMERO DOCUMENTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="numeroDocumentoProveedorEdit" class="form-label">Número documento</label>
+                            <input type="text" class="form-control" id="numeroDocumentoProveedorEdit" required>
+                        </div>
+                        <!-- INPUT NOMBRE -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="nombreProveedorEdit" class="form-label">Nombre proveedor</label>
+                            <input type="text" class="form-control" id="nombreProveedorEdit" required>
+                        </div>
+                        <!-- INPUT UBIGEO CODIGO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="ubigeoProveedorEdit" class="form-label">Ubigeo</label>
+                            <input type="text" class="form-control" id="ubigeoProveedorEdit">
+                        </div>
+                        <!-- INPUT TELEFONO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="telefonoProveedorEdit" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="telefonoProveedorEdit">
+                        </div>
+                        <!-- INPUT CONTACTO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="contactoProveedorEdit" class="form-label">Contacto</label>
+                            <input type="text" class="form-control" id="contactoProveedorEdit">
+                        </div>
+                        <!-- INPUT CORREO -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="correoProveedorEdit" class="form-label">Correo</label>
+                            <input type="text" class="form-control" id="correoProveedorEdit">
+                        </div>
+                        <!-- INPUT WHATSAPP -->
+                        <div class="col-md-6 col-12 mb-3">
+                            <label for="whatsappProveedorEdit" class="form-label">Whatsapp</label>
+                            <input type="text" class="form-control" id="whatsappProveedorEdit">
+                        </div>
+                        <!-- DIRECCION -->
+                        <div class="col-12 mb-3">
+                            <label for="direccionProveedorEdit" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccionProveedorEdit">
+                        </div>
+                        <!-- INPUT ESTADO -->
+                        <div class="col-6 mb-3">
+                            <input type="checkbox" class="form-check-input me-2" id="activoProveedorEdit" checked>
+                            <label class="form-check-label" for="activoProveedorEdit">Activo</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnEditarProveedor"
+                    form="editarProveedorForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

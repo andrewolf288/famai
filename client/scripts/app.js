@@ -88,6 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loadContent('pages/orden-interna/crearOrdenInterna.html', 'scripts/orden-interna/crearOrdenInterna.js')
         })
     })
+    // Ruta para proveedores
+    router.on('/proveedores', () => {
+        privateRoute(() => {
+            loadContent('pages/proveedor/proveedor.html', 'scripts/proveedor/proveedores.js')
+        })
+    })
 
     // Ruta para el perfil
     router.on('/perfil', () => {

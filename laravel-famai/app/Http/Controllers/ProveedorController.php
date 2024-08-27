@@ -20,7 +20,7 @@ class ProveedorController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $nombre = $request->input('prv_nombre', null);
-        $direccion = $request->input('prv_direccion', null);
+        $numerodocumento = $request->input('prv_nrodocumento', null);
 
         $query = Proveedor::with(['tipoDocumento','ubigeo']);
 
@@ -28,8 +28,8 @@ class ProveedorController extends Controller
             $query->where('prv_nombre', 'like', '%' . $nombre . '%');
         }
 
-        if ($direccion !== null) {
-            $query->where('prv_direccion', 'like', '%' . $direccion . '%');
+        if ($numerodocumento !== null) {
+            $query->where('prv_nrodocumento', 'like', '%' . $numerodocumento . '%');
         }
 
         $proveedor = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -65,22 +65,12 @@ class ProveedorController extends Controller
         $user = auth()->user();
         // Validamos los datos
         $validator = Validator::make($request->all(), [
-            'prv_nrodocumento' => [
-                'required',
-                'string',
-                'max:16',
-                Rule::unique('tblproveedores_prv', 'prv_nrodocumento'), // No se necesita ignore($id, 'prv_id')
-            ],
-            'prv_nombre' => [
-                'required',
-                'string',
-                'max:500',
-                Rule::unique('tblproveedores_prv', 'prv_nombre'), // No se necesita ignore($id, 'prv_id')
-            ],
+            'prv_nrodocumento' => 'required|string|max:16|unique:tblproveedores_prv,prv_nrodocumento',
+            'prv_nombre' => 'required|string|max:500',
             'tdo_codigo' => 'required|string|exists:tbltiposdocumento_tdo,tdo_codigo',
-            'prv_direccion' => 'required|string|max:1000',
+            'prv_direccion' => 'nullable|string|max:1000',
             'ubi_codigo' => 'nullable|string|exists:tblubigeos_ubi,ubi_codigo',
-            'prv_telefono' => 'required|string|max:30',
+            'prv_telefono' => 'nullable|string|max:30',
             'prv_contacto' => 'nullable|string|max:150',
             'prv_correo' => 'nullable|string|max:250',
             'prv_whatsapp' => 'nullable|string|max:30',
@@ -130,10 +120,9 @@ class ProveedorController extends Controller
                 'required',
                 'string',
                 'max:500',
-                Rule::unique('tblproveedores_prv', 'prv_nombre')->ignore($id, 'prv_id'),
             ],
             'tdo_codigo' => 'required|string|exists:tbltiposdocumento_tdo,tdo_codigo',
-            'prv_direccion' => 'required|string|max:1000',
+            'prv_direccion' => 'nullable|string|max:1000',
             'ubi_codigo' => 'nullable|string|exists:tblubigeos_ubi,ubi_codigo',
             'prv_telefono' => 'required|string|max:30',
             'prv_contacto' => 'nullable|string|max:150',
