@@ -38,7 +38,7 @@ class Proveedor extends Model
     // Tipo de documento
     public function tipoDocumento()
     {
-        return $this->belongsTo(TipoDocumento::class, 'tdo_codigo');
+        return $this->belongsTo(TipoDocumento::class, 'tdo_codigo')->selectFields();
     }
 
     // Ubigeo

@@ -17,6 +17,7 @@ use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\TipoDocumentoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -90,6 +91,12 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('areas', [AreaController::class, 'index']);
     Route::get('areasSimple', [AreaController::class, 'indexSimple']);
+});
+
+// rutas de tipos de documentos
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('tiposdocumentos', [TipoDocumentoController::class, 'index']);
+    Route::get('tiposdocumentosSimple', [TipoDocumentoController::class, 'indexSimple']);
 });
 
 // rutas de partes
