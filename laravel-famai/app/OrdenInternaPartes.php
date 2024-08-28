@@ -43,6 +43,6 @@ class OrdenInternaPartes extends Model
     // relacion con procesos
     public function procesos()
     {
-        return $this->hasMany(OrdenInternaProcesos::class);
+        return $this->hasMany(OrdenInternaProcesos::class, 'opd_id');
     }
 }

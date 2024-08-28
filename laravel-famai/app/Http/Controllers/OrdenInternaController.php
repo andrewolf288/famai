@@ -31,11 +31,11 @@ class OrdenInternaController extends Controller
         if ($odtNumero !== null) {
             $query->where('odt_numero', $odtNumero);
         }
-    
+
         if ($oicNumero !== null) {
             $query->where('oic_numero', $oicNumero);
         }
-    
+
         if ($equipo !== null) {
             $query->where('oic_equipo_descripcion', 'like', "%{$equipo}%");
         }
@@ -57,152 +57,117 @@ class OrdenInternaController extends Controller
         ]);
     }
 
-    public function editarProductoMateriales(Request $request, $opd)
-{
-    $user = auth()->user();
-
-    // Extraer parámetros de la solicitud
-    $detalle_materiales = $request->input('detalle_materiales', []);
-    $detalle_procesos = $request->input('detalle_procesos', []);
-
-    if (is_null($opd)) {
-        return response()->json([
-            'error' => 'El campo opd no puede ser nulo',
-        ], 400);
+    public function show($id)
+    {
+        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
+            ->findOrFail($id);
+        return response()->json($ordenInterna);
     }
 
-    // Verificar si ambos arrays están vacíos
-    if (empty($detalle_materiales) && empty($detalle_procesos)) {
-        return response()->json([
-            'error' => 'No se proporcionaron materiales ni procesos para actualizar',
-        ], 400);
-    }
-
-    $OrdenInternaPartes = OrdenInternaPartes::find($opd);
-
-    if (!$OrdenInternaPartes) {
-        return response()->json([
-            'error' => 'La OPD no fue encontrada',
-        ], 404);
-    }
-
-    foreach ($detalle_materiales as $material) {
-        $data = [
-            'opd_id' => $opd,
-            'pro_id' => $material['pro_id'],
-            'odm_item' => $material['odm_item'],
-            'odm_cantidad' => $material['odm_cantidad'],
-            'odm_observacion' => $material['odm_observacion'],
-            'odm_tipo' => $material['odm_tipo'] ?? 1,
-            'odm_estado' => $material['odm_estado'],
-        ];
-
-        $updateResult = $this->update_material($data, $material['odm_id']);
-        if (isset($updateResult['success']) && !$updateResult['success']) {
-            return response()->json([
-                'error' => $updateResult['error'],
-            ], 500);
-        }
-    }
-
-    foreach ($detalle_procesos as $proceso) {
-        $data = [
-            'opd_id' => $opd,
-            'opp_id' => $proceso['opp_id'],
-            'odp_observacion' => $proceso['odp_observacion'],
-            'odp_estado' => $proceso['odp_estado'],
-        ];
-
-        $updateResult = $this->update_proceso($data, $proceso['odp_id']);
-        if (isset($updateResult['success']) && !$updateResult['success']) {
-            return response()->json([
-                'error' => $updateResult['error'],
-            ], 500);
-        }
-    }
-
-    return response()->json([
-        'message' => 'Materiales y procesos actualizados correctamente',
-    ]);
-}
-
-    private function update_material(array $data, $id)
+    public function update_material(Request $request, $id)
     {
         $user = auth()->user();
+        try {
+            DB::beginTransaction();
 
-        $OrdenInternaMateriales = OrdenInternaMateriales::find($id);
+            $ordenInternaParte = OrdenInternaPartes::find($id);
+            if (!$ordenInternaParte) {
+                throw new Exception('Orden Interna Parte no encontrada');
+            }
 
-        if (!$OrdenInternaMateriales) {
-            return [
-                'success' => false,
-                'error' => 'La ODM no existe',
-            ];
+            $validator = Validator::make($request->all(), [
+                'materiales' => 'required|array|min:1',
+            ])->validate();
+
+            // Arreglo para almacenar los registros creados
+            $createdMateriales = [];
+            
+            $materiales = $request->input('materiales');
+            foreach ($materiales as $material) {
+                $newMaterial = OrdenInternaMateriales::create([
+                    'opd_id' => $ordenInternaParte->opd_id,
+                    'pro_id' => $material['odm_asociar'] === true ? $material['pro_id'] : null,
+                    'odm_item' => $material['odm_item'],
+                    'odm_descripcion' => $material['odm_descrcipcion'],
+                    'odm_cantidad' => $material['odm_cantidad'],
+                    'odm_observacion' => $material['odm_observacion'],
+                    'odm_tipo' => 2,
+                    'odm_estado' => 1,
+                    'usu_usucreacion' => $user->usu_codigo,
+                ]);
+
+                $newMaterial->load('producto');
+
+                // Añadimos el proceso creado al arreglo
+                $createdMateriales[] = $newMaterial;
+            }
+
+            DB::commit();
+
+            // Retornamos los procesos creados
+            return response()->json([
+                'success' => true,
+                'data' => $createdMateriales,
+            ], 201);
+            
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $e->getMessage(),
+            ]);
         }
-        
-        $validator = Validator::make($data, [
-            'pro_id' => 'required|integer|exists:tblproductos_pro,pro_id',
-            'odm_item' => 'required|integer',
-            'odm_descripcion' => 'nullable|string|max:250',
-            'odm_cantidad' => 'required|numeric|min:0',
-            'odm_observacion' => 'nullable|string|max:250',
-            'odm_tipo' => 'nullable|integer',
-            'odm_estado' => 'required|integer|in:0,1',
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                'success' => false,
-                'error' => 'Error en la validación de los campos de materiales',
-            ];
-        }
-
-        $OrdenInternaMateriales->update(array_merge(
-            $validator->validated(),
-            [
-                "usu_usumodificacion" => $user->usu_codigo,
-            ]
-        ));
-
-        return true;
     }
 
-    private function update_proceso(array $data, $id)
+    public function update_proceso(Request $request, $id)
     {
         $user = auth()->user();
+        try {
+            DB::beginTransaction();
 
-        $OrdenInternaProcesos = OrdenInternaProcesos::find($id);
+            $ordenInternaParte = OrdenInternaPartes::find($id);
+            if (!$ordenInternaParte) {
+                throw new Exception('Orden Interna Parte no encontrada');
+            }
 
-        if (!$OrdenInternaProcesos) {
-            return [
-                'success' => false,
-                'error' => 'El ODP no existe',
-            ];
+            $validator = Validator::make($request->all(), [
+                'procesos' => 'required|array|min:1',
+            ])->validate();
+
+            // Arreglo para almacenar los registros creados
+            $createdProcesses = [];
+            
+            $procesos = $request->input('procesos');
+            foreach ($procesos as $proceso) {
+                $newProceso = OrdenInternaProcesos::create([
+                    'opd_id' => $ordenInternaParte->opd_id,
+                    'opp_id' => $proceso['opp_id'],
+                    'odp_observacion' => $proceso['odp_observacion'],
+                    'odp_estado' => true,
+                    'usu_usucreacion' => $user->usu_codigo,
+                ]);
+
+                $newProceso->load('proceso');
+
+                // Añadimos el proceso creado al arreglo
+                $createdProcesses[] = $newProceso;
+            }
+
+            DB::commit();
+
+            // Retornamos los procesos creados
+            return response()->json([
+                'success' => true,
+                'data' => $createdProcesses,
+            ], 201);
+            
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $e->getMessage(),
+            ]);
         }
-
-        // Validamos los datos
-        $validator = Validator::make($data, [
-            'opp_id' => 'required|integer|exists:tblordenesinternasprocesos_opp,opp_id',
-            'odp_observacion' => 'nullable|string|max:250',
-            'odp_estado' => 'required|integer|in:0,1',
-        ]);
-
-        if ($validator->fails()) {
-            return [
-                'success' => false,
-                'error' => 'Error en la validación de los campos de procesos',
-            ];
-        }
-
-        $OrdenInternaProcesos->update(array_merge(
-            $validator->validated(),
-            [
-                "usu_usumodificacion" => $user->usu_codigo,
-            ]
-        ));
-
-        return true;
-    
     }
+
     public function store(Request $request)
     {
         $user = auth()->user();

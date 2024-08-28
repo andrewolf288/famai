@@ -73,16 +73,15 @@ $(document).ready(() => {
     initPagination(apiURL, initDataTable, dataTableOptions)
 
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
-    $('#datatable_container').on('click', '.btn-orden-interna-editar', function () {
+    $('#data-container').on('click', '.btn-orden-interna-editar', function () {
         const id = $(this).data('orden-interna')
-        localStorage.setItem('ordenInternaId', id)
-        window.location.href = '/orden-interna/editar'
+        // localStorage.setItem('ordenInternaId', id)
+        window.location.href = `/orden-interna/editar/${id}`
     })
 
     $('#data-container').on('click', '.btn-orden-interna-pdf', async (event) => {
         const oi_numero = $(event.currentTarget).data('orden-interna')
         const ot_numero = $(event.currentTarget).data('orden-trabajo')
-        console.log(oi_numero, ot_numero)
         try {
             const response = await client.get(`/generarReporteOrdenTrabajo`, {
                 params: {
@@ -93,18 +92,18 @@ $(document).ready(() => {
                     'Accept': 'application/pdf'
                 },
                 responseType: 'blob'
-            });
+            })
     
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `reporte_orden_trabajo_${oi_numero}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `reporte_orden_trabajo_${oi_numero}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
         } catch (error) {
-            console.error('Error:', error);
+            alert('Error al generar el reporte')
         }
     })
 })

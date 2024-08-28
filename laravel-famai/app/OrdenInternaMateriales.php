@@ -39,4 +39,10 @@ class OrdenInternaMateriales extends Model
     {
         return $this->belongsTo(Producto::class, 'pro_id')->selectFields();
     }
+
+    // parte
+    public function parte()
+    {
+        return $this->belongsTo(OrdenInternaPartes::class, 'opd_id');
+    }
 }
