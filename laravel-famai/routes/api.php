@@ -142,8 +142,10 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 // rutas de ordenes internas
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('ordenesinternas', [OrdenInternaController::class, 'index']);
+    Route::get('ordeninterna/{id}', [OrdenInternaController::class, 'show']);
     Route::post('ordenesinternas', [OrdenInternaController::class, 'store']);
-    Route::post('editarordenesinternas', [OrdenInternaController::class, 'editarProductoMateriales']);
+    Route::put('ordeninterna/guardar-procesos/{id}', [OrdenInternaController::class, 'update_proceso']);
+    Route::put('ordeninterna/guardar-materiales/{id}', [OrdenInternaController::class, 'update_material']);
 });
 
 // rutas de reportes

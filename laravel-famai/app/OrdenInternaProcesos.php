@@ -35,4 +35,10 @@ class OrdenInternaProcesos extends Model
     {
         return $this->belongsTo(Proceso::class, 'opp_id')->selectFields();
     }
+
+    // partes
+    public function parte()
+    {
+        return $this->belongsTo(OrdenInternaPartes::class, 'opd_id');
+    }
 }

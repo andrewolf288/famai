@@ -3,23 +3,21 @@ $(document).ready(function () {
         const loaderModal = new bootstrap.Modal(document.getElementById('loaderModal'), {
             backdrop: 'static',
             keyboard: false
-        });
-        loaderModal.show();
-    };
+        })
+        loaderModal.show()
+    }
 
     const hideLoaderModal = () => {
-        const loaderModal = bootstrap.Modal.getInstance(document.getElementById('loaderModal'));
+        const loaderModal = bootstrap.Modal.getInstance(document.getElementById('loaderModal'))
         if (loaderModal) {
-            loaderModal.hide();
-        } else {
-            console.log("El modal ya no existe")
+            loaderModal.hide()
         }
     }
 
     // data guardada
     const ordenInterna = {
         detalle_partes: []
-    };
+    }
 
     let currentParte = 0
 
@@ -31,12 +29,12 @@ $(document).ready(function () {
     // funcion de buscar Orden de Trabajo
     const buscarOrdenTrabajo = async () => {
         // Obtener el valor del campo de texto
-        var otValue = $('#otInput').val().trim();
+        var otValue = $('#otInput').val().trim()
 
         // Validar si el campo está vacío
         if (otValue.length === 0) {
-            alert('Por favor, ingrese un valor para buscar.');
-            return;
+            alert('Por favor, ingrese un valor para buscar.')
+            return
         }
 
         showLoaderModal()
@@ -71,23 +69,23 @@ $(document).ready(function () {
     // Maneja el evento de clic en el botón de búsqueda
     $('#searchButton').on('click', async () => {
         await buscarOrdenTrabajo()
-    });
+    })
 
     // cargar areas
     const cargarAreas = async () => {
         try {
             const { data } = await client.get('/areasSimple')
-            const $areaSelect = $('#areaSelect');
+            const $areaSelect = $('#areaSelect')
 
             data.sort((a, b) => a["are_descripcion"].localeCompare(b["are_descripcion"]))
 
             data.forEach(area => {
-                const option = $('<option>').val(area["are_codigo"]).text(area["are_descripcion"]);
-                $areaSelect.append(option);
-            });
+                const option = $('<option>').val(area["are_codigo"]).text(area["are_descripcion"])
+                $areaSelect.append(option)
+            })
 
         } catch (error) {
-            console.log('Error al obtener las áreas:', error)
+            alert('Error al obtener las areas')
         }
     }
 
@@ -95,21 +93,21 @@ $(document).ready(function () {
     const cargarResponsables = async () => {
         try {
             const { data } = await client.get('/trabajadoresSimple')
-            const $responsableOrigen = $('#responsableOrigen');
-            const $responsableMaestro = $('#responsableMaestro');
-            const $responsableAlmacen = $('#responsableAlmacen');
+            const $responsableOrigen = $('#responsableOrigen')
+            const $responsableMaestro = $('#responsableMaestro')
+            const $responsableAlmacen = $('#responsableAlmacen')
 
             // Ordenar la data alfabéticamente según el nombre (índice [1])
-            data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre));
+            data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
 
             data.forEach(responsable => {
-                const option = $('<option>').val(responsable.tra_id).text(responsable.tra_nombre);
+                const option = $('<option>').val(responsable.tra_id).text(responsable.tra_nombre)
                 $responsableOrigen.append(option.clone())
                 $responsableMaestro.append(option.clone())
                 $responsableAlmacen.append(option.clone())
-            });
+            })
         } catch (error) {
-            console.log('Error al obtener los encargados:', error)
+            alert('Error al obtener los encargados')
         }
     }
 
@@ -151,9 +149,9 @@ $(document).ready(function () {
                             <p class="text-center" id="cantidad-productos-${oip_id}">0</p>
                         </td>
                     </tr>
-                `;
+                `
                 // agregamos la tabla
-                $('#tbl-orden-interna tbody').append(row);
+                $('#tbl-orden-interna tbody').append(row)
                 // formamos la data de procesos y productos
                 const data = {
                     oip_id: oip_id,
@@ -164,7 +162,7 @@ $(document).ready(function () {
                 ordenInterna["detalle_partes"].push(data)
             })
         } catch (error) {
-            console.log("Hubo un error en la solicitud: " + error)
+            alert("Error al cargar la lista de partes")
         }
     }
 
@@ -177,7 +175,7 @@ $(document).ready(function () {
                 cargarResponsables()
             ])
         } catch (error) {
-            console.error("Error al cargar los datos:", error);
+            alert("Error al cargar los datos")
         } finally {
             hideLoaderModal()
 
@@ -192,25 +190,25 @@ $(document).ready(function () {
     const cargarProcesosSelect = async (id_parte) => {
         try {
             const { data } = await client.get(`/procesosByParte/${id_parte}`)
-            const $procesosSelect = $('#procesosSelect');
-            $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`);
+            const $procesosSelect = $('#procesosSelect')
+            $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`)
             data.forEach(function (proceso) {
-                const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"]);
-                $procesosSelect.append(option);
-            });
+                const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"])
+                $procesosSelect.append(option)
+            })
         } catch (error) {
-            console.log(error)
+            alert("Error al cargar la lista de procesos")
         }
     }
 
     // carga de detalle de procesos en tabla
     function cargarProcesosDetalle(id_parte) {
-        $('#tbl-orden-interna-procesos tbody').empty();
+        $('#tbl-orden-interna-procesos tbody').empty()
         // buscamos el detalle de la parte correspondiente
         const findElement = buscarDetalleParte(id_parte)
         const { detalle_procesos } = findElement
 
-        detalle_procesos.sort((a, b) => a.opp_codigo - b.opp_codigo);
+        detalle_procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
         detalle_procesos.forEach(element => {
             const row = `
@@ -235,7 +233,7 @@ $(document).ready(function () {
                     </div>
                 </td>
             </tr>`
-            $('#tbl-orden-interna-procesos tbody').append(row);
+            $('#tbl-orden-interna-procesos tbody').append(row)
         })
     }
 
@@ -303,7 +301,7 @@ $(document).ready(function () {
                 </td>
             </tr>`
 
-            $('#tbl-orden-interna-procesos tbody').append(row);
+            $('#tbl-orden-interna-procesos tbody').append(row)
             detalle_procesos.push(data)
             // debemos actualizar la cantidad de procesos
             const totalProcesos = detalle_procesos.length
@@ -329,7 +327,7 @@ $(document).ready(function () {
             .html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
                     <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
                     <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-                </svg>`);
+                </svg>`)
     })
 
     // funcion de guarda detalle de proceso
@@ -351,7 +349,7 @@ $(document).ready(function () {
             .addClass('btn-warning btn-detalle-proceso-editar')
             .html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                    </svg>`);
+                    </svg>`)
     })
 
     // funcion de eliminacion de detalle de proceso
@@ -378,7 +376,7 @@ $(document).ready(function () {
     // ------------ JAVASCRIPT PARA GESTION DE PRODUCTOS -------------
     // carga de detalle de materiales en tabla
     function cargarProductosDetalle(id_parte) {
-        $('#tbl-orden-interna-productos tbody').empty();
+        $('#tbl-orden-interna-productos tbody').empty()
         // buscamos el detalle de la parte correspondiente
         const findElement = buscarDetalleParte(id_parte)
         const { detalle_materiales } = findElement
@@ -410,12 +408,13 @@ $(document).ready(function () {
                     </div>
                 </td>
             </tr>`
-            $('#tbl-orden-interna-productos tbody').append(row);
+            $('#tbl-orden-interna-productos tbody').append(row)
         })
     }
 
     // funcion cargar modal de productos
     $('#tbl-orden-interna').on('click', '.btn-productos', async (event) => {
+        $('#checkAsociarProducto').prop('checked', true)
         const id = $(event.currentTarget).data('bs-id')
         currentParte = id
         // abrimos el modal
@@ -449,16 +448,15 @@ $(document).ready(function () {
                 listItem.dataset.id = material.pro_id
                 listItem.addEventListener('click', () => seleccionarMaterial(material))
                 // agregar la lista completa
-                $('#resultadosLista').append(listItem);
+                $('#resultadosLista').append(listItem)
             })
         } catch (error) {
-            console.log(error)
             alert('Error al buscar materiales')
         }
     }
 
     function limpiarLista() {
-        $('#resultadosLista').empty();
+        $('#resultadosLista').empty()
     }
 
     function seleccionarMaterial(material) {
@@ -470,7 +468,7 @@ $(document).ready(function () {
         if (findProducto) {
             alert('Este producto ya fué agregado')
         } else {
-            limpiarLista();
+            limpiarLista()
             $('#productosInput').val('')
 
             // obtenemos el valor de checked
@@ -513,7 +511,7 @@ $(document).ready(function () {
                 </td>
             </tr>`
 
-            $('#tbl-orden-interna-productos tbody').append(row);
+            $('#tbl-orden-interna-productos tbody').append(row)
             detalle_materiales.push(data)
 
             // debemos actualizar la cantidad de productos
@@ -526,14 +524,14 @@ $(document).ready(function () {
     // funcion de editar detalle de productos
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-editar', function () {
         const $row = $(this).closest('tr')
-        const $descripcionInput = $row.find('.descripcion-input');
-        const $cantidadInput = $row.find('.cantidad-input');
-        const $observacionInput = $row.find('.observacion-input');
+        const $descripcionInput = $row.find('.descripcion-input')
+        const $cantidadInput = $row.find('.cantidad-input')
+        const $observacionInput = $row.find('.observacion-input')
 
         // Habilitar los inputs
-        $descripcionInput.prop('readonly', false);
-        $cantidadInput.prop('readonly', false);
-        $observacionInput.prop('readonly', false);
+        $descripcionInput.prop('readonly', false)
+        $cantidadInput.prop('readonly', false)
+        $observacionInput.prop('readonly', false)
 
         // ACTUALIZAMOS EL ELEMENTO
         $(this).removeClass('btn-warning btn-detalle-producto-editar')
@@ -541,7 +539,7 @@ $(document).ready(function () {
             .html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
                     <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
                     <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-                </svg>`);
+                </svg>`)
     })
 
     // funcion de guardar detalle de productos
@@ -549,9 +547,9 @@ $(document).ready(function () {
         const id_producto = $(this).data('producto')
         const $row = $(this).closest('tr')
 
-        const $descripcionInput = $row.find('.descripcion-input');
-        const $cantidadInput = $row.find('.cantidad-input');
-        const $observacionInput = $row.find('.observacion-input');
+        const $descripcionInput = $row.find('.descripcion-input')
+        const $cantidadInput = $row.find('.cantidad-input')
+        const $observacionInput = $row.find('.observacion-input')
 
         const valueDescripcion = $descripcionInput.val()
         const valueCantidad = $cantidadInput.val()
@@ -573,7 +571,7 @@ $(document).ready(function () {
             .addClass('btn-warning btn-detalle-producto-editar')
             .html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                    </svg>`);
+                    </svg>`)
     })
 
     // funcion de eliminacion de detalle de producto
@@ -601,19 +599,19 @@ $(document).ready(function () {
 
     // validar información de detalle sin cantidad
     function validarInformacionDetalleMateriales() {
-        const { detalle_partes } = ordenInterna;
+        const { detalle_partes } = ordenInterna
 
         // Acumular los errores en un solo string
         const handleError = detalle_partes.reduce((errores, { oip_descripcion, detalle_materiales }) => {
             detalle_materiales.forEach(({ odm_cantidad, odm_observacion }) => {
                 if (!odm_cantidad || odm_cantidad <= 0) {
-                    errores += `- La cantidad del material "${odm_observacion}" en la parte "${oip_descripcion}" debe ser un valor numérico mayor a 0.\n`;
+                    errores += `- La cantidad del material "${odm_observacion}" en la parte "${oip_descripcion}" debe ser un valor numérico mayor a 0.\n`
                 }
-            });
-            return errores;
-        }, '');
+            })
+            return errores
+        }, '')
 
-        return handleError;
+        return handleError
     }
 
     // validacion informacion detalles partes
@@ -711,7 +709,6 @@ $(document).ready(function () {
                 if (validacionDetalleMateriales.length === 0) {
                     showLoaderModal()
                     try {
-                        console.log(formatData)
                         await client.post('/ordenesinternas', formatData)
                         window.location.href = '/orden-interna'
                     } catch (error) {
@@ -745,21 +742,24 @@ $(document).ready(function () {
 
     // Antes de que el modal se cierre
     $('#procesosModal').on('hide.bs.modal', function (e) {
-        const $elemento = $('.btn-detalle-proceso-guardar').first();
+        const $elemento = $('.btn-detalle-proceso-guardar').first()
+        const $elementEdicion = $('.btn-detalle-proceso-editar').first()
         if ($elemento.length > 0) {
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
-                e.preventDefault();
+                e.preventDefault()
+            } else {
+
             }
         }
-    });
+    })
 
     $('#productosModal').on('hide.bs.modal', function (e) {
-        const $elemento = $('.btn-detalle-producto-guardar').first();
+        const $elemento = $('.btn-detalle-producto-guardar').first()
         if ($elemento.length > 0) {
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
-                e.preventDefault();
+                e.preventDefault()
             }
         }
-    });
+    })
 
-});
+})

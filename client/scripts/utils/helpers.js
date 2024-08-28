@@ -14,6 +14,15 @@ function parseDate(dateString) {
     return formattedDate
 }
 
+function parseDateSimple(dateString) {
+    const date = new Date(dateString)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    const formattedDate = `${day}/${month}/${year}`
+    return formattedDate
+}
+
 function transformarFecha(fecha) {
     const [dia, mes, año] = fecha.split('/');
     return `${año}-${mes}-${dia}`;
@@ -45,4 +54,9 @@ function formatErrorsFromString(errorString) {
     }
 
     return errorMessage.trim();
+}
+
+function esValorNumericoValidoYMayorQueCero(inputElement) {
+    const numero = parseFloat(inputElement);
+    return !isNaN(numero) && numero > 0;
 }
