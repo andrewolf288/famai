@@ -106,7 +106,12 @@ class ClienteController extends Controller
                 'max:16',
                 Rule::unique('tblclientes_cli', 'cli_nrodocumento'),
             ],            
-            'cli_nombre' => 'required|string|max:250',
+            'cli_nombre' => [
+                'required',
+                'string',
+                'max:250',
+                Rule::unique('tblclientes_cli', 'cli_nombre'),
+            ],   
         ]);
 
         if ($validator->fails()) {
@@ -146,7 +151,12 @@ class ClienteController extends Controller
                 'max:16',
                 Rule::unique('tblclientes_cli', 'cli_nrodocumento')->ignore($id, 'cli_id'),
             ],
-            'cli_nombre' => 'required|string|max:250',
+            'cli_nombre' => [
+                'required',
+                'string',
+                'max:250',
+                Rule::unique('tblclientes_cli', 'cli_nombre')->ignore($id, 'cli_id'),
+            ],   
             'cli_activo' => 'nullable|boolean',
         ]);
 
