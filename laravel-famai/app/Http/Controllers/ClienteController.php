@@ -20,8 +20,13 @@ class ClienteController extends Controller
         $page = $request->input('page', 1);
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
-        //remover si se quiere retornar todos los clientes
         $activo = 1;
+        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
+        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
+        $allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
+        if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
+            $activo = 0;
+        }
 
         $query = Cliente::with(['tipoDocumento']);
 
@@ -32,8 +37,8 @@ class ClienteController extends Controller
         if ($nroDocumento !== null) {
             $query->where('cli_nrodocumento', 'like', '%' . $nroDocumento . '%');
         }
-        //remover si se quiere retornar todos los clientes
-        if ($activo) {
+        
+        if ($activo==1) {
             $query->where('cli_activo', $activo);
         }
 
@@ -49,13 +54,28 @@ class ClienteController extends Controller
     public function findClienteByQuery(Request $request)
     {
         $query = $request->input('query', null);
-        $clientes = Cliente::where('cli_nombre', 'like', '%' . $query . '%')
-            ->orWhere('cli_nrodocumento', 'like', '%' . $query . '%')
-            ->select('cli_id', 'cli_tipodocumento','cli_nrodocumento', 'cli_nombre')
+        $allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
+    
+        $activo = 1;
+        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
+        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
+        if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
+            $activo = 0;
+        }
+    
+        $clientes = Cliente::where(function ($q) use ($query) {
+                $q->where('cli_nombre', 'like', '%' . $query . '%')
+                  ->orWhere('cli_nrodocumento', 'like', '%' . $query . '%');
+            })
+            ->when($activo == 1, function ($q) {
+                $q->where('cli_activo', 1);
+            })
+            ->select('cli_id', 'cli_tipodocumento', 'cli_nrodocumento', 'cli_nombre')
             ->get();
-
+    
         return response()->json($clientes);
     }
+    
 
     /**
      * Display the specified resource.
