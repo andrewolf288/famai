@@ -21,9 +21,9 @@ class ClienteController extends Controller
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
         //remover si se quiere retornar todos los clientes
-        $activo = $request->input('cli_activo', null);
+        $activo = 1;
 
-        $query = Cliente::query();
+        $query = Cliente::with(['tipoDocumento']);
 
         if ($nombre !== null) {
             $query->where('cli_nombre', 'like', '%' . $nombre . '%');
@@ -33,7 +33,7 @@ class ClienteController extends Controller
             $query->where('cli_nrodocumento', 'like', '%' . $nroDocumento . '%');
         }
         //remover si se quiere retornar todos los clientes
-        if ($activo !== null) {
+        if ($activo) {
             $query->where('cli_activo', $activo);
         }
 
@@ -51,7 +51,7 @@ class ClienteController extends Controller
         $query = $request->input('query', null);
         $clientes = Cliente::where('cli_nombre', 'like', '%' . $query . '%')
             ->orWhere('cli_nrodocumento', 'like', '%' . $query . '%')
-            ->select('cli_id', 'cli_nrodocumento', 'cli_nombre')
+            ->select('cli_id', 'cli_tipodocumento','cli_nrodocumento', 'cli_nombre')
             ->get();
 
         return response()->json($clientes);

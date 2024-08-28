@@ -117,11 +117,11 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 
 // rutas de clientes
 Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('clientes', [ProductoController::class, 'index']);
-    Route::get('cliente/{id}', [ProductoController::class, 'show']);
-    Route::post('clientes', [ProductoController::class, 'store']);
-    Route::put('cliente/{id}', [ProductoController::class, 'update']);
-    Route::get('/clientesByQuery', [ProductoController::class, 'findClienteByQuery']);
+    Route::get('clientes', [ClienteController::class, 'index']);
+    Route::get('cliente/{id}', [ClienteController::class, 'show']);
+    Route::post('clientes', [ClienteController::class, 'store']);
+    Route::put('cliente/{id}', [ClienteController::class, 'update']);
+    Route::get('/clientesByQuery', [ClienteController::class, 'findClienteByQuery']);
 });
 
 
