@@ -36,7 +36,7 @@ class TrabajadorController extends Controller
 
     public function indexSimple()
     {
-        $trabajadores = Trabajador::select('tra_id', 'tra_nombre')->get();
+        $trabajadores = Trabajador::where('tra_activo', 1)->select('tra_id', 'tra_nombre')->get();
         return response()->json($trabajadores);
     }
 }

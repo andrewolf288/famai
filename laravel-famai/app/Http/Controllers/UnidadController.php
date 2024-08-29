@@ -15,7 +15,7 @@ class UnidadController extends Controller
 
     public function indexSimple()
     {
-        $unidades = Unidad::select('uni_codigo', 'uni_descripcion')->get();
+        $unidades = Unidad::where('uni_activo', 1)->select('uni_codigo', 'uni_descripcion')->get();
         return response()->json($unidades);
     }
 }

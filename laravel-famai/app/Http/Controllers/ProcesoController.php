@@ -15,7 +15,7 @@ class ProcesoController extends Controller
 
     public function indexSimple()
     {
-        $procesos = Proceso::select('opp_id', 'oip_id', 'opp_codigo', 'opp_descripcion', 'opp_orden')->get();
+        $procesos = Proceso::where('opp_activo', 1)->select('opp_id', 'oip_id', 'opp_codigo', 'opp_descripcion', 'opp_orden')->get();
         return response()->json($procesos);
     }
 

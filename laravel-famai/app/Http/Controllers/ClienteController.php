@@ -21,13 +21,7 @@ class ClienteController extends Controller
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
         $activo = 1;
-        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
-        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
-        //$allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
-        //if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
-        //    $activo = 0;
-        //}
-
+        
         $query = Cliente::with(['tipoDocumento']);
 
         if ($nombre !== null) {
@@ -54,15 +48,7 @@ class ClienteController extends Controller
     public function findClienteByQuery(Request $request)
     {
         $query = $request->input('query', null);
-        //$allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
-    
         $activo = 1;
-        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
-        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
-        //if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
-        //    $activo = 0;
-        //}
-    
         $clientes = Cliente::where(function ($q) use ($query) {
                 $q->where('cli_nombre', 'like', '%' . $query . '%')
                   ->orWhere('cli_nrodocumento', 'like', '%' . $query . '%');

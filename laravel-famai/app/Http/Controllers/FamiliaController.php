@@ -16,7 +16,7 @@ class FamiliaController extends Controller
 
     public function indexSimple()
     {
-        $familias = Familia::select('pfa_codigo', 'pfa_descripcion')->get();
+        $familias = Familia::where('pfa_activo', 1)->select('pfa_codigo', 'pfa_descripcion')->get();
         return response()->json($familias);
     }
 }

@@ -15,7 +15,7 @@ class MarcaController extends Controller
 
     public function indexSimple()
     {
-        $marcas = Marca::select('pma_codigo', 'pma_descripcion')->get();
+        $marcas = Marca::where('pma_activo', 1)->select('pma_codigo', 'pma_descripcion')->get();
         return response()->json($marcas);
     }
 }

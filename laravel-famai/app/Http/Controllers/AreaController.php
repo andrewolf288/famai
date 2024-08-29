@@ -15,7 +15,7 @@ class AreaController extends Controller
 
     public function indexSimple()
     {
-        $familias = Area::select('are_codigo', 'are_descripcion')->get();
+        $familias = Area::where('are_activo', 1)->select('are_codigo', 'are_descripcion')->get();
         return response()->json($familias);
     }
 }

@@ -15,7 +15,7 @@ class SubFamiliaController extends Controller
 
     public function indexSimple()
     {
-        $subfamilias = Subfamilia::select('psf_codigo', 'pfa_codigo', 'psf_descripcion')->get();
+        $subfamilias = Subfamilia::where('psf_activo', 1)->select('psf_codigo', 'pfa_codigo', 'psf_descripcion')->get();
         return response()->json($subfamilias);
     }
 }

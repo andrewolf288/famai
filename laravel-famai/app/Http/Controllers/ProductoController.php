@@ -58,6 +58,7 @@ class ProductoController extends Controller
         // Realiza la búsqueda de materiales por nombre o código
         $materiales = Producto::where('pro_descripcion', 'like', '%' . $query . '%')
             ->orWhere('pro_codigo', 'like', '%' . $query . '%')
+            ->where('pro_activo', 1)
             ->select('pro_id', 'pro_codigo', 'pro_descripcion')
             ->get();
 

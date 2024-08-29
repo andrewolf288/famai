@@ -15,7 +15,7 @@ class GrupoInventarioController extends Controller
 
     public function indexSimple()
     {
-        $gruposinventario = GrupoInventario::select('pgi_codigo', 'pgi_descripcion')->get();
+        $gruposinventario = GrupoInventario::where('pgi_activo', 1)->select('pgi_codigo', 'pgi_descripcion')->get();
         return response()->json($gruposinventario);
     }
 }

@@ -15,7 +15,7 @@ class TipoDocumentoController extends Controller
 
     public function indexSimple()
     {
-        $tiposDocumentos = TipoDocumento::select('tdo_codigo', 'tdo_descripcion', 'tdo_codigosunat')->get();
+        $tiposDocumentos = TipoDocumento::where('tdo_activo', 1)->select('tdo_codigo', 'tdo_descripcion', 'tdo_codigosunat')->get();
         return response()->json($tiposDocumentos);
     }
 }
