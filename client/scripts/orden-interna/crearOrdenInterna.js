@@ -37,11 +37,17 @@ $(document).ready(function () {
             return
         }
 
-        showLoaderModal()
         try {
             const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
+            const estadoOrdenTrabajo = data.odt_estado
+            if(estadoOrdenTrabajo === 'Cerrado'){
+                if(!confirm('La orden de trabajo ya ha sido cerrada. ¿Desea jalar los datos?')){
+                    return
+                }
+            }
             $('#clienteInput').val(data.cliente.cli_nombre)
             $('#idClienteInput').val(data.cliente.cli_id)
+            $('#equipoInput').val(data.odt_equipo)
         } catch (error) {
             const { response } = error
             if (response.status === 404) {
@@ -54,8 +60,7 @@ $(document).ready(function () {
             $('#otInput').val("")
             $('#clienteInput').val("")
             $('#idClienteInput').val("")
-        } finally {
-            hideLoaderModal()
+            $('#equipoInput').val("")
         }
     }
 
