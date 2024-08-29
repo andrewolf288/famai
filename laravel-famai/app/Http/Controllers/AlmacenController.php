@@ -20,6 +20,7 @@ class AlmacenController extends Controller
         $page = $request->input('page', 1);
         $codigo = $request->input('alm_codigo', null);
         $descripcion = $request->input('alm_descripcion', null);
+        $tipo = $request->input('alm_tipo', null);
 
         $query = Almacen::query();
 
@@ -29,6 +30,10 @@ class AlmacenController extends Controller
 
         if ($descripcion !== null) {
             $query->where('alm_descripcion', 'like', '%' . $descripcion . '%');
+        }
+
+        if ($tipo !== null) {
+            $query->where('alm_tipo', 'like', '%' . $tipo . '%');
         }
 
         $almacenes = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -79,6 +84,25 @@ class AlmacenController extends Controller
         ], 201);
     }
 
+    public function findAlmacenByQuery(Request $request)
+    {
+        $query = $request->input('query', null);
+        $activo = 1;
+
+        // Realizar la búsqueda en la tabla de almacenes
+        $almacenes = Almacen::where(function ($q) use ($query) {
+                $q->where('alm_codigo', 'like', '%' . $query . '%')
+                ->orWhere('alm_descripcion', 'like', '%' . $query . '%')
+                ->orWhere('alm_tipo', 'like', '%' . $query . '%');;
+            })
+            ->when($activo == 1, function ($q) {
+                $q->where('alm_activo', 1);
+            })
+            ->select('alm_id', 'alm_codigo', 'alm_descripcion', 'alm_tipo')
+            ->get();
+
+        return response()->json($almacenes);
+    }
     /**
      * Display the specified resource.
      *

@@ -20,7 +20,7 @@ class ClienteController extends Controller
         $page = $request->input('page', 1);
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
-        $activo = 1;
+        $activo = 0;
         //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
         //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
         //$allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);

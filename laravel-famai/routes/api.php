@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\GrupoInventarioController;
@@ -113,6 +114,15 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::post('productos', [ProductoController::class, 'store']);
     Route::put('producto/{id}', [ProductoController::class, 'update']);
     Route::get('/productosByQuery', [ProductoController::class, 'findProductoByQuery']);
+});
+
+// rutas de almacenes
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('almacenes', [AlmacenController::class, 'index']);
+    Route::get('almacen/{id}', [AlmacenController::class, 'show']);
+    Route::post('almacenes', [AlmacenController::class, 'store']);
+    Route::put('almacen/{id}', [AlmacenController::class, 'update']);
+    Route::put('almacenesByQuery', [AlmacenController::class, 'findAlmacenByQuery']);
 });
 
 // rutas de clientes
