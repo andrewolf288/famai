@@ -10,6 +10,7 @@ use App\Http\Controllers\OrdenTrabajoController;
 use App\Http\Controllers\ParteController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProductoProveedorController;
 use App\Http\Controllers\SubFamiliaController;
@@ -113,6 +114,16 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::put('producto/{id}', [ProductoController::class, 'update']);
     Route::get('/productosByQuery', [ProductoController::class, 'findProductoByQuery']);
 });
+
+// rutas de clientes
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('clientes', [ClienteController::class, 'index']);
+    Route::get('cliente/{id}', [ClienteController::class, 'show']);
+    Route::post('clientes', [ClienteController::class, 'store']);
+    Route::put('cliente/{id}', [ClienteController::class, 'update']);
+    Route::get('/clientesByQuery', [ClienteController::class, 'findClienteByQuery']);
+});
+
 
 // rutas de procesos
 Route::group(['middleware' => ['auth.jwt']], function() {
