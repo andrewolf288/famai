@@ -102,6 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta para clientes
+    router.on('/clientes', () => {
+        privateRoute(() => {
+            loadContent('pages/cliente/cliente.html', 'scripts/cliente/clientes.js')
+        })
+    })
+
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {

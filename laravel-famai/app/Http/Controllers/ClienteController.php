@@ -20,7 +20,6 @@ class ClienteController extends Controller
         $page = $request->input('page', 1);
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
-        $activo = 1;
         
         $query = Cliente::with(['tipoDocumento']);
 
@@ -32,10 +31,6 @@ class ClienteController extends Controller
             $query->where('cli_nrodocumento', 'like', '%' . $nroDocumento . '%');
         }
         
-        if ($activo==1) {
-            $query->where('cli_activo', $activo);
-        }
-
         $clientes = $query->paginate($pageSize, ['*'], 'page', $page);
 
         return response()->json([
@@ -56,7 +51,7 @@ class ClienteController extends Controller
             ->when($activo == 1, function ($q) {
                 $q->where('cli_activo', 1);
             })
-            ->select('cli_id', 'cli_tipodocumento', 'cli_nrodocumento', 'cli_nombre')
+            ->select('cli_id', 'tdo_codigo', 'cli_nrodocumento', 'cli_nombre')
             ->get();
     
         return response()->json($clientes);
@@ -85,7 +80,7 @@ class ClienteController extends Controller
         $user = auth()->user();
 
         $validator = Validator::make($request->all(), [
-            'cli_tipodocumento' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
+            'tdo_codigo' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
             'cli_nrodocumento' => [
                 'required',
                 'string',
@@ -96,7 +91,6 @@ class ClienteController extends Controller
                 'required',
                 'string',
                 'max:250',
-                Rule::unique('tblclientes_cli', 'cli_nombre'),
             ],   
         ]);
 
@@ -108,7 +102,7 @@ class ClienteController extends Controller
             $validator->validated(),
             [
                 "usu_usucreacion" => $user->usu_codigo,
-                "usu_feccreacion" => now(),
+                "cli_activo" => true
             ]
         ));
 
@@ -130,7 +124,7 @@ class ClienteController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'cli_tipodocumento' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
+            'tdo_codigo' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
             'cli_nrodocumento' => [
                 'required',
                 'string',
@@ -141,9 +135,8 @@ class ClienteController extends Controller
                 'required',
                 'string',
                 'max:250',
-                Rule::unique('tblclientes_cli', 'cli_nombre')->ignore($id, 'cli_id'),
             ],   
-            'cli_activo' => 'nullable|boolean',
+            'cli_activo' => 'required|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -154,7 +147,6 @@ class ClienteController extends Controller
             $validator->validated(),
             [
                 "usu_usumodificacion" => $user->usu_codigo,
-                "usu_fecmodificacion" => now(),
             ]
         ));
 

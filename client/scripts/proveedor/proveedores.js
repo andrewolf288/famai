@@ -101,7 +101,7 @@ $(document).ready(() => {
             const loaderModalCreate = new bootstrap.Modal(document.getElementById('crearProveedorModal'))
             loaderModalCreate.show()
         } catch (error) {
-            console.log(error)
+            alert('Error al cargar la información de creación.')
         }
 
     })
@@ -134,7 +134,6 @@ $(document).ready(() => {
         }
 
         if (handleError.length !== 0) {
-            console.log(handleError)
             alert(handleError)
             return
         }
@@ -161,7 +160,6 @@ $(document).ready(() => {
             initPagination(apiURL, initDataTable, dataTableOptions)
         } catch (error) {
             const { response } = error
-            console.log(error)
             if (response.status === 400) {
                 const handleError = formatErrorsFromString(response.data.error)
                 alert(handleError)
@@ -187,7 +185,7 @@ $(document).ready(() => {
             $("#direccionProveedorEdit").val(data.prv_direccion || "")
             $("#activoProveedorEdit").prop("checked", data.prv_activo == 1 ? true : false)
         } catch (error) {
-            console.log(error)
+            alert('Error al cargar la informacion del proveedor')
         }
     }
 
@@ -207,7 +205,7 @@ $(document).ready(() => {
             const loaderModalEdit = new bootstrap.Modal(document.getElementById('editarProveedorModal'))
             loaderModalEdit.show()
         } catch (error) {
-            console.log(error)
+            alert('Error al cargar la informacion de creación')
         }
 
     })

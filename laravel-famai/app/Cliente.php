@@ -11,7 +11,7 @@ class Cliente extends Model
     protected $primaryKey = 'cli_id';
 
     protected $fillable = [
-        'cli_tipodocumento',
+        'tdo_codigo',
         'cli_nrodocumento',
         'cli_nombre',
         'cli_activo',
@@ -32,6 +32,6 @@ class Cliente extends Model
     // tipo documento
     public function tipoDocumento()
     {
-        return $this->belongsTo(TipoDocumento::class, 'cli_tipodocumento');
+        return $this->belongsTo(TipoDocumento::class, 'tdo_codigo');
     }
 }
