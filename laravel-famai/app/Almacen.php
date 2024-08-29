@@ -14,12 +14,12 @@ class Almacen extends Model
         'alm_codigo',
         'alm_descripcion',
         'alm_tipo',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'alm_usucreacion',
+        'alm_feccreacion',
+        'alm_usumodificacion',
+        'alm_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'alm_feccreacion';
+    const UPDATED_AT = 'alm_fecmodificacion';
 }

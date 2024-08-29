@@ -20,7 +20,14 @@ class ClienteController extends Controller
         $page = $request->input('page', 1);
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
-        
+        $activo = 1;
+        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
+        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
+        //$allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
+        //if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
+        //    $activo = 0;
+        //}
+
         $query = Cliente::with(['tipoDocumento']);
 
         if ($nombre !== null) {
@@ -31,6 +38,10 @@ class ClienteController extends Controller
             $query->where('cli_nrodocumento', 'like', '%' . $nroDocumento . '%');
         }
         
+        if ($activo==1) {
+            $query->where('cli_activo', $activo);
+        }
+
         $clientes = $query->paginate($pageSize, ['*'], 'page', $page);
 
         return response()->json([
@@ -43,7 +54,15 @@ class ClienteController extends Controller
     public function findClienteByQuery(Request $request)
     {
         $query = $request->input('query', null);
+        //$allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
+    
         $activo = 1;
+        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
+        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
+        //if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
+        //    $activo = 0;
+        //}
+    
         $clientes = Cliente::where(function ($q) use ($query) {
                 $q->where('cli_nombre', 'like', '%' . $query . '%')
                   ->orWhere('cli_nrodocumento', 'like', '%' . $query . '%');
@@ -51,7 +70,7 @@ class ClienteController extends Controller
             ->when($activo == 1, function ($q) {
                 $q->where('cli_activo', 1);
             })
-            ->select('cli_id', 'tdo_codigo', 'cli_nrodocumento', 'cli_nombre')
+            ->select('cli_id', 'cli_tipodocumento', 'cli_nrodocumento', 'cli_nombre')
             ->get();
     
         return response()->json($clientes);
@@ -80,7 +99,7 @@ class ClienteController extends Controller
         $user = auth()->user();
 
         $validator = Validator::make($request->all(), [
-            'tdo_codigo' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
+            'cli_tipodocumento' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
             'cli_nrodocumento' => [
                 'required',
                 'string',
@@ -91,6 +110,7 @@ class ClienteController extends Controller
                 'required',
                 'string',
                 'max:250',
+                Rule::unique('tblclientes_cli', 'cli_nombre'),
             ],   
         ]);
 
@@ -102,7 +122,7 @@ class ClienteController extends Controller
             $validator->validated(),
             [
                 "usu_usucreacion" => $user->usu_codigo,
-                "cli_activo" => true
+                "usu_feccreacion" => now(),
             ]
         ));
 
@@ -124,7 +144,7 @@ class ClienteController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'tdo_codigo' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
+            'cli_tipodocumento' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
             'cli_nrodocumento' => [
                 'required',
                 'string',
@@ -135,8 +155,9 @@ class ClienteController extends Controller
                 'required',
                 'string',
                 'max:250',
+                Rule::unique('tblclientes_cli', 'cli_nombre')->ignore($id, 'cli_id'),
             ],   
-            'cli_activo' => 'required|boolean',
+            'cli_activo' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -147,6 +168,7 @@ class ClienteController extends Controller
             $validator->validated(),
             [
                 "usu_usumodificacion" => $user->usu_codigo,
+                "usu_fecmodificacion" => now(),
             ]
         ));
 
