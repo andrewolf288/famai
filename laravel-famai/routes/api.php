@@ -181,3 +181,5 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::post('proveedores', [ProveedorController::class, 'store']);
     Route::put('proveedor/{id}', [ProveedorController::class, 'update']);
 });
+
+// rutas de 
