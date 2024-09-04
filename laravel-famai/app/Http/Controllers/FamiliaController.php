@@ -36,6 +36,12 @@ class FamiliaController extends Controller
         ]);
     }
 
+    public function indexSimple()
+    {
+        $familias = Familia::where('pfa_activo', 1)->select('pfa_codigo', 'pfa_descripcion')->get();
+        return response()->json($familias);
+    }
+
     public function findFamiliaByQuery(Request $request)
     {
         $query = $request->input('query', null);

@@ -59,18 +59,6 @@ Route::group(['middleware' => ['auth.jwt']], function() {
    Route::post('usuarios', [UsuarioController::class, 'store']);
 });
 
-// rutas de familias
-Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('familias', [FamiliaController::class, 'index']);
-    Route::get('familiasSimple', [FamiliaController::class, 'indexSimple']);
-});
-
-// rutas de subfamilias
-Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('subfamilias', [SubFamiliaController::class, 'index']);
-    Route::get('subfamiliasSimple', [SubFamiliaController::class, 'indexSimple']);
-});
-
 // rutas de marcas
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('marcas', [MarcaController::class, 'index']);
@@ -81,12 +69,6 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('unidades', [UnidadController::class, 'index']);
     Route::get('unidadesSimple', [UnidadController::class, 'indexSimple']);
-});
-
-// rutas de grupos de inventarios
-Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('gruposinventarios', [GrupoInventarioController::class, 'index']);
-    Route::get('gruposinventariosSimple', [GrupoInventarioController::class, 'indexSimple']);
 });
 
 // rutas de areas
@@ -182,4 +164,35 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::put('proveedor/{id}', [ProveedorController::class, 'update']);
 });
 
-// rutas de 
+// rutas de subfamilias
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('subfamilias', [SubFamiliaController::class, 'index']);
+    Route::get('subfamiliasSimple', [SubFamiliaController::class, 'indexSimple']);
+    Route::get('subfamilia/{id}', [SubFamiliaController::class, 'show']);
+    Route::post('subfamilias', [SubFamiliaController::class, 'store']);
+    Route::put('subfamilia/{id}', [SubFamiliaController::class, 'update']);
+    Route::get('/subfamiliasByQuery', [SubFamiliaController::class, 'findSubFamiliaByQuery']);
+});
+
+// rutas de grupos de inventarios
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('gruposinventarios', [GrupoInventarioController::class, 'index']);
+    Route::get('gruposinventariosSimple', [GrupoInventarioController::class, 'indexSimple']);
+    Route::get('grupoinventario/{id}', [GrupoInventarioController::class, 'show']);
+    Route::post('gruposinventarios', [GrupoInventarioController::class, 'store']);
+    Route::put('grupoinventario/{id}', [GrupoInventarioController::class, 'update']);
+    Route::get('/gruposinventariosByQuery', [GrupoInventarioController::class, 'findGrupoInventarioByQuery']);
+});
+
+// rutas de familias
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('familias', [FamiliaController::class, 'index']);
+    Route::get('familiasSimple', [FamiliaController::class, 'indexSimple']);
+    Route::get('familia/{id}', [FamiliaController::class, 'show']);
+    Route::post('familias', [FamiliaController::class, 'store']);
+    Route::put('familia/{id}', [FamiliaController::class, 'update']);
+    Route::get('/familiasByQuery', [FamiliaController::class, 'findFamiliaByQuery']);
+});
+
+
+
