@@ -15,14 +15,14 @@ class Area extends Model
         'are_codigo',
         'are_descripcion',
         'are_activo',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'are_usucreacion',
+        'are_feccreacion',
+        'are_usumodificacion',
+        'are_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'are_feccreacion';
+    const UPDATED_AT = 'are_fecmodificacion';
 
     public function scopeSelectFields($query)
     {

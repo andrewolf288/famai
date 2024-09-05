@@ -113,8 +113,8 @@ $(document).ready(async function () {
                 <td>
                     ${element.odp_observacion || ''}
                 </td>
-                <td>${element.usu_usucreacion ?? 'No aplica'}</td>
-                <td>${element.usu_feccreacion ? parseDate(element.usu_feccreacion) : 'No aplica'}</td>
+                <td>${element.odp_usucreacion ?? 'No aplica'}</td>
+                <td>${element.odp_feccreacion ? parseDate(element.odp_feccreacion) : 'No aplica'}</td>
                 <td>Sin acciones</td>
             </tr>`
             $('#tbl-orden-interna-procesos tbody').append(row)
@@ -316,8 +316,8 @@ $(document).ready(async function () {
                 <td>${element.odm_descripcion}</td>
                 <td>${element.odm_cantidad}</td>
                 <td>${element.odm_observacion || ''}</td>
-                <td>${element.usu_usucreacion ?? 'No aplica'}</td>
-                <td>${element.usu_feccreacion ? parseDate(element.usu_feccreacion) : 'No aplica'}</td>
+                <td>${element.odm_usucreacion ?? 'No aplica'}</td>
+                <td>${element.odm_feccreacion ? parseDate(element.odm_feccreacion) : 'No aplica'}</td>
                 <td>Sin acciones</td>
             </tr>`
             $('#tbl-orden-interna-productos tbody').append(row)

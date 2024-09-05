@@ -21,14 +21,14 @@ class OrdenInterna extends Model
         'tra_idorigen',
         'tra_idmaestro',
         'tra_idalmacen',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'oic_usucreacion',
+        'oic_feccreacion',
+        'oic_usumodificacion',
+        'oic_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'oic_feccreacion';
+    const UPDATED_AT = 'oic_fecmodificacion';
 
     // Orden de Trabajo
     public function ordenTrabajo()

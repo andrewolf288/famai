@@ -19,14 +19,14 @@ class OrdenInternaMateriales extends Model
         'odm_observacion',
         'odm_tipo',
         'odm_estado',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'odm_usucreacion',
+        'odm_feccreacion',
+        'odm_usumodificacion',
+        'odm_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'odm_feccreacion';
+    const UPDATED_AT = 'odm_fecmodificacion';
 
     // orden interna parte
     public function ordenInternaParte()

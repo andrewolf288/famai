@@ -71,10 +71,10 @@ class ReporteController extends Controller
 				$varTraNombreMaestro = isset($dato['tra_nombremaestro']) ? $dato['tra_nombremaestro'] : $this->varTab;
 				$varTraNombreAlmacen = isset($dato['tra_nombrealmacen']) ? $dato['tra_nombrealmacen'] : $this->varTab;
 
-				$varUsuCreacion = isset($dato['usu_usucreacion']) ? $dato['usu_usucreacion'] : $this->varTab;
-				$varFecCreacion = isset($dato['usu_feccreacion']) ? $dato['usu_feccreacion'] : $this->varTab;
-				$varUsuModificacion = isset($dato['usu_usumodificacion']) ? $dato['usu_usumodificacion'] : $this->varTab;
-				$varFecModificacion = isset($dato['usu_fecmodificacion']) ? $dato['usu_fecmodificacion']  : $this->varTab;
+				$varUsuCreacion = isset($dato['oic_usucreacion']) ? $dato['oic_usucreacion'] : $this->varTab;
+				$varFecCreacion = isset($dato['oic_feccreacion']) ? $dato['oic_feccreacion'] : $this->varTab;
+				$varUsuModificacion = isset($dato['oic_usumodificacion']) ? $dato['oic_usumodificacion'] : $this->varTab;
+				$varFecModificacion = isset($dato['oic_fecmodificacion']) ? $dato['oic_fecmodificacion']  : $this->varTab;
 			}
 
 			if ($varFecha instanceof DateTime) {

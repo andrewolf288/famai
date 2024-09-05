@@ -14,14 +14,14 @@ class Parte extends Model
         'oip_descripcion',
         'oip_orden',
         'oip_activo',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_feccreacion',
-        'usu_fecmodificacion'
+        'oip_usucreacion',
+        'oip_feccreacion',
+        'oip_feccreacion',
+        'oip_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'oip_feccreacion';
+    const UPDATED_AT = 'oip_fecmodificacion';
 
     public function scopeSelectFields($query)
     {

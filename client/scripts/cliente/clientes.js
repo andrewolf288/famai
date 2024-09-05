@@ -35,10 +35,10 @@ $(document).ready(() => {
                             </button>
                         </div>
                     </td>
-                    <td>${cliente.usu_usucreacion ?? 'No aplica'}</td>
-                    <td>${cliente.usu_feccreacion === null ? 'No aplica' : parseDate(cliente.usu_feccreacion)}</td>
-                    <td>${cliente.usu_usumodificacion ?? 'No aplica'}</td>
-                    <td>${cliente.usu_fecmodificacion === null ? 'No aplica' : parseDate(cliente.usu_fecmodificacion)}</td>
+                    <td>${cliente.cli_usucreacion ?? 'No aplica'}</td>
+                    <td>${cliente.cli_feccreacion === null ? 'No aplica' : parseDate(cliente.cli_feccreacion)}</td>
+                    <td>${cliente.cli_usumodificacion ?? 'No aplica'}</td>
+                    <td>${cliente.cli_fecmodificacion === null ? 'No aplica' : parseDate(cliente.cli_fecmodificacion)}</td>
                 </tr>
             `
         })

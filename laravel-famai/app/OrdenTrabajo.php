@@ -17,14 +17,14 @@ class OrdenTrabajo extends Model
         'odt_equipo',
         'odt_trabajo',
         'odt_estado',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'odt_usucreacion',
+        'odt_feccreacion',
+        'odt_usumodificacion',
+        'odt_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'odt_feccreacion';
+    const UPDATED_AT = 'odt_fecmodificacion';
 
     // Cliente
     public function cliente()

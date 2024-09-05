@@ -121,8 +121,8 @@ class ClienteController extends Controller
         $cliente = Cliente::create(array_merge(
             $validator->validated(),
             [
-                "usu_usucreacion" => $user->usu_codigo,
-                "usu_feccreacion" => now(),
+                "cli_usucreacion" => $user->usu_codigo,
+                "cli_feccreacion" => now(),
             ]
         ));
 
@@ -167,8 +167,8 @@ class ClienteController extends Controller
         $cliente->update(array_merge(
             $validator->validated(),
             [
-                "usu_usumodificacion" => $user->usu_codigo,
-                "usu_fecmodificacion" => now(),
+                "cli_usumodificacion" => $user->usu_codigo,
+                "cli_fecmodificacion" => now(),
             ]
         ));
 

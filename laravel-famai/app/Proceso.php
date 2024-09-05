@@ -16,14 +16,14 @@ class Proceso extends Model
         'opp_descripcion',
         'opp_orden',
         'opp_activo',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'opp_usucreacion',
+        'opp_feccreacion',
+        'opp_usumodificacion',
+        'opp_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'opp_feccreacion';
+    const UPDATED_AT = 'opp_fecmodificacion';
 
     public function scopeSelectFields($query)
     {

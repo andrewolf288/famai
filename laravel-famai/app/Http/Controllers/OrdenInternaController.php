@@ -93,7 +93,7 @@ class OrdenInternaController extends Controller
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => 2,
                     'odm_estado' => 1,
-                    'usu_usucreacion' => $user->usu_codigo,
+                    'odm_usucreacion' => $user->usu_codigo,
                 ]);
 
                 $newMaterial->load('producto');
@@ -143,7 +143,7 @@ class OrdenInternaController extends Controller
                     'opp_id' => $proceso['opp_id'],
                     'odp_observacion' => $proceso['odp_observacion'],
                     'odp_estado' => true,
-                    'usu_usucreacion' => $user->usu_codigo,
+                    'odp_usucreacion' => $user->usu_codigo,
                 ]);
 
                 $newProceso->load('proceso');
@@ -198,7 +198,7 @@ class OrdenInternaController extends Controller
                 'tra_idmaestro' => $request->input('tra_idmaestro'),
                 'tra_idalmacen' => $request->input('tra_idalmacen'),
                 'oic_estado' => 1,
-                'usu_usucreacion' => $user->usu_codigo,
+                'oic_usucreacion' => $user->usu_codigo,
             ]);
 
             $detallePartes = $request->input('detalle_partes');
@@ -210,7 +210,7 @@ class OrdenInternaController extends Controller
                 $ordenInternaParte = OrdenInternaPartes::create([
                     'oic_id' => $ordeninterna->oic_id,
                     'oip_id' => $parte['oip_id'],
-                    'usu_usucreacion' => $user->usu_codigo
+                    'opd_usucreacion' => $user->usu_codigo
                 ]);
 
                 // recorremos el detalle de procesos
@@ -226,7 +226,7 @@ class OrdenInternaController extends Controller
                         'opp_id' => $proceso['opp_id'],
                         'odp_observacion' => $proceso['odp_observacion'],
                         'odp_estado' => 1,
-                        'usu_usucreacion' => $user->usu_codigo
+                        'odp_usucreacion' => $user->usu_codigo
                     ]);
                 }
 
@@ -251,7 +251,7 @@ class OrdenInternaController extends Controller
                         'odm_observacion' => $material['odm_observacion'],
                         'odm_tipo' => 1,
                         'odm_estado' => 1,
-                        'usu_usucreacion' => $user->usu_codigo
+                        'odm_usucreacion' => $user->usu_codigo
                     ]);
                 }
             };

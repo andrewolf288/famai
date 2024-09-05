@@ -44,10 +44,10 @@ $(document).ready(() => {
                             </button>
                         </div>
                     </td>
-                    <td>${ordenInterna.usu_usucreacion === null ? 'No aplica' : ordenInterna.usu_usucreacion}</td>
-                    <td>${ordenInterna.usu_feccreacion === null ? 'No aplica' : parseDate(ordenInterna.usu_feccreacion)}</td>
-                    <td>${ordenInterna.usu_usumodificacion === null ? 'No aplica' : ordenInterna.usu_usumodificacion}</td>
-                    <td>${ordenInterna.usu_fecmodificacion === null ? 'No aplica' : parseDate(ordenInterna.usu_fecmodificacion)}</td>
+                    <td>${ordenInterna.oic_usucreacion === null ? 'No aplica' : ordenInterna.oic_usucreacion}</td>
+                    <td>${ordenInterna.oic_feccreacion === null ? 'No aplica' : parseDate(ordenInterna.oic_feccreacion)}</td>
+                    <td>${ordenInterna.oic_usumodificacion === null ? 'No aplica' : ordenInterna.oic_usumodificacion}</td>
+                    <td>${ordenInterna.oic_fecmodificacion === null ? 'No aplica' : parseDate(ordenInterna.oic_fecmodificacion)}</td>
                 </tr>
             `
         })

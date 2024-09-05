@@ -15,14 +15,14 @@ class OrdenInternaProcesos extends Model
         'opp_id',
         'odp_observacion',
         'odp_estado',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'odp_usucreacion',
+        'odp_feccreacion',
+        'odp_usumodificacion',
+        'odp_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'odp_feccreacion';
+    const UPDATED_AT = 'odp_fecmodificacion';
 
     // orden interna parte
     public function ordenInternaParte()

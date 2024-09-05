@@ -13,14 +13,14 @@ class OrdenInternaPartes extends Model
     protected $fillable = [
         'oip_id',
         'oic_id',
-        'usu_usucreacion',
-        'usu_feccreacion',
-        'usu_usumodificacion',
-        'usu_fecmodificacion'
+        'opd_usucreacion',
+        'opd_feccreacion',
+        'opd_usumodificacion',
+        'opd_fecmodificacion'
     ];
 
-    const CREATED_AT = 'usu_feccreacion';
-    const UPDATED_AT = 'usu_fecmodificacion';
+    const CREATED_AT = 'opd_feccreacion';
+    const UPDATED_AT = 'opd_fecmodificacion';
 
     // orden interna
     public function ordenInterna()
