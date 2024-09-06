@@ -417,6 +417,16 @@ $(document).ready(function () {
         })
     }
 
+    $('#checkAsociarProducto').change(function() {
+        if ($(this).is(':checked')) {
+            // Si está marcado, cambia el placeholder
+            $('#productosInput').attr('placeholder', 'Describa material...');
+        } else {
+            // Si no está marcado, vuelve al placeholder original
+            $('#productosInput').attr('placeholder', 'Buscar material...');
+        }
+    });
+
     // funcion cargar modal de productos
     $('#tbl-orden-interna').on('click', '.btn-productos', async (event) => {
         $('#checkAsociarProducto').prop('checked', false)
@@ -543,6 +553,7 @@ $(document).ready(function () {
 
     function seleccionarMaterial(material) {
         const { pro_id, pro_codigo, pro_descripcion } = material
+        console.log(pro_id, pro_codigo, pro_descripcion)
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_materiales } = findElement
         const findProducto = detalle_materiales.find(element => element.pro_id == pro_id)
@@ -566,13 +577,13 @@ $(document).ready(function () {
             <tr>
                 <td>${data["pro_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${data["odm_descripcion"]}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"]}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control cantidad-input" value="${data["odm_cantidad"]}" readonly/>
+                    <input type="number" class="form-control cantidad-input" value='${data["odm_cantidad"]}' readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="${data["odm_observacion"]}" readonly/>
+                    <input type="text" class="form-control observacion-input" value='${data["odm_observacion"]}' readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">

@@ -303,6 +303,16 @@ $(document).ready(async function () {
 
     // --------- JAVASCRIPT para el manejo de PRODUCTOS ---------
 
+    $('#checkAsociarProducto').change(function() {
+        if ($(this).is(':checked')) {
+            // Si está marcado, cambia el placeholder
+            $('#productosInput').attr('placeholder', 'Describa material...');
+        } else {
+            // Si no está marcado, vuelve al placeholder original
+            $('#productosInput').attr('placeholder', 'Buscar material...');
+        }
+    });
+
     // carga de detalle de materiales en tabla
     function cargarProductosDetalle(id_detalle_parte) {
         $('#tbl-orden-interna-productos tbody').empty()
@@ -458,13 +468,13 @@ $(document).ready(async function () {
             <tr class="row-editable" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${pro_descripcion}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control cantidad-input" value="1.00" readonly/>
+                    <input type="number" class="form-control cantidad-input" value='1.00' readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="" readonly/>
+                    <input type="text" class="form-control observacion-input" value='' readonly/>
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
