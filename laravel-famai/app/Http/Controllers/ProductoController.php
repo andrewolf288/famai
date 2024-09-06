@@ -117,8 +117,20 @@ class ProductoController extends Controller
         $user = auth()->user();
         // Validamos los datos
         $validator = Validator::make($request->all(), [
-            'pro_codigo' => 'required|string|max:16|unique:tblproductos_pro,pro_codigo',
-            'pro_descripcion' => 'required|string|max:250|unique:tblproductos_pro,pro_descripcion',
+            'pro_codigo' => [
+                'required',
+                'string',
+                'max:16',
+                'unique:tblproductos_pro,pro_codigo',
+                'regex:/^[^+]*$/', // No permitir el caracter '+'
+            ],
+            'pro_descripcion' => [
+                'required',
+                'string',
+                'max:250',
+                'unique:tblproductos_pro,pro_descripcion',
+                'regex:/^[^+]*$/', // No permitir el caracter '+'
+            ],
             'uni_codigo' => 'required|string|exists:tblunidades_uni,uni_codigo',
             'pgi_codigo' => 'required|string|exists:tblproductosgruposinventario_pgi,pgi_codigo',
             'pfa_codigo' => 'required|string|exists:tblproductosfamilias_pfa,pfa_codigo',
@@ -175,12 +187,14 @@ class ProductoController extends Controller
                 'string',
                 'max:16',
                 Rule::unique('tblproductos_pro', 'pro_codigo')->ignore($id, 'pro_id'),
+                'regex:/^[^+]*$/', // No permitir el carácter '+'
             ],
             'pro_descripcion' => [
                 'required',
                 'string',
                 'max:250',
                 Rule::unique('tblproductos_pro', 'pro_descripcion')->ignore($id, 'pro_id'),
+                'regex:/^[^+]*$/', // No permitir el carácter '+'
             ],
             'uni_codigo' => 'required|string|exists:tblunidades_uni,uni_codigo',
             'pgi_codigo' => 'required|string|exists:tblproductosgruposinventario_pgi,pgi_codigo',
