@@ -234,7 +234,6 @@ class OrdenInternaController extends Controller
                 $detalle_materiales = $parte['detalle_materiales'] ?? [];
                 foreach ($detalle_materiales as $material) {
                     $validatorMaterial = Validator::make($material, [
-                        'pro_id' => 'required|integer|exists:tblproductos_pro,pro_id',
                         'odm_descripcion' => 'required|string',
                         'odm_cantidad' => 'required|numeric|min:1',
                         'odm_item' => 'required|integer',

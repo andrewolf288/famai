@@ -40,8 +40,8 @@ $(document).ready(function () {
         try {
             const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
             const estadoOrdenTrabajo = data.odt_estado
-            if(estadoOrdenTrabajo === 'Cerrado'){
-                if(!confirm('La orden de trabajo ya ha sido cerrada. ¿Desea jalar los datos?')){
+            if (estadoOrdenTrabajo === 'Cerrado') {
+                if (!confirm('La orden de trabajo ya ha sido cerrada. ¿Desea jalar los datos?')) {
                     return
                 }
             }
@@ -127,7 +127,7 @@ $(document).ready(function () {
         try {
             const { data } = await client.get('/partesSimple')
             data.forEach(function (item, index) {
-                const {oip_id, oip_descripcion} = item
+                const { oip_id, oip_descripcion } = item
                 const row = `
                     <tr>
                         <td>${oip_descripcion}</td>
@@ -419,7 +419,7 @@ $(document).ready(function () {
 
     // funcion cargar modal de productos
     $('#tbl-orden-interna').on('click', '.btn-productos', async (event) => {
-        $('#checkAsociarProducto').prop('checked', true)
+        $('#checkAsociarProducto').prop('checked', false)
         const id = $(event.currentTarget).data('bs-id')
         currentParte = id
         // abrimos el modal
@@ -431,14 +431,31 @@ $(document).ready(function () {
         $('#productosModal').modal('show')
     })
 
+    // al momento de ir ingresando valores en el input
     $('#productosInput').on('input', async function () {
+        const isChecked = $('#checkAsociarProducto').is(':checked')
         const query = $(this).val().trim()
-        if (query.length >= 3) {
+        if (query.length >= 3 && !isChecked) {
             await buscarMateriales(query)
         } else {
             limpiarLista()
         }
     })
+
+    // al momento de presionar enter
+    $('#productosInput').on('keydown', function(event) {
+        // si es la tecla de enter
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            const isChecked = $('#checkAsociarProducto').is(':checked')
+            // si se desea agregar un producto sin código
+            if(isChecked) {
+                ingresarProductoSinCodigo()
+            } else {
+                return
+            }
+        }
+    });
 
     async function buscarMateriales(query) {
         try {
@@ -465,6 +482,65 @@ $(document).ready(function () {
         $('#resultadosLista').empty()
     }
 
+    function ingresarProductoSinCodigo() {
+        const findElement = buscarDetalleParte(currentParte)
+        const { detalle_materiales } = findElement
+        const pro_codigo = ""
+        const pro_id = Date.now().toString(36) + Math.random().toString(36).slice(2, 11)
+        const pro_descripcion = $.trim($('#productosInput').val())
+
+        if (pro_descripcion.length < 3) {
+            alert('La descripción debe tener al menos 3 caracteres')
+        } else {
+            $('#productosInput').val('')
+
+            const data = {
+                pro_id,
+                pro_codigo,
+                odm_descripcion: pro_descripcion,
+                odm_cantidad: 1.00,
+                odm_observacion: "",
+                odm_asociar: false
+            }
+
+            const row = `
+             <tr>
+                 <td>${data["pro_codigo"]}</td>
+                 <td>
+                     <input type="text" class="form-control descripcion-input" value="${data["odm_descripcion"]}" readonly/>
+                 </td>
+                 <td>
+                     <input type="number" class="form-control cantidad-input" value="${data["odm_cantidad"]}" readonly/>
+                 </td>
+                 <td>
+                     <input type="text" class="form-control observacion-input" value="${data["odm_observacion"]}" readonly/>
+                 </td>
+                 <td>
+                     <div class="d-flex justify-content-around">
+                         <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-2" data-producto="${data["pro_id"]}">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                             </svg>
+                         </button>
+                         <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar" data-producto="${data["pro_id"]}">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                             </svg>
+                         </button>
+                     </div>
+                 </td>
+             </tr>`
+
+            $('#tbl-orden-interna-productos tbody').append(row)
+            detalle_materiales.push(data)
+
+            // debemos actualizar la cantidad de productos
+            const totalProductos = detalle_materiales.length
+            const idCantidadProducto = `#cantidad-productos-${currentParte}`
+            $(idCantidadProducto).text(totalProductos)
+        }
+    }
+
     function seleccionarMaterial(material) {
         const { pro_id, pro_codigo, pro_descripcion } = material
         const findElement = buscarDetalleParte(currentParte)
@@ -477,16 +553,13 @@ $(document).ready(function () {
             limpiarLista()
             $('#productosInput').val('')
 
-            // obtenemos el valor de checked
-            const checked = $('#checkAsociarProducto').prop('checked')
-
             const data = {
                 pro_id,
                 pro_codigo,
                 odm_descripcion: pro_descripcion,
                 odm_cantidad: 1.00,
                 odm_observacion: "",
-                odm_asociar: checked
+                odm_asociar: true
             }
 
             const row = `
@@ -718,8 +791,8 @@ $(document).ready(function () {
                         await client.post('/ordenesinternas', formatData)
                         window.location.href = '/orden-interna'
                     } catch (error) {
-                        const {response} = error
-                        if(response.status === 500){
+                        const { response } = error
+                        if (response.status === 500) {
                             alert(response.data.error)
                         } else {
                             alert('Hubo un error en la creacion de orden interna')
