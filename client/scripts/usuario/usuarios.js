@@ -24,6 +24,7 @@ $(document).ready(() => {
                 <tr>
                     <td>${usuario.usu_codigo}</td>
                     <td>${usuario.usu_nombre}</td>
+                    <td>${usuario.rol.rol_descripcion}</td>
                     <td>${usuario.usu_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
                     <td>${usuario.usu_ultimoacceso !== null ? parseDate(usuario.usu_ultimoacceso) : 'No aplica'}</td>
                     <td>${usuario.usu_usucreacion === null ? 'No aplica' : usuario.usu_usucreacion}</td>
@@ -64,11 +65,11 @@ $(document).ready(() => {
     initPagination(apiURL, initDataTable, dataTableOptions)
 
     //--------- MANEJADOR DE CONTRASEÑAS ---------
-    $('.toggle-password').on('click', function() {
+    $('.toggle-password').on('click', function () {
         const passwordField = $(this).siblings('input');
         const passwordFieldType = passwordField.attr('type') === 'password' ? 'text' : 'password';
         passwordField.attr('type', passwordFieldType);
-        
+
         const icon = $(this).find('i');
         if (passwordFieldType === 'text') {
             icon.removeClass('fa-eye').addClass('fa-eye-slash');
@@ -78,17 +79,44 @@ $(document).ready(() => {
     });
 
     //--------- CREACION USUARIO -------------
-    $("#btn-link-create-usuario").on('click', function (){
+
+    const traerInformacionRoles = async ($selectElement) => {
+        try {
+            const { data } = await client.get('/rolesSimple')
+            $selectElement.empty()
+
+            $selectElement.append($('<option>', {
+                value: '',
+                text: 'Seleccionar un rol'
+            }))
+
+            $.each(data, function (index, item) {
+                $selectElement.append($('<option>', {
+                    value: item.rol_id,
+                    text: item.rol_descripcion
+                }))
+            })
+
+        } catch (error) {
+            console.log(error)
+            alert("Hubo un error al traer la informacion de roles")
+        }
+    }
+
+    $("#btn-link-create-usuario").on('click', async function () {
+        const selectorRol = $("#rolUsuario")
+        await traerInformacionRoles(selectorRol)
         const loaderModalCreate = new bootstrap.Modal(document.getElementById('crearUsuarioModal'))
         loaderModalCreate.show()
     })
 
-    $("#btn-create-usuario").on('click', async(event) => {
+    $("#btn-create-usuario").on('click', async (event) => {
         event.preventDefault()
         $('#crearUsuarioForm')[0].reset()
 
         const usuario = $.trim($("#usu_codigo").val())
         const nombre = $.trim($("#usu_nombre").val())
+        const rol = $("#rolUsuario").val()
         const contrasena = $.trim($("#usu_contrasena").val())
         const contrasena_confirmar = $.trim($("#usu_contrasena_confirmar").val())
 
@@ -102,6 +130,10 @@ $(document).ready(() => {
             handleError += '- El campo nombre es obligatorio.\n'
         }
 
+        if (rol.length === 0) {
+            handleError += '- El campo rol es obligatorio.\n'
+        }
+
         if (contrasena.length === 0) {
             handleError += '- El campo contraseña es obligatorio.\n'
         } else {
@@ -110,8 +142,7 @@ $(document).ready(() => {
             }
         }
 
-        if(handleError.length > 0) {
-            console.log(handleError)
+        if (handleError.length > 0) {
             alert(handleError)
             return
         }
@@ -119,6 +150,7 @@ $(document).ready(() => {
         const formatData = {
             usu_codigo: usuario,
             usu_nombre: nombre,
+            rol_id: rol,
             usu_contrasena: contrasena
         }
 
@@ -129,10 +161,10 @@ $(document).ready(() => {
             loaderModalCreate.hide()
             // traemos de nuevo la data
             initPagination(apiURL, initDataTable, dataTableOptions)
-        } catch(error){
-            const {response} = error
+        } catch (error) {
+            const { response } = error
             console.log(error)
-            if(response.status === 400) {
+            if (response.status === 400) {
                 const handleError = formatErrorsFromString(response.data.error)
                 alert(handleError)
             } else {
@@ -145,31 +177,32 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-usuario-editar', async function () {
         // reseteamos el formulario
         const id_usuario = $(this).data('id-usuario')
-        console.log(id_usuario)
-        try{
-            const {data} = await client.get(`/usuario/${id_usuario}`)
-            const {usu_codigo, usu_nombre, usu_activo} = data
+        const selectorRolEdit = $("#rolUsuarioEdit")
+        await traerInformacionRoles(selectorRolEdit)
+        try {
+            const { data } = await client.get(`/usuario/${id_usuario}`)
+            const { usu_codigo, usu_nombre, usu_activo, rol } = data
             $("#usu_codigo_hidden").val(usu_codigo)
             $("#usu_codigo_editar").val(usu_codigo)
             $("#usu_nombre_editar").val(usu_nombre)
+            $("#rolUsuarioEdit").val(rol.rol_id)
             $("#activoUsuarioEdit").prop("checked", usu_activo == 1 ? true : false)
 
             const loaderModalEdit = new bootstrap.Modal(document.getElementById('editarUsuarioModal'))
             loaderModalEdit.show()
-        } catch(error){
+        } catch (error) {
             console.log(error)
         }
     })
 
-    $("#btn-editar-usuario").on('click', async(event) => {
+    $("#btn-editar-usuario").on('click', async (event) => {
         event.preventDefault()
-        
+
         const usuarioHidden = $("#usu_codigo_hidden").val()
         const usuario = $.trim($("#usu_codigo_editar").val())
         const nombre = $.trim($("#usu_nombre_editar").val())
-        const contrasena = $.trim($("#usu_contrasena_editar").val())
-        const contrasena_confirmar = $.trim($("#usu_contrasena_confirmar_editar").val())
-        const activoUsuario =  $('#activoUsuarioEdit').is(':checked')
+        const rol = $("#rolUsuarioEdit").val()
+        const activoUsuario = $('#activoUsuarioEdit').is(':checked')
 
         let handleError = ''
 
@@ -181,15 +214,11 @@ $(document).ready(() => {
             handleError += '- El campo nombre es obligatorio.\n'
         }
 
-        if (contrasena.length === 0) {
-            handleError += '- El campo contraseña es obligatorio.\n'
-        } else {
-            if (contrasena !== contrasena_confirmar) {
-                handleError += '- Las contraseñas no coinciden.\n'
-            }
+        if (rol.length === 0) {
+            handleError += '- El campo rol es obligatorio.\n'
         }
 
-        if(handleError.length > 0) {
+        if (handleError.length > 0) {
             alert(handleError)
             return
         }
@@ -197,7 +226,7 @@ $(document).ready(() => {
         const formatData = {
             usu_codigo: usuario,
             usu_nombre: nombre,
-            usu_contrasena: contrasena,
+            rol_id: rol,
             usu_activo: activoUsuario
         }
 
@@ -208,10 +237,9 @@ $(document).ready(() => {
             loaderModalEdit.hide()
             // traemos de nuevo la data
             initPagination(apiURL, initDataTable, dataTableOptions)
-        } catch(error){
-            const {response} = error
-            console.log(error)
-            if(response.status === 400) {
+        } catch (error) {
+            const { response } = error
+            if (response.status === 400) {
                 const handleError = formatErrorsFromString(response.data.error)
                 alert(handleError)
             } else {

@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ------------- JAVACRIPT PARA EL NAVABAR DE NAVEGACION -------------
+    const modulos = JSON.parse(localStorage.getItem('modulos'));
+    const {maestros, procesos} = modulos
+
+    // Seleccionar los dropdowns donde se agregarán los enlaces
+    const catalogosDropdown = $('#catalogosDropdownMenu');
+    const procesosDropdown = $('#procesosDropdownMenu');
+
+    // Función para crear enlaces de menú
+    function crearEnlaceMenu(descripcion, url) {
+        return `<li><a class="dropdown-item" href="/${url}">${descripcion}</a></li>`;
+    }
+
+    // Agregar los enlaces de "Maestros" al menú de "Catálogos"
+    if (maestros && maestros.length) {
+        maestros.forEach((maestro) => {
+            catalogosDropdown.append(crearEnlaceMenu(maestro.mol_descripcion, maestro.mol_url));
+        });
+    }
+
+    // Agregar los enlaces de "Procesos" al menú de "Procesos"
+    if (procesos && procesos.length) {
+        procesos.forEach((proceso) => {
+            procesosDropdown.append(crearEnlaceMenu(proceso.mol_descripcion, proceso.mol_url));
+        });
+    }
+
     // Crear instancia de Navigo
     const router = new Navigo('/')
 
@@ -49,9 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Definir las rutas
     router.on('/', () => {
         privateRoute(() => {
-            loadContent('pages/home.html', '')
+            loadContent('pages/home.html', 'scripts/home.js')
         })
-        // document.getElementById('content').innerHTML = '<h1>Bienvenido a la Página de Inicio</h1>'
     })
 
     // Ruta para el listado de productos
@@ -72,6 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
     router.on('/usuarios', () => {
         privateRoute(() => {
             loadContent('pages/usuario/usuario.html', 'scripts/usuario/usuarios.js')
+        })
+    })
+
+    // Ruta para el listado de roles
+    router.on('/roles', () => {
+        privateRoute(() => {
+            loadContent('pages/rol/rol.html', 'scripts/rol/roles.js')
         })
     })
 

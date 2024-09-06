@@ -7,6 +7,7 @@ async function handleLogout() {
         });
         // Borramos el localStorage
         localStorage.removeItem('authToken');
+        localStorage.removeItem('modulos');
         // Navegamos al login
         window.location.href = '/login.html';
     } catch (error) {

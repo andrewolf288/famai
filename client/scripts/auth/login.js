@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    function parseJwt (token) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    
+        return JSON.parse(jsonPayload);
+    }
+
     const form = document.getElementById('login-form')
 
     document.querySelectorAll('.toggle-password').forEach(toggle => {
@@ -35,7 +46,25 @@ document.addEventListener('DOMContentLoaded', () => {
             // Realizar la solicitud de login
             const {data} = await axios.post('http://localhost:8080/api/auth/login', formatData)
             const {access_token} = data
+            const payload = parseJwt(access_token)
             localStorage.setItem('authToken', access_token)
+            // realizamos una peticion para traer la informacion de modulos admitidos
+            const {data: modulos} = await axios.get(`http://localhost:8080/api/findModulosByRol/${payload.rol}`)
+
+            const result = {
+                maestros: [],
+                procesos: []
+            }
+
+            modulos[0].rol_modulo.forEach((mod) => {
+                if (mod.modulo.mol_tipo === "MAESTRO") {
+                    result.maestros.push(mod.modulo);
+                } else if (mod.modulo.mol_tipo === "PROCESO") {
+                    result.procesos.push(mod.modulo);
+                }
+            })
+            localStorage.setItem('modulos', JSON.stringify(result))
+
             window.location.href = '/'
         } catch (error) {
             console.log(error) // Manejar errores de la solicitud

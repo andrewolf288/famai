@@ -349,7 +349,8 @@ $(document).ready(async function () {
 
     async function buscarMateriales(query) {
         try {
-            const { data } = await client.get(`/productosByQuery?query=${query}`)
+            const queryEncoded = encodeURIComponent(query)
+            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
             // Limpiamos la lista
             limpiarLista()
             // formamos la lista
