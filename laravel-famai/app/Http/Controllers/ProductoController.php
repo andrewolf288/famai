@@ -52,7 +52,7 @@ class ProductoController extends Controller
         ]);
     }
 
-    public function findProductoByQuery(Request $request)
+    /**public function findProductoByQuery(Request $request)
     {
         $query = $request->input('query', null);
         // Realiza la búsqueda de materiales por nombre o código
@@ -64,7 +64,36 @@ class ProductoController extends Controller
 
         // Devuelve los materiales en formato JSON
         return response()->json($materiales);
+    }**/
+
+    public function findProductoByQuery(Request $request)
+    {
+        $query = $request->input('query', null);
+        
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+    
+        $symbols = ['!', '@', '#', '$']; // Aquí defines los símbolos permitidos
+    
+        $pattern = '/[' . preg_quote(implode('', $symbols), '/') . ']/';
+    
+        $subqueries = preg_split($pattern, $query);
+    
+        $materialesQuery = Producto::where('pro_activo', 1);
+    
+        foreach ($subqueries as $subquery) {
+            $materialesQuery->where(function($q) use ($subquery) {
+                $q->where('pro_descripcion', 'like', '%' . $subquery . '%')
+                  ->orWhere('pro_codigo', 'like', '%' . $subquery . '%');
+            });
+        }
+    
+        $materiales = $materialesQuery->select('pro_id', 'pro_codigo', 'pro_descripcion')->get();
+    
+        return response()->json($materiales);
     }
+    
 
     /**
      * Display the specified resource.
