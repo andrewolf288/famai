@@ -40,7 +40,9 @@ class AuthController extends Controller
             'password' => $request->input('usu_contrasena'),
         ];
 
-        $user = User::where('usu_codigo', $credentials['usu_codigo'])->first();
+        $user = User::with('rol')
+        ->where('usu_codigo', $credentials['usu_codigo'])
+        ->first();
 
         if (!$user) {
             return response()->json(['error' => 'Usuario no encontrado'], 404);
@@ -53,6 +55,11 @@ class AuthController extends Controller
         // actualizamos el ultimo acceso
         $user->usu_ultimoacceso = now();
         $user->save();
+
+        $customClaims = [
+            'rol' => $user->rol->rol_id,
+        ];
+        $token = JWTAuth::claims($customClaims)->attempt($credentials);
 
         return $this->respondWithToken($token);
     }

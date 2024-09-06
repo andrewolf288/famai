@@ -12,6 +12,7 @@ use App\Http\Controllers\ParteController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProductoProveedorController;
 use App\Http\Controllers\SubFamiliaController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\RolController;
 use App\Http\Controllers\TipoDocumentoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +59,20 @@ Route::group(['middleware' => ['auth.jwt']], function() {
    Route::get('usuario/{id}', [UsuarioController::class, 'show']);
    Route::put('usuario/{id}', [UsuarioController::class, 'update']);
    Route::post('usuarios', [UsuarioController::class, 'store']);
+});
+
+// rutas de roles
+Route::get('findModulosByRol/{id}', [RolController::class, 'findModulosByRol']);
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('roles', [RolController::class, 'index']);
+    Route::get('rolesSimple', [RolController::class, 'indexSimple']);
+    Route::post('roles', [RolController::class, 'store']);
+    Route::put('rol/{id}', [RolController::class, 'update']);
+});
+
+// rutas de modulos
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('modulosSimple', [ModuloController::class, 'indexSimple']);
 });
 
 // rutas de marcas

@@ -17,7 +17,7 @@ class UsuarioController extends Controller
         $codigo = $request->input('usu_codigo', null);
         $nombre = $request->input('usu_nombre', null);
 
-        $query = User::query();
+        $query = User::with('rol');
 
         if ($codigo !== null) {
             $query->where('usu_codigo', 'like', '%' . $codigo . '%');
@@ -39,7 +39,7 @@ class UsuarioController extends Controller
     // funcion para mostrar informacion de un usuario
     public function show($id)
     {
-        $user = User::find($id);
+        $user = User::with('rol')->find($id);
 
         if (!$user) {
             return response()->json(['error' => 'Usuario no encontrado'], 404);
@@ -68,8 +68,8 @@ class UsuarioController extends Controller
                 'max:8',
                 Rule::unique('tblusuarios_usu', 'usu_codigo')->ignore($id, 'usu_codigo'),
             ],
-            'usu_contrasena' => 'required|string|min:6',
             'usu_nombre' => 'required|string|max:250',
+            'rol_id' => 'required|integer|exists:tblroles_rol,rol_id',
             'usu_activo' => 'required|boolean',
         ]);
 
@@ -80,8 +80,8 @@ class UsuarioController extends Controller
 
         $user->update([
             'usu_codigo' => $request->usu_codigo,
-            'usu_contrasena' => bcrypt($request->usu_contrasena),
             'usu_nombre' => $request->usu_nombre,
+            'rol_id' => $request->rol_id,
             'usu_activo' => $request->usu_activo,
             'usu_usumodificacion' => $userAuth->usu_codigo,
         ]);
@@ -101,6 +101,7 @@ class UsuarioController extends Controller
             'usu_codigo' => 'required|string|max:8|unique:tblusuarios_usu',
             'usu_contrasena' => 'required|string|min:6',
             'usu_nombre' => 'required|string|max:250',
+            'rol_id' => 'required|integer|exists:tblroles_rol,rol_id',
         ]);
 
         if ($validator->fails()) {
@@ -111,6 +112,7 @@ class UsuarioController extends Controller
             'usu_codigo' => $request->usu_codigo,
             'usu_contrasena' => bcrypt($request->usu_contrasena),
             'usu_nombre' => $request->usu_nombre,
+            'rol_id' => $request->rol_id,
             'usu_usucreacion' => $userAuth->usu_codigo,
         ]);
 

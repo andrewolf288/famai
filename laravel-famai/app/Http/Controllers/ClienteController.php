@@ -20,13 +20,6 @@ class ClienteController extends Controller
         $page = $request->input('page', 1);
         $nombre = $request->input('cli_nombre', null);
         $nroDocumento = $request->input('cli_nrodocumento', null);
-        $activo = 0;
-        //si allowLogDeletedRegs esta en 0 devuelve todos los registros 
-        //si allowLogDeletedRegs esta en un valor distinto a 1 devuelve solo los registros activos
-        //$allowLogDeletedRegs = $request->input('allowlogicallyDeleted', null);
-        //if (isset($allowLogDeletedRegs) && $allowLogDeletedRegs == 0){
-        //    $activo = 0;
-        //}
 
         $query = Cliente::with(['tipoDocumento']);
 
@@ -36,10 +29,6 @@ class ClienteController extends Controller
 
         if ($nroDocumento !== null) {
             $query->where('cli_nrodocumento', 'like', '%' . $nroDocumento . '%');
-        }
-        
-        if ($activo==1) {
-            $query->where('cli_activo', $activo);
         }
 
         $clientes = $query->paginate($pageSize, ['*'], 'page', $page);

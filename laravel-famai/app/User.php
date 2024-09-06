@@ -23,8 +23,9 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'usu_codigo',
+        'rol_id',
         'usu_contrasena', 
-        'usu_nombre', 
+        'usu_nombre',
         'usu_activo',
         'usu_ultimoacceso',
         'usu_usucreacion',
@@ -32,6 +33,10 @@ class User extends Authenticatable implements JWTSubject
         'usu_usumodificacion',
         'usu_fecmodificacion'
     ];
+
+    public function rol(){
+        return $this->belongsTo(Rol::class, 'rol_id')->selectFields();
+    }
 
     /**
      * Las constantes para las columnas de timestamps personalizados.
