@@ -188,7 +188,7 @@ class OrdenInternaController extends Controller
             ])->validate();
             $odtNumero = $request->input('odt_numero');
             $maxOicNumero = OrdenInterna::where('odt_numero', $odtNumero)->max('oic_numero');
-            $oicNumero = $maxOicNumero ? $maxOicNumero + 1 : 1;
+            $oicNumero = $maxOicNumero ? $maxOicNumero + 1 : 12345;
             $ordeninterna = OrdenInterna::create([
                 'oic_numero' => $oicNumero,
                 'oic_fecha' => $request->input('oic_fecha'),
