@@ -186,9 +186,11 @@ class OrdenInternaController extends Controller
                 'oic_equipo_descripcion' => 'required|string',
                 'detalle_partes' => 'required|array|min:1',
             ])->validate();
-
+            $odtNumero = $request->input('odt_numero');
+            $maxOicNumero = OrdenInterna::where('odt_numero', $odtNumero)->max('oic_numero');
+            $oicNumero = $maxOicNumero ? $maxOicNumero + 1 : 1;
             $ordeninterna = OrdenInterna::create([
-                'oic_numero' => 12345,
+                'oic_numero' => $oicNumero,
                 'oic_fecha' => $request->input('oic_fecha'),
                 'odt_numero' => $request->input('odt_numero'),
                 'cli_id' => $request->input('cli_id'),
