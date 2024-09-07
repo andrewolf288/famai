@@ -31,7 +31,7 @@ class Reporte extends Model
         return $result;
     }
     
-    public function metobtenerCabeceraAlt($varOIC)
+    /**public function metobtenerCabeceraAlt($varOIC)
     {
         if (!$varOIC) {
             return false;
@@ -51,7 +51,7 @@ class Reporte extends Model
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         return $result;
-    }
+    }**/
     
     public function metobtenerPartes($varOIC)
     {

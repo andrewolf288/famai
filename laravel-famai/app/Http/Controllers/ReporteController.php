@@ -101,12 +101,14 @@ class ReporteController extends Controller
 					$ultimoElemento = end($varResultProcesos);
 					$nuevoindice = 0;
 					for ($i = 0; $i < $varFilasComunes; $i++) {
+						//procesos
 						$varProcesoParte = isset($varResultProcesos[$i]['oip_descripcion']) ? $varResultProcesos[$i]['oip_descripcion'] : $this->varTab;
 						$varCodigoProceso = isset($varResultProcesos[$i]['opp_codigo']) ? $varResultProcesos[$i]['opp_codigo'] : $this->varTab;
 						$varDescripcionProceso = isset($varResultProcesos[$i]['opp_descripcion']) ? $varResultProcesos[$i]['opp_descripcion'] : $this->varTab;
 						$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? $varResultProcesos[$i]['odp_observacion'] : $this->varTab;
+						//materiales
 						$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
-						$varProDescripcion = isset($varResultMateriales[$i]['pro_descripcion']) ? $varResultMateriales[$i]['pro_descripcion'] : $this->varTab;
+						$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
 						$varCantidad = isset($varResultMateriales[$i]['odm_cantidad']) ? $varResultMateriales[$i]['odm_cantidad'] : $this->varTab;
 						$varProObservaciones = isset($varResultMateriales[$i]['odm_observacion']) ? $varResultMateriales[$i]['odm_observacion'] : $this->varTab;
 						$htmlFila = "";
@@ -181,8 +183,11 @@ class ReporteController extends Controller
 						$nuevoindice = $i;
 					}
 
+					$nuevoindice ++;
+
 					for ($i = 0; $i < $varfilasRestantes; $i++) {
 						if ($varNumProcesos > $varNumMateriales) {
+							//procesos
 							$varProcesoParte = isset($varResultProcesos[$i + $nuevoindice]['oip_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['oip_descripcion'] : $this->varTab;
 							$varCodigoProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_codigo']) ? $varResultProcesos[$i + $nuevoindice]['opp_codigo'] : $this->varTab;
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
@@ -194,8 +199,9 @@ class ReporteController extends Controller
 								$htmlStringSecundarioSoloProcesos
 							);
 						} elseif ($varNumProcesos < $varNumMateriales) {
+							//materiales
 							$varItem = isset($varResultMateriales[$i + $nuevoindice]['odm_item']) ? $varResultMateriales[$i + $nuevoindice]['odm_item'] : $this->varTab;
-							$varProDescripcion = isset($varResultMateriales[$i + $nuevoindice]['pro_descripcion']) ? $varResultMateriales[$i + $nuevoindice]['pro_descripcion'] : $this->varTab;
+							$varProDescripcion = isset($varResultMateriales[$i + $nuevoindice]['odm_descripcion']) ? $varResultMateriales[$i + $nuevoindice]['odm_descripcion'] : $this->varTab;
 							$varCantidad = isset($varResultMateriales[$i + $nuevoindice]['odm_cantidad']) ? $varResultMateriales[$i + $nuevoindice]['odm_cantidad'] : $this->varTab;
 							$varProObservaciones = isset($varResultMateriales[$i + $nuevoindice]['odm_observacion']) ? $varResultMateriales[$i + $nuevoindice]['odm_observacion'] : $this->varTab;
 							$htmlFila = "";
