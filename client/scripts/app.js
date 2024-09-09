@@ -1,32 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-    // ------------- JAVACRIPT PARA EL NAVABAR DE NAVEGACION -------------
-    const modulos = JSON.parse(localStorage.getItem('modulos'));
-    const {maestros, procesos} = modulos
-
-    // Seleccionar los dropdowns donde se agregarán los enlaces
-    const catalogosDropdown = $('#catalogosDropdownMenu');
-    const procesosDropdown = $('#procesosDropdownMenu');
-
-    // Función para crear enlaces de menú
-    function crearEnlaceMenu(descripcion, url) {
-        return `<li><a class="dropdown-item" href="/${url}">${descripcion}</a></li>`;
-    }
-
-    // Agregar los enlaces de "Maestros" al menú de "Catálogos"
-    if (maestros && maestros.length) {
-        maestros.forEach((maestro) => {
-            catalogosDropdown.append(crearEnlaceMenu(maestro.mol_descripcion, maestro.mol_url));
-        });
-    }
-
-    // Agregar los enlaces de "Procesos" al menú de "Procesos"
-    if (procesos && procesos.length) {
-        procesos.forEach((proceso) => {
-            procesosDropdown.append(crearEnlaceMenu(proceso.mol_descripcion, proceso.mol_url));
-        });
-    }
-
     // Crear instancia de Navigo
     const router = new Navigo('/')
 
@@ -128,6 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loadContent('pages/orden-interna/editarOrdenInterna.html', 'scripts/orden-interna/editarOrdenInterna.js')
         })
     })
+    // Ruta para despliegue orden interna
+    router.on('/despliegue-orden', () => {
+        privateRoute(() => {
+            loadContent('pages/despliegue-orden/despliegueOrdenInterna.html', 'scripts/despliegue-orden/despliegueOrdenInterna.js')
+        })
+    })
 
     // Ruta para proveedores
     router.on('/proveedores', () => {
@@ -161,4 +139,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Resolver la ruta actual
     router.resolve()
+
+    // ------------- JAVACRIPT PARA EL NAVABAR DE NAVEGACION -------------
+    const modulos = JSON.parse(localStorage.getItem('modulos'));
+    const {maestros, procesos} = modulos
+
+    // Seleccionar los dropdowns donde se agregarán los enlaces
+    const catalogosDropdown = $('#catalogosDropdownMenu');
+    const procesosDropdown = $('#procesosDropdownMenu');
+
+    // Función para crear enlaces de menú
+    function crearEnlaceMenu(descripcion, url) {
+        return `<li><a class="dropdown-item" href="/${url}">${descripcion}</a></li>`;
+    }
+
+    // Agregar los enlaces de "Maestros" al menú de "Catálogos"
+    if (maestros && maestros.length) {
+        maestros.forEach((maestro) => {
+            catalogosDropdown.append(crearEnlaceMenu(maestro.mol_descripcion, maestro.mol_url));
+        });
+    }
+
+    // Agregar los enlaces de "Procesos" al menú de "Procesos"
+    if (procesos && procesos.length) {
+        procesos.forEach((proceso) => {
+            procesosDropdown.append(crearEnlaceMenu(proceso.mol_descripcion, proceso.mol_url));
+        });
+    }
 })

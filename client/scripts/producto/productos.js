@@ -45,7 +45,7 @@ $(document).ready(() => {
                         </button>
                     </div>
                 </td>
-                <td>${producto.ultima_compra === null ? 'No aplica' : parseDate(producto.ultima_compra.prp_fechaultimacompra)}</td>
+                <td>${producto.ultima_compra === null ? 'No aplica' : parseDateSimple(producto.ultima_compra.prp_fechaultimacompra)}</td>
                 <td>${producto.ultima_compra === null ? 'No aplica' : producto.ultima_compra.prp_preciounitario}</td>
                 <td>${producto.ultima_compra === null ? 'No aplica' : producto.ultima_compra.proveedor.prv_nrodocumento}</td>
                 <td>${producto.pro_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>

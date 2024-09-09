@@ -46,7 +46,7 @@ class Producto extends Model
 
     public function scopeSelectFields($query)
     {
-        return $query->select('pro_id', 'pro_codigo', 'pro_descripcion');
+        return $query->select('pro_id', 'pro_codigo', 'pro_descripcion', 'uni_codigo');
     }
 
     // relacion de unidad

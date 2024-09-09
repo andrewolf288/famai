@@ -13,6 +13,7 @@ use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ModuloController;
+use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProductoProveedorController;
 use App\Http\Controllers\SubFamiliaController;
@@ -117,6 +118,7 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 // rutas de almacenes
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('almacenes', [AlmacenController::class, 'index']);
+    Route::get('almacenesSimple', [AlmacenController::class, 'indexSimple']);
     Route::get('almacen/{id}', [AlmacenController::class, 'show']);
     Route::post('almacenes', [AlmacenController::class, 'store']);
     Route::put('almacen/{id}', [AlmacenController::class, 'update']);
@@ -131,7 +133,6 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::put('cliente/{id}', [ClienteController::class, 'update']);
     Route::get('/clientesByQuery', [ClienteController::class, 'findClienteByQuery']);
 });
-
 
 // rutas de procesos
 Route::group(['middleware' => ['auth.jwt']], function() {
@@ -165,6 +166,11 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::post('ordenesinternas', [OrdenInternaController::class, 'store']);
     Route::put('ordeninterna/guardar-procesos/{id}', [OrdenInternaController::class, 'update_proceso']);
     Route::put('ordeninterna/guardar-materiales/{id}', [OrdenInternaController::class, 'update_material']);
+});
+
+// rutas detalle materiales orden interna
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('materialesByOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'findByOrdenInterna']);
 });
 
 // rutas de reportes

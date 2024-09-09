@@ -45,6 +45,11 @@ class AlmacenController extends Controller
         ]);
     }
 
+    public function indexSimple(){
+        $almacenes = Almacen::select('alm_id', 'alm_codigo', 'alm_descripcion')->get();
+        return response()->json($almacenes);
+    }
+
     /**
      * Store a newly created resource in storage.
      *

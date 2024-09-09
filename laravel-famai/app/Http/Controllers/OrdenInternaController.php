@@ -25,6 +25,7 @@ class OrdenInternaController extends Controller
         $odtNumero = $request->input('ot_numero', null);
         $oicNumero = $request->input('oi_numero', null);
         $equipo = $request->input('oic_equipo_descripcion', null);
+        $estado = $request->input('oic_estado', null);
 
         $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen']);
 
@@ -38,6 +39,10 @@ class OrdenInternaController extends Controller
 
         if ($equipo !== null) {
             $query->where('oic_equipo_descripcion', 'like', "%{$equipo}%");
+        }
+
+        if($estado !== null){
+            $query->where('oic_estado', $estado);
         }
 
         $query->orderBy('oic_fecha', 'desc');

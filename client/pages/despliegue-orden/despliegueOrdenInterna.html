@@ -1,0 +1,58 @@
+<h2 class="mb-3 fs-4">Despliegue OT-Material</h2>
+<div class="d-flex flex-column flex-md-row justify-content-end align-items-center mb-3">
+    <!-- Paginación a la derecha -->
+    <div id="pagination-container" class="pagination-container mt-3 mt-md-0"></div>
+</div>
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <th>Nro. OT</th>
+        <th>Cliente</th>
+        <th>Nro. OI</th>
+        <th>Fecha</th>
+        <th>Área</th>
+        <th>Materiales</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+        <th>Fec. Creación</th>
+        <th>Usu. Creador</th>
+        <th>Fec. Actualización</th>
+        <th>Usu. Actualizador</th>
+    </thead>
+    <tbody id="data-container-body">
+    </tbody>
+</table>
+
+<!-- VER DETALLE MATERIALES -->
+<div class="modal modal-lg fade" id="detalleMaterialesOrdenModal" tabindex="-1"
+    aria-labelledby="detalleMaterialesOrdenModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detalleMaterialesOrdenModalLabel">Detalle Materiales Orden Interna</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive mt-3">
+                    <table id="table_detalleMaterialesOrden" class="table">
+                        <thead>
+                            <tr>
+                                <th class="col-lg-3">Descripcion</th>
+                                <th class="col-lg-1">Cantidad</th>
+                                <th class="col-lg-1">Und.</th>
+                                <th class="col-lg-2">Tipo</th>
+                                <th class="col-lg-3">Almacen</th>
+                                <th class="col-lg-1">Stock</th>
+                                <th class="col-lg-1">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody_detalle_materiales_orden">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
