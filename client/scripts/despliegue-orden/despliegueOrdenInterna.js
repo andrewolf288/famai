@@ -73,7 +73,7 @@ $(document).ready(() => {
                 <tr data-detalle-material="${material.odm_id}">
                     <td>${material.odm_descripcion}</td>
                     <td>${material.odm_cantidad}</td>
-                    <td>${material.producto?.unidad?.uni_codigo && 'No aplica'}</td>
+                    <td>${material.producto?.unidad?.uni_codigo || 'No aplica'}</td>
                     <td>${material.odm_tipo == 1 ? 'Programado' : 'Agregado'}</td>
                     <td>${selectorAlmacen}</td>
                     <td>No aplica</td>
