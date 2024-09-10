@@ -21,6 +21,7 @@ class OrdenInterna extends Model
         'tra_idorigen',
         'tra_idmaestro',
         'tra_idalmacen',
+        'oic_activo',
         'oic_usucreacion',
         'oic_feccreacion',
         'oic_usumodificacion',

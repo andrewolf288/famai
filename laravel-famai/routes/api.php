@@ -163,6 +163,7 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('ordenesinternas', [OrdenInternaController::class, 'index']);
     Route::get('ordeninterna/{id}', [OrdenInternaController::class, 'show']);
+    Route::get('ordeninternaByNumero/{numero}', [OrdenInternaController::class, 'findByNumero']);
     Route::post('ordenesinternas', [OrdenInternaController::class, 'store']);
     Route::put('ordeninterna/guardar-procesos/{id}', [OrdenInternaController::class, 'update_proceso']);
     Route::put('ordeninterna/guardar-materiales/{id}', [OrdenInternaController::class, 'update_material']);

@@ -25,7 +25,9 @@ class OrdenInternaController extends Controller
         $odtNumero = $request->input('ot_numero', null);
         $oicNumero = $request->input('oi_numero', null);
         $equipo = $request->input('oic_equipo_descripcion', null);
-        $estado = $request->input('oic_estado', null);
+        $estado = $request->input('oic_activo', null);
+        $fecha_desde = $request->input('fecha_desde', null);
+        $fecha_hasta = $request->input('fecha_hasta', null);
 
         $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen']);
 
@@ -42,7 +44,11 @@ class OrdenInternaController extends Controller
         }
 
         if($estado !== null){
-            $query->where('oic_estado', $estado);
+            $query->where('oic_activo', $estado);
+        }
+
+        if($fecha_desde !== null && $fecha_hasta !== null){
+            $query->whereBetween('oic_fecha', [$fecha_desde, $fecha_hasta]);
         }
 
         $query->orderBy('oic_fecha', 'desc');
@@ -66,6 +72,14 @@ class OrdenInternaController extends Controller
     {
         $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
             ->findOrFail($id);
+        return response()->json($ordenInterna);
+    }
+
+    public function findByNumero($numero)
+    {
+        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
+            ->where('oic_numero', $numero)
+            ->first();
         return response()->json($ordenInterna);
     }
 
@@ -146,6 +160,7 @@ class OrdenInternaController extends Controller
                 $newProceso = OrdenInternaProcesos::create([
                     'opd_id' => $ordenInternaParte->opd_id,
                     'opp_id' => $proceso['opp_id'],
+                    'odp_ccalidad' => $proceso['odp_ccalidad'],
                     'odp_observacion' => $proceso['odp_observacion'],
                     'odp_estado' => true,
                     'odp_usucreacion' => $user->usu_codigo,
@@ -182,6 +197,7 @@ class OrdenInternaController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'odt_numero' => 'required|string',
+                'oic_numero' => 'required|string',
                 'cli_id' => 'required|integer|exists:tblclientes_cli,cli_id',
                 'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
                 'oic_fecha' => 'required|date',
@@ -191,11 +207,8 @@ class OrdenInternaController extends Controller
                 'oic_equipo_descripcion' => 'required|string',
                 'detalle_partes' => 'required|array|min:1',
             ])->validate();
-            $odtNumero = $request->input('odt_numero');
-            $maxOicNumero = OrdenInterna::where('odt_numero', $odtNumero)->max('oic_numero');
-            $oicNumero = $maxOicNumero ? $maxOicNumero + 1 : 12345;
             $ordeninterna = OrdenInterna::create([
-                'oic_numero' => $oicNumero,
+                'oic_numero' => $request->input('oic_numero'),
                 'oic_fecha' => $request->input('oic_fecha'),
                 'odt_numero' => $request->input('odt_numero'),
                 'cli_id' => $request->input('cli_id'),
@@ -204,7 +217,8 @@ class OrdenInternaController extends Controller
                 'tra_idorigen' => $request->input('tra_idorigen'),
                 'tra_idmaestro' => $request->input('tra_idmaestro'),
                 'tra_idalmacen' => $request->input('tra_idalmacen'),
-                'oic_estado' => 1,
+                'oic_activo' => 1,
+                'oic_estado' => 'Pendiente',
                 'oic_usucreacion' => $user->usu_codigo,
             ]);
 
@@ -226,12 +240,14 @@ class OrdenInternaController extends Controller
                     $validatorProceso = Validator::make($proceso, [
                         'opp_id' => 'required|integer|exists:tblordenesinternasprocesos_opp,opp_id',
                         'odp_observacion' => 'nullable|string',
+                        'odp_ccalidad' => 'required|boolean',
                     ])->validate();
 
                     OrdenInternaProcesos::create([
                         'opd_id' => $ordenInternaParte->opd_id,
                         'opp_id' => $proceso['opp_id'],
                         'odp_observacion' => $proceso['odp_observacion'],
+                        'odp_ccalidad' => $proceso['odp_ccalidad'],
                         'odp_estado' => 1,
                         'odp_usucreacion' => $user->usu_codigo
                     ]);

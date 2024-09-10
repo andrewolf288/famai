@@ -110,6 +110,7 @@ $(document).ready(async function () {
             <tr data-id-proceso="${element.proceso.opp_id}">
                 <td>${element.proceso.opp_codigo}</td>
                 <td>${element.proceso.opp_descripcion}</td>
+                <td><input type="checkbox" ${element.odp_ccalidad ? 'checked' : ''}/></td>
                 <td>
                     ${element.odp_observacion || ''}
                 </td>
@@ -166,6 +167,7 @@ $(document).ready(async function () {
             <tr class="row-editable" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
                 <td>${selectedProcesoName}</td>
+                <td><input type="checkbox" disabled/></td>
                 <td>
                     <input type="text" class="form-control" value="" readonly/>
                 </td>
@@ -196,10 +198,12 @@ $(document).ready(async function () {
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        const $input = $row.find('input')
+        const $input = $row.find('input[type="text"]')
+        const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
         $input.prop('readonly', false)
+        $inputCheckbox.prop('disabled', false)
 
         // ACTUALIZAMOS EL ELEMENTO
         $(this).removeClass('btn-warning btn-detalle-proceso-editar')
@@ -213,9 +217,11 @@ $(document).ready(async function () {
     // funcion de guarda detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', function () {
         const $row = $(this).closest('tr')
-        const $input = $row.find('input')
+        const $input = $row.find('input[type="text"]')
+        const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         $input.prop('readonly', true)
+        $inputCheckbox.prop('disabled', true)
 
         // ACTUALIZAMOS EL ELEMENTO
         $(this).removeClass('btn-success btn-detalle-proceso-guardar')
@@ -257,6 +263,7 @@ $(document).ready(async function () {
             let dataObject = {
                 opp_id: $(this).data('id-proceso'),
                 odp_observacion: $(this).find('input[type="text"]').val().trim(),
+                odp_ccalidad: $(this).find('input[type="checkbox"]').is(':checked') ? true : false
             }
             dataArray.push(dataObject)
         })

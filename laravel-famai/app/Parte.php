@@ -26,5 +26,5 @@ class Parte extends Model
     public function scopeSelectFields($query)
     {
         return $query->select('oip_id', 'oip_descripcion', 'oip_orden');
-    }    
+    }
 }

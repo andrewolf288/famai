@@ -1,11 +1,27 @@
 <h2 class="mb-3 fs-4">Lista de Ordenes Internas</h2>
-<div class="row justify-content-end mb-4">
-    <div class="col-auto">
-        <a href="/orden-interna/crear" class="btn btn-agregar">
-            Crear Orden Interna
-        </a>
+<div class="row justify-content-between mb-4">
+    <div class="col-md-6 d-flex flex-column flex-md-row align-items-end">
+      <div class="me-3">
+        <label for="fechaDesde" class="form-label">Fecha Desde</label>
+        <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
+      </div>
+      <div>
+        <label for="fechaHasta" class="form-label">Fecha Hasta</label>
+        <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
+      </div>
+      <button id="filter-dates" class="btn btn-primary ms-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+        </svg>
+      </button>
     </div>
-</div>
+    <div class="col-auto">
+      <a href="/orden-interna/crear" class="btn btn-agregar">
+        Crear Orden Interna
+      </a>
+    </div>
+  </div>
+  
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
     <!-- Filtros a la izquierda -->
     <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">

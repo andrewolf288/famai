@@ -6,6 +6,17 @@ $(document).ready(() => {
     const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
     const filterButton = $('#filter-button')
+    const filterFechas = $('#filter-dates')
+
+    // -------- MANEJO DE FECHA ----------
+    $("#fechaDesde").datepicker({
+        dateFormat: 'dd/mm/yy',
+        setDate: new Date()
+    }).datepicker("setDate", new Date())
+    $("#fechaHasta").datepicker({
+        dateFormat: 'dd/mm/yy',
+        setDate: new Date()
+    }).datepicker("setDate", new Date())
 
     // Opciones de DataTable
     const dataTableOptions = {
@@ -25,10 +36,10 @@ $(document).ready(() => {
                     <td>${ordenInterna.odt_numero}</td>
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'No aplica'}</td>
                     <td>${ordenInterna.oic_numero}</td>
-                    <td>${ordenInterna.oic_fecha !== null ? parseDate(ordenInterna.oic_fecha) : 'No aplica'}</td>
+                    <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'No aplica'}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
-                    <td>${ordenInterna.oic_estado == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
+                    <td>${ordenInterna.oic_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-orden-interna-editar" data-orden-interna="${ordenInterna.oic_id}">
@@ -53,6 +64,14 @@ $(document).ready(() => {
         })
         $('#data-container-body').html(content)
     }
+
+    filterFechas.on('click', () => {
+        const fechaDesde = transformarFecha($('#fechaDesde').val())
+        const fechaHasta = transformarFecha($('#fechaHasta').val())
+        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        console.log(filteredURL)
+        initPagination(filteredURL, initDataTable, dataTableOptions)
+    })
 
     filterButton.on('click', () => {
         // seleccionamos el valor del selector

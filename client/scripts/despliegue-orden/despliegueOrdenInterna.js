@@ -1,6 +1,6 @@
 $(document).ready(() => {
     // URL ENDPOINT
-    const apiURL = '/ordenesinternas?oic_estado=1'
+    const apiURL = '/ordenesinternas?oic_activo=1'
 
     // Opciones de DataTable
     const dataTableOptions = {
@@ -23,7 +23,7 @@ $(document).ready(() => {
                     <td>${ordenInterna.oic_fecha !== null ? parseDate(ordenInterna.oic_fecha) : 'No aplica'}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
-                    <td>${ordenInterna.oic_estado == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
+                    <td>${ordenInterna.oic_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-primary btn-orden-interna-view-materiales" data-orden-interna="${ordenInterna.oic_id}">

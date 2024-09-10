@@ -3,24 +3,11 @@ function testConsole() {
 }
 
 function parseDate(dateString) {
-    const date = new Date(dateString)
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
-    const hour = String(date.getHours()).padStart(2, '0')
-    const minute = String(date.getMinutes()).padStart(2, '0')
-    const second = String(date.getSeconds()).padStart(2, '0')
-    const formattedDate = `${day}/${month}/${year} ${hour}:${minute}:${second}`
-    return formattedDate
+    return moment(dateString).format('DD/MM/YYYY HH:mm:ss');
 }
 
 function parseDateSimple(dateString) {
-    const date = new Date(dateString)
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
-    const formattedDate = `${day}/${month}/${year}`
-    return formattedDate
+    return moment(dateString).format('DD/MM/YYYY');
 }
 
 function transformarFecha(fecha) {
@@ -59,4 +46,8 @@ function formatErrorsFromString(errorString) {
 function esValorNumericoValidoYMayorQueCero(inputElement) {
     const numero = parseFloat(inputElement);
     return !isNaN(numero) && numero > 0;
+}
+
+function obtenerIdUnico() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 11)
 }

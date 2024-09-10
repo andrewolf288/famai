@@ -46,6 +46,7 @@ $(document).ready(function () {
                 }
             }
             $('#clienteInput').val(data.cliente.cli_nombre)
+            $('#oiInput').val(data.odt_numero)
             $('#idClienteInput').val(data.cliente.cli_id)
             $('#equipoInput').val(data.odt_equipo)
         } catch (error) {
@@ -74,6 +75,109 @@ $(document).ready(function () {
     // Maneja el evento de clic en el botón de búsqueda
     $('#searchButton').on('click', async () => {
         await buscarOrdenTrabajo()
+    })
+
+    // buscar orden interna
+    const buscarOrdenInterna = async () => {
+        // Obtener el valor del campo de texto
+        var oiValue = $('#oiInput').val().trim()
+
+        // Validar si el campo está vacío
+        if (oiValue.length === 0) {
+            alert('Por favor, ingrese un valor para buscar.')
+            return
+        }
+
+        try {
+            const {data} = await client.get(`/ordeninternaByNumero/${oiValue}`)
+            const formatData = []
+            data.partes.forEach(parte => {
+                const parteDetalle = {
+                    oip_id: parte.oip_id,
+                    oip_descripcion: parte.parte.oip_descripcion,
+                    detalle_materiales: [],
+                    detalle_procesos: []
+                }
+
+                // parseamos los procesos
+                parte.procesos.forEach(proceso => {
+                    parteDetalle.detalle_procesos.push({
+                        opp_id: proceso.proceso.opp_id,
+                        opp_codigo: proceso.proceso.opp_codigo,
+                        opp_descripcion: proceso.proceso.opp_descripcion,
+                        odp_observacion: "",
+                        odp_ccalidad: false
+                    })
+                })
+
+                // parseamos los materiales
+                parte.materiales.forEach(material => {
+                    parteDetalle.detalle_materiales.push({
+                        pro_id: material.producto === null ? obtenerIdUnico(): material.producto.pro_id,
+                        pro_codigo: material.producto === null ? '' : material.producto.pro_codigo,
+                        odm_descripcion: material.odm_descripcion,
+                        odm_cantidad: material.odm_cantidad,
+                        odm_observacion: "",
+                        odm_asociar: material.producto === null ? false : true
+                    })
+                })
+
+                // agregamos al detalle
+                formatData.push(parteDetalle)
+            })
+
+            // agregamos al DOM la informacion
+            $('#tbl-orden-interna tbody').empty()
+            formatData.forEach(function (item, index) {
+                const { oip_id, oip_descripcion, detalle_materiales, detalle_procesos } = item
+                const row = `
+                    <tr>
+                        <td>${oip_descripcion}</td>
+                        <td>
+                            <button class="btn btn-sm btn-editar btn-procesos" data-element="${oip_descripcion}" data-bs-id="${oip_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
+                                    <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                                </svg>
+                                Procesos
+                            </button>
+                        </td>
+                        <td>
+                            <p class="text-center" id="cantidad-procesos-${oip_id}">${detalle_procesos.length}</p>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-eliminar btn-productos" data-element="${oip_descripcion}" data-bs-id="${oip_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hammer" viewBox="0 0 16 16">
+                                    <path d="M9.972 2.508a.5.5 0 0 0-.16-.556l-.178-.129a5 5 0 0 0-2.076-.783C6.215.862 4.504 1.229 2.84 3.133H1.786a.5.5 0 0 0-.354.147L.146 4.567a.5.5 0 0 0 0 .706l2.571 2.579a.5.5 0 0 0 .708 0l1.286-1.29a.5.5 0 0 0 .146-.353V5.57l8.387 8.873A.5.5 0 0 0 14 14.5l1.5-1.5a.5.5 0 0 0 .017-.689l-9.129-8.63c.747-.456 1.772-.839 3.112-.839a.5.5 0 0 0 .472-.334"/>
+                                </svg> 
+                                Materiales
+                            </button>
+                        </td>
+                        <td>
+                            <p class="text-center" id="cantidad-productos-${oip_id}">${detalle_materiales.length}</p>
+                        </td>
+                    </tr>
+                `
+                // agregamos la tabla
+                $('#tbl-orden-interna tbody').append(row)
+            })
+
+            // actualizamos la informacion de procesos
+            ordenInterna["detalle_partes"] = formatData
+
+        } catch (error) {
+            alert('Error al buscar la orden interna')
+        }
+    }
+
+    // Maneja el evento de enter en el campo de orden interna
+    $('#oiInput').on('keypress', async (event) => {
+        if (event.which === 13) {
+            await buscarOrdenInterna()
+        }
+    })
+    // Maneja el evento de clic en el botón de busqueda
+    $('#copyButton').on('click', async () => {
+        await buscarOrdenInterna()
     })
 
     // cargar areas
@@ -220,6 +324,7 @@ $(document).ready(function () {
             <tr>
                 <td>${element["opp_codigo"]}</td>
                 <td>${element["opp_descripcion"]}</td>
+                <td><input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/></td>
                 <td>
                     <input type="text" class="form-control" value="${element["odp_observacion"]}" readonly/>
                 </td>
@@ -279,6 +384,7 @@ $(document).ready(function () {
                 opp_id: selectedProcesoId,
                 opp_codigo: selectedProcesoCode,
                 opp_descripcion: selectedProcesoName,
+                odp_ccalidad: false,
                 odp_observacion: ""
             }
 
@@ -287,6 +393,7 @@ $(document).ready(function () {
             <tr>
                 <td>${data["opp_codigo"]}</td>
                 <td>${data["opp_descripcion"]}</td>
+                <td><input type="checkbox" disabled/></td>
                 <td>
                     <input type="text" class="form-control" value="${data["odp_observacion"]}" readonly/>
                 </td>
@@ -321,10 +428,12 @@ $(document).ready(function () {
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        const $input = $row.find('input')
+        const $input = $row.find('input[type="text"]')
+        const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
         $input.prop('readonly', false)
+        $inputCheckbox.prop('disabled', false)
 
         // ACTUALIZAMOS EL ELEMENTO
         $(this).removeClass('btn-warning btn-detalle-proceso-editar')
@@ -339,15 +448,18 @@ $(document).ready(function () {
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', function () {
         const id_proceso = $(this).data('proceso')
         const $row = $(this).closest('tr')
-        const $input = $row.find('input')
+        const $input = $row.find('input[type="text"]')
+        const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         const valueObservacion = $input.val()
         $input.prop('readonly', true)
+        $inputCheckbox.prop('disabled', true)
 
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_procesos } = findElement
         const findElementProceso = detalle_procesos.find(element => element.opp_id == id_proceso)
         findElementProceso["odp_observacion"] = valueObservacion
+        findElementProceso["odp_ccalidad"] = $inputCheckbox.is(':checked') ? true : false
 
         // ACTUALIZAMOS EL ELEMENTO
         $(this).removeClass('btn-success btn-detalle-proceso-guardar')
@@ -496,7 +608,7 @@ $(document).ready(function () {
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_materiales } = findElement
         const pro_codigo = ""
-        const pro_id = Date.now().toString(36) + Math.random().toString(36).slice(2, 11)
+        const pro_id = obtenerIdUnico()
         const pro_descripcion = $.trim($('#productosInput').val())
 
         if (pro_descripcion.length < 3) {
@@ -727,6 +839,7 @@ $(document).ready(function () {
         let handleError = ''
         const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
+        const $oiInput = $('#oiInput').val().trim()
         const $oiValorEquipo = $('#equipoInput').val().trim()
         const $oiCodigoArea = $('#areaSelect').val()
         const $oiFecha = $('#fechaPicker').val()
@@ -737,6 +850,7 @@ $(document).ready(function () {
         if (
             $oiCliente.length === 0 ||
             $otInput.length === 0 ||
+            $oiInput.length === 0 ||
             $oiValorEquipo.length === 0 ||
             $oiCodigoArea.length === 0 ||
             $oiFecha.length === 0 ||
@@ -746,6 +860,9 @@ $(document).ready(function () {
         ) {
             if ($otInput.length === 0) {
                 handleError += '- Se debe ingresar información de orden trabajo\n'
+            }
+            if ($oiInput.length === 0) {
+                handleError += '- Se debe ingresar información de orden interna\n'
             }
             if ($oiCliente.length === 0) {
                 handleError += '- Se debe ingresar información del cliente\n'
@@ -774,6 +891,7 @@ $(document).ready(function () {
         if (handleError.length === 0) {
             const formatData = {
                 odt_numero: $otInput,
+                oic_numero: $oiInput,
                 cli_id: $oiCliente,
                 are_codigo: $oiCodigoArea,
                 oic_fecha: transformarFecha($oiFecha),
