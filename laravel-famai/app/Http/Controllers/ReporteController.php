@@ -43,7 +43,7 @@ class ReporteController extends Controller
 		$validated = $request->validate([
 			//'ot_numero' => 'required|string',
 			//'oi_numero' => 'required|string',
-			oic_id => 'required|string',
+			'oic_id' => 'required|string',
 		]);
 
 		// Obtener los campos
