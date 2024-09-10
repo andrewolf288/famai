@@ -41,13 +41,15 @@ class ReporteController extends Controller
 
 		// Validar los parámetros de entrada
 		$validated = $request->validate([
-			'ot_numero' => 'required|string',
-			'oi_numero' => 'required|string',
+			//'ot_numero' => 'required|string',
+			//'oi_numero' => 'required|string',
+			'oic_id' => 'required|string',
 		]);
 
 		// Obtener los campos
-		$varOtNumero = $validated['ot_numero'];
-		$varOiNumero = $validated['oi_numero'];
+		//$varOtNumero = $validated['ot_numero'];
+		//$varOiNumero = $validated['oi_numero'];
+		$varOIC = $validated['oic_id'];
 
 		$reporte = new Reporte();
 		$varData = file_get_contents($this->varRuta);
@@ -57,15 +59,15 @@ class ReporteController extends Controller
 		$htmlStringSecundarioSoloProcesos = file_get_contents($this->varRutaStringSecundarioSoloProcesos);
 		$finalHtmlString = file_get_contents($this->varRutaStringFinal);
 
-		$result = $reporte->metobtenerCabecera($varOtNumero, $varOiNumero);
-		$varOIC = 0;
+		$result = $reporte->metobtenerCabecera($varOIC);
+		//$varOIC = 0;
 		if ($result && is_array($result)) {
 			foreach ($result as $dato) {
 				$varClienteNombre = isset($dato['nombre_del_cliente']) ? $dato['nombre_del_cliente'] : $this->varTab;
 				$varDescripcionEquipo = isset($dato['descripcion_equipo']) ? $dato['descripcion_equipo'] : $this->varTab;
 				$varFecha = isset($dato['oic_fecha']) ? $dato['oic_fecha'] : $this->varTab;
 				$varOT = isset($dato['odt_numero']) ? $dato['odt_numero'] : $this->varTab;
-				$varOIC = isset($dato['oic_id']) ? $dato['oic_id'] : $this->varTab;
+				//$varOIC = isset($dato['oic_id']) ? $dato['oic_id'] : $this->varTab;
 
 				$varTraNombreOrigen = isset($dato['tra_nombreorigen']) ? $dato['tra_nombreorigen'] : $this->varTab;
 				$varTraNombreMaestro = isset($dato['tra_nombremaestro']) ? $dato['tra_nombremaestro'] : $this->varTab;
