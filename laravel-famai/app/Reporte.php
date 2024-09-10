@@ -9,30 +9,10 @@ class Reporte extends Model
 {
     protected $connection = 'sqlsrv';
     
-    public function metobtenerCabecera($varOtNumero, $varOiNumero)
-    {
-        if (!$varOtNumero || !$varOiNumero) {
-            return false;
-        }
-
-        // Obtener la conexión PDO
-        $pdo = DB::connection()->getPdo();
-        
-        // Definir la consulta
-        $query = "EXEC sprobtenercabecera_oca ?, ?";
-        
-        // Preparar y ejecutar la consulta
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$varOtNumero, $varOiNumero]);
-        
-        // Obtener los resultados
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $result;
-    }
-    
-    /**public function metobtenerCabeceraAlt($varOIC)
-    {
+    //public function metobtenerCabecera($varOtNumero, $varOiNumero)
+    public function metobtenerCabecera($varOIC)
+    {   
+        //if (!$varOtNumero || !$varOiNumero) {
         if (!$varOIC) {
             return false;
         }
@@ -41,17 +21,19 @@ class Reporte extends Model
         $pdo = DB::connection()->getPdo();
         
         // Definir la consulta
-        $query = "EXEC sprobtenercabecalt_oct ?";
+        // $query = "EXEC sprobtenercabecera_oca ?, ? ";
+        $query = "EXEC sprobtenercabecera_oca ?";
         
         // Preparar y ejecutar la consulta
         $stmt = $pdo->prepare($query);
+        //$stmt->execute([$varOtNumero, $varOiNumero]);
         $stmt->execute([$varOIC]);
         
         // Obtener los resultados
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         return $result;
-    }**/
+    }
     
     public function metobtenerPartes($varOIC)
     {
