@@ -280,6 +280,8 @@ class OrdenInternaController extends Controller
 
             // hacemos commit
             DB::commit();
+
+            return response()->json($ordeninterna, 200);
         } catch (Exception $e) {
             // hacemos rollback y devolvemos el error
             DB::rollBack();

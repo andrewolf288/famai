@@ -836,6 +836,8 @@ $(document).ready(function () {
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
+        let imprimir = false
+        confirm('¿Deseas imprimir la orden interna?') ? (imprimir = true) : (imprimir = false)
         let handleError = ''
         const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
@@ -917,7 +919,29 @@ $(document).ready(function () {
                 if (validacionDetalleMateriales.length === 0) {
                     showLoaderModal()
                     try {
-                        await client.post('/ordenesinternas', formatData)
+                        const {data} = await client.post('/ordenesinternas', formatData)
+                        // si se desea imprimir
+                        if(imprimir) {
+                            try {
+                                const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${data.oic_id}`, {
+                                    headers: {
+                                        'Accept': 'application/pdf'
+                                    },
+                                    responseType: 'blob'
+                                })
+                        
+                                const url = window.URL.createObjectURL(new Blob([response.data]))
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = `reporte_orden_trabajo_${data.oic_id}.pdf`
+                                document.body.appendChild(a)
+                                a.click()
+                                window.URL.revokeObjectURL(url)
+                                document.body.removeChild(a)
+                            } catch (error) {
+                                alert('Error al generar el reporte')
+                            }
+                        }
                         window.location.href = '/orden-interna'
                     } catch (error) {
                         const { response } = error

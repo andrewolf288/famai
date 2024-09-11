@@ -81,6 +81,29 @@ $(document).ready(async function () {
 
     await cargarDetalleOrdenInterna()
 
+    // ---------- JAVASCRIPT PARA IMPRESION DE PDF ------------------
+    $('#btn-imprimir-orden-interna').on('click', async function () {
+        try {
+            const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${id}`, {
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            })
+    
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `reporte_orden_trabajo_${id}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            alert('Error al generar el reporte')
+        }
+    })
+
     // ------------ JAVASCRIPT PARA GESTION DE PROCESOS -------------
     // carga de selector de procesos
     const cargarProcesosSelect = async (id_parte) => {
@@ -110,7 +133,7 @@ $(document).ready(async function () {
             <tr data-id-proceso="${element.proceso.opp_id}">
                 <td>${element.proceso.opp_codigo}</td>
                 <td>${element.proceso.opp_descripcion}</td>
-                <td><input type="checkbox" ${element.odp_ccalidad ? 'checked' : ''}/></td>
+                <td><input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''}/></td>
                 <td>
                     ${element.odp_observacion || ''}
                 </td>
