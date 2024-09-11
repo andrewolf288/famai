@@ -35,10 +35,13 @@ class ProductoController extends Controller
             'stock' => function ($q) use ($almID) {
                 // Filtrar por almacén si se especifica
                 if ($almID !== null) {
-                    $q->where('alm_id', $almID);
+                    // Filtrar por almacén si se especifica
+                    $q->where('alm_id', $almID)
+                      ->select('pro_id', 'alm_id', 'alp_stock');
+                } else {
+                    // Si no hay alm_id, devolver stock como null
+                    $q->selectRaw('null as alp_stock');
                 }
-                // Seleccionar el stock específico del producto en el almacén
-                $q->select('pro_id', 'alm_id', 'alp_stock');
             }
         ]);
 
@@ -100,12 +103,15 @@ class ProductoController extends Controller
         $materialesQuery = Producto::where('pro_activo', 1)
             ->with([
                 'stock' => function ($q) use ($almID) {
-                    // Filtrar el stock por almacén si se especifica
+                        // Filtrar por almacén si se especifica
                     if ($almID !== null) {
-                        $q->where('alm_id', $almID);
+                        // Filtrar por almacén si se especifica
+                        $q->where('alm_id', $almID)
+                        ->select('pro_id', 'alm_id', 'alp_stock');
+                    } else {
+                        // Si no hay alm_id, devolver stock como null
+                        $q->selectRaw('null as alp_stock');
                     }
-                    // Seleccionar los campos que quieras devolver
-                    $q->select('pro_id', 'alm_id', 'alp_stock');
                 }
             ]);
 
