@@ -21,8 +21,8 @@ class Cliente extends Model
         'are_fecmodificacion'
     ];
 
-    const CREATED_AT = 'are_feccreacion';
-    const UPDATED_AT = 'are_fecmodificacion';
+    const CREATED_AT = 'cli_feccreacion';
+    const UPDATED_AT = 'cli_fecmodificacion';
 
     public function scopeSelectFields($query)
     {

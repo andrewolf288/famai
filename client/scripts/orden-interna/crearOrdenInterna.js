@@ -80,7 +80,7 @@ $(document).ready(function () {
     // buscar orden interna
     const buscarOrdenInterna = async () => {
         // Obtener el valor del campo de texto
-        var oiValue = $('#oiInput').val().trim()
+        var oiValue = $('#ordenInternaInput').val().trim()
 
         // Validar si el campo está vacío
         if (oiValue.length === 0) {
@@ -169,15 +169,18 @@ $(document).ready(function () {
         }
     }
 
-    // Maneja el evento de enter en el campo de orden interna
-    $('#oiInput').on('keypress', async (event) => {
-        if (event.which === 13) {
-            await buscarOrdenInterna()
-        }
-    })
     // Maneja el evento de clic en el botón de busqueda
     $('#copyButton').on('click', async () => {
+        // abrimos el modal de ingreso de informacion
+        const loaderModalSearchOI = new bootstrap.Modal(document.getElementById('ordenInternaSearchModal'))
+        loaderModalSearchOI.show()
+    })
+
+    $('#btnSearchOrdenInterna').on('click', async function (event){
+        event.preventDefault()
         await buscarOrdenInterna()
+        const loaderModalSearchOI = bootstrap.Modal.getInstance(document.getElementById('ordenInternaSearchModal'))
+        loaderModalSearchOI.hide()
     })
 
     // cargar areas
@@ -836,8 +839,6 @@ $(document).ready(function () {
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
-        let imprimir = false
-        confirm('¿Deseas imprimir la orden interna?') ? (imprimir = true) : (imprimir = false)
         let handleError = ''
         const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
@@ -921,7 +922,7 @@ $(document).ready(function () {
                     try {
                         const {data} = await client.post('/ordenesinternas', formatData)
                         // si se desea imprimir
-                        if(imprimir) {
+                        if(confirm('¿Deseas imprimir la orden interna?')) {
                             try {
                                 const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${data.oic_id}`, {
                                     headers: {

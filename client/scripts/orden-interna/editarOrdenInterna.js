@@ -90,7 +90,7 @@ $(document).ready(async function () {
                 },
                 responseType: 'blob'
             })
-    
+
             const url = window.URL.createObjectURL(new Blob([response.data]))
             const a = document.createElement('a')
             a.href = url
@@ -133,7 +133,9 @@ $(document).ready(async function () {
             <tr data-id-proceso="${element.proceso.opp_id}">
                 <td>${element.proceso.opp_codigo}</td>
                 <td>${element.proceso.opp_descripcion}</td>
-                <td><input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''}/></td>
+                <td class="text-center">
+                    <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
+                </td>
                 <td>
                     ${element.odp_observacion || ''}
                 </td>
@@ -291,6 +293,10 @@ $(document).ready(async function () {
             dataArray.push(dataObject)
         })
 
+        if (dataArray.length === 0) {
+            alert('No hay procesos para guardar')
+            return
+        }
         try {
             const { data } = await client.put(`/ordeninterna/guardar-procesos/${currentDetalleParte}`, { procesos: dataArray })
 
@@ -333,7 +339,7 @@ $(document).ready(async function () {
 
     // --------- JAVASCRIPT para el manejo de PRODUCTOS ---------
 
-    $('#checkAsociarProducto').change(function() {
+    $('#checkAsociarProducto').change(function () {
         if ($(this).is(':checked')) {
             // Si está marcado, cambia el placeholder
             $('#productosInput').attr('placeholder', 'Describa material...');
@@ -614,6 +620,11 @@ $(document).ready(async function () {
             }
             dataArray.push(dataObject)
         })
+
+        if (dataArray.length === 0) {
+            alert('No hay materiales para guardar')
+            return
+        }
 
         // validacion de cantidades
         const validatedCantidades = dataArray.every(element => esValorNumericoValidoYMayorQueCero(element.odm_cantidad))

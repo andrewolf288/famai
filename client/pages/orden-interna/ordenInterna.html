@@ -1,6 +1,15 @@
 <h2 class="mb-3 fs-4">Lista de Ordenes Internas</h2>
-<div class="row justify-content-between mb-4">
-    <div class="col-md-6 d-flex flex-column flex-md-row align-items-end">
+<div class="row justify-content-end mb-2">
+  <div class="col-auto">
+    <a href="/orden-interna/crear" class="btn btn-agregar">
+      Crear Orden Interna
+    </a>
+  </div>
+</div>
+<div class="row mb-3">
+  <!-- Filtros de fechas -->
+  <div class="col-12 col-md-3 mb-3 mb-md-0">
+    <div class="d-flex flex-column flex-md-row align-items-end">
       <div class="me-3">
         <label for="fechaDesde" class="form-label">Fecha Desde</label>
         <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
@@ -9,53 +18,54 @@
         <label for="fechaHasta" class="form-label">Fecha Hasta</label>
         <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
       </div>
-      <button id="filter-dates" class="btn btn-primary ms-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+      <button id="filter-dates" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+          viewBox="0 0 16 16">
+          <path
+            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
         </svg>
       </button>
     </div>
-    <div class="col-auto">
-      <a href="/orden-interna/crear" class="btn btn-agregar">
-        Crear Orden Interna
-      </a>
+  </div>
+
+  <!-- Filtros a la izquierda -->
+  <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
+    <div class="d-flex flex-column flex-md-row">
+      <select id="filter-selector" class="form-select w-100 w-md-auto">
+        <option value="">Seleccione un filtro</option>
+        <option value="ot_numero">Orden trabajo</option>
+        <option value="oi_numero">Orden interna</option>
+        <option value="oic_equipo_descripcion">Equipo</option>
+      </select>
+
+      <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
+        placeholder="Buscar...">
+
+      <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
     </div>
   </div>
-  
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
-    <!-- Filtros a la izquierda -->
-    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">
-        <select id="filter-selector" class="form-select w-100 w-md-auto">
-            <option value="">Seleccione un filtro</option>
-            <option value="ot_numero">Orden trabajo</option>
-            <option value="oi_numero">Orden interna</option>
-            <option value="oic_equipo_descripcion">Equipo</option>
-        </select>
 
-        <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
-            placeholder="Buscar...">
-
-        <button id="filter-button" class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2">Filtrar</button>
-    </div>
-    <!-- Paginación a la derecha -->
-    <div id="pagination-container" class="pagination-container mt-3 mt-md-0"></div>
+  <!-- Paginación a la derecha -->
+  <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+    <div class="pagination-container" id="pagination-container"></div>
+  </div>
 </div>
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
-    <thead>
-        <th>Nro. OT</th>
-        <th>Cliente</th>
-        <th>Nro. OI</th>
-        <th>Fecha</th>
-        <th>Área</th>
-        <th>Materiales</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-        <th>Fec. Creación</th>
-        <th>Usu. Creador</th>
-        <th>Fec. Actualización</th>
-        <th>Usu. Actualizador</th>
-    </thead>
-    <tbody id="data-container-body">
-    </tbody>
+  <thead>
+    <th>Nro. OT</th>
+    <th>Cliente</th>
+    <th>Nro. OI</th>
+    <th>Fecha</th>
+    <th>Área</th>
+    <th>Materiales</th>
+    <th>Estado</th>
+    <th>Acciones</th>
+    <th>Fec. Creación</th>
+    <th>Usu. Creador</th>
+    <th>Fec. Actualización</th>
+    <th>Usu. Actualizador</th>
+  </thead>
+  <tbody id="data-container-body">
+  </tbody>
 </table>

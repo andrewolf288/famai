@@ -87,6 +87,7 @@ class ProveedorController extends Controller
             [
                 "prv_activo" => true,
                 "prv_usucreacion" => $user->usu_codigo,
+                "prv_fecmodificacion" => null,
             ]
         ));
 
