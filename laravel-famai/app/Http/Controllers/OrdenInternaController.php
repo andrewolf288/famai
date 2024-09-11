@@ -121,6 +121,12 @@ class OrdenInternaController extends Controller
                 $createdMateriales[] = $newMaterial;
             }
 
+            // actualizamos informacion de actualizacion de orden interna
+            $ordenInterna = OrdenInterna::find($ordenInternaParte->oic_id);
+            $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_usumodificacion = $user->usu_codigo;
+            $ordenInterna->save();
+
             DB::commit();
 
             // Retornamos los procesos creados
@@ -172,6 +178,12 @@ class OrdenInternaController extends Controller
                 $createdProcesses[] = $newProceso;
             }
 
+            // actualizamos informacion de actualizacion de orden interna
+            $ordenInterna = OrdenInterna::find($ordenInternaParte->oic_id);
+            $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_usumodificacion = $user->usu_codigo;
+            $ordenInterna->save();
+
             DB::commit();
 
             // Retornamos los procesos creados
@@ -197,7 +209,7 @@ class OrdenInternaController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'odt_numero' => 'required|string',
-                'oic_numero' => 'required|string',
+                'oic_numero' => 'required|string|unique:tblordenesinternascab_oic,oic_numero',
                 'cli_id' => 'required|integer|exists:tblclientes_cli,cli_id',
                 'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
                 'oic_fecha' => 'required|date',
@@ -218,8 +230,9 @@ class OrdenInternaController extends Controller
                 'tra_idmaestro' => $request->input('tra_idmaestro'),
                 'tra_idalmacen' => $request->input('tra_idalmacen'),
                 'oic_activo' => 1,
-                'oic_estado' => 'Pendiente',
+                'oic_estado' => 'PENDIENTE',
                 'oic_usucreacion' => $user->usu_codigo,
+                'oic_fecmodificacion' => null, // para colocar que la fecha de modificacion no se setee al crearse el registro
             ]);
 
             $detallePartes = $request->input('detalle_partes');

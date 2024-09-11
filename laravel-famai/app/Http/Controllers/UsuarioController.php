@@ -114,6 +114,7 @@ class UsuarioController extends Controller
             'usu_nombre' => $request->usu_nombre,
             'rol_id' => $request->rol_id,
             'usu_usucreacion' => $userAuth->usu_codigo,
+            'usu_fecmodificacion' => null,
         ]);
 
         return response()->json([

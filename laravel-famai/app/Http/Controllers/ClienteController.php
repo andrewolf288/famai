@@ -111,7 +111,7 @@ class ClienteController extends Controller
             $validator->validated(),
             [
                 "cli_usucreacion" => $user->usu_codigo,
-                "cli_feccreacion" => now(),
+                "cli_fecmodificacion" => null,
             ]
         ));
 

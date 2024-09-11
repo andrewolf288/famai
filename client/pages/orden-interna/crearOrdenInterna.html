@@ -23,11 +23,11 @@
         <!-- ORDEN INTERNA -->
         <div class="col-12 col-md-3 mb-3 mb-md-0">
             <div class="row g-3 align-items-center">
-                <div class="col-3 col-md-2">
-                    <label for="oiInput" class="form-label">OI:</label>
+                <div class="col-3 col-md-4">
+                    <label for="oiInput" class="form-label">Nro de OI:</label>
                 </div>
-                <div class="col-6 col-md-8">
-                    <input type="text" id="oiInput" class="form-control" placeholder="Buscar OI" autocomplete="off">
+                <div class="col-6 col-md-6">
+                    <input type="text" id="oiInput" class="form-control" autocomplete="off">
                 </div>
                 <div class="col-3 col-md-2">
                     <button id="copyButton" class="btn btn-primary">
@@ -218,6 +218,30 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE INGESO DE NUMERO DE ORDEN INTERNA -->
+<div class="modal fade" id="ordenInternaSearchModal" tabindex="-1" aria-labelledby="ordenInternaSearchModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ordenInternaSearchModalLabel">Buscar Orden Interna</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="mb-3" id="formSearchOrdenInterna">
+                    <label for="ordenInternaInput" class="form-label">Número de Orden Interna</label>
+                    <input type="text" class="form-control" id="ordenInternaInput">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnSearchOrdenInterna"
+                    form="formSearchOrdenInterna">Buscar</button>
             </div>
         </div>
     </div>

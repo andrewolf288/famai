@@ -187,6 +187,7 @@ class ProductoController extends Controller
             [
                 "pro_activo" => true,
                 "pro_usucreacion" => $user->usu_codigo,
+                "pro_fecmodificacion" => null,
             ]
         ));
 
