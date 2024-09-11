@@ -22,6 +22,7 @@ class ReporteController extends Controller
 	private $varTab = "&nbsp;";
 	private $fechaHoraActual;
 	private $storagepath = 'app/mpdf_tmp';
+	
 
 	public function generarReporteOrdenTrabajo(Request $request)
 	{
@@ -40,6 +41,7 @@ class ReporteController extends Controller
 		}
 
 		// Validar los parámetros de entrada
+	
 		$validated = $request->validate([
 			//'ot_numero' => 'required|string',
 			//'oi_numero' => 'required|string',
@@ -99,8 +101,6 @@ class ReporteController extends Controller
 					$varFilasTotales = max($varNumProcesos, $varNumMateriales);
 					$varfilasRestantes = abs($varNumMateriales - $varNumProcesos);
 					$varFilasComunes = $varFilasTotales - $varfilasRestantes;
-
-					$ultimoElemento = end($varResultProcesos);
 					$nuevoindice = 0;
 					for ($i = 0; $i < $varFilasComunes; $i++) {
 						//procesos
@@ -241,6 +241,10 @@ class ReporteController extends Controller
 				$varData .= $htmlFilasTotal . $finalHtmlString;
 				$varData = str_replace($this->varProcCampos, $this->varTab, $varData);
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);
+				//Activar las dos lineas siguientes solo paraa depuracion
+				$varFilename = 'generated.html';
+				file_put_contents($varTempDir."/".$varFilename, $varData, LOCK_EX);
+
 				$varMpdf = new \Mpdf\Mpdf(['orientation' => 'L', 'tempDir' => $varTempDir]);
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
