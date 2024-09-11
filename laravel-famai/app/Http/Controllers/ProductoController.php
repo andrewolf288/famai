@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AlmacenProducto;
 use App\Producto;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -22,8 +23,24 @@ class ProductoController extends Controller
         $modeloMaquina = $request->input('pro_modelomaquina', null);
         $codigoMarca = $request->input('pro_codigomarca', null);
         $marcaDescripcion = $request->input('pma_descripcion', null);
+        $almID = $request->input('alm_id', null);
 
-        $query = Producto::with(['unidad', 'grupoInventario', 'familia', 'subfamilia', 'marca', 'ultimaCompra.proveedor']);
+        $query = Producto::with([
+            'unidad', 
+            'grupoInventario', 
+            'familia', 
+            'subfamilia', 
+            'marca', 
+            'ultimaCompra.proveedor',
+            'stock' => function ($q) use ($almID) {
+                // Filtrar por almacén si se especifica
+                if ($almID !== null) {
+                    $q->where('alm_id', $almID);
+                }
+                // Seleccionar el stock específico del producto en el almacén
+                $q->select('pro_id', 'alm_id', 'alp_stock');
+            }
+        ]);
 
         if ($descripcion !== null) {
             $query->where('pro_descripcion', 'like', '%' . $descripcion . '%');
@@ -67,31 +84,42 @@ class ProductoController extends Controller
     }**/
 
     public function findProductoByQuery(Request $request)
-{
-    $query = $request->input('query', null);
+    {
+        $query = $request->input('query', null);
+        $almID = $request->input('alm_id', null); // Para filtrar por almacén si se proporciona
 
-    if ($query === null) {
-        return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+        $symbol = '+'; // Aquí se define el símbolo permitido de separacion
+
+        //en el frontent se debe codificar adecuadamente el simbolo + a %2B
+
+        $subqueries = explode($symbol, $query);
+
+        $materialesQuery = Producto::where('pro_activo', 1)
+            ->with([
+                'stock' => function ($q) use ($almID) {
+                    // Filtrar el stock por almacén si se especifica
+                    if ($almID !== null) {
+                        $q->where('alm_id', $almID);
+                    }
+                    // Seleccionar los campos que quieras devolver
+                    $q->select('pro_id', 'alm_id', 'alp_stock');
+                }
+            ]);
+
+        foreach ($subqueries as $subquery) {
+            $materialesQuery->where(function($q) use ($subquery) {
+                $q->where('pro_descripcion', 'like', '%' . $subquery . '%')
+                ->orWhere('pro_codigo', 'like', '%' . $subquery . '%');
+            });
+        }
+
+        $materiales = $materialesQuery->select('pro_id', 'pro_codigo', 'pro_descripcion')->get();
+
+        return response()->json($materiales);
     }
-    $symbol = '+'; // Aquí se define el símbolo permitido de separacion
-
-    //en el frontent se debe codificar adecuadamente el simbolo + a %2B
-
-    $subqueries = explode($symbol, $query);
-
-    $materialesQuery = Producto::where('pro_activo', 1);
-
-    foreach ($subqueries as $subquery) {
-        $materialesQuery->where(function($q) use ($subquery) {
-            $q->where('pro_descripcion', 'like', '%' . $subquery . '%')
-              ->orWhere('pro_codigo', 'like', '%' . $subquery . '%');
-        });
-    }
-
-    $materiales = $materialesQuery->select('pro_id', 'pro_codigo', 'pro_descripcion')->get();
-
-    return response()->json($materiales);
-}
 
     /**
      * Display the specified resource.

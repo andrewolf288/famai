@@ -67,6 +67,13 @@ class Producto extends Model
         return $this->belongsTo(Familia::class, 'pfa_codigo')->selectFields();
     }
 
+    // relacion de stock
+    public function stock()
+    {
+        return $this->hasOne(AlmacenProducto::class, 'pro_id', 'pro_id');
+    }
+
+
     // relacion de subfamilia
     public function subfamilia()
     {
