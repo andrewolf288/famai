@@ -23,7 +23,7 @@ class ProductoController extends Controller
         $modeloMaquina = $request->input('pro_modelomaquina', null);
         $codigoMarca = $request->input('pro_codigomarca', null);
         $marcaDescripcion = $request->input('pma_descripcion', null);
-        $almID = $request->input('alm_id', null);
+        $almID = $request->input('alm_id', 1);
 
         $query = Producto::with([
             'unidad', 
@@ -89,7 +89,7 @@ class ProductoController extends Controller
     public function findProductoByQuery(Request $request)
     {
         $query = $request->input('query', null);
-        $almID = $request->input('alm_id', null); // Para filtrar por almacén si se proporciona
+        $almID = $request->input('alm_id', 1); // Para filtrar por almacén si se proporciona
 
         if ($query === null) {
             return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
