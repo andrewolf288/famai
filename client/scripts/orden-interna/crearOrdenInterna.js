@@ -592,7 +592,7 @@ $(document).ready(function () {
             data.forEach(material => {
                 const listItem = document.createElement('li')
                 listItem.className = 'list-group-item list-group-item-action'
-                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion}`
+                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - ${material.stock?.alp_stock || 0}`
                 listItem.dataset.id = material.pro_id
                 listItem.addEventListener('click', () => seleccionarMaterial(material))
                 // agregar la lista completa
