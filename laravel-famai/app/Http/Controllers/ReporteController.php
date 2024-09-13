@@ -65,7 +65,7 @@ class ReporteController extends Controller
 		$result = $reporte->metobtenerCabecera($varOIC);
 		if ($result && is_array($result)) {
 			foreach ($result as $dato) {
-				//Llenamos las variables para la cabecera (cliente, secripcion del equipo y OT)
+				//Llenamos las variables para la cabecera (cliente, descripcion del equipo y OT)
 				$varClienteNombre = isset($dato['nombre_del_cliente']) ? $dato['nombre_del_cliente'] : $this->varTab;
 				$varDescripcionEquipo = isset($dato['descripcion_equipo']) ? $dato['descripcion_equipo'] : $this->varTab;
 				$varFecha = isset($dato['oic_fecha']) ? $dato['oic_fecha'] : $this->varTab;
@@ -98,8 +98,7 @@ class ReporteController extends Controller
 					//Obtenemos las filas restantes
 					$varNumProcesos = count($varResultProcesos);
 					$varNumMateriales = count($varResultMateriales);
-
-					//Calculamos las filas que se van a añadir para rowspan
+					//Calculamos las filas que se van a añadir para el rowspan
 					$varFilasRowSpan = max(0, $varNumMateriales - $varNumProcesos);
 					//Calculamos el numero total de filas por parte
 					$varFilasTotales = max($varNumProcesos, $varNumMateriales);
@@ -109,91 +108,190 @@ class ReporteController extends Controller
 					$varFilasComunes = $varFilasTotales - $varfilasRestantes;
 					//variable para el indice de los materiales / procesos restantes
 					$nuevoindice = 0;
-					//Procesamos
-					for ($i = 0; $i < $varFilasComunes; $i++) {
+					//Procesamos en funcion a las filas comunes (distinguimos entre partes con puros materiales o puros procesos)
+					if ($varFilasComunes == 0){
+						//Esta es la parte donde se hace la asignación de variables
 						//procesos
-						$varProcesoParte = isset($varResultProcesos[$i]['oip_descripcion']) ? $varResultProcesos[$i]['oip_descripcion'] : $this->varTab;
-						$varCodigoProceso = isset($varResultProcesos[$i]['opp_codigo']) ? $varResultProcesos[$i]['opp_codigo'] : $this->varTab;
-						$varDescripcionProceso = isset($varResultProcesos[$i]['opp_descripcion']) ? $varResultProcesos[$i]['opp_descripcion'] : $this->varTab;
-						$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? $varResultProcesos[$i]['odp_observacion'] : $this->varTab;
+						$varProcesoParte = $varParteNombre;
+						$varCodigoProceso = isset($varResultProcesos[0]['opp_codigo']) ? $varResultProcesos[0]['opp_codigo'] : $this->varTab;
+						$varDescripcionProceso = isset($varResultProcesos[0]['opp_descripcion']) ? $varResultProcesos[0]['opp_descripcion'] : $this->varTab;
+						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? $varResultProcesos[0]['odp_observacion'] : $this->varTab;
 						//materiales
-						$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
-						$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
-						$varCantidad = isset($varResultMateriales[$i]['odm_cantidad']) ? $varResultMateriales[$i]['odm_cantidad'] : $this->varTab;
-						$varProObservaciones = isset($varResultMateriales[$i]['odm_observacion']) ? $varResultMateriales[$i]['odm_observacion'] : $this->varTab;
+						$varItem = isset($varResultMateriales[0]['odm_item']) ? $varResultMateriales[0]['odm_item'] : $this->varTab;
+						$varProDescripcion = isset($varResultMateriales[0]['odm_descripcion']) ? $varResultMateriales[0]['odm_descripcion'] : $this->varTab;
+						$varCantidad = isset($varResultMateriales[0]['odm_cantidad']) ? $varResultMateriales[0]['odm_cantidad'] : $this->varTab;
+						$varProObservaciones = isset($varResultMateriales[0]['odm_observacion']) ? $varResultMateriales[0]['odm_observacion'] : $this->varTab;
 						$htmlFila = "";
+						//Esta es la parte donde se hace el reemplazo de las variables de las plantillas
 						//verificamos si es el primer elemento de los procesos
-						if ($i == 0) {
+						$htmlFila = str_replace(
+							[
+								'{varNumFil}', //se refiere al valor de rowspan
+								'{varProcesoParte}', //la parte que contiene a los procesos
+								'{varCodigo}', //codigo del proceso
+								'{varDescripcion}',//nombre del proceso
+								'{varProObservacion}',//observacion en el proceso
+								'{varItem}',//nro item producto
+								'{varDescripcionMat}',//nombre del material
+								'{varCantidad}',//cantidad del material
+								'{varMatObservacion}'//observacion en el material
+							],
+							[
+								$varNumProcesos + $varFilasRowSpan,
+								$varProcesoParte,
+								sprintf("%04d", $varCodigoProceso),
+								$varDescripcionProceso,
+								$varObservacionProceso,
+								$varItem,
+								$varProDescripcion,
+								$varCantidad,
+								$varProObservaciones
+							],
+							$htmlStringPrincipal
+						);
+						//completamos los rowspan que faltan, si es que hay mas procesos que materiales
+						if ($varNumProcesos > $varNumMateriales) {
 							$htmlFila = str_replace(
-								[
-									'{varNumFil}', //se refiere al valor de rowspan
-									'{varProcesoParte}', //la parte que contiene a los procesos
-									'{varCodigo}', //codigo del proceso
-									'{varDescripcion}',//nombre del proceso
-									'{varProObservacion}',//observacion en el proceso
-									'{varItem}',//nro item producto
-									'{varDescripcionMat}',//nombre del material
-									'{varCantidad}',//cantidad del material
-									'{varMatObservacion}'//observacion en el material
+								[	'{rowSpanItm}', 
+									'{rowSpanDmt}', 
+									'{rowSpanCan}', 
+									'{rowSpanObm}'
 								],
-								[
-									$varNumProcesos + $varFilasRowSpan,
-									$varProcesoParte,
-									sprintf("%04d", $varCodigoProceso),
-									$varDescripcionProceso,
-									$varObservacionProceso,
-									$varItem,
-									$varProDescripcion,
-									$varCantidad,
-									$varProObservaciones
+								[	'rowspan=' . ($varfilasRestantes ), 
+									'rowspan=' . ($varfilasRestantes ), 
+									'rowspan=' . ($varfilasRestantes ), 
+									'rowspan=' . ($varfilasRestantes )
 								],
-								$htmlStringPrincipal
+								$htmlFila
 							);
-						} //si no es el primer elemento de los procesos, no le pondra '{varNumFil}', por lo tanto tampoco tendra rowspan
-						else {
+						//completamos los rowspan que faltan, si es que hay mas materiales que procesos
+						} elseif ($varNumProcesos < $varNumMateriales) {
 							$htmlFila = str_replace(
-								[
-									'{varProcesoParte}', //la parte que contiene a los procesos
-									'{varCodigo}', //codigo del proceso
-									'{varDescripcion}',//nombre del proceso
-									'{varProObservacion}',//observacion en el proceso
-									'{varItem}',//nro item producto
-									'{varDescripcionMat}',//nombre del material
-									'{varCantidad}',//cantidad del material
-									'{varMatObservacion}'//observacion en el material
+								[	'{rowSpanCod}', 
+									'{rowSpanDes}', 
+									'{rowSpanObs}'
 								],
-								[
-									$varProcesoParte,
-									sprintf("%04d", $varCodigoProceso),
-									$varDescripcionProceso,
-									$varObservacionProceso,
-									$varItem,
-									$varProDescripcion,
-									$varCantidad,
-									$varProObservaciones
+								[	'rowspan=' . ($varFilasRowSpan ), 
+									'rowspan=' . ($varFilasRowSpan ), 
+									'rowspan=' . ($varFilasRowSpan )
 								],
-								$htmlStringSecundario
+								$htmlFila
 							);
 						}
-						if ($i == ($varFilasComunes - 1)) {
-							if ($varNumProcesos > $varNumMateriales) {
+						//adjuntamos la fila procesada
+						$htmlFilas .= "\n".$htmlFila;
+						//asignamos el valor del indice para los nuevos elementos
+						$nuevoindice = 0;
+					}
+					else 
+					{
+						for ($i = 0; $i < $varFilasComunes; $i++) {
+							//Esta es la parte donde se hace la asignación de variables
+							//procesos
+							$varProcesoParte = $varParteNombre;
+							$varCodigoProceso = isset($varResultProcesos[$i]['opp_codigo']) ? $varResultProcesos[$i]['opp_codigo'] : $this->varTab;
+							$varDescripcionProceso = isset($varResultProcesos[$i]['opp_descripcion']) ? $varResultProcesos[$i]['opp_descripcion'] : $this->varTab;
+							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? $varResultProcesos[$i]['odp_observacion'] : $this->varTab;
+							//materiales
+							$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
+							$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
+							$varCantidad = isset($varResultMateriales[$i]['odm_cantidad']) ? $varResultMateriales[$i]['odm_cantidad'] : $this->varTab;
+							$varProObservaciones = isset($varResultMateriales[$i]['odm_observacion']) ? $varResultMateriales[$i]['odm_observacion'] : $this->varTab;
+							$htmlFila = "";
+							//Esta es la parte donde se hace el reemplazo de las variables de las plantillas
+							//verificamos si es el primer elemento de los procesos
+							if ($i == 0) {
 								$htmlFila = str_replace(
-									['{rowSpanItm}', '{rowSpanDmt}', '{rowSpanCan}', '{rowSpanObm}'],
-									['rowspan=' . ($varfilasRestantes + 1), 'rowspan=' . ($varfilasRestantes + 1), 'rowspan=' . ($varfilasRestantes + 1), 'rowspan=' . ($varfilasRestantes + 1)],
-									$htmlFila
+									[
+										'{varNumFil}', //se refiere al valor de rowspan
+										'{varProcesoParte}', //la parte que contiene a los procesos
+										'{varCodigo}', //codigo del proceso
+										'{varDescripcion}',//nombre del proceso
+										'{varProObservacion}',//observacion en el proceso
+										'{varItem}',//nro item producto
+										'{varDescripcionMat}',//nombre del material
+										'{varCantidad}',//cantidad del material
+										'{varMatObservacion}'//observacion en el material
+									],
+									[
+										$varNumProcesos + $varFilasRowSpan,
+										$varProcesoParte,
+										sprintf("%04d", $varCodigoProceso),
+										$varDescripcionProceso,
+										$varObservacionProceso,
+										$varItem,
+										$varProDescripcion,
+										$varCantidad,
+										$varProObservaciones
+									],
+									$htmlStringPrincipal
 								);
-							} elseif ($varNumProcesos < $varNumMateriales) {
+							} //si no es el primer elemento de los procesos, no le pondra '{varNumFil}', por lo tanto tampoco tendra rowspan
+							else {
 								$htmlFila = str_replace(
-									['{rowSpanCod}', '{rowSpanDes}', '{rowSpanObs}'],
-									['rowspan=' . ($varFilasRowSpan + 1), 'rowspan=' . ($varFilasRowSpan + 1), 'rowspan=' . ($varFilasRowSpan + 1)],
-									$htmlFila
+									[
+										'{varProcesoParte}', //la parte que contiene a los procesos
+										'{varCodigo}', //codigo del proceso
+										'{varDescripcion}',//nombre del proceso
+										'{varProObservacion}',//observacion en el proceso
+										'{varItem}',//nro item producto
+										'{varDescripcionMat}',//nombre del material
+										'{varCantidad}',//cantidad del material
+										'{varMatObservacion}'//observacion en el material
+									],
+									[
+										$varProcesoParte,
+										sprintf("%04d", $varCodigoProceso),
+										$varDescripcionProceso,
+										$varObservacionProceso,
+										$varItem,
+										$varProDescripcion,
+										$varCantidad,
+										$varProObservaciones
+									],
+									$htmlStringSecundario
 								);
 							}
+							//Si llegamos al ultimo bucle 
+							if ($i == ($varFilasComunes - 1)) {
+								//completamos los rowspan que faltan, si es que hay mas procesos que materiales
+								if ($varNumProcesos > $varNumMateriales) {
+									$htmlFila = str_replace(
+										[	'{rowSpanItm}', 
+											'{rowSpanDmt}', 
+											'{rowSpanCan}', 
+											'{rowSpanObm}'
+										],
+										[	'rowspan=' . ($varfilasRestantes + 1), 
+											'rowspan=' . ($varfilasRestantes + 1), 
+											'rowspan=' . ($varfilasRestantes + 1), 
+											'rowspan=' . ($varfilasRestantes + 1)
+										],
+										$htmlFila
+									);
+								//completamos los rowspan que faltan, si es que hay mas materiales que procesos
+								} elseif ($varNumProcesos < $varNumMateriales) {
+									$htmlFila = str_replace(
+										[	'{rowSpanCod}', 
+											'{rowSpanDes}', 
+											'{rowSpanObs}'
+										],
+										[	'rowspan=' . ($varFilasRowSpan + 1), 
+											'rowspan=' . ($varFilasRowSpan + 1), 
+											'rowspan=' . ($varFilasRowSpan + 1)
+										],
+										$htmlFila
+									);
+								}
+							}
+							//adjuntamos la fila procesada
+							$htmlFilas .= "\n".$htmlFila;
+							//asignamos el valor del indice para los nuevos elementos
+							$nuevoindice = $i;
 						}
-						$htmlFilas .= $htmlFila;
-						$nuevoindice = $i;
 					}
-
+					
+					//Añadimos 1 al nuevo indice
 					$nuevoindice ++;
 					//ahora adjuntamos los materiales / procesos restantes
 					for ($i = 0; $i < $varfilasRestantes; $i++) {
@@ -204,41 +302,10 @@ class ReporteController extends Controller
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
 							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? $varResultProcesos[$i + $nuevoindice]['odp_observacion'] : $this->varTab;
 							$htmlFila = "";
-							//si no existe productos sucede esto
-							if ($varFilasComunes == 0 && $i == 0 ){
-								$htmlFila = str_replace(
-									[	'{varNumFil}',
-										'{varProcesoParte}',
-										'{varCodigo}',
-										'{varDescripcion}', 
-										'{varProObservacion}'
-									],
-									[	$varfilasRestantes,
-										$varProcesoParte, 
-										sprintf("%04d", $varCodigoProceso), 
-										$varDescripcionProceso, 
-										$varObservacionProceso
-									],
-										$htmlStringSecundarioSoloProcesosConRowspan
-									);
-							}
-							else
-							{
-								$htmlFila = str_replace(
-									[	'{varProcesoParte}',
-										'{varCodigo}',
-										'{varDescripcion}', 
-										'{varProObservacion}'
-									],
-									[	$varProcesoParte, 
-										sprintf("%04d", $varCodigoProceso), 
-										$varDescripcionProceso, 
-										$varObservacionProceso
-									],
-										$htmlStringSecundarioSoloProcesos
-									);
-							}
 							
+							//aca falta parte de un codigo
+
+
 						} elseif ($varNumProcesos < $varNumMateriales) {
 							//materiales
 							$varItem = isset($varResultMateriales[$i + $nuevoindice]['odm_item']) ? $varResultMateriales[$i + $nuevoindice]['odm_item'] : $this->varTab;
@@ -272,7 +339,7 @@ class ReporteController extends Controller
 							'{rowSpanCan}',
 							'{rowSpanObm}'
 						],
-						[' ', ' ', ' ', ' ', ' ', ' ', ' '],
+						[	' ', ' ', ' ', ' ', ' ', ' ', ' '	],
 						$htmlFilas
 					);
 					$htmlFilasTotal .= $htmlFilas;
