@@ -67,6 +67,7 @@ class ReporteController extends Controller
 				$varDescripcionEquipo = isset($dato['descripcion_equipo']) ? $dato['descripcion_equipo'] : $this->varTab;
 				$varFecha = isset($dato['oic_fecha']) ? $dato['oic_fecha'] : $this->varTab;
 				$varOT = isset($dato['odt_numero']) ? $dato['odt_numero'] : $this->varTab;
+				$varArea = isset($dato['are_descripcion']) ? strtoupper($dato['are_descripcion']) : strtoupper($this->varTab);
 				//Llenamos las variables para la cabecera (Los 3 Trabajadores responsables)
 				$varTraNombreOrigen = isset($dato['tra_nombreorigen']) ? $dato['tra_nombreorigen'] : $this->varTab;
 				$varTraNombreMaestro = isset($dato['tra_nombremaestro']) ? $dato['tra_nombremaestro'] : $this->varTab;
@@ -363,6 +364,7 @@ class ReporteController extends Controller
 				$varData = str_replace("{varClientenombre}", $varClienteNombre, $varData);
 				$varData = str_replace("{varEquipoDescripcion}", $varDescripcionEquipo, $varData);
 				$varData = str_replace("{varFecha}", $varFecha, $varData);
+				$varData = str_replace("{varArea}", $varArea, $varData);
 				$varData = str_replace("{varOrdenTrabajo}", $varOT, $varData);
 				$varData = str_replace("{varTraNombreOrigen}", $varTraNombreOrigen, $varData);
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
