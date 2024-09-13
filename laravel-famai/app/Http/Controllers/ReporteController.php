@@ -14,6 +14,7 @@ class ReporteController extends Controller
 	private $varRutaStringSecundario;
 	private $varRutaStringSecundarioSoloMateriales;
 	private $varRutaStringSecundarioSoloProcesos;
+	private $varRutaStringSecundarioSoloProcesosConRowspan;
 	private $varRutaStringFinal;
 
 	private $varProcCampos = ["{varNumFil}", "{varProcesoParte}", "{varCodigo}", "{varDescripcion}", "{varProObservacion}"];
@@ -30,6 +31,7 @@ class ReporteController extends Controller
 		$this->varRutaStringSecundario = resource_path("views/reporte/StringSecundario.php");
 		$this->varRutaStringSecundarioSoloMateriales = resource_path("views/reporte/StringSecundarioSoloMateriales.php");
 		$this->varRutaStringSecundarioSoloProcesos = resource_path("views/reporte/StringSecundarioSoloProcesos.php");
+		$this->varRutaStringSecundarioSoloProcesosConRowspan = resource_path("views/reporte/StringSecundarioSoloProcesosConRowspan.php");
 		$this->varRutaStringFinal = resource_path("views/reporte/StringFinal.php");
 
 	}
@@ -56,6 +58,8 @@ class ReporteController extends Controller
 		$htmlStringSecundario = file_get_contents($this->varRutaStringSecundario);
 		$htmlStringSecundarioSoloMateriales = file_get_contents($this->varRutaStringSecundarioSoloMateriales);
 		$htmlStringSecundarioSoloProcesos = file_get_contents($this->varRutaStringSecundarioSoloProcesos);
+		$htmlStringSecundarioSoloProcesosConRowspan = file_get_contents($this->varRutaStringSecundarioSoloProcesosConRowspan);
+		
 		$finalHtmlString = file_get_contents($this->varRutaStringFinal);
 		//Obtenemos el registro cabecera
 		$result = $reporte->metobtenerCabecera($varOIC);
@@ -89,7 +93,7 @@ class ReporteController extends Controller
 					$varResultMateriales = $reporte->metobtenerMateriales($varOIC, $varParteID);
 					//Esquivamos el proceso si no existe materiales y procesos
 					if (empty($varResultMateriales) && empty($varResultProcesos)){
-						break;
+						continue;
 					}
 					//Obtenemos las filas restantes
 					$varNumProcesos = count($varResultProcesos);
@@ -105,6 +109,7 @@ class ReporteController extends Controller
 					$varFilasComunes = $varFilasTotales - $varfilasRestantes;
 					//variable para el indice de los materiales / procesos restantes
 					$nuevoindice = 0;
+					//Procesamos
 					for ($i = 0; $i < $varFilasComunes; $i++) {
 						//procesos
 						$varProcesoParte = isset($varResultProcesos[$i]['oip_descripcion']) ? $varResultProcesos[$i]['oip_descripcion'] : $this->varTab;
@@ -199,11 +204,41 @@ class ReporteController extends Controller
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
 							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? $varResultProcesos[$i + $nuevoindice]['odp_observacion'] : $this->varTab;
 							$htmlFila = "";
-							$htmlFila = str_replace(
-								['{varProcesoParte}', '{varCodigo}', '{varDescripcion}', '{varProObservacion}'],
-								[$varProcesoParte, sprintf("%04d", $varCodigoProceso), $varDescripcionProceso, $varObservacionProceso],
-								$htmlStringSecundarioSoloProcesos
-							);
+							//si no existe productos sucede esto
+							if ($varFilasComunes == 0 && $i == 0 ){
+								$htmlFila = str_replace(
+									[	'{varNumFil}',
+										'{varProcesoParte}',
+										'{varCodigo}',
+										'{varDescripcion}', 
+										'{varProObservacion}'
+									],
+									[	$varfilasRestantes,
+										$varProcesoParte, 
+										sprintf("%04d", $varCodigoProceso), 
+										$varDescripcionProceso, 
+										$varObservacionProceso
+									],
+										$htmlStringSecundarioSoloProcesosConRowspan
+									);
+							}
+							else
+							{
+								$htmlFila = str_replace(
+									[	'{varProcesoParte}',
+										'{varCodigo}',
+										'{varDescripcion}', 
+										'{varProObservacion}'
+									],
+									[	$varProcesoParte, 
+										sprintf("%04d", $varCodigoProceso), 
+										$varDescripcionProceso, 
+										$varObservacionProceso
+									],
+										$htmlStringSecundarioSoloProcesos
+									);
+							}
+							
 						} elseif ($varNumProcesos < $varNumMateriales) {
 							//materiales
 							$varItem = isset($varResultMateriales[$i + $nuevoindice]['odm_item']) ? $varResultMateriales[$i + $nuevoindice]['odm_item'] : $this->varTab;
@@ -212,8 +247,16 @@ class ReporteController extends Controller
 							$varProObservaciones = isset($varResultMateriales[$i + $nuevoindice]['odm_observacion']) ? $varResultMateriales[$i + $nuevoindice]['odm_observacion'] : $this->varTab;
 							$htmlFila = "";
 							$htmlFila = str_replace(
-								['{varItem}', '{varDescripcionMat}', '{varCantidad}', '{varMatObservacion}'],
-								[$varItem, $varProDescripcion, $varCantidad, $varProObservaciones],
+							[	'{varItem}', 
+								'{varDescripcionMat}', 	
+								'{varCantidad}', 
+								'{varMatObservacion}'
+							],
+							[	$varItem, 
+								$varProDescripcion, 
+								$varCantidad, 
+								$varProObservaciones
+							],
 								$htmlStringSecundarioSoloMateriales
 							);
 						}
