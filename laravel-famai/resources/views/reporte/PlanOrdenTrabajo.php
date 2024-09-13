@@ -163,16 +163,16 @@
       &nbsp;
     <table class="secondarytable">
       <tr>
-          <th rowspan="2" width="5%"></th>
+          <th rowspan="2" width="6%"></th>
           <th colspan="3">ORDEN INTERNA DE TRABAJO</th>
           <th colspan="4">ORDEN DE PEDIDO DE MATERIALES</th>
       </tr>
       <tr>
         <td width="4%" class="sub-header">COD.</td>
-        <td width="25%" class="sub-header">PROCESOS</td>
+        <td width="15%" class="sub-header">PROCESOS</td>
         <td width="20%" class="sub-header">OBSERVACIONES</td>
         <td width="4%" class="sub-header">ITEM</td>
-        <td width="15%" class="sub-header">DESCRIPCION</td>
+        <td width="25%" class="sub-header">DESCRIPCION</td>
         <td width="5%" class="sub-header">CANT.</td>
         <td class="sub-header">OBSERVACION</td>
       </tr>
