@@ -6,6 +6,7 @@ use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
 use App\OrdenInternaProcesos;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +30,7 @@ class OrdenInternaController extends Controller
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
-        $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen']);
-
+        $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'ordenTrabajo']);
         if ($odtNumero !== null) {
             $query->where('odt_numero', $odtNumero);
         }
@@ -49,6 +49,8 @@ class OrdenInternaController extends Controller
 
         if($fecha_desde !== null && $fecha_hasta !== null){
             $query->whereBetween('oic_fecha', [$fecha_desde, $fecha_hasta]);
+        } else {
+            $query->whereDate('oic_fecha', Carbon::today());
         }
 
         $query->orderBy('oic_fecha', 'desc');

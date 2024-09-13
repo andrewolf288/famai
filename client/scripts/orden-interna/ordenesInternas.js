@@ -33,7 +33,8 @@ $(document).ready(() => {
         data.forEach((ordenInterna, index) => {
             content += `
                 <tr>
-                    <td>${ordenInterna.odt_numero}</td>
+                    <td>${ordenInterna.orden_trabajo?.odt_numero ?? 'No aplica'}</td>
+                    <td>${ordenInterna.orden_trabajo?.odt_estado ?? 'No aplica'}</td>
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'No aplica'}</td>
                     <td>${ordenInterna.oic_numero}</td>
                     <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'No aplica'}</td>
@@ -69,7 +70,6 @@ $(document).ready(() => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        console.log(filteredURL)
         initPagination(filteredURL, initDataTable, dataTableOptions)
     })
 
