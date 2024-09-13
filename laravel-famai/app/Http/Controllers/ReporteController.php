@@ -136,7 +136,7 @@ class ReporteController extends Controller
 							[
 								$varNumProcesos + $varFilasRowSpan,
 								$varProcesoParte,
-								sprintf("%04d", $varCodigoProceso),
+								is_numeric($varCodigoProceso) ? sprintf("%04d", $varCodigoProceso) : $varCodigoProceso,
 								$varDescripcionProceso,
 								$varObservacionProceso,
 								$varItem,
@@ -213,7 +213,7 @@ class ReporteController extends Controller
 									[
 										$varNumProcesos + $varFilasRowSpan,
 										$varProcesoParte,
-										sprintf("%04d", $varCodigoProceso),
+										is_numeric($varCodigoProceso) ? sprintf("%04d", $varCodigoProceso) : $varCodigoProceso,
 										$varDescripcionProceso,
 										$varObservacionProceso,
 										$varItem,
