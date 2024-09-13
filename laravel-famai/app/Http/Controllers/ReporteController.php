@@ -238,7 +238,7 @@ class ReporteController extends Controller
 									],
 									[
 										$varProcesoParte,
-										sprintf("%04d", $varCodigoProceso),
+										is_numeric($varCodigoProceso) ? sprintf("%04d", $varCodigoProceso) : $varCodigoProceso,
 										$varDescripcionProceso,
 										$varObservacionProceso,
 										$varItem,
@@ -293,13 +293,29 @@ class ReporteController extends Controller
 					//ahora adjuntamos los materiales / procesos restantes
 					for ($i = 0; $i < $varfilasRestantes; $i++) {
 						if ($varNumProcesos > $varNumMateriales) {
+							//si estamos trabajando sin materiales, descontamos el proceso final que se generara vacío
+							if ($varFilasComunes == 0 && ($i == ($varfilasRestantes -1)) ){
+								continue;
+							}
 							//procesos
 							$varProcesoParte = isset($varResultProcesos[$i + $nuevoindice]['oip_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['oip_descripcion'] : $this->varTab;
 							$varCodigoProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_codigo']) ? $varResultProcesos[$i + $nuevoindice]['opp_codigo'] : $this->varTab;
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
 							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? $varResultProcesos[$i + $nuevoindice]['odp_observacion'] : $this->varTab;
 							$htmlFila = "";
-
+							$htmlFila = str_replace(
+								[
+									'{varCodigo}', //codigo del proceso
+									'{varDescripcion}',//nombre del proceso
+									'{varProObservacion}'//observacion en el proceso
+								],
+								[
+									is_numeric($varCodigoProceso) ? sprintf("%04d", $varCodigoProceso) : $varCodigoProceso,
+									$varDescripcionProceso,
+									$varObservacionProceso
+								],
+								$htmlStringSecundarioSoloProcesos
+							);
 
 						} elseif ($varNumProcesos < $varNumMateriales) {
 							//si estamos trabajando sin procesos, descontamos el material final que se generara vacío
