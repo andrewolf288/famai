@@ -14,7 +14,6 @@ class ReporteController extends Controller
 	private $varRutaStringSecundario;
 	private $varRutaStringSecundarioSoloMateriales;
 	private $varRutaStringSecundarioSoloProcesos;
-	private $varRutaStringSecundarioSoloProcesosConRowspan;
 	private $varRutaStringFinal;
 
 	private $varProcCampos = ["{varNumFil}", "{varProcesoParte}", "{varCodigo}", "{varDescripcion}", "{varProObservacion}"];
@@ -31,7 +30,6 @@ class ReporteController extends Controller
 		$this->varRutaStringSecundario = resource_path("views/reporte/StringSecundario.php");
 		$this->varRutaStringSecundarioSoloMateriales = resource_path("views/reporte/StringSecundarioSoloMateriales.php");
 		$this->varRutaStringSecundarioSoloProcesos = resource_path("views/reporte/StringSecundarioSoloProcesos.php");
-		$this->varRutaStringSecundarioSoloProcesosConRowspan = resource_path("views/reporte/StringSecundarioSoloProcesosConRowspan.php");
 		$this->varRutaStringFinal = resource_path("views/reporte/StringFinal.php");
 
 	}
@@ -58,7 +56,6 @@ class ReporteController extends Controller
 		$htmlStringSecundario = file_get_contents($this->varRutaStringSecundario);
 		$htmlStringSecundarioSoloMateriales = file_get_contents($this->varRutaStringSecundarioSoloMateriales);
 		$htmlStringSecundarioSoloProcesos = file_get_contents($this->varRutaStringSecundarioSoloProcesos);
-		$htmlStringSecundarioSoloProcesosConRowspan = file_get_contents($this->varRutaStringSecundarioSoloProcesosConRowspan);
 		
 		$finalHtmlString = file_get_contents($this->varRutaStringFinal);
 		//Obtenemos el registro cabecera
@@ -302,11 +299,13 @@ class ReporteController extends Controller
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
 							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? $varResultProcesos[$i + $nuevoindice]['odp_observacion'] : $this->varTab;
 							$htmlFila = "";
-							
-							//aca falta parte de un codigo
 
 
 						} elseif ($varNumProcesos < $varNumMateriales) {
+							//si estamos trabajando sin procesos, descontamos el material final que se generara vacío
+							if ($varFilasComunes == 0 && ($i == ($varfilasRestantes -1)) ){
+								continue;
+							}
 							//materiales
 							$varItem = isset($varResultMateriales[$i + $nuevoindice]['odm_item']) ? $varResultMateriales[$i + $nuevoindice]['odm_item'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i + $nuevoindice]['odm_descripcion']) ? $varResultMateriales[$i + $nuevoindice]['odm_descripcion'] : $this->varTab;
@@ -356,8 +355,8 @@ class ReporteController extends Controller
 				$varData = str_replace($this->varProcCampos, $this->varTab, $varData);
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);
 				//Activar las dos lineas siguientes solo para depuracion
-				$varFilename = 'generated.html';
-				file_put_contents($varTempDir."/".$varFilename, $varData, LOCK_EX);
+				//$varFilename = 'generated.html';
+				//file_put_contents($varTempDir."/".$varFilename, $varData, LOCK_EX);
 
 				$varMpdf = new \Mpdf\Mpdf(['orientation' => 'L', 'tempDir' => $varTempDir]);
 				$varMpdf->SetDisplayMode('fullpage');
