@@ -149,7 +149,7 @@
       &nbsp;
       <table class="generaltable">
         <tr>
-          <th colspan="6">HIDRAULICA</th>
+          <th colspan="6">{varArea}</th> <!--HIDRAULICA-->
         </tr>
         <tr>
           <td width="10%"><strong>Respon. ORIGEN</strong></td>
