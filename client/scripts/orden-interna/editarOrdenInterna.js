@@ -136,7 +136,7 @@ $(document).ready(async function () {
                 <td>${element.proceso.opp_codigo}</td>
                 <td>${element.proceso.opp_descripcion}</td>
                 <td class="text-center">
-                    <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
+                    <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''}/>
                 </td>
                 <td>
                     ${element.odp_observacion || ''}
@@ -194,7 +194,7 @@ $(document).ready(async function () {
             <tr class="row-editable" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
                 <td>${selectedProcesoName}</td>
-                <td><input type="checkbox" disabled/></td>
+                <td class="text-center"><input type="checkbox" disabled/></td>
                 <td>
                     <input type="text" class="form-control" value="" readonly/>
                 </td>
@@ -263,6 +263,29 @@ $(document).ready(async function () {
         const $row = $(this).closest('tr')
         // removemos el DOM
         $row.remove()
+    })
+
+    // actualizar checkbox
+    $('#tbl-orden-interna-procesos').on('change', 'input[type="checkbox"]', async function () {
+        const $row = $(this).closest('tr')
+        const id_proceso = $row.data('id-proceso')
+        const $inputCheckbox = $row.find('input[type="checkbox"]')
+        // si no es una fila editable
+        if(!$row.hasClass('row-editable')){
+            const valueCheckbox = $inputCheckbox.prop('checked')
+            const {procesos} = buscarDetalleParte(currentDetalleParte)
+            const findProceso = procesos.find(element => element.proceso.opp_id == id_proceso)
+            try {
+                await client.put(`/ordeninternaprocesos/${findProceso.odp_id}`, {
+                    'opd_ccalidad': valueCheckbox
+                })
+                findProceso["odp_ccalidad"] = valueCheckbox ? "1" : "0"
+                alert('Se actualizo correctamente el detalle de proceso')
+            } catch(error){
+                $inputCheckbox.prop('checked', !valueCheckbox)
+                alert('No se pudo actualizar el detalle de proceso')
+            }
+        }
     })
 
     // Gestionamos el cierre del modal
