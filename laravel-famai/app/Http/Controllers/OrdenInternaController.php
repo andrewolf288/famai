@@ -264,7 +264,8 @@ class OrdenInternaController extends Controller
                         'odp_observacion' => $proceso['odp_observacion'],
                         'odp_ccalidad' => $proceso['odp_ccalidad'],
                         'odp_estado' => 1,
-                        'odp_usucreacion' => $user->usu_codigo
+                        'odp_usucreacion' => $user->usu_codigo,
+                        'odp_fecmodificacion' => null
                     ]);
                 }
 
@@ -288,7 +289,8 @@ class OrdenInternaController extends Controller
                         'odm_observacion' => $material['odm_observacion'],
                         'odm_tipo' => 1,
                         'odm_estado' => 1,
-                        'odm_usucreacion' => $user->usu_codigo
+                        'odm_usucreacion' => $user->usu_codigo,
+                        'odm_fecmodificacion' => null
                     ]);
                 }
             };
