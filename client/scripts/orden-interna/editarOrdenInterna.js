@@ -277,11 +277,12 @@ $(document).ready(async function () {
             const findProceso = procesos.find(element => element.proceso.opp_id == id_proceso)
             try {
                 await client.put(`/ordeninternaprocesos/${findProceso.odp_id}`, {
-                    'opd_ccalidad': valueCheckbox
+                    'odp_ccalidad': valueCheckbox
                 })
                 findProceso["odp_ccalidad"] = valueCheckbox ? "1" : "0"
                 alert('Se actualizo correctamente el detalle de proceso')
             } catch(error){
+                console.log(error)
                 $inputCheckbox.prop('checked', !valueCheckbox)
                 alert('No se pudo actualizar el detalle de proceso')
             }
