@@ -172,7 +172,8 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 
 // rutas detalle materiales orden interna
 Route::group(['middleware' => ['auth.jwt']], function() {
-    Route::get('materialesByOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'findByOrdenInterna']);
+    // Route::get('materialesByOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'findByOrdenInterna']);
+    Route::get('detalleMaterialesOrdenInterna', [OrdenInternaMaterialesController::class, 'index']);
 });
 
 // rutas detalle procesos orden interna

@@ -1,7 +1,7 @@
 <h2 class="mb-3 fs-4">Despliegue OT-Material</h2>
 <div class="row mb-3">
     <!-- Filtros de fechas -->
-    <div class="col-12 col-md-3 mb-3 mb-md-0">
+    <!-- <div class="col-12 col-md-3 mb-3 mb-md-0">
         <div class="d-flex flex-column flex-md-row align-items-end">
             <div class="me-3">
                 <label for="fechaDesde" class="form-label">Fecha Desde</label>
@@ -19,7 +19,7 @@
                 </svg>
             </button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Filtros a la izquierda -->
     <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
@@ -28,7 +28,6 @@
                 <option value="">Seleccione un filtro</option>
                 <option value="ot_numero">Orden trabajo</option>
                 <option value="oi_numero">Orden interna</option>
-                <option value="oic_equipo_descripcion">Equipo</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -46,28 +45,27 @@
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
     <thead>
-        <th>Nro. OT</th>
-        <th>Estado OT</th>
-        <th>Cliente</th>
-        <th>Nro. OI</th>
-        <th>Fecha</th>
-        <th>Área</th>
-        <th>Materiales</th>
-        <th>Estado OI</th>
+        <th>OT</th>
+        <th>OI</th>
+        <th>Fec. Det OI</th>
+        <th>Tipo</th>
+        <th>Cod Producto</th>
+        <th>Producto</th>
+        <th>Obs Producto</th>
+        <th>Cantidad</th>
+        <th>Und.</th>
+        <th>Stock Alm</th>
         <th>Acciones</th>
-        <th>Fec. Creación</th>
-        <th>Usu. Creador</th>
-        <th>Fec. Actualización</th>
-        <th>Usu. Actualizador</th>
+        <th>Cant. Reservado</th>
     </thead>
     <tbody id="data-container-body">
     </tbody>
 </table>
 
 <!-- VER DETALLE MATERIALES -->
-<div class="modal fade" id="detalleMaterialesOrdenModal" tabindex="-1"
+<!-- <div class="modal fade" id="detalleMaterialesOrdenModal" tabindex="-1"
     aria-labelledby="detalleMaterialesOrdenModalLabel" aria-hidden="true">
-    <!-- <div class="modal-dialog modal-xl"> -->
+    <div class="modal-dialog modal-xl">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
@@ -111,4 +109,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
