@@ -74,9 +74,10 @@ class ReporteController extends Controller
 				$varTraNombreAlmacen = isset($dato['tra_nombrealmacen']) ? $dato['tra_nombrealmacen'] : $this->varTab;
 				//Llenamos las variables de seguimiento
 				$varUsuCreacion = isset($dato['oic_usucreacion']) ? $dato['oic_usucreacion'] : $this->varTab;
-				$varFecCreacion = isset($dato['oic_feccreacion']) ? $dato['oic_feccreacion'] : $this->varTab;
+				$varFecCreacion = isset($dato['oic_feccreacion']) ? (new DateTime($dato['oic_feccreacion']))->format('Y-m-d H:i') : $this->varTab;
 				$varUsuModificacion = isset($dato['oic_usumodificacion']) ? $dato['oic_usumodificacion'] : $this->varTab;
-				$varFecModificacion = isset($dato['oic_fecmodificacion']) ? $dato['oic_fecmodificacion']  : $this->varTab;
+				$varFecModificacion = isset($dato['oic_fecmodificacion']) ? (new DateTime($dato['oic_fecmodificacion']))->format('Y-m-d H:i') : $this->varTab;
+				
 			}
 			//Obtenemos el registro de las partes
 			$varPartes = $reporte->metobtenerPartes($varOIC);
