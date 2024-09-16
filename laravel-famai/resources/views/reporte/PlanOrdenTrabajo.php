@@ -94,7 +94,7 @@
     <table class="maintable">
         <tbody>
             <tr>
-                <td width="30%"><strong>FAMAI</strong></td>
+                <td width="30%"><img src="{varLogo}" alt="Famai" style="max-width: 51mm; max-height: 24mm;"></td>
                 <td width="50%"><strong>ORDEN INTERNA</strong></td>
                 <td width="20%">
                     <table class="secondarytable" >
