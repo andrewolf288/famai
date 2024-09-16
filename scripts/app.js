@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Crear instancia de Navigo
-    const router = new Navigo('/')
+    const router = new Navigo('/famai', {hash: false})
 
     // Función para cargar contenido en el elemento #content
     const loadContent = (path, scriptURL) => {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para crear enlaces de menú
     function crearEnlaceMenu(descripcion, url) {
-        return `<li><a class="dropdown-item" href="/${url}">${descripcion}</a></li>`;
+        return `<li><a class="dropdown-item" href="${url}">${descripcion}</a></li>`;
     }
 
     // Agregar los enlaces de "Maestros" al menú de "Catálogos"

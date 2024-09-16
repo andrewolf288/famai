@@ -8,7 +8,7 @@ function getCurrentAccessToken(){
 function logoutUnauthorized(){
     localStorage.removeItem('authToken')
     localStorage.removeItem('modulos')
-    window.location.href = '/login.html'
+    window.location.href = '/famai/login.html'
 }
 
 const options = {

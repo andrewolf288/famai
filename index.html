@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAMAI</title>
-    <link href="/assets/css/all.min.css" rel="stylesheet">
-    <link href="/estilos/app.css" rel="stylesheet">
-    <link href="/estilos/nav-bar.css" rel="stylesheet">
+    <base href="/famai/" />
+    <link href="assets/css/all.min.css" rel="stylesheet">
+    <link href="estilos/app.css" rel="stylesheet">
+    <link href="estilos/nav-bar.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/v/dt/dt-2.0.8/datatables.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <!-- DataTable CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.bootstrap5.css">
@@ -17,10 +18,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
     <!-- ESTILOS GENERALES -->
-    <link rel="stylesheet" href="/estilos/app.css">
+    <link rel="stylesheet" href="estilos/app.css">
     <!-- PAGINATION CSS -->
-    <link rel="stylesheet" href="/estilos/pagination.css">
-    <base href="/" />
+    <link rel="stylesheet" href="estilos/pagination.css">
 </head>
 
 <body>
@@ -29,8 +29,8 @@
         <!-- NAVBAR -->
         <nav class="navbar navbar-expand-lg custom-navbar">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/">
-                    <img src="/iconos/famai-negativo.jpg" alt="Logo FAMAI" class="img-fluid"
+                <a class="navbar-brand" href="">
+                    <img src="iconos/famai-negativo.jpg" alt="Logo FAMAI" class="img-fluid"
                         style="max-width: 150px; height: auto;">
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -64,7 +64,7 @@
                                 Sesión
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="sesionDropdown">
-                                <li><a class="dropdown-item" href="/perfil" id="perfilLink">Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="perfil" id="perfilLink">Mi Perfil</a></li>
                                 <button class="dropdown-item" id="logoutButton" onclick="handleLogout()">Cerrar
                                     Sesión</button>
                             </ul>
@@ -85,8 +85,8 @@
 
     <!-- SECCION DE SCRIPTS -->
     <!-- JQUERY -->
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <script src="/assets/js/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
     <!-- script de axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -112,9 +112,9 @@
     <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/plug-ins/1.10.11/sorting/date-eu.js"></script>
     <!-- Pagination.js -->
-    <script src="/assets/js/pagination.min.js"></script>
+    <script src="assets/js/pagination.min.js"></script>
     <!-- scripts de paginacion -->
-    <script src="/scripts/customPagination.js"></script>
+    <script src="scripts/customPagination.js"></script>
 </body>
 
 </html>

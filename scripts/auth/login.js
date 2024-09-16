@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             localStorage.setItem('modulos', JSON.stringify(result))
 
-            window.location.href = '/'
+            window.location.href = '/famai'
         } catch (error) {
             console.log(error) // Manejar errores de la solicitud
             const {data} = error.response
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Funcion para regresar a la pagina de inicio en caso este logeado
     const returnNoAccess = () => {
         if (isAuthenticated()) {
-            window.location.href = '/'
+            window.location.href = '/famai'
         }
     }
 

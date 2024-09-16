@@ -12,7 +12,7 @@ $(document).ready(() => {
                   <i class="bi bi-collection"></i>
                 </div>
                 <h2 class="fs-4 fw-bold">${title}</h2>
-                <a href="/${url}" class="btn btn-primary">Ingresar</a>
+                <a href="${url}" class="btn btn-primary">Ingresar</a>
               </div>
             </div>
           </div>
