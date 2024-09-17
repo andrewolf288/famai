@@ -412,6 +412,17 @@ class OrdenInternaController extends Controller
                 'oic_equipo_descripcion' => 'required|string',
                 'detalle_partes' => 'required|array|min:1',
             ])->validate();
+            // ------- CREACION DE ORDEN INTERNA -------
+            // 1. El numero de orden de trabajo es recibido en: $request->input('odt_numero')
+            // 2. Se debe buscar en el modelo OrdenTrabajo si existe alguna orden de trabajo con ese numero
+            // 3. Si existe, se obtiene su id: $odt_id
+            // 4. Si no existe, se crea una nueva orden de trabajo con la informacion de la orden de trabajo que se encuentra en la base de datos secundaria (hacer una nueva consulta para obtener los datos)
+            // 5. El id obtenido de la cracion en OrdenTrabajo se establece en: $odt_id
+            // 6. Se debe comprobar si la informacion traida de CardCode de la tabla secundaria es un cliente existente
+            // 7. Si existe la informacion de CardCode en nuestra tabla cliente entonces obtener el id
+            // 8. Si no existe la informacion de CardCode en nuestra tabla cliente entonces crear un nuevo cliente con la informacion de cliente de la base de datos secundaria
+            // 9. Se obtiene la informacion de Cliente en: cli_id
+            
             $ordeninterna = OrdenInterna::create([
                 'oic_numero' => $request->input('oic_numero'),
                 'oic_fecha' => $request->input('oic_fecha'),
