@@ -945,7 +945,7 @@ $(document).ready(function () {
                                 alert('Error al generar el reporte')
                             }
                         }
-                        window.location.href = '/orden-interna'
+                        window.location.href = 'orden-interna'
                     } catch (error) {
                         const { response } = error
                         if (response.status === 500) {
