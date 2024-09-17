@@ -415,19 +415,19 @@ class OrdenInternaController extends Controller
             // ------- CREACION DE ORDEN INTERNA -------
             // 1. El numero de orden de trabajo es recibido en: $request->input('odt_numero')
             // 2. Se debe buscar en el modelo OrdenTrabajo si existe alguna orden de trabajo con ese numero
-            // 3. Si existe, se obtiene su id: $odt_id
+            // 3. Si existe, se obtiene su id: $odt_numero
             // 4. Si no existe, se crea una nueva orden de trabajo con la informacion de la orden de trabajo que se encuentra en la base de datos secundaria (hacer una nueva consulta para obtener los datos)
-            // 5. El id obtenido de la cracion en OrdenTrabajo se establece en: $odt_id
+            // 5. El id obtenido de la cracion en OrdenTrabajo se establece en: $odt_numero
             // 6. Se debe comprobar si la informacion traida de CardCode de la tabla secundaria es un cliente existente
             // 7. Si existe la informacion de CardCode en nuestra tabla cliente entonces obtener el id
             // 8. Si no existe la informacion de CardCode en nuestra tabla cliente entonces crear un nuevo cliente con la informacion de cliente de la base de datos secundaria
             // 9. Se obtiene la informacion de Cliente en: cli_id
-            
+
             $ordeninterna = OrdenInterna::create([
                 'oic_numero' => $request->input('oic_numero'),
                 'oic_fecha' => $request->input('oic_fecha'),
-                'odt_numero' => $request->input('odt_numero'),
-                'cli_id' => $request->input('cli_id'),
+                'odt_numero' => $request->input('odt_numero'), // ----- con el valor de la anterior especificacion
+                'cli_id' => $request->input('cli_id'), // ----- con el valor de la anterior especificacion
                 'are_codigo' => $request->input('are_codigo'),
                 'oic_equipo_descripcion' => $request->input('oic_equipo_descripcion'),
                 'tra_idorigen' => $request->input('tra_idorigen'),
