@@ -6,6 +6,7 @@ use App\AlmacenProducto;
 use App\Producto;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ProductoController extends Controller
@@ -85,6 +86,44 @@ class ProductoController extends Controller
         // Devuelve los materiales en formato JSON
         return response()->json($materiales);
     }**/
+
+    public function findProductoByQuery2(Request $request)
+    {
+        $query = $request->input('query', null);
+        $almID = $request->input('alm_id', '01_AQPAG');
+
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+        $symbol = '+';
+        $subqueries = explode($symbol, $query);
+        // Construir la consulta
+        $queryBuilder = DB::connection('sqlsrv_secondary')
+                        ->table('OITM as T0')
+        ->leftJoin('OITW as T1', function($join) use ($almID) {
+            $join->on('T0.ItemCode', '=', 'T1.ItemCode')
+                 ->where('T1.WhsCode', '=', $almID);
+        })
+        ->select([
+            'T0.ItemCode as pro_codigo', 
+            'T0.ItemName as pro_descripcion', 
+		    'T0.BuyUnitMsr as uni_codigo' , 
+            'T1.OnHand as alp_stock'
+        ])
+        ->selectRaw('T0.ItemCode as pro_id');
+
+        foreach ($subqueries as $term) {
+            $queryBuilder->where(function ($q) use ($term) {
+                $q->where('T0.ItemCode', 'like', '%' . $term . '%')
+                  ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
+            });
+        }
+    
+        // Ejecutar la consulta y devolver los resultados
+        $results = $queryBuilder->get();
+    
+        return response()->json($results);
+    }
 
     public function findProductoByQuery(Request $request)
     {

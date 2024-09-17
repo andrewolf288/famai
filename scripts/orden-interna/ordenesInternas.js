@@ -95,7 +95,7 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-orden-interna-editar', function () {
         const id = $(this).data('orden-interna')
         // localStorage.setItem('ordenInternaId', id)
-        window.location.href = `/orden-interna/editar/${id}`
+        window.location.href = `orden-interna/editar/${id}`
     })
 
     $('#data-container').on('click', '.btn-orden-interna-pdf', async function() {

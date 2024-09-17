@@ -113,8 +113,7 @@ $(document).ready(function () {
                 // parseamos los materiales
                 parte.materiales.forEach(material => {
                     parteDetalle.detalle_materiales.push({
-                        // pro_id: material.producto === null ? obtenerIdUnico(): material.producto.pro_id,
-                        pro_id: material.producto === null ? '' : material.producto.pro_codigo,
+                        pro_id: material.producto === null ? obtenerIdUnico(): material.producto.pro_id,
                         pro_codigo: material.producto === null ? '' : material.producto.pro_codigo,
                         odm_descripcion: material.odm_descripcion,
                         odm_cantidad: material.odm_cantidad,

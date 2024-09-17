@@ -383,7 +383,7 @@ $(document).ready(async function () {
         const { materiales } = findElement
         materiales.forEach(element => {
             const row = `
-            <tr data-id-producto="${element.producto?.pro_codigo ?? ''}">
+            <tr data-id-producto="${element.producto?.pro_id ?? 0}">
                 <td>${element.producto?.pro_codigo ?? '-'}</td>
                 <td>${element.odm_descripcion}</td>
                 <td>${element.odm_cantidad}</td>
@@ -465,7 +465,7 @@ $(document).ready(async function () {
     function ingresarProductoSinCodigo() {
         // obtenemos el valor de checked
         const checked = false
-        const pro_id = obtenerIdUnico()
+        const pro_id = Date.now().toString(36) + Math.random().toString(36).slice(2, 11)
         const pro_codigo = ""
         const pro_descripcion = $.trim($('#productosInput').val())
 
