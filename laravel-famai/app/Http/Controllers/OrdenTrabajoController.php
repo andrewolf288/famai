@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\OrdenTrabajo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrdenTrabajoController extends Controller
 {
@@ -34,19 +35,4 @@ class OrdenTrabajoController extends Controller
             ], 404);
         }
     }
-
-    public function findByNumero2($numero)
-    {
-        $ordenTrabajo = new OrdenTrabajo();
-        $result = $ordenTrabajo->metListadoOTSecondary($numero);
-    
-        if ($result && is_array($result)) {
-            return response()->json($result, 200);
-        } else {
-            return response()->json([
-                'error' => 'Orden de trabajo no encontrada',
-            ], 404);
-        }
-    }
-    
 }
