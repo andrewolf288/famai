@@ -15,6 +15,8 @@ class ReporteController extends Controller
 	private $varRutaStringSecundarioSoloMateriales;
 	private $varRutaStringSecundarioSoloProcesos;
 	private $varRutaStringFinal;
+	private $varRutaLogo;
+
 
 	private $varProcCampos = ["{varNumFil}", "{varProcesoParte}", "{varCodigo}", "{varDescripcion}", "{varProObservacion}"];
 	private $varMatCampos = ["{varItem}", "{varDescripcionMat}", "{varCantidad}", "{varMatObservacion}"];
@@ -31,7 +33,7 @@ class ReporteController extends Controller
 		$this->varRutaStringSecundarioSoloMateriales = resource_path("views/reporte/StringSecundarioSoloMateriales.php");
 		$this->varRutaStringSecundarioSoloProcesos = resource_path("views/reporte/StringSecundarioSoloProcesos.php");
 		$this->varRutaStringFinal = resource_path("views/reporte/StringFinal.php");
-
+		$this->varRutaLogo = resource_path("views/reporte/logo_famai.jpg");
 	}
 
 	public function generarReporteOrdenTrabajo(Request $request)
@@ -361,7 +363,7 @@ class ReporteController extends Controller
 					);
 					$htmlFilasTotal .= $htmlFilas;
 				}
-
+				$varData = str_replace("{varLogo}", $this->varRutaLogo, $varData);
 				$varData = str_replace("{varClientenombre}", $varClienteNombre, $varData);
 				$varData = str_replace("{varEquipoDescripcion}", $varDescripcionEquipo, $varData);
 				$varData = str_replace("{varFecha}", $varFecha, $varData);
