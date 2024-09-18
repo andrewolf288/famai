@@ -482,6 +482,7 @@ class OrdenInternaController extends Controller
             }
 
             // ---------- MANEJO DE INFORMACION DE LA ORDEN DE TRABAJO ----------
+            $flagErrors = '';
             $odt_numero = null;
             // debemos buscar si existe la informacion de orden de trabajo en nuestra base de datos
             $odtFound = OrdenTrabajo::where('odt_numero', $request->input('odt_numero'))
@@ -532,10 +533,15 @@ class OrdenInternaController extends Controller
                         'odt_usucreacion' => $user->usu_codigo,
                         'odt_fecmodificacion' => null
                     ]);
+                    $flagErrors .= "Se ha creado la orden intern con numero {$odtCreated->odt_numero}";
                     $odt_numero = $odtCreated->odt_numero;
                 } else {
                     throw new Exception('La orden de trabajo no existe en la base de datos secundaria');
                 }
+            }
+
+            if (is_null($odt_numero) || $odt_numero === 0) {
+                throw new Exception('No se pudo encontrar un número de orden de trabajo válido para: ' . $odt_numero . ' Valor en la insercion: ' . $flagErrors);
             }
 
             // creamos la orden interna
