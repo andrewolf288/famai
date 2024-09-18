@@ -45,9 +45,9 @@ $(document).ready(function () {
                     return
                 }
             }
-            $('#clienteInput').val(data.cliente.cli_nombre)
+            $('#clienteInput').val(data.cli_nombre || '')
             $('#oiInput').val(data.odt_numero)
-            $('#idClienteInput').val(data.cliente.cli_id)
+            $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
         } catch (error) {
             const { response } = error

@@ -31,19 +31,5 @@ class OrdenTrabajo extends Model
     {
         return $this->belongsTo(Cliente::class, 'cli_id')->selectFields();
     }
-
-    public function metListadoOTSecondary($varOT)
-    {
-        if (!$varOT) {
-            return false;
-        }
-        $pdo = DB::connection('sqlsrv_secondary')->getPdo();
-        $query = "EXEC FAM_LOG_ListadoOT ?";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute([$varOT]);
-        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $result;
-    }
     
 }

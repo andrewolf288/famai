@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Cliente;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
 use App\OrdenInternaProcesos;
+use App\OrdenTrabajo;
 use App\Producto;
+use App\Unidad;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -174,20 +177,56 @@ class OrdenInternaController extends Controller
                     $findMaterial = Producto::where('pro_codigo', $material['pro_id'])->first();
                     // en caso no se encuentre, se crea el registro
                     if(!$findMaterial) {
-                        $productoCreado = Producto::create([
-                            'pro_codigo' => $material['pro_id'],
-                            'pro_descripcion' => $material['pro_descripcion'],
-                            'uni_codigo' => 'UND',
-                            'pgi_codigo' => 'SIN',
-                            'pfa_codigo' => 'SIN',
-                            'psf_codigo' => 'SIN',
-                            'pma_codigo' => 'SIN',
-                            'pro_usucreacion' => $user->usu_codigo,
-                            'pro_fecmodificacion' => null
-                        ]);
-                        // se establece el ID correspondiente
-                        $pro_id = $productoCreado->pro_id;
+                        // hacemos una busqueda de los datos en la base de datos secundaria
+                        $productoSecondary = DB::connection('sqlsrv_secondary')
+                        ->table('OITM as T0')
+                        ->select([
+                            'T0.ItemCode as pro_codigo', 
+                            'T0.ItemName as pro_descripcion', 
+                            'T0.BuyUnitMsr as uni_codigo' , 
+                        ])
+                        ->where('T0.ItemCode', $material['pro_id'])
+                        ->first();
+
+                        if($productoSecondary){
+                            // debemos hacer validaciones de la unidad
+                            $uni_codigo = 'SIN';
+                            $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
+                            if(!empty($uni_codigo)){
+                                $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
+                                if($unidadFound){
+                                    $uni_codigo = $unidadFound->uni_codigo;
+                                } else {
+                                    $unidadCreated = Unidad::create([
+                                        'uni_codigo' => $uni_codigo_secondary,
+                                        'uni_descripcion' => $uni_codigo_secondary,
+                                        'uni_activo' => 1,
+                                        'uni_usucreacion' => $user->usu_codigo,
+                                        'uni_fecmodificacion' => null
+                                    ]);
+                                    $uni_codigo = $unidadCreated->uni_codigo;
+                                }
+                            }
+                            // creamos el producto con los valores correspondientes
+                            $productoCreado = Producto::create([
+                                'pro_codigo' => $productoSecondary->pro_codigo,
+                                'pro_descripcion' => $productoSecondary->pro_descripcion,
+                                'uni_codigo' => $uni_codigo,
+                                'pgi_codigo' => 'SIN',
+                                'pfa_codigo' => 'SIN',
+                                'psf_codigo' => 'SIN',
+                                'pma_codigo' => 'SIN',
+                                'pro_usucreacion' => $user->usu_codigo,
+                                'pro_fecmodificacion' => null
+                            ]);
+                            // se establece el ID correspondiente
+                            $pro_id = $productoCreado->pro_id;
+                        } else {
+                            throw new Exception('Material no encontrado en la base de datos secundaria');
+                        }
+
                     } else {
+                        // en el caso que se encuentre el producto en base de datos dbfamai
                         $pro_id = $findMaterial->pro_id;
                     }
                 }
@@ -402,8 +441,8 @@ class OrdenInternaController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'odt_numero' => 'required|string',
+                'cli_id' => 'required|string',
                 'oic_numero' => 'required|string|unique:tblordenesinternascab_oic,oic_numero',
-                'cli_id' => 'required|integer|exists:tblclientes_cli,cli_id',
                 'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
                 'oic_fecha' => 'required|date',
                 'tra_idalmacen' => 'required|integer|exists:tbltrabajadores_tra,tra_id',
@@ -412,22 +451,100 @@ class OrdenInternaController extends Controller
                 'oic_equipo_descripcion' => 'required|string',
                 'detalle_partes' => 'required|array|min:1',
             ])->validate();
-            // ------- CREACION DE ORDEN INTERNA -------
-            // 1. El numero de orden de trabajo es recibido en: $request->input('odt_numero')
-            // 2. Se debe buscar en el modelo OrdenTrabajo si existe alguna orden de trabajo con ese numero
-            // 3. Si existe, se obtiene su id: $odt_numero
-            // 4. Si no existe, se crea una nueva orden de trabajo con la informacion de la orden de trabajo que se encuentra en la base de datos secundaria (hacer una nueva consulta para obtener los datos)
-            // 5. El id obtenido de la cracion en OrdenTrabajo se establece en: $odt_numero
-            // 6. Se debe comprobar si la informacion traida de CardCode de la tabla secundaria es un cliente existente
-            // 7. Si existe la informacion de CardCode en nuestra tabla cliente entonces obtener el id
-            // 8. Si no existe la informacion de CardCode en nuestra tabla cliente entonces crear un nuevo cliente con la informacion de cliente de la base de datos secundaria
-            // 9. Se obtiene la informacion de Cliente en: cli_id
 
+            // ---------- MANEJO DE INFORMACION DEL CLIENTE ----------
+            $cli_id = null;
+            // debemos buscar si el cliente existe en nuestra base de datos
+            $clienteFound = Cliente::where('cli_nrodocumento', $request->input('cli_id'))->first();
+            if ($clienteFound) {
+                $cli_id = $clienteFound->cli_id;
+            } else {
+                // si no existe debemos crearlo
+                // debemos buscar la informacion correspondiente en la tabla secundaria
+                $clienteSecondary = DB::connection('sqlsrv_secondary')
+                                    ->table('OCRD')
+                                    ->where('CardCode', $request->input('cli_id'))
+                                    ->first();
+                if ($clienteSecondary) {
+                    $clienteCreated = Cliente::create([
+                        'tdo_codigo' => 'RUC',
+                        'cli_nrodocumento' => $clienteSecondary->CardCode,
+                        'cli_nombre' => $clienteSecondary->CardName,
+                        'cli_activo' => 1,
+                        'cli_usucreacion' => $user->usu_codigo,
+                        'cli_fecmodificacion' => null
+                    ]);
+                    $cli_id = $clienteCreated->cli_id;
+                } else {
+                    throw new Exception('El cliente no existe en la base de datos secundaria');
+                }
+            }
+
+            // ---------- MANEJO DE INFORMACION DE LA ORDEN DE TRABAJO ----------
+            $odt_numero = null;
+            // debemos buscar si existe la informacion de orden de trabajo en nuestra base de datos
+            $odtFound = OrdenTrabajo::where('odt_numero', $request->input('odt_numero'))
+                                    ->first();
+            if($odtFound) {
+                $odt_numero = $odtFound->odt_numero;
+            } else {
+                // si no existe debemos crearlo
+                // debemos buscar la informacion correspondiente en la tabla secundaria
+                $otSecondary = DB::connection('sqlsrv_secondary')
+                        ->table('OWOR as OT')
+                        ->leftJoin('OCRD as C', 'OT.CardCode', '=', 'C.CardCode')
+                        ->select(
+                            'OT.DocNum as odt_numero',
+                            'OT.PostDate as odt_fecha',
+                            'OT.CardCode as cli_nrodocumento',
+                            'C.CardName as cli_nombre',  // Obtenemos el CardName con el LEFT JOIN
+                            'OT.ProdName as odt_equipo',
+                            DB::raw("
+                                CASE 
+                                    WHEN OT.U_EXX_TIPOSERV = 1 THEN 'Reparacion'
+                                    WHEN OT.U_EXX_TIPOSERV = 2 THEN 'Fabricacion'
+                                    WHEN OT.U_EXX_TIPOSERV = 3 THEN 'Compra/Venta'
+                                    WHEN OT.U_EXX_TIPOSERV = 4 THEN 'Garantia Total'
+                                    WHEN OT.U_EXX_TIPOSERV = 5 THEN 'Interno'
+                                    WHEN OT.U_EXX_TIPOSERV = 6 THEN 'Garantia Parcial'
+                                    WHEN OT.U_EXX_TIPOSERV = 7 THEN 'Sellos'
+                                    ELSE 'Otro'
+                                END as odt_trabajo
+                            "),
+                            DB::raw("
+                                CASE 
+                                    WHEN OT.Status = 'L' THEN 'Cerrado'
+                                    WHEN OT.Status = 'R' THEN 'Abierto'
+                                    ELSE 'Planificado'
+                                END as odt_estado
+                            ")
+                        )
+                        ->where('OT.DocNum', $request->input('odt_numero'))
+                        ->first();
+
+                if($otSecondary){
+                    $odtCreated = OrdenTrabajo::create([
+                        'odt_numero' => $otSecondary->odt_numero,
+                        'odt_fecha' => $otSecondary->odt_fecha,
+                        'cli_id' => $cli_id,
+                        'odt_equipo' => $otSecondary->odt_equipo,
+                        'odt_trabajo' => $otSecondary->odt_trabajo,
+                        'odt_estado' => $otSecondary->odt_estado,
+                        'odt_usucreacion' => $user->usu_codigo,
+                        'odt_fecmodificacion' => null
+                    ]);
+                    $odt_numero = $odtCreated->odt_numero;
+                } else {
+                    throw new Exception('La orden de trabajo no existe en la base de datos secundaria');
+                }
+            }
+
+            // creamos la orden interna
             $ordeninterna = OrdenInterna::create([
                 'oic_numero' => $request->input('oic_numero'),
                 'oic_fecha' => $request->input('oic_fecha'),
-                'odt_numero' => $request->input('odt_numero'), // ----- con el valor de la anterior especificacion
-                'cli_id' => $request->input('cli_id'), // ----- con el valor de la anterior especificacion
+                'odt_numero' => $odt_numero,
+                'cli_id' => $cli_id,
                 'are_codigo' => $request->input('are_codigo'),
                 'oic_equipo_descripcion' => $request->input('oic_equipo_descripcion'),
                 'tra_idorigen' => $request->input('tra_idorigen'),
@@ -484,26 +601,62 @@ class OrdenInternaController extends Controller
 
                     // buscamos el material en la base de datos
                     $pro_id = null;
-                    // si se debe asociat el amterial
+                    // si se debe asociat el material
                     if($material['odm_asociar']){
                         // buscamos el material en la base de datos
                         $findMaterial = Producto::where('pro_codigo', $material['pro_id'])->first();
                         // en caso no se encuentre, se crea el registro
                         if(!$findMaterial) {
-                            $productoCreado = Producto::create([
-                                'pro_codigo' => $material['pro_id'],
-                                'pro_descripcion' => $material['pro_descripcion'],
-                                'uni_codigo' => 'UND',
-                                'pgi_codigo' => 'SIN',
-                                'pfa_codigo' => 'SIN',
-                                'psf_codigo' => 'SIN',
-                                'pma_codigo' => 'SIN',
-                                'pro_usucreacion' => $user->usu_codigo,
-                                'pro_fecmodificacion' => null
-                            ]);
-                            // se establece el ID correspondiente
-                            $pro_id = $productoCreado->pro_id;
+                            // hacemos una busqueda de los datos en la base de datos secundaria
+                            $productoSecondary = DB::connection('sqlsrv_secondary')
+                            ->table('OITM as T0')
+                            ->select([
+                                'T0.ItemCode as pro_codigo', 
+                                'T0.ItemName as pro_descripcion', 
+                                'T0.BuyUnitMsr as uni_codigo' , 
+                            ])
+                            ->where('T0.ItemCode', $material['pro_id'])
+                            ->first();
+
+                            if($productoSecondary){
+                                // debemos hacer validaciones de la unidad
+                                $uni_codigo = 'SIN';
+                                $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
+                                if(!empty($uni_codigo)){
+                                    $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
+                                    if($unidadFound){
+                                        $uni_codigo = $unidadFound->uni_codigo;
+                                    } else {
+                                        $unidadCreated = Unidad::create([
+                                            'uni_codigo' => $uni_codigo_secondary,
+                                            'uni_descripcion' => $uni_codigo_secondary,
+                                            'uni_activo' => 1,
+                                            'uni_usucreacion' => $user->usu_codigo,
+                                            'uni_fecmodificacion' => null
+                                        ]);
+                                        $uni_codigo = $unidadCreated->uni_codigo;
+                                    }
+                                }
+                                // creamos el producto con los valores correspondientes
+                                $productoCreado = Producto::create([
+                                    'pro_codigo' => $productoSecondary->pro_codigo,
+                                    'pro_descripcion' => $productoSecondary->pro_descripcion,
+                                    'uni_codigo' => $uni_codigo,
+                                    'pgi_codigo' => 'SIN',
+                                    'pfa_codigo' => 'SIN',
+                                    'psf_codigo' => 'SIN',
+                                    'pma_codigo' => 'SIN',
+                                    'pro_usucreacion' => $user->usu_codigo,
+                                    'pro_fecmodificacion' => null
+                                ]);
+                                // se establece el ID correspondiente
+                                $pro_id = $productoCreado->pro_id;
+                            } else {
+                                throw new Exception('Material no encontrado en la base de datos secundaria');
+                            }
+
                         } else {
+                            // en el caso que se encuentre el producto en base de datos dbfamai
                             $pro_id = $findMaterial->pro_id;
                         }
                     }

@@ -15,10 +15,10 @@ class Cliente extends Model
         'cli_nrodocumento',
         'cli_nombre',
         'cli_activo',
-        'are_usucreacion',
-        'are_feccreacion',
-        'are_usumodificacion',
-        'are_fecmodificacion'
+        'cli_usucreacion',
+        'cli_feccreacion',
+        'cli_usumodificacion',
+        'cli_fecmodificacion'
     ];
 
     const CREATED_AT = 'cli_feccreacion';
