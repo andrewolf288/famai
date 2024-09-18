@@ -496,8 +496,7 @@ class OrdenInternaController extends Controller
                         ->table('OWOR as OT')
                         ->select(
                             'OT.DocNum as odt_numero',
-                            'OT.PostDate as odt_fecha',
-                            'OT.CardCode as cli_nrodocumento',
+                            'CONVERT(DATE, OT.PostDate) as odt_fecha',
                             'OT.ProdName as odt_equipo',
                             DB::raw("
                                 CASE 
@@ -533,7 +532,7 @@ class OrdenInternaController extends Controller
                         'odt_usucreacion' => $user->usu_codigo,
                         'odt_fecmodificacion' => null
                     ]);
-                    $flagErrors .= "Se ha creado la orden interna con numero {$odtCreated->odt_numero}. De base de datos secundaria se obtiene: {$otSecondary->odt_numero} y cliente: {$cli_id}";
+                    $flagErrors .= "Se ha creado la orden interna con numero {$odtCreated->odt_numero}. De base de datos secundaria se obtiene: {$otSecondary->odt_numero} y cliente: {$cli_id} y fecha: {$otSecondary->odt_fecha}";
                     $odt_numero = $odtCreated->odt_numero;
                 } else {
                     throw new Exception('La orden de trabajo no existe en la base de datos secundaria');
