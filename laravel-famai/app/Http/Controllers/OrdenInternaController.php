@@ -524,7 +524,7 @@ class OrdenInternaController extends Controller
 
                 if($otSecondary){
                     $odtCreated = OrdenTrabajo::create([
-                        'odt_numero' => $otSecondary->odt_numero,
+                        'odt_numero' => (int) $otSecondary->odt_numero,
                         'odt_fecha' => $otSecondary->odt_fecha,
                         'cli_id' => $cli_id,
                         'odt_equipo' => $otSecondary->odt_equipo,
