@@ -530,7 +530,7 @@ class OrdenInternaController extends Controller
                         'odt_trabajo' => $otSecondary->odt_trabajo,
                         'odt_estado' => $otSecondary->odt_estado,
                         'odt_usucreacion' => $user->usu_codigo,
-                        'odt_fecmodificacion' => null
+                        'odt_feccreacion' => Carbon::now(),
                     ];
                     DB::table('tblordenesdetrabajo_odt')->insert($data);
 
