@@ -41,7 +41,7 @@ class OrdenTrabajoController extends Controller
                         ->leftJoin('OCRD as C', 'OT.CardCode', '=', 'C.CardCode')
                         ->select(
                             'OT.DocNum as odt_numero',
-                            'CAST(OT.PostDate AS DATE) as odt_fecha',
+                            DB::raw('CAST(OT.PostDate AS DATE) as odt_postdate'),
                             'OT.CardCode as cli_nrodocumento',
                             'C.CardName as cli_nombre',  // Obtenemos el CardName con el LEFT JOIN
                             'OT.ProdName as odt_equipo',

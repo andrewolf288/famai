@@ -496,7 +496,7 @@ class OrdenInternaController extends Controller
                         ->table('OWOR as OT')
                         ->select(
                             'OT.DocNum as odt_numero',
-                            'CAST(OT.PostDate as DATE) as odt_fecha',
+                            DB::raw('CAST(OT.PostDate AS DATE) as odt_postdate'),
                             'OT.ProdName as odt_equipo',
                             DB::raw("
                                 CASE 
