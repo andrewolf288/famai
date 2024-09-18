@@ -50,6 +50,7 @@ $(document).ready(function () {
             $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
         } catch (error) {
+            console.log(error)
             const { response } = error
             if (response.status === 404) {
                 alert(response.data.error)
