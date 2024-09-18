@@ -532,7 +532,12 @@ class OrdenInternaController extends Controller
                         'odt_usucreacion' => $user->usu_codigo,
                         'odt_fecmodificacion' => null
                     ];
-                    $odtCreated = OrdenTrabajo::create($data);
+                    DB::table('tblordenesdetrabajo_odt')->insert($data);
+
+                    // Obtener el registro insertado
+                    $odtCreated = DB::table('tblordenesdetrabajo_odt')
+                        ->where('odt_numero', $otSecondary->odt_numero) // Asumiendo que 'odt_numero' es único
+                        ->first();
                     $flagErrors .= "Se ha creado la orden interna con numero {$odtCreated->odt_numero}. De base de datos secundaria se obtiene: {$otSecondary->odt_numero} y cliente: {$cli_id} y fecha: {$otSecondary->odt_fecha} " . "toda la data fue: " . print_r($data, true);
                     $odt_numero = $odtCreated->odt_numero;
                 } else {
