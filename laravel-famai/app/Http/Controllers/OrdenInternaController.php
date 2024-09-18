@@ -463,6 +463,7 @@ class OrdenInternaController extends Controller
                 // debemos buscar la informacion correspondiente en la tabla secundaria
                 $clienteSecondary = DB::connection('sqlsrv_secondary')
                                     ->table('OCRD')
+                                    ->select('CardCode', 'CardName')
                                     ->where('CardCode', $request->input('cli_id'))
                                     ->first();
                 if ($clienteSecondary) {
