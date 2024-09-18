@@ -524,7 +524,7 @@ class OrdenInternaController extends Controller
 
                 if($otSecondary){
                     $odtCreated = OrdenTrabajo::create([
-                        'odt_numero' => (int) $otSecondary->odt_numero,
+                        'odt_numero' => $otSecondary->odt_numero,
                         'odt_fecha' => $otSecondary->odt_fecha,
                         'cli_id' => $cli_id,
                         'odt_equipo' => $otSecondary->odt_equipo,
@@ -533,7 +533,7 @@ class OrdenInternaController extends Controller
                         'odt_usucreacion' => $user->usu_codigo,
                         'odt_fecmodificacion' => null
                     ]);
-                    $flagErrors .= "Se ha creado la orden interna con numero {$odtCreated->odt_numero}. De base de datos secundaria se obtiene: {$otSecondary->odt_numero}";
+                    $flagErrors .= "Se ha creado la orden interna con numero {$odtCreated->odt_numero}. De base de datos secundaria se obtiene: {$otSecondary->odt_numero} y cliente: {$cli_id}";
                     $odt_numero = $odtCreated->odt_numero;
                 } else {
                     throw new Exception('La orden de trabajo no existe en la base de datos secundaria');
