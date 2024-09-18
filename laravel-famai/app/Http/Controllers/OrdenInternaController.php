@@ -493,12 +493,10 @@ class OrdenInternaController extends Controller
                 // debemos buscar la informacion correspondiente en la tabla secundaria
                 $otSecondary = DB::connection('sqlsrv_secondary')
                         ->table('OWOR as OT')
-                        ->leftJoin('OCRD as C', 'OT.CardCode', '=', 'C.CardCode')
                         ->select(
                             'OT.DocNum as odt_numero',
                             'OT.PostDate as odt_fecha',
                             'OT.CardCode as cli_nrodocumento',
-                            'C.CardName as cli_nombre',  // Obtenemos el CardName con el LEFT JOIN
                             'OT.ProdName as odt_equipo',
                             DB::raw("
                                 CASE 

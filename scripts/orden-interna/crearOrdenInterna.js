@@ -907,6 +907,8 @@ $(document).ready(function () {
                 detalle_partes: ordenInterna.detalle_partes,
             }
 
+            console.log(formatData)
+
             // // formateamos la data de numero de orden
             formatData.detalle_partes.forEach(element => {
                 element.detalle_materiales.forEach((detalle, index) => {
