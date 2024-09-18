@@ -75,4 +75,63 @@ class OrdenTrabajoController extends Controller
 
         return response()->json($queryBuilder);
     }
+
+
+    /*
+    //Funcion alternativa que usa Procedimientos almacenados
+    public function findByNumero2($numero)
+    {
+        // Instancia el SP OrdenTrabajo
+        $ordenTrabajo = new OrdenTrabajo();
+        $result = $ordenTrabajo->metListadoOTSecondary($numero);
+    
+        if ($result && is_array($result)) {
+            try {
+                $cliente = Cliente::where('cli_nrodocumento', $result['cli_nrodocumento'])
+                    ->firstOrFail();
+    
+                return response()->json($cliente);
+            } catch (ModelNotFoundException $e) {
+                $user = auth()->user();
+    
+                $validator = Validator::make($result, [
+                    'cli_nrodocumento' => [
+                        'required',
+                        'string',
+                        'max:16',
+                        Rule::unique('tblclientes_cli', 'cli_nrodocumento'),
+                    ],
+                    'cli_nombre' => [
+                        'required',
+                        'string',
+                        'max:250',
+                        Rule::unique('tblclientes_cli', 'cli_nombre'),
+                    ],
+                ]);
+    
+                if ($validator->fails()) {
+                    return response()->json(["error" => $validator->errors()], 400);
+                }
+    
+                $cliente = Cliente::create(array_merge(
+                    $validator->validated(),
+                    [
+                        "tdo_codigo" => "RUC",
+                        "cli_activo" => "1",
+                        "cli_usucreacion" => $user->usu_codigo,
+                        "cli_fecmodificacion" => null,
+                    ]
+                ));
+    
+                return response()->json([
+                    'message' => 'Cliente registrado exitosamente',
+                    'data' => $cliente
+                ], 201);
+            }
+        } else {
+            return response()->json([
+                'error' => 'Orden de trabajo no encontrada',
+            ], 404);
+        }
+    }*/
 }
