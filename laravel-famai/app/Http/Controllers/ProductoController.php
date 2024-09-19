@@ -108,9 +108,8 @@ class ProductoController extends Controller
             'T0.ItemCode as pro_codigo', 
             'T0.ItemName as pro_descripcion', 
 		    'T0.BuyUnitMsr as uni_codigo' , 
-            // 'T1.OnHand as alp_stock'
+            'T1.OnHand as alp_stock'
         ])
-        ->selectRaw('FORMAT(T1.OnHand, 6) as alp_stock')
         ->selectRaw('T0.ItemCode as pro_id');
 
         foreach ($subqueries as $term) {
