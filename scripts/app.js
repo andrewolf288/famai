@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {
-            loadContent('pages/perfil.html', '')
+            loadContent('pages/perfil.html', 'scripts/perfil/perfil.js')
         })
     })
 

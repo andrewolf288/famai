@@ -72,7 +72,14 @@ class AuthController extends Controller
      */
     public function me()
     {
-        return response()->json(auth()->user());
+        $user = auth()->user();
+        $usuarioPerfil = User::with('rol')->find($user->usu_codigo);
+
+        if(!$usuarioPerfil) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        return response()->json($usuarioPerfil);
     }
 
     /**
