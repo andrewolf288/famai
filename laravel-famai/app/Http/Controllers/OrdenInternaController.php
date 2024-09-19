@@ -467,8 +467,10 @@ class OrdenInternaController extends Controller
                                     ->where('CardCode', $request->input('cli_id'))
                                     ->first();
                 if ($clienteSecondary) {
+                    $documento = substr($clienteSecondary->CardCode, 1);
+                    $longitud = strlen($documento);
                     $clienteCreated = Cliente::create([
-                        'tdo_codigo' => 'RUC',
+                        'tdo_codigo' => $longitud == 8 ? 'DNI' : 'RUC',
                         'cli_nrodocumento' => $clienteSecondary->CardCode,
                         'cli_nombre' => $clienteSecondary->CardName,
                         'cli_activo' => 1,
