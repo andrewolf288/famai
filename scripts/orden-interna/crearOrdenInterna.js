@@ -115,7 +115,7 @@ $(document).ready(function () {
                 parte.materiales.forEach(material => {
                     parteDetalle.detalle_materiales.push({
                         // pro_id: material.producto === null ? obtenerIdUnico(): material.producto.pro_id,
-                        pro_id: material.producto === null ? '' : material.producto.pro_codigo,
+                        pro_id: material.producto === null ? obtenerIdUnico() : material.producto.pro_codigo,
                         pro_codigo: material.producto === null ? '' : material.producto.pro_codigo,
                         odm_descripcion: material.odm_descripcion,
                         odm_cantidad: material.odm_cantidad,
@@ -602,7 +602,7 @@ $(document).ready(function () {
                 $('#resultadosLista').append(listItem)
             })
         } catch (error) {
-            alert('Error al buscar materiales')
+            // alert('Error al buscar materiales')
         }
     }
 
@@ -671,7 +671,6 @@ $(document).ready(function () {
 
     function seleccionarMaterial(material) {
         const { pro_id, pro_codigo, pro_descripcion } = material
-        console.log(pro_id, pro_codigo, pro_descripcion)
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_materiales } = findElement
         const findProducto = detalle_materiales.find(element => element.pro_id == pro_id)

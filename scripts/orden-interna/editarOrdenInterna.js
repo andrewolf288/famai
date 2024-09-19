@@ -454,7 +454,7 @@ $(document).ready(async function () {
                 $('#resultadosLista').append(listItem)
             })
         } catch (error) {
-            alert('Error al buscar materiales')
+            // alert('Error al buscar materiales')
         }
     }
 
