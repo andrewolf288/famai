@@ -175,7 +175,6 @@ $(document).ready(() => {
 
     //--------- EDITAR USUARIO -------------
     $('#data-container').on('click', '.btn-usuario-editar', async function () {
-        // reseteamos el formulario
         const id_usuario = $(this).data('id-usuario')
         const selectorRolEdit = $("#rolUsuarioEdit")
         await traerInformacionRoles(selectorRolEdit)

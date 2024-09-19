@@ -235,7 +235,6 @@ $(document).ready(() => {
     async function cargarDetalleProductoById(id_producto) {
         try {
             const {data} = await client.get(`/producto/${id_producto}`)
-            console.log(data)
 
             // actualizamos el formulario de edicion
             $("#productoIDEdit").val(data.pro_id)
@@ -265,7 +264,6 @@ $(document).ready(() => {
 
     $('#data-container').on('click', '.btn-producto-editar', async function () {
         // reseteamos el formulario
-        $('#editarProductoForm')[0].reset()
         const id_producto = $(this).data('id-producto')
 
         // CARGAMOS LOS SELECTORES

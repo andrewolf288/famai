@@ -133,7 +133,7 @@ class ClienteController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'cli_tipodocumento' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
+            'tdo_codigo' => 'required|string|max:3|exists:tbltiposdocumento_tdo,tdo_codigo',
             'cli_nrodocumento' => [
                 'required',
                 'string',

@@ -227,6 +227,7 @@ $(document).ready(() => {
         }
 
         try {
+            console.log(formatData)
             await client.put(`/cliente/${id_cliente}`, formatData)
             // oculatamos el modal
             const loaderModalEditar = bootstrap.Modal.getInstance(document.getElementById('editarClienteModal'))
