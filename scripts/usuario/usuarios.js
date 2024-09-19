@@ -107,12 +107,12 @@ $(document).ready(() => {
         const selectorRol = $("#rolUsuario")
         await traerInformacionRoles(selectorRol)
         const loaderModalCreate = new bootstrap.Modal(document.getElementById('crearUsuarioModal'))
+        $('#crearUsuarioForm')[0].reset()
         loaderModalCreate.show()
     })
 
     $("#btn-create-usuario").on('click', async (event) => {
         event.preventDefault()
-        $('#crearUsuarioForm')[0].reset()
 
         const usuario = $.trim($("#usu_codigo").val())
         const nombre = $.trim($("#usu_nombre").val())
