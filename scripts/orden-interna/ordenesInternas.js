@@ -84,12 +84,11 @@ $(document).ready(() => {
         if (filterField.length !== 0 && filterValue.length !== 0) {
             filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
         }
-
         initPagination(filteredURL, initDataTable, dataTableOptions)
     })
 
     // inicializamos la paginacion con datatable
-    initPagination(apiURL, initDataTable, dataTableOptions)
+    initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
 
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
     $('#data-container').on('click', '.btn-orden-interna-editar', function () {

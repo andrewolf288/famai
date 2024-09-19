@@ -27,8 +27,8 @@ class OrdenInternaController extends Controller
     {
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
-        $odtNumero = $request->input('ot_numero', null);
-        $oicNumero = $request->input('oi_numero', null);
+        $odtNumero = $request->input('odt_numero', null);
+        $oicNumero = $request->input('oic_numero', null);
         $equipo = $request->input('oic_equipo_descripcion', null);
         $estado = $request->input('oic_activo', null);
         $fecha_desde = $request->input('fecha_desde', null);
@@ -53,9 +53,10 @@ class OrdenInternaController extends Controller
 
         if($fecha_desde !== null && $fecha_hasta !== null){
             $query->whereBetween('oic_fecha', [$fecha_desde, $fecha_hasta]);
-        } else {
-            $query->whereDate('oic_fecha', Carbon::today());
-        }
+        } 
+        // else {
+        //     $query->whereDate('oic_fecha', Carbon::today());
+        // }
 
         $query->orderBy('oic_fecha', 'desc');
 
