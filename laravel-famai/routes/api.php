@@ -189,6 +189,7 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 // rutas de reportes
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
+    Route::post('/previsualizarReporteOrdenTrabajo', [ReporteController::class, 'previsualizarReporteOrdenTrabajo']);
 });
 
 // rutas de proveedores

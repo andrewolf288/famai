@@ -970,6 +970,66 @@ $(document).ready(function () {
         }
     })
 
+    // previsualizar orden interna
+    $("#btn-previsualizar-orden-interna").on('click', async function () {
+        let handleError = ''
+        const $oiCliente = $('#clienteInput').val().trim()
+        const $otInput = $('#otInput').val().trim()
+        const $oiInput = $('#oiInput').val().trim()
+        const $oiValorEquipo = $('#equipoInput').val().trim()
+        const $oiCodigoArea = $('#areaSelect option:selected').text()
+        const $oiFecha = $('#fechaPicker').val()
+        const $oiEncargadoOrigen = $('#responsableOrigen option:selected').text()
+        const $oiEncargadoMaestro = $('#responsableMaestro option:selected').text()
+        const $oiEncargadoAlmacen = $('#responsableAlmacen option:selected').text()
+
+        const formatData = {
+            odt_numero: $otInput,
+            oic_numero: $oiInput,
+            cli_id: $oiCliente,
+            are_codigo: $oiCodigoArea,
+            oic_fecha: $oiFecha,
+            tra_idorigen: $oiEncargadoOrigen,
+            tra_idmaestro: $oiEncargadoMaestro,
+            tra_idalmacen: $oiEncargadoAlmacen,
+            oic_equipo_descripcion: $oiValorEquipo,
+            detalle_partes: ordenInterna.detalle_partes,
+        }
+
+        console.log(formatData)
+
+        // // formateamos la data de numero de orden
+        formatData.detalle_partes.forEach(element => {
+            element.detalle_materiales.forEach((detalle, index) => {
+                detalle["odm_item"] = index + 1
+            })
+        })
+
+        showLoaderModal()
+        try {
+            const response = await client.post(`/previsualizarReporteOrdenTrabajo`, formatData ,{
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            })
+    
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `previsualizacion_orden_trabajo.pdf`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            console.log(error)
+            alert('Error al generar el reporte')
+        }finally {
+            hideLoaderModal()
+        }
+    })
+
     // Funcion de cancelar
     $('#btn-cancelar-orden-interna').on('click', function () {
         resetValues()

@@ -145,6 +145,9 @@
         <tr>
           <td class="lefty-align"><strong>OT:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {varOrdenTrabajo}</td>
         </tr>
+        <tr>
+          <td class="lefty-align"><strong>OI:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {varOrdenInterna}</td>
+        </tr>
       </table>
       &nbsp;
       <table class="generaltable">
