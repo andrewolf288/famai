@@ -132,18 +132,33 @@ $(document).ready(async function () {
 
         procesos.forEach(element => {
             const row = `
-            <tr data-id-proceso="${element.proceso.opp_id}">
+            <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary">
                 <td>${element.proceso.opp_codigo}</td>
                 <td>${element.proceso.opp_descripcion}</td>
                 <td class="text-center">
-                    <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''}/>
+                    <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
                 </td>
                 <td>
-                    ${element.odp_observacion || ''}
+                    <input type="text" class="form-control" value="${element.odp_observacion || ''}" readonly/>
                 </td>
+                <td>${element.odp_usumodificacion ?? 'No aplica'}</td>
+                <td>${element.odp_fecmodificacion ? parseDate(element.odp_fecmodificacion) : 'No aplica'}</td>
                 <td>${element.odp_usucreacion ?? 'No aplica'}</td>
                 <td>${element.odp_feccreacion ? parseDate(element.odp_feccreacion) : 'No aplica'}</td>
-                <td>Sin acciones</td>
+                <td>
+                    <div class="d-flex justify-content-around">
+                        <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
             </tr>`
             $('#tbl-orden-interna-procesos tbody').append(row)
         })
@@ -191,7 +206,7 @@ $(document).ready(async function () {
         } else {
             // primero añadimos al DOM
             const row = `
-            <tr class="row-editable" data-id-proceso="${selectedProcesoId}">
+            <tr class="row-editable table-warning" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
                 <td>${selectedProcesoName}</td>
                 <td class="text-center"><input type="checkbox" disabled/></td>
@@ -200,14 +215,16 @@ $(document).ready(async function () {
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
+                <td>No aplica</td>
+                <td>No aplica</td>
                 <td>
                     <div class="d-flex justify-content-around">
-                        <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${selectedProcesoId}">
+                        <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${selectedProcesoId}">
+                        <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
@@ -241,11 +258,37 @@ $(document).ready(async function () {
                 </svg>`)
     })
 
-    // funcion de guarda detalle de proceso
-    $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', function () {
+    // funcion de guarda detalle de proceso (gestionar caso de uso)
+    $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', async function () {
         const $row = $(this).closest('tr')
         const $input = $row.find('input[type="text"]')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
+        // si se trata de un registro existente
+        if(!$row.hasClass('row-editable')){
+            // debemos extraer la informacion dl tr
+            const odp_id = $row.data('id-detalle')
+            const odp_observacion = $input.val().trim()
+            const odp_ccalidad = $inputCheckbox.is(':checked') ? true : false
+            const formatData = {
+                odp_observacion,
+                odp_ccalidad
+            }
+            try {
+                const {data} = await client.put(`/ordeninternaprocesos/${odp_id}`, formatData)
+                const { procesos } = buscarDetalleParte(currentDetalleParte)
+                const findProceso = procesos.find(element => element.odp_id == odp_id)
+                findProceso["odp_observacion"] = data.odp_observacion || ""
+                findProceso["odp_ccalidad"] = data.odp_ccalidad
+                findProceso["odp_usumodificacion"] = data.odp_usumodificacion
+                findProceso["odp_fecmodificacion"] = data.odp_fecmodificacion
+    
+                $row.find('td').eq(4).text(data.odp_usumodificacion || 'No aplica')
+                $row.find('td').eq(5).text(data.odp_fecmodificacion ? parseDate(data.odp_fecmodificacion) : 'No aplica')
+                alert('Se actualizo correctamente')
+            } catch(error){
+                alert('Error al actualizar el detalle de proceso')
+            }
+        }
 
         $input.prop('readonly', true)
         $inputCheckbox.prop('disabled', true)
@@ -258,49 +301,55 @@ $(document).ready(async function () {
                     </svg>`)
     })
 
-    // funcion de eliminacion de detalle de proceso
-    $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', function () {
+    // funcion de eliminacion de detalle de proceso (gestionar condicional)
+    $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', async function () {
         const $row = $(this).closest('tr')
-        // removemos el DOM
-        $row.remove()
-    })
-
-    // actualizar checkbox
-    $('#tbl-orden-interna-procesos').on('change', 'input[type="checkbox"]', async function () {
-        const $row = $(this).closest('tr')
-        const id_proceso = $row.data('id-proceso')
-        const $inputCheckbox = $row.find('input[type="checkbox"]')
-        // si no es una fila editable
+        // si se trata de un registro existente
         if(!$row.hasClass('row-editable')){
-            const valueCheckbox = $inputCheckbox.prop('checked')
-            const {procesos} = buscarDetalleParte(currentDetalleParte)
-            const findProceso = procesos.find(element => element.proceso.opp_id == id_proceso)
+            // debemos extraer la informacion dl tr
+            const odp_id = $row.data('id-detalle')
             try {
-                await client.put(`/ordeninternaprocesos/${findProceso.odp_id}`, {
-                    'odp_ccalidad': valueCheckbox
-                })
-                findProceso["odp_ccalidad"] = valueCheckbox ? "1" : "0"
-                alert('Se actualizo correctamente el detalle de proceso')
+                await client.delete(`/ordeninternaprocesos/${odp_id}`)
+                const { procesos } = buscarDetalleParte(currentDetalleParte)
+                const findProcesoIndex = procesos.findIndex(element => element.odp_id == odp_id)
+                procesos.splice(findProcesoIndex, 1)
+                // actualizamos el total de procesos
+                $(`#cantidad-procesos-${currentDetalleParte}`).text(procesos.length)
+                $row.remove()
+                setTimeout(function() {
+                    alert('Se eliminó correctamente');
+                }, 0);
             } catch(error){
-                console.log(error)
-                $inputCheckbox.prop('checked', !valueCheckbox)
-                alert('No se pudo actualizar el detalle de proceso')
+                alert('Error al eliminar el detalle de proceso')
             }
+        } else {
+            // removemos el DOM
+            $row.remove()
         }
     })
 
     // Gestionamos el cierre del modal
     $('#procesosModal').on('hide.bs.modal', function (e) {
         const $elementoGuardar = $('.btn-detalle-proceso-guardar').first()
-        const $elementEdicion = $('.btn-detalle-proceso-editar').first()
         // si se encuentran elementos editables en el modal sin guardar
-        if ($elementoGuardar.length > 0 || $elementEdicion.length > 0) {
+        if ($elementoGuardar.length > 0) {
             // permanecemos en el modal
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
                 e.preventDefault()
+            } else {
+                // borramos los elementos del DOM
+                $('#tbl-orden-interna-procesos tbody .row-editable').remove()
             }
-            // salir del modal
-            else {
+        }
+
+        const $elementEdicion = $('#tbl-orden-interna-procesos tbody .row-editable')
+        const $btnDetalleProceso = $elementEdicion.find('.btn-detalle-proceso-editar')
+
+        if($btnDetalleProceso.length > 0){
+            // permanecemos en el modal
+            if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
+                e.preventDefault()
+            } else {
                 // borramos los elementos del DOM
                 $('#tbl-orden-interna-procesos tbody .row-editable').remove()
             }
@@ -351,7 +400,8 @@ $(document).ready(async function () {
 
     // Gestionamos el guardar del modal
     $('#btn-guardar-proceso').on('click', async function (e) {
-        const $elementoGuardar = $('.btn-detalle-proceso-guardar').first()
+        const $elementEdicion = $('#tbl-orden-interna-procesos tbody .row-editable')
+        const $elementoGuardar = $elementEdicion.find('.btn-detalle-proceso-guardar')
         if ($elementoGuardar.length > 0) {
             // permanecemos en el modal
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres guardar?")) {
@@ -373,6 +423,8 @@ $(document).ready(async function () {
             // Si no está marcado, vuelve al placeholder original
             $('#productosInput').attr('placeholder', 'Buscar material...');
         }
+        $('#productosInput').val('')
+        limpiarLista()
     });
 
     // carga de detalle de materiales en tabla
@@ -383,14 +435,35 @@ $(document).ready(async function () {
         const { materiales } = findElement
         materiales.forEach(element => {
             const row = `
-            <tr data-id-producto="${element.producto?.pro_codigo ?? ''}">
+            <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary">
                 <td>${element.producto?.pro_codigo ?? '-'}</td>
-                <td>${element.odm_descripcion}</td>
-                <td>${element.odm_cantidad}</td>
-                <td>${element.odm_observacion || ''}</td>
+                <td>
+                    <input type="text" class="form-control descripcion-input" value="${element.odm_descripcion}" readonly/>
+                </td>
+                <td>
+                    <input type="number" class="form-control cantidad-input" value="${element.odm_cantidad}" readonly/>
+                </td>
+                <td>
+                    <input type="text" class="form-control observacion-input" value="${element.odm_observacion || ''}" readonly/>
+                </td>
+                <td>${element.odm_usumodificacion ?? 'No aplica'}</td>
+                <td>${element.odm_fecmodificacion ? parseDate(element.odm_fecmodificacion) : 'No aplica'}</td>
                 <td>${element.odm_usucreacion ?? 'No aplica'}</td>
                 <td>${element.odm_feccreacion ? parseDate(element.odm_feccreacion) : 'No aplica'}</td>
-                <td>Sin acciones</td>
+                <td>
+                    <div class="d-flex justify-content-around">
+                        <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                            </svg>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
             </tr>`
             $('#tbl-orden-interna-productos tbody').append(row)
         })
@@ -474,7 +547,7 @@ $(document).ready(async function () {
         } else {
             $('#productosInput').val('')
             const row = `
-            <tr class="row-editable" data-id-producto="${pro_id}" data-asociar="${checked}">
+            <tr class="row-editable table-warning" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value="${pro_descripcion}" readonly/>
@@ -487,14 +560,16 @@ $(document).ready(async function () {
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
+                <td>No aplica</td>
+                <td>No aplica</td>
                 <td>
                     <div class="d-flex justify-content-around">
-                        <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-2" data-producto="${pro_id}">
+                        <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar" data-producto="${pro_id}">
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
@@ -528,7 +603,7 @@ $(document).ready(async function () {
             const checked = true
 
             const row = `
-            <tr class="row-editable" data-id-producto="${pro_id}" data-asociar="${checked}">
+            <tr class="row-editable table-warning" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value='${pro_descripcion}' readonly/>
@@ -541,14 +616,16 @@ $(document).ready(async function () {
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
+                <td>No aplica</td>
+                <td>No aplica</td>
                 <td>
                     <div class="d-flex justify-content-around">
-                        <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-2" data-producto="${pro_id}">
+                        <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar" data-producto="${pro_id}">
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
@@ -583,12 +660,42 @@ $(document).ready(async function () {
     })
 
     // funcion de guardar detalle de productos
-    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-guardar', function () {
+    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-guardar', async function () {
         const $row = $(this).closest('tr')
 
         const $descripcionInput = $row.find('.descripcion-input')
         const $cantidadInput = $row.find('.cantidad-input')
         const $observacionInput = $row.find('.observacion-input')
+
+        // si se trata de un registro existente
+        if(!$row.hasClass('row-editable')){
+            // debemos extraer la informacion dl tr
+            const odm_id = $row.data('id-detalle')
+            const odm_descripcion = $descripcionInput.val().trim()
+            const odm_cantidad = $cantidadInput.val().trim()
+            const odm_observacion = $observacionInput.val().trim()
+            const formatData = {
+                odm_descripcion,
+                odm_cantidad,
+                odm_observacion
+            }
+            try {
+                const {data} = await client.put(`/ordeninternamateriales/${odm_id}`, formatData)
+                const { materiales } = buscarDetalleParte(currentDetalleParte)
+                const findMaterial = materiales.find(element => element.odm_id == odm_id)
+                findMaterial["odm_descripcion"] = data.odm_descripcion
+                findMaterial["odm_cantidad"] = data.odm_cantidad
+                findMaterial["odm_observacion"] = data.odm_observacion
+                findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
+                findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
+    
+                $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
+                $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
+                alert('Se actualizo correctamente')
+            } catch(error){
+                alert('Error al actualizar el detalle de material')
+            }
+        }
 
         $descripcionInput.prop('readonly', true)
         $cantidadInput.prop('readonly', true)
@@ -603,24 +710,64 @@ $(document).ready(async function () {
     })
 
     // funcion de eliminacion de detalle de producto
-    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-eliminar', function () {
+    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-eliminar', async function () {
         const $row = $(this).closest('tr')
-        // removemos el DOM
-        $row.remove()
+        // si se trata de un registro existente
+        if(!$row.hasClass('row-editable')){
+            // debemos extraer la informacion dl tr
+            const odm_id = $row.data('id-detalle')
+            try {
+                await client.delete(`/ordeninternamateriales/${odm_id}`)
+                const { materiales } = buscarDetalleParte(currentDetalleParte)
+                const findMaterialIndex = materiales.findIndex(element => element.odm_id == odm_id)
+                const findMaterial = materiales.findIndex(element => element.odm_id == odm_id)
+                const tipo = findMaterial["odm_tipo"]
+                materiales.splice(findMaterialIndex, 1)
+                // actualizamos el total de procesos
+                $(`#cantidad-productos-${currentDetalleParte}`).text(materiales.length)
+                let cantidadTotal = 0
+                if(tipo == '1'){
+                    cantidadTotal = parseInt($(`#cantidad-regulares-${currentDetalleParte}`).text()) - 1
+                    $(`#cantidad-regulares-${currentDetalleParte}`).text(cantidadTotal)
+                } else {
+                    cantidadTotal = parseInt($(`#cantidad-adicionales-${currentDetalleParte}`).text()) - 1
+                    $(`#cantidad-adicionales-${currentDetalleParte}`).text(cantidadTotal)
+                }
+                $row.remove()
+                setTimeout(function() {
+                    alert('Se eliminó correctamente');
+                }, 0);
+            } catch(error){
+                alert('Error al eliminar el detalle de material')
+            }
+        } else {
+            // removemos el DOM
+            $row.remove()
+        }
     })
 
     // Gestionamos el cierre del modal
     $('#productosModal').on('hide.bs.modal', function (e) {
         const $elementoGuardar = $('.btn-detalle-producto-guardar').first()
-        const $elementEdicion = $('.btn-detalle-producto-editar').first()
         // si se encuentran elementos editables en el modal sin guardar
-        if ($elementoGuardar.length > 0 || $elementEdicion.length > 0) {
+        if ($elementoGuardar.length > 0) {
             // permanecemos en el modal
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
                 e.preventDefault()
+            } else {
+                // borramos los elementos del DOM
+                $('#tbl-orden-interna-productos tbody .row-editable').remove()
             }
-            // salir del modal
-            else {
+        }
+
+        const $elementEdicion = $('#tbl-orden-interna-productos tbody .row-editable')
+        const $btnDetalleProducto = $elementEdicion.find('.btn-detalle-producto-editar')
+
+        if($btnDetalleProducto.length > 0){
+            // permanecemos en el modal
+            if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
+                e.preventDefault()
+            } else {
                 // borramos los elementos del DOM
                 $('#tbl-orden-interna-productos tbody .row-editable').remove()
             }
@@ -687,7 +834,8 @@ $(document).ready(async function () {
 
     // Gestionamos el guardar del modal
     $('#btn-guardar-producto').on('click', async function (e) {
-        const $elementoGuardar = $('.btn-detalle-producto-guardar').first()
+        const $elementEdicion = $('#tbl-orden-interna-productos tbody .row-editable')
+        const $elementoGuardar = $elementEdicion.find('.btn-detalle-producto-guardar')
         if ($elementoGuardar.length > 0) {
             // permanecemos en el modal
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres guardar?")) {

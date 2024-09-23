@@ -541,6 +541,8 @@ $(document).ready(function () {
             // Si no está marcado, vuelve al placeholder original
             $('#productosInput').attr('placeholder', 'Buscar material...');
         }
+        $('#productosInput').val('')
+        limpiarLista()
     });
 
     // funcion cargar modal de productos

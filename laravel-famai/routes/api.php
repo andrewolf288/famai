@@ -176,11 +176,14 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 Route::group(['middleware' => ['auth.jwt']], function() {
     // Route::get('materialesByOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'findByOrdenInterna']);
     Route::get('detalleMaterialesOrdenInterna', [OrdenInternaMaterialesController::class, 'index']);
+    Route::put('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'update']);
+    Route::delete('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'destroy']);
 });
 
 // rutas detalle procesos orden interna
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::put('ordeninternaprocesos/{id}', [OrdenInternaProcesosController::class, 'update']);
+    Route::delete('ordeninternaprocesos/{id}', [OrdenInternaProcesosController::class, 'destroy']);
 });
 
 // rutas de reportes

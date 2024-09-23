@@ -242,6 +242,7 @@ class OrdenInternaController extends Controller
                     'odm_tipo' => 2,
                     'odm_estado' => 1,
                     'odm_usucreacion' => $user->usu_codigo,
+                    'odm_fecmodificacion' => null
                 ]);
 
                 $newMaterial->load('producto');
@@ -299,6 +300,7 @@ class OrdenInternaController extends Controller
                     'odp_observacion' => $proceso['odp_observacion'],
                     'odp_estado' => true,
                     'odp_usucreacion' => $user->usu_codigo,
+                    'odp_fecmodificacion' => null
                 ]);
 
                 $newProceso->load('proceso');
