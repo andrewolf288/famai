@@ -304,8 +304,8 @@ $(document).ready(function () {
                 cargarTablaOrdenInterna(),
                 cargarAreas(),
                 cargarResponsables(),
-                cargarInformacionUsuario()
             ])
+            cargarInformacionUsuario()
         } catch (error) {
             alert("Error al cargar los datos")
         } finally {
