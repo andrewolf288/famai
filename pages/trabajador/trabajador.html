@@ -1,4 +1,11 @@
 <h2 class="mb-3 fs-4">Lista de Trabajadores</h2>
+<div class="row justify-content-end mb-4">
+    <div class="col-auto">
+        <a class="btn btn-agregar" id="btn-link-create-trabajador">
+            Crear Trabajador
+        </a>
+    </div>
+</div>
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
     <!-- Filtros a la izquierda -->
     <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-3 mb-md-0">
@@ -20,7 +27,10 @@
         <tr>
             <th>Cod. SAP</th>
             <th>Nombre trabajador</th>
+            <th>Área</th>
+            <th>Sede</th>
             <th>Estado</th>
+            <th>Acciones</th>
             <th>Usu. Creador</th>
             <th>Fec. Creación</th>
             <th>Usu. Actualizador</th>
@@ -30,3 +40,107 @@
     <tbody id="data-container-body">
     </tbody>
 </table>
+
+<!-- CREACION DE TRABAJADOR -->
+<div class="modal fade" id="crearTrabajadorModal" tabindex="-1" aria-labelledby="crearTrabajadorModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="crearTrabajadorModalLabel">Añadir Trabajador</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body orange-form">
+                <form id="crearTrabajadorForm">
+                    <div class="row">
+                        <!-- INPUT NOMBRE -->
+                        <div class="mb-3">
+                            <label for="nombreTrabajador" class="form-label">Nombre trabajador</label>
+                            <input type="text" class="form-control" id="nombreTrabajador" required>
+                        </div>
+                        <!-- INPUT CODIGO SAP -->
+                        <div class="mb-3">
+                            <label for="codigoSAPTrabajador" class="form-label">Codigo SAP trabajador</label>
+                            <input type="text" class="form-control" id="codigoSAPTrabajador">
+                        </div>
+                        <!-- SELECT DE USUARIO -->
+                        <div class="mb-3">
+                            <label for="usuarioTrabajador" class="form-label">Usuario</label>
+                            <select class="form-select" id="usuarioTrabajador" required></select>
+                        </div>
+                        <!-- SELECT DE AREA -->
+                        <div class="mb-3">
+                            <label for="areaTrabajador" class="form-label">Área</label>
+                            <select class="form-select" id="areaTrabajador" required></select>
+                        </div>
+                        <!-- SELECT DE SEDE -->
+                        <div class="mb-3">
+                            <label for="sedeTrabajador" class="form-label">Sede</label>
+                            <select class="form-select" id="sedeTrabajador" required></select>
+                        </div>
+                        
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnCrearTrabajador"
+                    form="crearTrabajadorForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ACTUALIZACION DE TRABAJADOR -->
+<div class="modal fade" id="editarTrabajadorModal" tabindex="-1" aria-labelledby="editarTrabajadorModalLabel"
+aria-hidden="true">
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="editarTrabajadorModalLabel">Editar Trabajador</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body orange-form">
+            <form id="editarTrabajadorForm">
+                <div class="row">
+                    <input type="hidden" id="id_trabajador_hidden">
+                    <!-- INPUT NOMBRE -->
+                    <div class="mb-3">
+                        <label for="nombreTrabajadorEdit" class="form-label">Nombre trabajador</label>
+                        <input type="text" class="form-control" id="nombreTrabajadorEdit" required>
+                    </div>
+                    <!-- INPUT CODIGO SAP -->
+                    <div class="mb-3">
+                        <label for="codigoSAPTrabajadorEdit" class="form-label">Codigo SAP trabajador</label>
+                        <input type="text" class="form-control" id="codigoSAPTrabajadorEdit">
+                    </div>
+                    <!-- SELECT DE USUARIO -->
+                    <div class="mb-3">
+                        <label for="usuarioTrabajadorEdit" class="form-label">Usuario</label>
+                        <select class="form-select" id="usuarioTrabajadorEdit" required></select>
+                    </div>
+                    <!-- SELECT DE AREA -->
+                    <div class="mb-3">
+                        <label for="areaTrabajadorEdit" class="form-label">Área</label>
+                        <select class="form-select" id="areaTrabajadorEdit" required></select>
+                    </div>
+                    <!-- SELECT DE SEDE -->
+                    <div class="mb-3">
+                        <label for="sedeTrabajadorEdit" class="form-label">Sede</label>
+                        <select class="form-select" id="sedeTrabajadorEdit" required></select>
+                    </div>
+                    <!-- ESTADO TRABAJADOR -->
+                    <div class="mb-3">
+                        <input type="checkbox" class="form-check-input me-2" id="activoTrabajadorEdit">
+                        <label class="form-check-label" for="activoTrabajadorEdit">Activo</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary" id="btnEditarTrabajador"
+                form="editarTrabajadorForm">Guardar</button>
+        </div>
+    </div>
+</div>
+</div>

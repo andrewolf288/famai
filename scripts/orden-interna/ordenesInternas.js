@@ -1,4 +1,7 @@
 $(document).ready(() => {
+
+    // OBTENEMOS LA INFORMACION DEL USUARIO
+    const {rol} = decodeJWT(localStorage.getItem('authToken'))
     // URL ENDPOINT
     const apiURL = '/ordenesinternas'
 
@@ -40,7 +43,9 @@ $(document).ready(() => {
                     <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'No aplica'}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
-                    <td>${ordenInterna.oic_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary btn-orden-interna-change-estado" data-orden-interna="${ordenInterna.oic_id}" ${rol > 3 ? 'disabled' : '' }>${ordenInterna.oic_estado}</button>
+                    </td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-orden-interna-editar" data-orden-interna="${ordenInterna.oic_id}">
@@ -117,6 +122,43 @@ $(document).ready(() => {
             document.body.removeChild(a)
         } catch (error) {
             alert('Error al generar el reporte')
+        }
+    })
+
+    $('#data-container').on('click', '.btn-orden-interna-change-estado', function () {
+        const id = $(this).data('orden-interna')
+        const textEstado = $(this).text()
+        const modalChangeEstado =  new bootstrap.Modal(document.getElementById('changeEstadoOI'))
+        modalChangeEstado.show()
+        $('#estadoActualOI').text(textEstado)
+        $('#idOI').val(id)
+        const estado = ['ABIERTA', 'EVALUADO', 'ATENDIDA', 'CERRADA']
+
+        // vaciamos el select
+        $('#estadoOISelect').empty()
+
+        // rellenamos el select
+        estado.forEach(element => {
+            const abiertoStatus = element === 'ABIERTA' ? (textEstado === 'ATENDIDA' || textEstado === 'CERRADA') ? 'disabled' : '' : ''
+            const selectedStatus = element === textEstado ? 'selected' : ''
+            $('#estadoOISelect').append(`<option value="${element}" ${selectedStatus} ${abiertoStatus}>${element}</option>`)
+        })
+    })
+
+    $('#changeEstadoOIBtn').on('click', async function () {
+        const id = $('#idOI').val()
+        const estado = $('#estadoOISelect').val()
+        try {
+            await client.put(`/ordeninterna/${id}`, { oic_estado: estado })
+
+            const modalChangeEstado = bootstrap.Modal.getInstance(document.getElementById('changeEstadoOI'))
+            modalChangeEstado.hide()
+
+            // traemos la data
+            const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
+            initPagination(URL, initDataTable, dataTableOptions)
+        } catch (error) {
+            alert('Error al cambiar el estado')
         }
     })
 })

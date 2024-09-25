@@ -23,6 +23,7 @@ use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,7 @@ Route::group([
 // rutas de usuarios
 Route::group(['middleware' => ['auth.jwt']], function() {
    Route::get('usuarios', [UsuarioController::class, 'index']);
+   Route::get('usuariosSimple', [UsuarioController::class, 'indexSimple']);
    Route::get('usuario/{id}', [UsuarioController::class, 'show']);
    Route::put('usuario/{id}', [UsuarioController::class, 'update']);
    Route::post('usuarios', [UsuarioController::class, 'store']);
@@ -147,6 +149,10 @@ Route::group(['middleware' => ['auth.jwt']], function() {
 Route::group(['middleware' => ['auth.jwt']], function() {
     Route::get('trabajadores', [TrabajadorController::class, 'index']);
     Route::get('trabajadoresSimple', [TrabajadorController::class, 'indexSimple']);
+    Route::post('trabajadores', [TrabajadorController::class, 'store']);
+    Route::put('trabajador/{id}', [TrabajadorController::class, 'update']);
+    Route::get('trabajador/{id}', [TrabajadorController::class, 'show']);
+    Route::get('trabajadorByUsuario/{usuario}', [TrabajadorController::class, 'findByUsuario']);
 });
 
 // rutas de compras
@@ -170,6 +176,7 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::post('ordenesinternas', [OrdenInternaController::class, 'store']);
     Route::put('ordeninterna/guardar-procesos/{id}', [OrdenInternaController::class, 'update_proceso']);
     Route::put('ordeninterna/guardar-materiales/{id}', [OrdenInternaController::class, 'update_material']);
+    Route::put('ordeninterna/{id}', [OrdenInternaController::class, 'update']);
 });
 
 // rutas detalle materiales orden interna
@@ -228,6 +235,12 @@ Route::group(['middleware' => ['auth.jwt']], function() {
     Route::post('familias', [FamiliaController::class, 'store']);
     Route::put('familia/{id}', [FamiliaController::class, 'update']);
     Route::get('/familiasByQuery', [FamiliaController::class, 'findFamiliaByQuery']);
+});
+
+// rutas de sedes
+Route::group(['middleware' => ['auth.jwt']], function() {
+    Route::get('sedes', [SedeController::class, 'index']);
+    Route::get('sedesSimple', [SedeController::class, 'indexSimple']);
 });
 
 

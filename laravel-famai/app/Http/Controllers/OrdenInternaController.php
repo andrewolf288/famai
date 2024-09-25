@@ -701,4 +701,35 @@ class OrdenInternaController extends Controller
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
+
+    // actualizamos el estado de la orden interna
+    public function update(Request $request, $id)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+
+            $ordenInterna = OrdenInterna::find($id);
+            if (!$ordenInterna) {
+                throw new Exception('Orden Interna no encontrada');
+            }
+
+            $validator = Validator::make($request->all(), [
+                'oic_estado' => 'required|string',
+            ])->validate();
+
+            $ordenInterna->update([
+                'oic_estado' => $request->input('oic_estado'),
+                'oic_usumodificacion' => $user->usu_codigo,
+            ]);
+
+            DB::commit();
+
+            return response()->json($ordenInterna, 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
 }

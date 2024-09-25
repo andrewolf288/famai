@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -34,6 +36,13 @@ class UsuarioController extends Controller
             'data' => $users->items(),
             'count' => $users->total()
         ]);
+    }
+
+    // funcion para mostrar de manera simplicada los usuarios
+    public function indexSimple()
+    {
+        $users = User::where('usu_activo', 1)->select('usu_codigo', 'usu_nombre')->get();
+        return response()->json($users);
     }
 
     // funcion para mostrar informacion de un usuario
@@ -96,30 +105,47 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $userAuth = auth()->user();
+        try {
+            DB::beginTransaction();
+            $validator = Validator::make($request->all(), [
+                'usu_codigo' => 'required|string|max:8|unique:tblusuarios_usu',
+                'usu_contrasena' => 'required|string|min:6',
+                'usu_nombre' => 'required|string|max:250',
+                'rol_id' => 'required|integer|exists:tblroles_rol,rol_id',
+                // 'sed_codigo' => 'required|string|exists:tblsedes_sed,sed_codigo',
+                // 'are_codigo' => 'required|integer|exists:tblareas_are,are_codigo',
+            ]);
 
-        $validator = Validator::make($request->all(), [
-            'usu_codigo' => 'required|string|max:8|unique:tblusuarios_usu',
-            'usu_contrasena' => 'required|string|min:6',
-            'usu_nombre' => 'required|string|max:250',
-            'rol_id' => 'required|integer|exists:tblroles_rol,rol_id',
-        ]);
+            if ($validator->fails()) {
+                return response()->json(["error" => $validator->errors()->toJson()], 400);
+            }
 
-        if ($validator->fails()) {
-            return response()->json(["error" => $validator->errors()->toJson()], 400);
+            $user = User::create([
+                'usu_codigo' => $request->usu_codigo,
+                'usu_contrasena' => bcrypt($request->usu_contrasena),
+                'usu_nombre' => $request->usu_nombre,
+                'rol_id' => $request->rol_id,
+                'usu_usucreacion' => $userAuth->usu_codigo,
+                'usu_fecmodificacion' => null,
+            ]);
+            // $trabajador = Trabajador::create([
+            //     'usu_codigo' => $user->usu_codigo,
+            //     'tra_nombre' => $request->usu_nombre,
+            //     'sed_codigo' => $request->sed_codigo,
+            //     'are_codigo' => $request->are_codigo,
+            //     'tra_activo' => 1,
+            //     'tra_usucreacion' => $userAuth->usu_codigo,
+            //     'tra_fecmodificacion' => null,
+            // ]);
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Usuario registrado exitosamente',
+                'user' => $user
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
         }
-
-        $user = User::create([
-            'usu_codigo' => $request->usu_codigo,
-            'usu_contrasena' => bcrypt($request->usu_contrasena),
-            'usu_nombre' => $request->usu_nombre,
-            'rol_id' => $request->rol_id,
-            'usu_usucreacion' => $userAuth->usu_codigo,
-            'usu_fecmodificacion' => null,
-        ]);
-
-        return response()->json([
-            'message' => 'Usuario registrado exitosamente',
-            'user' => $user
-        ], 201);
     }
 }

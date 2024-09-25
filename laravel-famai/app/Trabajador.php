@@ -13,6 +13,9 @@ class Trabajador extends Model
     protected $fillable = [
         'tra_nombre',
         'tra_codigosap',
+        'usu_codigo',
+        'are_codigo',
+        'sed_codigo',
         'tra_activo',
         'tra_usucreacion',
         'tra_feccreacion',
@@ -26,5 +29,21 @@ class Trabajador extends Model
     public function scopeSelectFields($query)
     {
         return $query->select('tra_id', 'tra_nombre', 'tra_codigosap');
+    }
+
+    // usuario
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'usu_codigo')->select('usu_codigo', 'usu_nombre');
+    }
+    // area
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'are_codigo')->selectFields();
+    }
+    // sede
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'sed_codigo')->selectFields();
     }
 }

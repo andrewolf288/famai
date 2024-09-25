@@ -70,3 +70,29 @@
   <tbody id="data-container-body">
   </tbody>
 </table>
+
+<!-- Dialog para cambio de estado -->
+<div class="modal fade" id="changeEstadoOI" tabindex="-1" aria-labelledby="changeEstadoOILabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="changeEstadoOILabel">Cambiar Estado</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body orange-form">
+        <form id="changeEstadoOIForm">
+          <input type="text" id="idOI" hidden>
+          <p>Estado actual: <span id="estadoActualOI" class="badge bg-primary"></span></p>
+          <label for="estadoOISelect" class="form-label">Estado de OI</label>
+          <select name="estadoOISelect" id="estadoOISelect" class="form-control">
+          </select>
+        </form>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="changeEstadoOIBtn">Guardar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

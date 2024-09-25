@@ -224,6 +224,24 @@ $(document).ready(function () {
         }
     }
 
+    // cargar informacion segun usuario
+    const cargarInformacionUsuario = async () => {
+        console.log(decodeJWT(localStorage.getItem('authToken')))
+        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
+        try {
+            const { data } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
+            $('#areaSelect').val(data.are_codigo)
+            $('#otInput').val(data.sed_codigo)
+        } catch(error) {
+            const {response} = error
+            if (response.status === 404) {
+                alert('El usuario logeado no esta relacionado con ningun trabajador')
+            } else {
+                alert('Ocurrio un error al traer la informacion de trabajador')
+            }
+        }
+    }
+
     // -------- MANEJO DE FECHA ----------
     $("#fechaPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -285,7 +303,8 @@ $(document).ready(function () {
             await Promise.all([
                 cargarTablaOrdenInterna(),
                 cargarAreas(),
-                cargarResponsables()
+                cargarResponsables(),
+                cargarInformacionUsuario()
             ])
         } catch (error) {
             alert("Error al cargar los datos")

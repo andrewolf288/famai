@@ -58,6 +58,7 @@ class AuthController extends Controller
 
         $customClaims = [
             'rol' => $user->rol->rol_id,
+            'usu_codigo' => $user->usu_codigo
         ];
         $token = JWTAuth::claims($customClaims)->attempt($credentials);
 

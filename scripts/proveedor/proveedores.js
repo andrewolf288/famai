@@ -169,7 +169,7 @@ $(document).ready(() => {
         }
     })
 
-    //--------- EDITAR USUARIO -------------
+    //--------- EDITAR PROVEEDOR -------------
     async function cargarDetalleProveedorById(id_proveedor) {
         try {
             const { data } = await client.get(`/proveedor/${id_proveedor}`)
