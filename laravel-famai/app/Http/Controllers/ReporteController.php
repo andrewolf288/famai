@@ -41,6 +41,9 @@ class ReporteController extends Controller
 
 	public function generarReporteOrdenTrabajo(Request $request)
 	{
+		# obtenemos informacion del usuario que imprime el reporte
+		$userAuth = auth()->user();
+
 		$this->initializePaths();
 		$this->fechaHoraActual = date('Y-m-d H:i:s');
 		$varTempDir = storage_path($this->storagepath);
@@ -391,7 +394,8 @@ class ReporteController extends Controller
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
 				$varMpdf->WriteHTML($varData);
-				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				// $varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				$varMpdf->SetFooter('Usuario impresión: '. $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
 				return response()->streamDownload(
 					function () use ($varMpdf) {
 						echo $varMpdf->Output('', 'S');
@@ -416,6 +420,7 @@ class ReporteController extends Controller
 
 	public function previsualizarReporteOrdenTrabajo(Request $request)
 	{
+		$userAuth = auth()->user();
 		try {
 			$this->initializePaths();
 			$this->fechaHoraActual = date('Y-m-d H:i:s');
@@ -769,7 +774,7 @@ class ReporteController extends Controller
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
 				$varMpdf->WriteHTML($varData);
-				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				$varMpdf->SetFooter('Usuario impresión: '. $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
 				return response()->streamDownload(
 					function () use ($varMpdf) {
 						echo $varMpdf->Output('', 'S');

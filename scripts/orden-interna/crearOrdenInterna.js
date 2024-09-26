@@ -232,6 +232,7 @@ $(document).ready(function () {
             const { data } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
             $('#areaSelect').val(data.are_codigo)
             $('#otInput').val(data.sed_codigo)
+            $('#responsableOrigen').val(data.tra_id)
         } catch(error) {
             const {response} = error
             if (response.status === 404) {
@@ -879,9 +880,7 @@ $(document).ready(function () {
             $oiValorEquipo.length === 0 ||
             $oiCodigoArea.length === 0 ||
             $oiFecha.length === 0 ||
-            $oiEncargadoOrigen.length === 0 ||
-            $oiEncargadoMaestro.length === 0 ||
-            $oiEncargadoAlmacen.length === 0
+            $oiEncargadoOrigen.length === 0
         ) {
             if ($otInput.length === 0) {
                 handleError += '- Se debe ingresar información de orden trabajo\n'
@@ -904,12 +903,6 @@ $(document).ready(function () {
             if ($oiEncargadoOrigen.length === 0) {
                 handleError += '- Se debe ingresar información de encargado origen\n'
             }
-            if ($oiEncargadoMaestro.length === 0) {
-                handleError += '- Se debe ingresar información de encargado maestro\n'
-            }
-            if ($oiEncargadoAlmacen.length === 0) {
-                handleError += '- Se debe ingresar información de encargado almacen\n'
-            }
         }
 
         // manejamos el error
@@ -921,8 +914,8 @@ $(document).ready(function () {
                 are_codigo: $oiCodigoArea,
                 oic_fecha: transformarFecha($oiFecha),
                 tra_idorigen: $oiEncargadoOrigen,
-                tra_idmaestro: $oiEncargadoMaestro,
-                tra_idalmacen: $oiEncargadoAlmacen,
+                tra_idmaestro: $oiEncargadoMaestro || null,
+                tra_idalmacen: $oiEncargadoAlmacen || null,
                 oic_equipo_descripcion: $oiValorEquipo,
                 detalle_partes: ordenInterna.detalle_partes,
             }
