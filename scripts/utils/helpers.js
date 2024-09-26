@@ -60,3 +60,11 @@ function decodeJWT(token) {
     }).join(''));
     return JSON.parse(jsonPayload);
 }
+
+function debounce(func) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), 300);
+    };
+}

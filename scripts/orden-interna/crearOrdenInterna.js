@@ -1,5 +1,6 @@
 
 $(document).ready(function () {
+    let abortController
     
     window.onbeforeunload = function(e) {
         e.preventDefault();
@@ -586,7 +587,7 @@ $(document).ready(function () {
     })
 
     // al momento de ir ingresando valores en el input
-    $('#productosInput').on('input', async function () {
+    $('#productosInput').on('input', debounce(async function () {
         const isChecked = $('#checkAsociarProducto').is(':checked')
         const query = $(this).val().trim()
         if (query.length >= 3 && !isChecked) {
@@ -594,7 +595,7 @@ $(document).ready(function () {
         } else {
             limpiarLista()
         }
-    })
+    }))
 
     // al momento de presionar enter
     $('#productosInput').on('keydown', function(event) {
@@ -612,6 +613,12 @@ $(document).ready(function () {
     });
 
     async function buscarMateriales(query) {
+        if (abortController) {
+            abortController.abort();
+        }
+        abortController = new AbortController();
+        const signal = abortController.signal;
+
         try {
             const queryEncoded = encodeURIComponent(query)
             const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
@@ -629,7 +636,12 @@ $(document).ready(function () {
                 $('#resultadosLista').append(listItem)
             })
         } catch (error) {
-            // alert('Error al buscar materiales')
+            if (error.name === 'AbortError') {
+                console.log('Petición abortada'); // Maneja el error de la petición abortada
+            } else {
+                console.error('Error al buscar materiales:', error);
+                alert('Error al buscar materiales. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
+            }
         }
     }
 
@@ -998,7 +1010,6 @@ $(document).ready(function () {
 
     // previsualizar orden interna
     $("#btn-previsualizar-orden-interna").on('click', async function () {
-        let handleError = ''
         const $oiCliente = $('#clienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
         const $oiInput = $('#oiInput').val().trim()
@@ -1057,7 +1068,7 @@ $(document).ready(function () {
     // Funcion de cancelar
     $('#btn-cancelar-orden-interna').on('click', function () {
         resetValues()
-        window.location.href = '/orden-interna'
+        window.location.href = 'orden-interna'
     })
 
     // -------- MANEJADORES DE DIALOG ---------------
