@@ -1,11 +1,25 @@
 
 $(document).ready(function () {
     let abortController
-    
-    window.onbeforeunload = function(e) {
+
+    window.onbeforeunload = function (e) {
         e.preventDefault();
         e.returnValue = '';
     }
+
+    // evento para cargar
+    $('select[multiple]').multiselect(
+        {
+            onOptionClick: function (element, option) {
+                var thisOpt = $(option);
+                if (thisOpt.prop('checked')) {
+                    agregarDetalleProceso(thisOpt.val(), thisOpt.attr('title'))
+                } else {
+                    eliminarDetalleProceso(thisOpt.val())
+                }
+            }
+        }
+    )
 
     const showLoaderModal = () => {
         const loaderModal = new bootstrap.Modal(document.getElementById('loaderModal'), {
@@ -97,7 +111,7 @@ $(document).ready(function () {
         }
 
         try {
-            const {data} = await client.get(`/ordeninternaByNumero/${oiValue}`)
+            const { data } = await client.get(`/ordeninternaByNumero/${oiValue}`)
             const formatData = []
             data.partes.forEach(parte => {
                 const parteDetalle = {
@@ -185,7 +199,7 @@ $(document).ready(function () {
         loaderModalSearchOI.show()
     })
 
-    $('#btnSearchOrdenInterna').on('click', async function (event){
+    $('#btnSearchOrdenInterna').on('click', async function (event) {
         event.preventDefault()
         await buscarOrdenInterna()
         const loaderModalSearchOI = bootstrap.Modal.getInstance(document.getElementById('ordenInternaSearchModal'))
@@ -240,8 +254,8 @@ $(document).ready(function () {
             $('#areaSelect').val(data.are_codigo)
             $('#otInput').val(data.sed_codigo)
             $('#responsableOrigen').val(data.tra_id)
-        } catch(error) {
-            const {response} = error
+        } catch (error) {
+            const { response } = error
             if (response.status === 404) {
                 alert('El usuario logeado no esta relacionado con ningun trabajador')
             } else {
@@ -328,14 +342,28 @@ $(document).ready(function () {
     // ------------ JAVASCRIPT PARA GESTION DE PROCESOS -------------
     // carga de selector de procesos
     const cargarProcesosSelect = async (id_parte) => {
+        const findElement = buscarDetalleParte(id_parte)
+        const { detalle_procesos } = findElement
+
         try {
             const { data } = await client.get(`/procesosByParte/${id_parte}`)
-            const $procesosSelect = $('#procesosSelect')
-            $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`)
+            // const $procesosSelect = $('#procesosSelect')
+            // $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`)
+            // data.forEach(function (proceso) {
+            //     const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"])
+            //     $procesosSelect.append(option)
+            // })
+            let options = []
             data.forEach(function (proceso) {
-                const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"])
-                $procesosSelect.append(option)
+                const checked = detalle_procesos.find( element => element.opp_id == proceso["opp_id"]) ? true : false
+                options.push({
+                    name: `${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`,
+                    value: proceso["opp_id"],
+                    checked: checked
+                })
             })
+
+            $('select[multiple]').multiselect('loadOptions', options);
         } catch (error) {
             alert("Error al cargar la lista de procesos")
         }
@@ -351,6 +379,29 @@ $(document).ready(function () {
         detalle_procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
         detalle_procesos.forEach(element => {
+            // const row = `
+            // <tr>
+            //     <td>${element["opp_codigo"]}</td>
+            //     <td>${element["opp_descripcion"]}</td>
+            //     <td><input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/></td>
+            //     <td>
+            //         <input type="text" class="form-control" value="${element["odp_observacion"]}" readonly/>
+            //     </td>
+            //     <td>
+            //         <div class="d-flex justify-content-around">
+            //             <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${element["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+            //                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+            //                 </svg>
+            //             </button>
+            //             <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${element["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+            //                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+            //                 </svg>
+            //             </button>
+            //         </div>
+            //     </td>
+            // </tr>`
             const row = `
             <tr>
                 <td>${element["opp_codigo"]}</td>
@@ -364,11 +415,6 @@ $(document).ready(function () {
                         <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${element["opp_id"]}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${element["opp_id"]}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
                         </button>
                     </div>
@@ -394,14 +440,15 @@ $(document).ready(function () {
     })
 
     // funcion de agregar detalle de proceso a parte de orden interna
-    $('#procesosSelect').on('change', function () {
-        const selectedProcesoId = $(this).val()
+    function agregarDetalleProceso(valueId, valueName) {
+        console.log(valueId, valueName)
+        const selectedProcesoId = valueId
         if (selectedProcesoId == "0") {
             alert('Debes seleccionar un proceso')
             return
         }
-        const selectedProcesoName = $(this).find('option:selected').text().split(" - ")[1].trim()
-        const selectedProcesoCode = $(this).find('option:selected').data('codigo')
+        const selectedProcesoName = valueName.split(" - ")[1].trim()
+        const selectedProcesoCode = valueName.split(" - ")[0].trim()
 
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_procesos } = findElement
@@ -420,6 +467,29 @@ $(document).ready(function () {
             }
 
             // primero añadimos al DOM
+            // const row = `
+            // <tr>
+            //     <td>${data["opp_codigo"]}</td>
+            //     <td>${data["opp_descripcion"]}</td>
+            //     <td><input type="checkbox" disabled/></td>
+            //     <td>
+            //         <input type="text" class="form-control" value="${data["odp_observacion"]}" readonly/>
+            //     </td>
+            //     <td>
+            //         <div class="d-flex justify-content-around">
+            //             <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${data["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+            //                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+            //                 </svg>
+            //             </button>
+            //             <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${data["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+            //                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+            //                 </svg>
+            //             </button>
+            //         </div>
+            //     </td>
+            // </tr>`
             const row = `
             <tr>
                 <td>${data["opp_codigo"]}</td>
@@ -435,11 +505,6 @@ $(document).ready(function () {
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${data["opp_id"]}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
                     </div>
                 </td>
             </tr>`
@@ -452,9 +517,72 @@ $(document).ready(function () {
             $(idCantidadProceso).text(totalProcesos)
         }
 
-        // seleccionamos el valor por defecto
-        $('#procesosSelect').val(0)
-    })
+        // seleccionamos el valor por defecto ---- para anterior implementacion se descomenta -----
+        // $('#procesosSelect').val(0)
+    }
+
+    // funcion de agregar detalle de proceso a parte de orden interna
+    // $('#procesosSelect').on('change', function () {
+    //     const selectedProcesoId = $(this).val()
+    //     if (selectedProcesoId == "0") {
+    //         alert('Debes seleccionar un proceso')
+    //         return
+    //     }
+    //     const selectedProcesoName = $(this).find('option:selected').text().split(" - ")[1].trim()
+    //     const selectedProcesoCode = $(this).find('option:selected').data('codigo')
+
+    //     const findElement = buscarDetalleParte(currentParte)
+    //     const { detalle_procesos } = findElement
+
+    //     const findProceso = detalle_procesos.find(element => element.opp_id == selectedProcesoId)
+
+    //     if (findProceso) {
+    //         alert('Este proceso ya fué agregado')
+    //     } else {
+    //         const data = {
+    //             opp_id: selectedProcesoId,
+    //             opp_codigo: selectedProcesoCode,
+    //             opp_descripcion: selectedProcesoName,
+    //             odp_ccalidad: false,
+    //             odp_observacion: ""
+    //         }
+
+    //         // primero añadimos al DOM
+    //         const row = `
+    //         <tr>
+    //             <td>${data["opp_codigo"]}</td>
+    //             <td>${data["opp_descripcion"]}</td>
+    //             <td><input type="checkbox" disabled/></td>
+    //             <td>
+    //                 <input type="text" class="form-control" value="${data["odp_observacion"]}" readonly/>
+    //             </td>
+    //             <td>
+    //                 <div class="d-flex justify-content-around">
+    //                     <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${data["opp_id"]}">
+    //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+    //                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+    //                         </svg>
+    //                     </button>
+    //                     <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${data["opp_id"]}">
+    //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+    //                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+    //                         </svg>
+    //                     </button>
+    //                 </div>
+    //             </td>
+    //         </tr>`
+
+    //         $('#tbl-orden-interna-procesos tbody').append(row)
+    //         detalle_procesos.push(data)
+    //         // debemos actualizar la cantidad de procesos
+    //         const totalProcesos = detalle_procesos.length
+    //         const idCantidadProceso = `#cantidad-procesos-${currentParte}`
+    //         $(idCantidadProceso).text(totalProcesos)
+    //     }
+
+    //     // seleccionamos el valor por defecto
+    //     $('#procesosSelect').val(0)
+    // })
 
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
@@ -475,7 +603,7 @@ $(document).ready(function () {
                 </svg>`)
     })
 
-    // funcion de guarda detalle de proceso
+    // funcion de guardar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', function () {
         const id_proceso = $(this).data('proceso')
         const $row = $(this).closest('tr')
@@ -501,9 +629,10 @@ $(document).ready(function () {
     })
 
     // funcion de eliminacion de detalle de proceso
-    $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', function () {
-        const id_proceso = $(this).data('proceso')
-        const $row = $(this).closest('tr')
+    function eliminarDetalleProceso (id_proceso) {
+        // const id_proceso = $(this).data('proceso')
+        const $element = $(`button[data-proceso="${id_proceso}"]`)
+        const $row = $element.closest('tr')
 
         // removemos el DOM
         $row.remove()
@@ -519,7 +648,26 @@ $(document).ready(function () {
         const totalProcesos = detalle_procesos.length
         const idCantidadProceso = `#cantidad-procesos-${currentParte}`
         $(idCantidadProceso).text(totalProcesos)
-    })
+    }
+    // $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', function () {
+    //     const id_proceso = $(this).data('proceso')
+    //     const $row = $(this).closest('tr')
+
+    //     // removemos el DOM
+    //     $row.remove()
+
+    //     // actualizamos la data
+    //     const findElement = buscarDetalleParte(currentParte)
+    //     const { detalle_procesos } = findElement
+
+    //     const findIndexElementProceso = detalle_procesos.findIndex(element => element.opp_id == id_proceso)
+    //     detalle_procesos.splice(findIndexElementProceso, 1)
+
+    //     // debemos actualizar la cantidad de procesos
+    //     const totalProcesos = detalle_procesos.length
+    //     const idCantidadProceso = `#cantidad-procesos-${currentParte}`
+    //     $(idCantidadProceso).text(totalProcesos)
+    // })
 
     // ------------ JAVASCRIPT PARA GESTION DE PRODUCTOS -------------
     // carga de detalle de materiales en tabla
@@ -560,7 +708,7 @@ $(document).ready(function () {
         })
     }
 
-    $('#checkAsociarProducto').change(function() {
+    $('#checkAsociarProducto').change(function () {
         if ($(this).is(':checked')) {
             // Si está marcado, cambia el placeholder
             $('#productosInput').attr('placeholder', 'Describa material...');
@@ -598,13 +746,13 @@ $(document).ready(function () {
     }))
 
     // al momento de presionar enter
-    $('#productosInput').on('keydown', function(event) {
+    $('#productosInput').on('keydown', function (event) {
         // si es la tecla de enter
         if (event.keyCode === 13) {
             event.preventDefault();
             const isChecked = $('#checkAsociarProducto').is(':checked')
             // si se desea agregar un producto sin código
-            if(isChecked) {
+            if (isChecked) {
                 ingresarProductoSinCodigo()
             } else {
                 return
@@ -957,9 +1105,9 @@ $(document).ready(function () {
                 if (validacionDetalleMateriales.length === 0) {
                     showLoaderModal()
                     try {
-                        const {data} = await client.post('/ordenesinternas', formatData)
+                        const { data } = await client.post('/ordenesinternas', formatData)
                         // si se desea imprimir
-                        if(confirm('¿Deseas imprimir la orden interna?')) {
+                        if (confirm('¿Deseas imprimir la orden interna?')) {
                             try {
                                 const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${data.oic_id}`, {
                                     headers: {
@@ -967,7 +1115,7 @@ $(document).ready(function () {
                                     },
                                     responseType: 'blob'
                                 })
-                        
+
                                 const url = window.URL.createObjectURL(new Blob([response.data]))
                                 const a = document.createElement('a')
                                 a.href = url
@@ -982,7 +1130,7 @@ $(document).ready(function () {
                         }
 
                         //verificamos si quiere seguir editando la orden interna
-                        if(confirm('¿Deseas seguir editando la orden interna?')) {
+                        if (confirm('¿Deseas seguir editando la orden interna?')) {
                             window.location.href = `orden-interna/editar/${data.oic_id}`
                         } else {
                             window.location.href = 'orden-interna'
@@ -1042,13 +1190,13 @@ $(document).ready(function () {
 
         showLoaderModal()
         try {
-            const response = await client.post(`/previsualizarReporteOrdenTrabajo`, formatData ,{
+            const response = await client.post(`/previsualizarReporteOrdenTrabajo`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'
                 },
                 responseType: 'blob'
             })
-    
+
             const url = window.URL.createObjectURL(new Blob([response.data]))
             const a = document.createElement('a')
             a.href = url
@@ -1060,7 +1208,7 @@ $(document).ready(function () {
         } catch (error) {
             console.log(error)
             alert('Error al generar el reporte')
-        }finally {
+        } finally {
             hideLoaderModal()
         }
     })
