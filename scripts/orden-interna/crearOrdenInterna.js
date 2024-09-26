@@ -1,4 +1,11 @@
+
 $(document).ready(function () {
+    
+    window.onbeforeunload = function(e) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+
     const showLoaderModal = () => {
         const loaderModal = new bootstrap.Modal(document.getElementById('loaderModal'), {
             backdrop: 'static',
@@ -226,7 +233,6 @@ $(document).ready(function () {
 
     // cargar informacion segun usuario
     const cargarInformacionUsuario = async () => {
-        console.log(decodeJWT(localStorage.getItem('authToken')))
         const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
         try {
             const { data } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
@@ -862,6 +868,8 @@ $(document).ready(function () {
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
+        // deshabilitamos el evento de recarga
+        window.onbeforeunload = null;
         let handleError = ''
         const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
@@ -960,7 +968,13 @@ $(document).ready(function () {
                                 alert('Error al generar el reporte')
                             }
                         }
-                        window.location.href = 'orden-interna'
+
+                        //verificamos si quiere seguir editando la orden interna
+                        if(confirm('¿Deseas seguir editando la orden interna?')) {
+                            window.location.href = `orden-interna/editar/${data.oic_id}`
+                        } else {
+                            window.location.href = 'orden-interna'
+                        }
                     } catch (error) {
                         const { response } = error
                         if (response.status === 500) {
@@ -1007,8 +1021,6 @@ $(document).ready(function () {
             oic_equipo_descripcion: $oiValorEquipo,
             detalle_partes: ordenInterna.detalle_partes,
         }
-
-        console.log(formatData)
 
         // // formateamos la data de numero de orden
         formatData.detalle_partes.forEach(element => {
