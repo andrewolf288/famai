@@ -249,12 +249,12 @@ $(document).ready(async function () {
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        const $inputDescripcion = $row.find('.descripcion-input')
+        // const $inputDescripcion = $row.find('.descripcion-input')
         const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
-        $inputDescripcion.prop('readonly', false)
+        // $inputDescripcion.prop('readonly', false)
         $inputObservacion.prop('readonly', false)
         $inputCheckbox.prop('disabled', false)
 
