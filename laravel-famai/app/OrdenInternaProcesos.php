@@ -14,6 +14,7 @@ class OrdenInternaProcesos extends Model
         'opd_id',
         'opp_id',
         'odp_observacion',
+        'odp_descripcion',
         'odp_ccalidad',
         'odp_estado',
         'odp_usucreacion',

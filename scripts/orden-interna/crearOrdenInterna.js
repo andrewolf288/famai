@@ -126,7 +126,7 @@ $(document).ready(function () {
                     parteDetalle.detalle_procesos.push({
                         opp_id: proceso.proceso.opp_id,
                         opp_codigo: proceso.proceso.opp_codigo,
-                        opp_descripcion: proceso.proceso.opp_descripcion,
+                        odp_descripcion: proceso.odp_descripcion || '',
                         odp_observacion: "",
                         odp_ccalidad: false
                     })
@@ -405,10 +405,14 @@ $(document).ready(function () {
             const row = `
             <tr>
                 <td>${element["opp_codigo"]}</td>
-                <td>${element["opp_descripcion"]}</td>
-                <td><input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/></td>
                 <td>
-                    <input type="text" class="form-control" value="${element["odp_observacion"]}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value="${element["odp_descripcion"]}" readonly/>
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/>
+                </td>
+                <td>
+                    <input type="text" class="form-control observacion-input" value="${element["odp_observacion"]}" readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -443,10 +447,10 @@ $(document).ready(function () {
     function agregarDetalleProceso(valueId, valueName) {
         console.log(valueId, valueName)
         const selectedProcesoId = valueId
-        if (selectedProcesoId == "0") {
-            alert('Debes seleccionar un proceso')
-            return
-        }
+        // if (selectedProcesoId == "0") {
+        //     alert('Debes seleccionar un proceso')
+        //     return
+        // }
         const selectedProcesoName = valueName.split(" - ")[1].trim()
         const selectedProcesoCode = valueName.split(" - ")[0].trim()
 
@@ -461,7 +465,7 @@ $(document).ready(function () {
             const data = {
                 opp_id: selectedProcesoId,
                 opp_codigo: selectedProcesoCode,
-                opp_descripcion: selectedProcesoName,
+                odp_descripcion: selectedProcesoName,
                 odp_ccalidad: false,
                 odp_observacion: ""
             }
@@ -493,10 +497,14 @@ $(document).ready(function () {
             const row = `
             <tr>
                 <td>${data["opp_codigo"]}</td>
-                <td>${data["opp_descripcion"]}</td>
-                <td><input type="checkbox" disabled/></td>
                 <td>
-                    <input type="text" class="form-control" value="${data["odp_observacion"]}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value="${data["odp_descripcion"]}" readonly/>
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" disabled/>
+                </td>
+                <td>
+                    <input type="text" class="form-control observacion-input" value="${data["odp_observacion"]}" readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -587,11 +595,13 @@ $(document).ready(function () {
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        const $input = $row.find('input[type="text"]')
+        const $inputDescripcion = $row.find('.descripcion-input')
+        const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
-        $input.prop('readonly', false)
+        $inputDescripcion.prop('readonly', false)
+        $inputObservacion.prop('readonly', false)
         $inputCheckbox.prop('disabled', false)
 
         // ACTUALIZAMOS EL ELEMENTO
@@ -607,16 +617,21 @@ $(document).ready(function () {
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', function () {
         const id_proceso = $(this).data('proceso')
         const $row = $(this).closest('tr')
-        const $input = $row.find('input[type="text"]')
+        const $inputDescripcion = $row.find('.descripcion-input')
+        const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
 
-        const valueObservacion = $input.val()
-        $input.prop('readonly', true)
+        const valueDescripcion = $inputDescripcion.val()
+        const valueObservacion = $inputObservacion.val()
+
+        $inputDescripcion.prop('readonly', true)
+        $inputObservacion.prop('readonly', true)
         $inputCheckbox.prop('disabled', true)
 
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_procesos } = findElement
         const findElementProceso = detalle_procesos.find(element => element.opp_id == id_proceso)
+        findElementProceso["odp_descripcion"] = valueDescripcion
         findElementProceso["odp_observacion"] = valueObservacion
         findElementProceso["odp_ccalidad"] = $inputCheckbox.is(':checked') ? true : false
 
@@ -1028,6 +1043,7 @@ $(document).ready(function () {
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
+        console.log(ordenInterna.detalle_partes)
         // deshabilitamos el evento de recarga
         window.onbeforeunload = null;
         let handleError = ''

@@ -135,12 +135,14 @@ $(document).ready(async function () {
             const row = `
             <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary">
                 <td>${element.proceso.opp_codigo}</td>
-                <td>${element.proceso.opp_descripcion}</td>
+                <td>
+                    <input type="text" class="form-control descripcion-input" value="${element.odp_descripcion || element.proceso.opp_descripcion}" readonly/>
+                </td>
                 <td class="text-center">
                     <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control" value="${element.odp_observacion || ''}" readonly/>
+                    <input type="text" class="form-control observacion-input" value="${element.odp_observacion || ''}" readonly/>
                 </td>
                 <td>${element.odp_usumodificacion ?? 'No aplica'}</td>
                 <td>${element.odp_fecmodificacion ? parseDate(element.odp_fecmodificacion) : 'No aplica'}</td>
@@ -209,10 +211,14 @@ $(document).ready(async function () {
             const row = `
             <tr class="row-editable table-warning" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
-                <td>${selectedProcesoName}</td>
-                <td class="text-center"><input type="checkbox" disabled/></td>
                 <td>
-                    <input type="text" class="form-control" value="" readonly/>
+                    <input type="text" class="form-control descripcion-input" value="${selectedProcesoName}" readonly/>
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" disabled/>
+                </td>
+                <td>
+                    <input type="text" class="form-control observacion-input" value="" readonly/>
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
@@ -243,11 +249,13 @@ $(document).ready(async function () {
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        const $input = $row.find('input[type="text"]')
+        const $inputDescripcion = $row.find('.descripcion-input')
+        const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
 
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
-        $input.prop('readonly', false)
+        $inputDescripcion.prop('readonly', false)
+        $inputObservacion.prop('readonly', false)
         $inputCheckbox.prop('disabled', false)
 
         // ACTUALIZAMOS EL ELEMENTO
@@ -262,15 +270,18 @@ $(document).ready(async function () {
     // funcion de guarda detalle de proceso (gestionar caso de uso)
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', async function () {
         const $row = $(this).closest('tr')
-        const $input = $row.find('input[type="text"]')
+        const $inputDescripcion = $row.find('.descripcion-input')
+        const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
         // si se trata de un registro existente
         if(!$row.hasClass('row-editable')){
             // debemos extraer la informacion dl tr
             const odp_id = $row.data('id-detalle')
-            const odp_observacion = $input.val().trim()
+            const odp_descripcion = $inputDescripcion.val().trim()
+            const odp_observacion = $inputObservacion.val().trim()
             const odp_ccalidad = $inputCheckbox.is(':checked') ? true : false
             const formatData = {
+                odp_descripcion,
                 odp_observacion,
                 odp_ccalidad
             }
@@ -278,6 +289,7 @@ $(document).ready(async function () {
                 const {data} = await client.put(`/ordeninternaprocesos/${odp_id}`, formatData)
                 const { procesos } = buscarDetalleParte(currentDetalleParte)
                 const findProceso = procesos.find(element => element.odp_id == odp_id)
+                findProceso["odp_descripcion"] = data.odp_descripcion || ""
                 findProceso["odp_observacion"] = data.odp_observacion || ""
                 findProceso["odp_ccalidad"] = data.odp_ccalidad
                 findProceso["odp_usumodificacion"] = data.odp_usumodificacion
@@ -291,7 +303,8 @@ $(document).ready(async function () {
             }
         }
 
-        $input.prop('readonly', true)
+        $inputDescripcion.prop('readonly', true)
+        $inputObservacion.prop('readonly', true)
         $inputCheckbox.prop('disabled', true)
 
         // ACTUALIZAMOS EL ELEMENTO
@@ -363,7 +376,8 @@ $(document).ready(async function () {
         $('.row-editable').each(function () {
             let dataObject = {
                 opp_id: $(this).data('id-proceso'),
-                odp_observacion: $(this).find('input[type="text"]').val().trim(),
+                odp_descripcion: $(this).find('.descripcion-input').val().trim(),
+                odp_observacion: $(this).find('.observacion-input').val().trim(),
                 odp_ccalidad: $(this).find('input[type="checkbox"]').is(':checked') ? true : false
             }
             dataArray.push(dataObject)

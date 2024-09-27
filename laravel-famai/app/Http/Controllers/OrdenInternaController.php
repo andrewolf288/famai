@@ -297,6 +297,7 @@ class OrdenInternaController extends Controller
                     'opd_id' => $ordenInternaParte->opd_id,
                     'opp_id' => $proceso['opp_id'],
                     'odp_ccalidad' => $proceso['odp_ccalidad'],
+                    'odp_descripcion' => $proceso['odp_descripcion'],
                     'odp_observacion' => $proceso['odp_observacion'],
                     'odp_estado' => true,
                     'odp_usucreacion' => $user->usu_codigo,
@@ -588,6 +589,7 @@ class OrdenInternaController extends Controller
                 foreach ($detalle_procesos as $proceso) {
                     $validatorProceso = Validator::make($proceso, [
                         'opp_id' => 'required|integer|exists:tblordenesinternasprocesos_opp,opp_id',
+                        'odp_descripcion' => 'required|string', # se añadio el campo de descripcion
                         'odp_observacion' => 'nullable|string',
                         'odp_ccalidad' => 'required|boolean',
                     ])->validate();
@@ -595,6 +597,7 @@ class OrdenInternaController extends Controller
                     OrdenInternaProcesos::create([
                         'opd_id' => $ordenInternaParte->opd_id,
                         'opp_id' => $proceso['opp_id'],
+                        'odp_descripcion' => $proceso['odp_descripcion'],
                         'odp_observacion' => $proceso['odp_observacion'],
                         'odp_ccalidad' => $proceso['odp_ccalidad'],
                         'odp_estado' => 1,
