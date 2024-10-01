@@ -84,9 +84,15 @@ $(document).ready(() => {
         const filterValue = filterInput.val().trim()
 
         let filteredURL = apiURL
-        // si se aplica un filtro y se ingresa un criterio de busqueda
+
+        // primero aplicamos el filtro de fechas
+        const fechaDesde = transformarFecha($('#fechaDesde').val())
+        const fechaHasta = transformarFecha($('#fechaHasta').val())
+        filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+
+        // debemos adjuntar el filtro de busqueda por criterio
         if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+            filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
         }
         initPagination(filteredURL, initDataTable, dataTableOptions)
     })
