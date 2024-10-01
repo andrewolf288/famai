@@ -8,6 +8,8 @@ use App\OrdenInternaPartes;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class OrdenInternaMaterialesController extends Controller
 {
@@ -149,6 +151,69 @@ class OrdenInternaMaterialesController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al eliminar el detalle de material: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function exportExcel(Request $request)
+    {
+        // $ordenTrabajo = $request->input('ot_numero', null);
+        // $ordenInterna = $request->input('oi_numero', null);
+        // $almID = $request->input('alm_id', 1);
+        // $fecha_desde = $request->input('fecha_desde', null);
+        // $fecha_hasta = $request->input('fecha_hasta', null);
+
+        // $query = OrdenInternaMateriales::with(
+        //     [
+        //         'producto.unidad',
+        //         'producto.stock' => function ($q) use ($almID) {
+        //             if ($almID !== null) {
+        //                 $q->where('alm_id', $almID)
+        //                     ->select('pro_id', 'alm_id', 'alp_stock');
+        //             } else {
+        //                 $q->selectRaw('null as alp_stock');
+        //             }
+        //         },
+        //         'ordenInternaParte.ordenInterna'
+        //     ]
+        // );
+
+        // // filtro de orden de trabajo
+        // if ($ordenTrabajo !== null) {
+        //     $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+        //         $q->where('odt_numero', $ordenTrabajo);
+        //     });
+        // }
+
+        // // filtro de orden interna
+        // if ($ordenInterna !== null) {
+        //     $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenInterna) {
+        //         $q->where('oic_numero', $ordenInterna);
+        //     });
+        // }
+
+        // // filtro de fecha
+        // if ($fecha_desde !== null && $fecha_hasta !== null) {
+        //     $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+        // }
+
+        // // ordenar de formar descendiente
+        // $query->orderBy('odm_feccreacion', 'desc');
+
+        // $data = $query->get();
+
+        try {
+            $spreadsheet = new Spreadsheet();
+            $activeWorksheet = $spreadsheet->getActiveSheet();
+            $activeWorksheet->setCellValue('A1', 'Hello World!');
+
+            return response()->streamDownload(function () use ($spreadsheet) {
+                $writer = new Xlsx($spreadsheet);
+                $writer->save('php://output');
+            }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+
+            // return $response;
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
