@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Area;
-use App\Cliente;
 use App\Reporte;
-use App\Trabajador;
 use DateTime;
 use Exception;
 use Illuminate\Http\Request;
+use Mpdf\Output\Destination;
 
 class ReporteController extends Controller
 {
@@ -393,14 +391,16 @@ class ReporteController extends Controller
 				$varData = str_replace($this->varProcCampos, $this->varTab, $varData);
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);
 
+				// Generamos el primer PDF
 				$varMpdf = new \Mpdf\Mpdf(['orientation' => 'L', 'tempDir' => $varTempDir]);
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
 				$varMpdf->WriteHTML($varData);
-				// $varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
-				$varMpdf->SetFooter('Usuario impresión: '. $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				$varMpdf->SetFooter('Usuario impresión: ' . $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+
 				return response()->streamDownload(
 					function () use ($varMpdf) {
+						// echo $varMpdf->Output('', 'S');echo $finalMpdf->Output('', 'S');
 						echo $varMpdf->Output('', 'S');
 					},
 					'reporte.pdf',
@@ -780,7 +780,7 @@ class ReporteController extends Controller
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
 				$varMpdf->WriteHTML($varData);
-				$varMpdf->SetFooter('Usuario impresión: '. $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				$varMpdf->SetFooter('Usuario impresión: ' . $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
 				return response()->streamDownload(
 					function () use ($varMpdf) {
 						echo $varMpdf->Output('', 'S');
