@@ -1,7 +1,7 @@
 $(document).ready(() => {
 
     // OBTENEMOS LA INFORMACION DEL USUARIO
-    const {rol} = decodeJWT(localStorage.getItem('authToken'))
+    const { rol } = decodeJWT(localStorage.getItem('authToken'))
     // URL ENDPOINT
     const apiURL = '/ordenesinternas'
 
@@ -14,12 +14,11 @@ $(document).ready(() => {
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
-        setDate: new Date()
-    }).datepicker("setDate", new Date())
+    }).datepicker("setDate", new Date());
+
     $("#fechaHasta").datepicker({
         dateFormat: 'dd/mm/yy',
-        setDate: new Date()
-    }).datepicker("setDate", new Date())
+    }).datepicker("setDate", new Date());
 
     // Opciones de DataTable
     const dataTableOptions = {
@@ -44,7 +43,7 @@ $(document).ready(() => {
                     <td>${ordenInterna.area?.are_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary btn-orden-interna-change-estado" data-orden-interna="${ordenInterna.oic_id}" ${rol > 3 ? 'disabled' : '' }>${ordenInterna.oic_estado}</button>
+                        <button class="btn btn-sm btn-primary btn-orden-interna-change-estado" data-orden-interna="${ordenInterna.oic_id}" ${rol > 3 ? 'disabled' : ''}>${ordenInterna.oic_estado}</button>
                     </td>
                     <td>
                         <div class="d-flex justify-content-around">
@@ -102,7 +101,7 @@ $(document).ready(() => {
         window.location.href = `orden-interna/editar/${id}`
     })
 
-    $('#data-container').on('click', '.btn-orden-interna-pdf', async function() {
+    $('#data-container').on('click', '.btn-orden-interna-pdf', async function () {
         const id = $(this).data('orden-interna')
         try {
             const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${id}`, {
@@ -111,7 +110,7 @@ $(document).ready(() => {
                 },
                 responseType: 'blob'
             })
-    
+
             const url = window.URL.createObjectURL(new Blob([response.data]))
             const a = document.createElement('a')
             a.href = url
@@ -128,7 +127,7 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-orden-interna-change-estado', function () {
         const id = $(this).data('orden-interna')
         const textEstado = $(this).text()
-        const modalChangeEstado =  new bootstrap.Modal(document.getElementById('changeEstadoOI'))
+        const modalChangeEstado = new bootstrap.Modal(document.getElementById('changeEstadoOI'))
         modalChangeEstado.show()
         $('#estadoActualOI').text(textEstado)
         $('#idOI').val(id)

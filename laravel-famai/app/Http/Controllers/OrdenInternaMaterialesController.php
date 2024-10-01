@@ -19,6 +19,9 @@ class OrdenInternaMaterialesController extends Controller
         $ordenTrabajo = $request->input('ot_numero', null);
         $ordenInterna = $request->input('oi_numero', null);
         $almID = $request->input('alm_id', 1);
+        $fecha_desde = $request->input('fecha_desde', null);
+        $fecha_hasta = $request->input('fecha_hasta', null);
+
         $query = OrdenInternaMateriales::with(
             [
                 'producto.unidad',
@@ -36,16 +39,21 @@ class OrdenInternaMaterialesController extends Controller
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function($q) use ($ordenTrabajo) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
                 $q->where('odt_numero', $ordenTrabajo);
             });
         }
 
         // filtro de orden interna
         if ($ordenInterna !== null) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function($q) use ($ordenInterna) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenInterna) {
                 $q->where('oic_numero', $ordenInterna);
             });
+        }
+
+        // filtro de fecha
+        if ($fecha_desde !== null && $fecha_hasta !== null) {
+            $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
         }
 
         // ordenar de formar descendiente
@@ -111,7 +119,7 @@ class OrdenInternaMaterialesController extends Controller
             DB::commit();
 
             return response()->json($ordenInternaMaterial, 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al actualizar el detalle de producto: ' . $e->getMessage()], 500);
         }
@@ -138,7 +146,7 @@ class OrdenInternaMaterialesController extends Controller
 
             DB::commit();
             return response()->json(['message' => 'Detalle de material eliminado'], 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al eliminar el detalle de material: ' . $e->getMessage()], 500);
         }

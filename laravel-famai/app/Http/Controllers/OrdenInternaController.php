@@ -47,16 +47,13 @@ class OrdenInternaController extends Controller
             $query->where('oic_equipo_descripcion', 'like', "%{$equipo}%");
         }
 
-        if($estado !== null){
+        if ($estado !== null) {
             $query->where('oic_activo', $estado);
         }
 
-        if($fecha_desde !== null && $fecha_hasta !== null){
+        if ($fecha_desde !== null && $fecha_hasta !== null) {
             $query->whereBetween('oic_fecha', [$fecha_desde, $fecha_hasta]);
-        } 
-        // else {
-        //     $query->whereDate('oic_fecha', Carbon::today());
-        // }
+        }
 
         $query->orderBy('oic_fecha', 'desc');
 
@@ -107,7 +104,7 @@ class OrdenInternaController extends Controller
 
     //         // Arreglo para almacenar los registros creados
     //         $createdMateriales = [];
-            
+
     //         $materiales = $request->input('materiales');
     //         foreach ($materiales as $material) {
     //             $newMaterial = OrdenInternaMateriales::create([
@@ -141,7 +138,7 @@ class OrdenInternaController extends Controller
     //             'success' => true,
     //             'data' => $createdMateriales,
     //         ], 201);
-            
+
     //     } catch (Exception $e) {
     //         DB::rollBack();
     //         return response()->json([
@@ -167,35 +164,35 @@ class OrdenInternaController extends Controller
 
             // Arreglo para almacenar los registros creados
             $createdMateriales = [];
-            
+
             $materiales = $request->input('materiales');
             foreach ($materiales as $material) {
                 // buscamos el material en la base de datos
                 $pro_id = null;
                 // si se debe asociat el amterial
-                if($material['odm_asociar']){
+                if ($material['odm_asociar']) {
                     // buscamos el material en la base de datos
                     $findMaterial = Producto::where('pro_codigo', $material['pro_id'])->first();
                     // en caso no se encuentre, se crea el registro
-                    if(!$findMaterial) {
+                    if (!$findMaterial) {
                         // hacemos una busqueda de los datos en la base de datos secundaria
                         $productoSecondary = DB::connection('sqlsrv_secondary')
-                        ->table('OITM as T0')
-                        ->select([
-                            'T0.ItemCode as pro_codigo', 
-                            'T0.ItemName as pro_descripcion', 
-                            'T0.BuyUnitMsr as uni_codigo' , 
-                        ])
-                        ->where('T0.ItemCode', $material['pro_id'])
-                        ->first();
+                            ->table('OITM as T0')
+                            ->select([
+                                'T0.ItemCode as pro_codigo',
+                                'T0.ItemName as pro_descripcion',
+                                'T0.BuyUnitMsr as uni_codigo',
+                            ])
+                            ->where('T0.ItemCode', $material['pro_id'])
+                            ->first();
 
-                        if($productoSecondary){
+                        if ($productoSecondary) {
                             // debemos hacer validaciones de la unidad
                             $uni_codigo = 'SIN';
                             $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
-                            if(!empty($uni_codigo)){
+                            if (!empty($uni_codigo)) {
                                 $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
-                                if($unidadFound){
+                                if ($unidadFound) {
                                     $uni_codigo = $unidadFound->uni_codigo;
                                 } else {
                                     $unidadCreated = Unidad::create([
@@ -225,7 +222,6 @@ class OrdenInternaController extends Controller
                         } else {
                             throw new Exception('Material no encontrado en la base de datos secundaria');
                         }
-
                     } else {
                         // en el caso que se encuentre el producto en base de datos dbfamai
                         $pro_id = $findMaterial->pro_id;
@@ -264,7 +260,6 @@ class OrdenInternaController extends Controller
                 'success' => true,
                 'data' => $createdMateriales,
             ], 201);
-            
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -290,7 +285,7 @@ class OrdenInternaController extends Controller
 
             // Arreglo para almacenar los registros creados
             $createdProcesses = [];
-            
+
             $procesos = $request->input('procesos');
             foreach ($procesos as $proceso) {
                 $newProceso = OrdenInternaProcesos::create([
@@ -323,7 +318,6 @@ class OrdenInternaController extends Controller
                 'success' => true,
                 'data' => $createdProcesses,
             ], 201);
-            
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -466,10 +460,10 @@ class OrdenInternaController extends Controller
                 // si no existe debemos crearlo
                 // debemos buscar la informacion correspondiente en la tabla secundaria
                 $clienteSecondary = DB::connection('sqlsrv_secondary')
-                                    ->table('OCRD')
-                                    ->select('CardCode', 'CardName')
-                                    ->where('CardCode', $request->input('cli_id'))
-                                    ->first();
+                    ->table('OCRD')
+                    ->select('CardCode', 'CardName')
+                    ->where('CardCode', $request->input('cli_id'))
+                    ->first();
                 if ($clienteSecondary) {
                     $documento = substr($clienteSecondary->CardCode, 1);
                     $longitud = strlen($documento);
@@ -492,19 +486,19 @@ class OrdenInternaController extends Controller
             $odt_numero = null;
             // debemos buscar si existe la informacion de orden de trabajo en nuestra base de datos
             $odtFound = OrdenTrabajo::where('odt_numero', $request->input('odt_numero'))
-                                    ->first();
-            if($odtFound) {
+                ->first();
+            if ($odtFound) {
                 $odt_numero = $odtFound->odt_numero;
             } else {
                 // si no existe debemos crearlo
                 // debemos buscar la informacion correspondiente en la tabla secundaria
                 $otSecondary = DB::connection('sqlsrv_secondary')
-                        ->table('OWOR as OT')
-                        ->select(
-                            'OT.DocNum as odt_numero',
-                            DB::raw('CAST(OT.PostDate AS DATE) as odt_fecha'),
-                            'OT.ProdName as odt_equipo',
-                            DB::raw("
+                    ->table('OWOR as OT')
+                    ->select(
+                        'OT.DocNum as odt_numero',
+                        DB::raw('CAST(OT.PostDate AS DATE) as odt_fecha'),
+                        'OT.ProdName as odt_equipo',
+                        DB::raw("
                                 CASE 
                                     WHEN OT.U_EXX_TIPOSERV = 1 THEN 'Reparacion'
                                     WHEN OT.U_EXX_TIPOSERV = 2 THEN 'Fabricacion'
@@ -516,18 +510,18 @@ class OrdenInternaController extends Controller
                                     ELSE 'Otro'
                                 END as odt_trabajo
                             "),
-                            DB::raw("
+                        DB::raw("
                                 CASE 
                                     WHEN OT.Status = 'L' THEN 'Cerrado'
                                     WHEN OT.Status = 'R' THEN 'Abierto'
                                     ELSE 'Planificado'
                                 END as odt_estado
                             ")
-                        )
-                        ->where('OT.DocNum', $request->input('odt_numero'))
-                        ->first();
+                    )
+                    ->where('OT.DocNum', $request->input('odt_numero'))
+                    ->first();
 
-                if($otSecondary){
+                if ($otSecondary) {
                     $data = [
                         'odt_numero' => $otSecondary->odt_numero,
                         'odt_fecha' => $otSecondary->odt_fecha,
@@ -620,29 +614,29 @@ class OrdenInternaController extends Controller
                     // buscamos el material en la base de datos
                     $pro_id = null;
                     // si se debe asociat el material
-                    if($material['odm_asociar']){
+                    if ($material['odm_asociar']) {
                         // buscamos el material en la base de datos
                         $findMaterial = Producto::where('pro_codigo', $material['pro_id'])->first();
                         // en caso no se encuentre, se crea el registro
-                        if(!$findMaterial) {
+                        if (!$findMaterial) {
                             // hacemos una busqueda de los datos en la base de datos secundaria
                             $productoSecondary = DB::connection('sqlsrv_secondary')
-                            ->table('OITM as T0')
-                            ->select([
-                                'T0.ItemCode as pro_codigo', 
-                                'T0.ItemName as pro_descripcion', 
-                                'T0.BuyUnitMsr as uni_codigo' , 
-                            ])
-                            ->where('T0.ItemCode', $material['pro_id'])
-                            ->first();
+                                ->table('OITM as T0')
+                                ->select([
+                                    'T0.ItemCode as pro_codigo',
+                                    'T0.ItemName as pro_descripcion',
+                                    'T0.BuyUnitMsr as uni_codigo',
+                                ])
+                                ->where('T0.ItemCode', $material['pro_id'])
+                                ->first();
 
-                            if($productoSecondary){
+                            if ($productoSecondary) {
                                 // debemos hacer validaciones de la unidad
                                 $uni_codigo = 'SIN';
                                 $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
-                                if(!empty($uni_codigo)){
+                                if (!empty($uni_codigo)) {
                                     $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
-                                    if($unidadFound){
+                                    if ($unidadFound) {
                                         $uni_codigo = $unidadFound->uni_codigo;
                                     } else {
                                         $unidadCreated = Unidad::create([
@@ -672,7 +666,6 @@ class OrdenInternaController extends Controller
                             } else {
                                 throw new Exception('Material no encontrado en la base de datos secundaria');
                             }
-
                         } else {
                             // en el caso que se encuentre el producto en base de datos dbfamai
                             $pro_id = $findMaterial->pro_id;
@@ -729,7 +722,6 @@ class OrdenInternaController extends Controller
             DB::commit();
 
             return response()->json($ordenInterna, 200);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);

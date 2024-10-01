@@ -9,14 +9,14 @@ $(document).ready(() => {
     // const filterFechas = $('#filter-dates')
 
     // -------- MANEJO DE FECHA ----------
-    // $("#fechaDesde").datepicker({
-    //     dateFormat: 'dd/mm/yy',
-    //     setDate: new Date()
-    // }).datepicker("setDate", new Date())
-    // $("#fechaHasta").datepicker({
-    //     dateFormat: 'dd/mm/yy',
-    //     setDate: new Date()
-    // }).datepicker("setDate", new Date())
+    $("#fechaDesde").datepicker({
+        dateFormat: 'dd/mm/yy',
+        setDate: moment().startOf('month').toDate()
+    });
+    $("#fechaHasta").datepicker({
+        dateFormat: 'dd/mm/yy',
+        setDate: moment().toDate()
+    });
 
     // Opciones de DataTable
     const dataTableOptions = {
@@ -33,19 +33,19 @@ $(document).ready(() => {
         console.log(data)
         data.forEach((material, index) => {
             // obtenemos los datos
-            const {producto, orden_interna_parte} = material
-            const {orden_interna} = orden_interna_parte
-            const {oic_numero, odt_numero} = orden_interna
+            const { producto, orden_interna_parte } = material
+            const { orden_interna } = orden_interna_parte
+            const { oic_numero, odt_numero } = orden_interna
 
             // debemos obtener la condicion de reserva segun los stocks requeridos y disponibles
             let condicionalReserva = true
-            if(producto === null){
+            if (producto === null) {
                 condicionalReserva = false
             } else {
-                if(producto.stock === null){
+                if (producto.stock === null) {
                     condicionalReserva = false
                 } else {
-                    if(parseFloat(producto.stock.alp_stock) < parseFloat(material.odm_cantidad)){
+                    if (parseFloat(producto.stock.alp_stock) < parseFloat(material.odm_cantidad)) {
                         console.log(producto.stock.alp_stock, material.odm_cantidad)
                         condicionalReserva = false
                     }
@@ -66,7 +66,7 @@ $(document).ready(() => {
                     <td>${producto?.stock?.alp_stock || "0.00"}</td>
                     <td>
                         <div class="d-flex justify-content-around">
-                            <button class="btn btn-sm ${condicionalReserva ? 'btn-primary': 'btn-secondary'} me-2" ${condicionalReserva ? '' : 'disabled'}>
+                            <button class="btn btn-sm ${condicionalReserva ? 'btn-primary' : 'btn-secondary'} me-2" ${condicionalReserva ? '' : 'disabled'}>
                                 Reservar
                             </button>
                             <button class="btn btn-sm btn-success">
