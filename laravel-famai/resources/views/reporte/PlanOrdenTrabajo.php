@@ -124,7 +124,7 @@
                 <td class="lefty-align">Versión : 02</td>
               </tr>
               <tr>
-                <td class="lefty-align">Fecha : 01/10/24</td>
+                <td class="lefty-align">Fecha : 01/10/2024</td>
               </tr>
               <tr>
                 <td class="lefty-align">Revisado: JPR</td>
