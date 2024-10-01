@@ -156,55 +156,112 @@ class OrdenInternaMaterialesController extends Controller
 
     public function exportExcel(Request $request)
     {
-        // $ordenTrabajo = $request->input('ot_numero', null);
-        // $ordenInterna = $request->input('oi_numero', null);
-        // $almID = $request->input('alm_id', 1);
-        // $fecha_desde = $request->input('fecha_desde', null);
-        // $fecha_hasta = $request->input('fecha_hasta', null);
-
-        // $query = OrdenInternaMateriales::with(
-        //     [
-        //         'producto.unidad',
-        //         'producto.stock' => function ($q) use ($almID) {
-        //             if ($almID !== null) {
-        //                 $q->where('alm_id', $almID)
-        //                     ->select('pro_id', 'alm_id', 'alp_stock');
-        //             } else {
-        //                 $q->selectRaw('null as alp_stock');
-        //             }
-        //         },
-        //         'ordenInternaParte.ordenInterna'
-        //     ]
-        // );
-
-        // // filtro de orden de trabajo
-        // if ($ordenTrabajo !== null) {
-        //     $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
-        //         $q->where('odt_numero', $ordenTrabajo);
-        //     });
-        // }
-
-        // // filtro de orden interna
-        // if ($ordenInterna !== null) {
-        //     $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenInterna) {
-        //         $q->where('oic_numero', $ordenInterna);
-        //     });
-        // }
-
-        // // filtro de fecha
-        // if ($fecha_desde !== null && $fecha_hasta !== null) {
-        //     $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
-        // }
-
-        // // ordenar de formar descendiente
-        // $query->orderBy('odm_feccreacion', 'desc');
-
-        // $data = $query->get();
-
         try {
+            $ordenTrabajo = $request->input('ot_numero', null);
+            $ordenInterna = $request->input('oi_numero', null);
+            $almID = $request->input('alm_id', 1);
+            $fecha_desde = $request->input('fecha_desde', null);
+            $fecha_hasta = $request->input('fecha_hasta', null);
+
+            $query = OrdenInternaMateriales::with(
+                [
+                    'producto.unidad',
+                    'producto.stock' => function ($q) use ($almID) {
+                        if ($almID !== null) {
+                            $q->where('alm_id', $almID)
+                                ->select('pro_id', 'alm_id', 'alp_stock');
+                        } else {
+                            $q->selectRaw('null as alp_stock');
+                        }
+                    },
+                    'ordenInternaParte.ordenInterna'
+                ]
+            );
+
+            // filtro de orden de trabajo
+            if ($ordenTrabajo !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                    $q->where('odt_numero', $ordenTrabajo);
+                });
+            }
+
+            // filtro de orden interna
+            if ($ordenInterna !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenInterna) {
+                    $q->where('oic_numero', $ordenInterna);
+                });
+            }
+
+            // filtro de fecha
+            if ($fecha_desde !== null && $fecha_hasta !== null) {
+                $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            }
+
+            // ordenar de formar descendiente
+            $query->orderBy('odm_feccreacion', 'desc');
+
+            $data = $query->get();
+            $headers = ['OT', 'OI', 'Fec. Det OI', 'Tipo', 'Cod Producto', 'Producto', 'Obs Producto', 'Cantidad', 'Und.', 'Stock Alm', 'Reservado', 'Ordenado', 'Atendido'];
+            $columnWidths = [15, 15, 19, 5, 10, 50, 40, 10, 7, 10, 10, 10, 10];
+            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'texto', 'numero', 'numero', 'numero', 'numero'];
+
             $spreadsheet = new Spreadsheet();
-            $activeWorksheet = $spreadsheet->getActiveSheet();
-            $activeWorksheet->setCellValue('A1', 'Hello World!');
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Establecemos anchos de columnas
+            foreach ($columnWidths as $columnIndex => $width) {
+                $sheet->getColumnDimensionByColumn($columnIndex + 1)->setWidth($width);
+            }
+
+            // Establecemos encabezados con formatos
+            foreach ($headers as $columnIndex => $header) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+
+                // Dar color al fondo del encabezado
+                $sheet->getStyle("{$columnLetter}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('c7cdd6');
+
+                // Poner el texto en negrita
+                $sheet->getStyle("{$columnLetter}1")->getFont()->setBold(true);
+
+                // Establecer el valor en la celda
+                $sheet->setCellValue("{$columnLetter}1", $header);
+            }
+
+            // Establecer tipos de datos
+            $SIZE_DATA = sizeof($data) + 1;
+            foreach ($tipoDato as $columnIndex => $tipoDato) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+                $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+                if ($tipoDato === "numero") {
+                    $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode('0.00');
+                }
+            }
+
+            function getValue($relation, $default = 'N/A')
+            {
+                return $relation ?? $default;
+            }
+
+            // Agregamos la data
+            $row = 2;
+
+            foreach ($data as $rowData) {
+                $sheet->setCellValue("A{$row}", getValue($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna) ? $rowData->ordenInternaParte->ordenInterna->oic_numero : null);
+                $sheet->setCellValue("B{$row}", getValue($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->odt_numero : null));
+                $sheet->setCellValue("C{$row}", getValue($rowData->odm_feccreacion));
+                $sheet->setCellValue("D{$row}", getValue($rowData->odm_tipo == 1 ? 'R' : 'A'));
+                $sheet->setCellValue("E{$row}", getValue($rowData->producto ? $rowData->producto->pro_codigo : null));
+                $sheet->setCellValue("F{$row}", getValue($rowData->odm_descripcion));
+                $sheet->setCellValue("G{$row}", getValue($rowData->odm_observacion));
+                $sheet->setCellValue("H{$row}", getValue($rowData->odm_cantidad));
+                $sheet->setCellValue("I{$row}", getValue($rowData->producto && $rowData->producto->unidad ? $rowData->producto->unidad->uni_codigo : null));
+                $sheet->setCellValue("J{$row}", getValue($rowData->producto && $rowData->producto->stock ? $rowData->producto->stock->alp_stock : null, 0.00));
+                $sheet->setCellValue("K{$row}", 0.00);
+                $sheet->setCellValue("L{$row}", 0.00);
+                $sheet->setCellValue("M{$row}", 0.00);
+                $row++;
+            }
+
 
             return response()->streamDownload(function () use ($spreadsheet) {
                 $writer = new Xlsx($spreadsheet);

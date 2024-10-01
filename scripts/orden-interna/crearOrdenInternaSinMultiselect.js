@@ -128,8 +128,7 @@ $(document).ready(function () {
                         opp_codigo: proceso.proceso.opp_codigo,
                         odp_descripcion: proceso.odp_descripcion || '',
                         odp_observacion: "",
-                        odp_ccalidad: false,
-                        odp_editable_descripcion: false
+                        odp_ccalidad: false
                     })
                 })
 
@@ -275,8 +274,7 @@ $(document).ready(function () {
     const cargarTablaOrdenInterna = async () => {
         try {
             const { data } = await client.get('/partesSimple')
-            const dataOrdenada = data.sort((a, b) => a.oip_orden - b.oip_orden)
-            dataOrdenada.forEach(function (item, index) {
+            data.forEach(function (item, index) {
                 const { oip_id, oip_descripcion } = item
                 const row = `
                     <tr>
@@ -349,9 +347,14 @@ $(document).ready(function () {
 
         try {
             const { data } = await client.get(`/procesosByParte/${id_parte}`)
-            const dataOrdenada = data.sort((a, b) => a.opp_orden - b.opp_orden)
+            // const $procesosSelect = $('#procesosSelect')
+            // $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`)
+            // data.forEach(function (proceso) {
+            //     const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"])
+            //     $procesosSelect.append(option)
+            // })
             let options = []
-            dataOrdenada.forEach(function (proceso) {
+            data.forEach(function (proceso) {
                 const checked = detalle_procesos.find(element => element.opp_id == proceso["opp_id"]) ? true : false
                 options.push({
                     name: `${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`,
@@ -376,8 +379,31 @@ $(document).ready(function () {
         detalle_procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
         detalle_procesos.forEach(element => {
+            // const row = `
+            // <tr>
+            //     <td>${element["opp_codigo"]}</td>
+            //     <td>${element["opp_descripcion"]}</td>
+            //     <td><input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/></td>
+            //     <td>
+            //         <input type="text" class="form-control" value="${element["odp_observacion"]}" readonly/>
+            //     </td>
+            //     <td>
+            //         <div class="d-flex justify-content-around">
+            //             <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${element["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+            //                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+            //                 </svg>
+            //             </button>
+            //             <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${element["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+            //                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+            //                 </svg>
+            //             </button>
+            //         </div>
+            //     </td>
+            // </tr>`
             const row = `
-            <tr class="${element['odp_editable_descripcion'] ? 'editable-descripcion' : ''}">
+            <tr>
                 <td>${element["opp_codigo"]}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value="${element["odp_descripcion"]}" readonly/>
@@ -419,11 +445,14 @@ $(document).ready(function () {
 
     // funcion de agregar detalle de proceso a parte de orden interna
     function agregarDetalleProceso(valueId, valueName) {
-        const palabraClave = 'otro'
+        console.log(valueId, valueName)
         const selectedProcesoId = valueId
+        // if (selectedProcesoId == "0") {
+        //     alert('Debes seleccionar un proceso')
+        //     return
+        // }
         const selectedProcesoName = valueName.split(" - ")[1].trim()
         const selectedProcesoCode = valueName.split(" - ")[0].trim()
-        const claseCondicional = selectedProcesoName.toLowerCase().includes(palabraClave) ? true : false
 
         const findElement = buscarDetalleParte(currentParte)
         const { detalle_procesos } = findElement
@@ -438,12 +467,35 @@ $(document).ready(function () {
                 opp_codigo: selectedProcesoCode,
                 odp_descripcion: selectedProcesoName,
                 odp_ccalidad: false,
-                odp_observacion: "",
-                odp_editable_descripcion: claseCondicional
+                odp_observacion: ""
             }
 
+            // primero añadimos al DOM
+            // const row = `
+            // <tr>
+            //     <td>${data["opp_codigo"]}</td>
+            //     <td>${data["opp_descripcion"]}</td>
+            //     <td><input type="checkbox" disabled/></td>
+            //     <td>
+            //         <input type="text" class="form-control" value="${data["odp_observacion"]}" readonly/>
+            //     </td>
+            //     <td>
+            //         <div class="d-flex justify-content-around">
+            //             <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${data["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+            //                     <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+            //                 </svg>
+            //             </button>
+            //             <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${data["opp_id"]}">
+            //                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+            //                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+            //                 </svg>
+            //             </button>
+            //         </div>
+            //     </td>
+            // </tr>`
             const row = `
-            <tr class="${claseCondicional ? 'editable-descripcion' : ''}">
+            <tr>
                 <td>${data["opp_codigo"]}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value="${data["odp_descripcion"]}" readonly/>
@@ -472,20 +524,83 @@ $(document).ready(function () {
             const idCantidadProceso = `#cantidad-procesos-${currentParte}`
             $(idCantidadProceso).text(totalProcesos)
         }
+
+        // seleccionamos el valor por defecto ---- para anterior implementacion se descomenta -----
+        // $('#procesosSelect').val(0)
     }
+
+    // funcion de agregar detalle de proceso a parte de orden interna
+    // $('#procesosSelect').on('change', function () {
+    //     const selectedProcesoId = $(this).val()
+    //     if (selectedProcesoId == "0") {
+    //         alert('Debes seleccionar un proceso')
+    //         return
+    //     }
+    //     const selectedProcesoName = $(this).find('option:selected').text().split(" - ")[1].trim()
+    //     const selectedProcesoCode = $(this).find('option:selected').data('codigo')
+
+    //     const findElement = buscarDetalleParte(currentParte)
+    //     const { detalle_procesos } = findElement
+
+    //     const findProceso = detalle_procesos.find(element => element.opp_id == selectedProcesoId)
+
+    //     if (findProceso) {
+    //         alert('Este proceso ya fué agregado')
+    //     } else {
+    //         const data = {
+    //             opp_id: selectedProcesoId,
+    //             opp_codigo: selectedProcesoCode,
+    //             opp_descripcion: selectedProcesoName,
+    //             odp_ccalidad: false,
+    //             odp_observacion: ""
+    //         }
+
+    //         // primero añadimos al DOM
+    //         const row = `
+    //         <tr>
+    //             <td>${data["opp_codigo"]}</td>
+    //             <td>${data["opp_descripcion"]}</td>
+    //             <td><input type="checkbox" disabled/></td>
+    //             <td>
+    //                 <input type="text" class="form-control" value="${data["odp_observacion"]}" readonly/>
+    //             </td>
+    //             <td>
+    //                 <div class="d-flex justify-content-around">
+    //                     <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-2" data-proceso="${data["opp_id"]}">
+    //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+    //                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+    //                         </svg>
+    //                     </button>
+    //                     <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar" data-proceso="${data["opp_id"]}">
+    //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+    //                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+    //                         </svg>
+    //                     </button>
+    //                 </div>
+    //             </td>
+    //         </tr>`
+
+    //         $('#tbl-orden-interna-procesos tbody').append(row)
+    //         detalle_procesos.push(data)
+    //         // debemos actualizar la cantidad de procesos
+    //         const totalProcesos = detalle_procesos.length
+    //         const idCantidadProceso = `#cantidad-procesos-${currentParte}`
+    //         $(idCantidadProceso).text(totalProcesos)
+    //     }
+
+    //     // seleccionamos el valor por defecto
+    //     $('#procesosSelect').val(0)
+    // })
 
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        const $inputDescripcion = $row.find('.descripcion-input')
+        // const $inputDescripcion = $row.find('.descripcion-input')
         const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
 
-        // debemos verificar si cuenta con la clase editable-descripcion
-        const claseCondicional = $row.hasClass('editable-descripcion')
-
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
-        $inputDescripcion.prop('readonly', !claseCondicional)
+        // $inputDescripcion.prop('readonly', false)
         $inputObservacion.prop('readonly', false)
         $inputCheckbox.prop('disabled', false)
 
@@ -549,6 +664,25 @@ $(document).ready(function () {
         const idCantidadProceso = `#cantidad-procesos-${currentParte}`
         $(idCantidadProceso).text(totalProcesos)
     }
+    // $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', function () {
+    //     const id_proceso = $(this).data('proceso')
+    //     const $row = $(this).closest('tr')
+
+    //     // removemos el DOM
+    //     $row.remove()
+
+    //     // actualizamos la data
+    //     const findElement = buscarDetalleParte(currentParte)
+    //     const { detalle_procesos } = findElement
+
+    //     const findIndexElementProceso = detalle_procesos.findIndex(element => element.opp_id == id_proceso)
+    //     detalle_procesos.splice(findIndexElementProceso, 1)
+
+    //     // debemos actualizar la cantidad de procesos
+    //     const totalProcesos = detalle_procesos.length
+    //     const idCantidadProceso = `#cantidad-procesos-${currentParte}`
+    //     $(idCantidadProceso).text(totalProcesos)
+    // })
 
     // ------------ JAVASCRIPT PARA GESTION DE PRODUCTOS -------------
     // carga de detalle de materiales en tabla

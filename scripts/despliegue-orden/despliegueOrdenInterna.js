@@ -55,15 +55,25 @@ $(document).ready(() => {
                     <td>${odt_numero}</td>
                     <td>${oic_numero}</td>
                     <td>${parseDate(material.odm_feccreacion)}</td>
-                    <td>${material.odm_tipo == 1 ? 'P' : 'A'}</td>
+                    <td class="text-center">${material.odm_tipo == 1 ? 'R' : 'A'}</td>
                     <td>${producto?.pro_codigo || 'N/A'}</td>
                     <td>${material.odm_descripcion}</td>
                     <td>${material.odm_observacion || 'N/A'}</td>
                     <td>${material.odm_cantidad}</td>
-                    <td>${producto?.unidad?.uni_codigo || 'N/A'}</td>
-                    <td>${producto?.stock?.alp_stock || "0.00"}</td>
-                    <td>0.00</td>
-                    <td>0.00</td>
+                    <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
+                    <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary">0.00</button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary">0.00</button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary">0.00</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary">Responsable</button>
+                    </td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm ${condicionalReserva ? 'btn-primary' : 'btn-secondary'} me-2" ${condicionalReserva ? '' : 'disabled'}>
@@ -116,7 +126,7 @@ $(document).ready(() => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         let filteredURL = `/ordeninternamateriales/export-excel?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-
+        console.log(filteredURL)
         try {
             const response = await client.get(filteredURL, {
                 responseType: 'blob',
