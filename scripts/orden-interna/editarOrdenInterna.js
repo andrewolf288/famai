@@ -112,9 +112,12 @@ $(document).ready(async function () {
     const cargarProcesosSelect = async (id_parte) => {
         try {
             const { data } = await client.get(`/procesosByParte/${id_parte}`)
+            // ordenamos la data
+            const dataOrdenada = data.sort((a, b) => a.opp_orden - b.opp_orden)
+
             const $procesosSelect = $('#procesosSelect')
             $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`)
-            data.forEach(function (proceso) {
+            dataOrdenada.forEach(function (proceso) {
                 const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"])
                 $procesosSelect.append(option)
             })
@@ -135,9 +138,7 @@ $(document).ready(async function () {
             const row = `
             <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary">
                 <td>${element.proceso.opp_codigo}</td>
-                <td>
-                    <input type="text" class="form-control descripcion-input" value="${element.odp_descripcion || element.proceso.opp_descripcion}" readonly/>
-                </td>
+                <td>${element.odp_descripcion || element.proceso.opp_descripcion}</td>
                 <td class="text-center">
                     <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
                 </td>
@@ -188,6 +189,7 @@ $(document).ready(async function () {
 
     // funcion de agregar detalle de proceso a parte de orden interna
     $('#procesosSelect').on('change', function () {
+        const palabraClave = 'otro'
         const selectedProcesoId = $(this).val()
         if (selectedProcesoId == "0") {
             alert('Debes seleccionar un proceso')
@@ -195,6 +197,7 @@ $(document).ready(async function () {
         }
         const selectedProcesoName = $(this).find('option:selected').text().split(" - ")[1].trim()
         const selectedProcesoCode = $(this).find('option:selected').data('codigo')
+        const claseCondicional = selectedProcesoName.toLowerCase().includes(palabraClave) ? true : false
 
         let idProcesosArray = []
         $('#tbl-orden-interna-procesos tbody tr').each(function () {
@@ -206,10 +209,11 @@ $(document).ready(async function () {
 
         if (findProceso) {
             alert('Este proceso ya fué agregado')
+            return
         } else {
             // primero añadimos al DOM
             const row = `
-            <tr class="row-editable table-warning" data-id-proceso="${selectedProcesoId}">
+            <tr class="row-editable table-warning ${claseCondicional ? 'editable-descripcion' : ''}" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value="${selectedProcesoName}" readonly/>
@@ -249,12 +253,15 @@ $(document).ready(async function () {
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
         const $row = $(this).closest('tr')
-        // const $inputDescripcion = $row.find('.descripcion-input')
+        const $inputDescripcion = $row.find('.descripcion-input')
         const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
 
+        // debemos verificar si cuenta con la clase editable-descripcion
+        const claseCondicional = $row.hasClass('editable-descripcion')
+
         // CAMBIAMOS LA PROPIEDAD PARA QUE SE PUEDA EDITAR
-        // $inputDescripcion.prop('readonly', false)
+        $inputDescripcion.prop('readonly', !claseCondicional)
         $inputObservacion.prop('readonly', false)
         $inputCheckbox.prop('disabled', false)
 
@@ -274,7 +281,7 @@ $(document).ready(async function () {
         const $inputObservacion = $row.find('.observacion-input')
         const $inputCheckbox = $row.find('input[type="checkbox"]')
         // si se trata de un registro existente
-        if(!$row.hasClass('row-editable')){
+        if (!$row.hasClass('row-editable')) {
             // debemos extraer la informacion dl tr
             const odp_id = $row.data('id-detalle')
             const odp_descripcion = $inputDescripcion.val().trim()
@@ -286,7 +293,7 @@ $(document).ready(async function () {
                 odp_ccalidad
             }
             try {
-                const {data} = await client.put(`/ordeninternaprocesos/${odp_id}`, formatData)
+                const { data } = await client.put(`/ordeninternaprocesos/${odp_id}`, formatData)
                 const { procesos } = buscarDetalleParte(currentDetalleParte)
                 const findProceso = procesos.find(element => element.odp_id == odp_id)
                 findProceso["odp_descripcion"] = data.odp_descripcion || ""
@@ -294,11 +301,11 @@ $(document).ready(async function () {
                 findProceso["odp_ccalidad"] = data.odp_ccalidad
                 findProceso["odp_usumodificacion"] = data.odp_usumodificacion
                 findProceso["odp_fecmodificacion"] = data.odp_fecmodificacion
-    
+
                 $row.find('td').eq(4).text(data.odp_usumodificacion || 'No aplica')
                 $row.find('td').eq(5).text(data.odp_fecmodificacion ? parseDate(data.odp_fecmodificacion) : 'No aplica')
                 alert('Se actualizo correctamente')
-            } catch(error){
+            } catch (error) {
                 alert('Error al actualizar el detalle de proceso')
             }
         }
@@ -319,7 +326,7 @@ $(document).ready(async function () {
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', async function () {
         const $row = $(this).closest('tr')
         // si se trata de un registro existente
-        if(!$row.hasClass('row-editable')){
+        if (!$row.hasClass('row-editable')) {
             // debemos extraer la informacion dl tr
             const odp_id = $row.data('id-detalle')
             try {
@@ -330,10 +337,10 @@ $(document).ready(async function () {
                 // actualizamos el total de procesos
                 $(`#cantidad-procesos-${currentDetalleParte}`).text(procesos.length)
                 $row.remove()
-                setTimeout(function() {
+                setTimeout(function () {
                     alert('Se eliminó correctamente');
                 }, 0);
-            } catch(error){
+            } catch (error) {
                 alert('Error al eliminar el detalle de proceso')
             }
         } else {
@@ -359,7 +366,7 @@ $(document).ready(async function () {
         const $elementEdicion = $('#tbl-orden-interna-procesos tbody .row-editable')
         const $btnDetalleProceso = $elementEdicion.find('.btn-detalle-proceso-editar')
 
-        if($btnDetalleProceso.length > 0){
+        if ($btnDetalleProceso.length > 0) {
             // permanecemos en el modal
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
                 e.preventDefault()
@@ -694,7 +701,7 @@ $(document).ready(async function () {
         const $observacionInput = $row.find('.observacion-input')
 
         // si se trata de un registro existente
-        if(!$row.hasClass('row-editable')){
+        if (!$row.hasClass('row-editable')) {
             // debemos extraer la informacion dl tr
             const odm_id = $row.data('id-detalle')
             const odm_descripcion = $descripcionInput.val().trim()
@@ -706,7 +713,7 @@ $(document).ready(async function () {
                 odm_observacion
             }
             try {
-                const {data} = await client.put(`/ordeninternamateriales/${odm_id}`, formatData)
+                const { data } = await client.put(`/ordeninternamateriales/${odm_id}`, formatData)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterial = materiales.find(element => element.odm_id == odm_id)
                 findMaterial["odm_descripcion"] = data.odm_descripcion
@@ -714,11 +721,11 @@ $(document).ready(async function () {
                 findMaterial["odm_observacion"] = data.odm_observacion
                 findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
                 findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
-    
+
                 $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
                 $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
                 alert('Se actualizo correctamente')
-            } catch(error){
+            } catch (error) {
                 alert('Error al actualizar el detalle de material')
             }
         }
@@ -739,7 +746,7 @@ $(document).ready(async function () {
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-eliminar', async function () {
         const $row = $(this).closest('tr')
         // si se trata de un registro existente
-        if(!$row.hasClass('row-editable')){
+        if (!$row.hasClass('row-editable')) {
             // debemos extraer la informacion dl tr
             const odm_id = $row.data('id-detalle')
             try {
@@ -752,7 +759,7 @@ $(document).ready(async function () {
                 // actualizamos el total de procesos
                 $(`#cantidad-productos-${currentDetalleParte}`).text(materiales.length)
                 let cantidadTotal = 0
-                if(tipo == '1'){
+                if (tipo == '1') {
                     cantidadTotal = parseInt($(`#cantidad-regulares-${currentDetalleParte}`).text()) - 1
                     $(`#cantidad-regulares-${currentDetalleParte}`).text(cantidadTotal)
                 } else {
@@ -760,10 +767,10 @@ $(document).ready(async function () {
                     $(`#cantidad-adicionales-${currentDetalleParte}`).text(cantidadTotal)
                 }
                 $row.remove()
-                setTimeout(function() {
+                setTimeout(function () {
                     alert('Se eliminó correctamente');
                 }, 0);
-            } catch(error){
+            } catch (error) {
                 alert('Error al eliminar el detalle de material')
             }
         } else {
@@ -789,7 +796,7 @@ $(document).ready(async function () {
         const $elementEdicion = $('#tbl-orden-interna-productos tbody .row-editable')
         const $btnDetalleProducto = $elementEdicion.find('.btn-detalle-producto-editar')
 
-        if($btnDetalleProducto.length > 0){
+        if ($btnDetalleProducto.length > 0) {
             // permanecemos en el modal
             if (!confirm("Aún tienes elementos sin guardar ¿Seguro que quieres cerrar el modal?")) {
                 e.preventDefault()

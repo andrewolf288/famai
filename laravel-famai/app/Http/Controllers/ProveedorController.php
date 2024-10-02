@@ -22,7 +22,7 @@ class ProveedorController extends Controller
         $nombre = $request->input('prv_nombre', null);
         $numerodocumento = $request->input('prv_nrodocumento', null);
 
-        $query = Proveedor::with(['tipoDocumento','ubigeo']);
+        $query = Proveedor::with(['tipoDocumento', 'ubigeo']);
 
         if ($nombre !== null) {
             $query->where('prv_nombre', 'like', '%' . $nombre . '%');
@@ -39,6 +39,47 @@ class ProveedorController extends Controller
             'data' => $proveedor->items(),
             'count' => $proveedor->total()
         ]);
+    }
+
+    public function findProveedorByQuery(Request $request)
+    {
+        $query = $request->input('query', null);
+
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+        $symbol = '+';
+        $subqueries = explode($symbol, $query);
+        // Realiza la búsqueda de materiales por nombre o código
+        $queryBuilder = Proveedor::where('prv_activo', 1)
+            ->select('prv_id', 'tdo_codigo', 'prv_nrodocumento', 'prv_nombre');
+
+        foreach ($subqueries as $term) {
+            $queryBuilder->where(function ($q) use ($term) {
+                $q->where('prv_nrodocumento', 'like', '%' . $term . '%')
+                    ->orWhere('prv_nombre', 'like', '%' . $term . '%');
+            });
+        }
+
+        $results = $queryBuilder->get();
+
+        // Devuelve los materiales en formato JSON
+        return response()->json($results);
+    }
+
+    public function findProveedorByDocumento(Request $request)
+    {
+        $query = $request->input('query', null);
+        $tipoDocumento = $request->input('tdo_codigo', null);
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+        $queryBuilder = Proveedor::where('prv_activo', 1)
+            ->where('prv_nrodocumento', $query)
+            ->where('tdo_codigo', $tipoDocumento)
+            ->select('prv_id', 'tdo_codigo', 'prv_nrodocumento', 'prv_nombre');
+        $results = $queryBuilder->get();
+        return response()->json($results);
     }
 
     /**

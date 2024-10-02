@@ -73,4 +73,47 @@
     <tbody id="data-container-body">
     </tbody>
 </table>
+
 <!-- DIALOG DE COTIZACION -->
+<div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cotizacionesModalLabel">Cotización</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id-detalle-materiales">
+                <!-- SECCION DE FORM -->
+                <div class="mb-2">
+                    <select name="tipo-proveedor" id="tipo-proveedor" class="form-select form-select-sm w-25">
+                        <option value="" selected>Búsqueda libre</option>
+                        <option value="RUC">RUC</option>
+                        <option value="DNI">DNI</option>
+                    </select>
+                </div>
+                <input type="text" id="proveedoresInput" class="form-control" placeholder="Buscar proveedor...">
+                <ul id="resultadosLista" class="list-group mt-2"></ul>
+                <!-- SECCION DE DATA -->
+                <table id="tbl-despliegue-materiales-cotizaciones" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-4">Nombre</th>
+                            <th class="col-1">Tip. Documento</th>
+                            <th class="col-2">Documento</th>
+                            <th class="col-2">Fec. Ult. Compra</th>
+                            <th class="col-2">Prec. Ult. Compra</th>
+                            <th class="col-1">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-container-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
