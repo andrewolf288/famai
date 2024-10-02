@@ -1,4 +1,4 @@
-function initPagination(URL, initDataTable, dataTableOptions = {}) {
+function initPagination(URL, initDataTable, dataTableOptions = {}, pageSize = 10) {
     const dataContainer = $('#data-container')
     const dataContainerBody = $('#data-container-body')
 
@@ -8,7 +8,7 @@ function initPagination(URL, initDataTable, dataTableOptions = {}) {
         totalNumberLocator: function (response) {
             return response.count
         },
-        pageSize: 10,
+        pageSize: pageSize,
         pageRange: 1,
         showPageNumbers: true,
         showPrevious: true,

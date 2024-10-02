@@ -9,9 +9,6 @@ $(document).ready(() => {
     const filterButton = $('#filter-button')
     const filterFechas = $('#filter-dates')
 
-    // manejador de datos seleccionado
-    const selectedRows = new Map()
-
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -26,33 +23,36 @@ $(document).ready(() => {
         responsive: true,
         paging: false,
         searching: false,
-        info: false,
-        columnDefs: [
-            {
-                targets: [0, 1],
-                orderable: false,
-            }
-        ]
+        info: false
     }
 
     // Inicializacion de data table
     function initDataTable(data) {
         let content = ''
-        // vaciamos la lista
-        $('#data-container-body').empty()
-        // recorremos la lista
         data.forEach((material, index) => {
             // obtenemos los datos
             const { producto, orden_interna_parte } = material
             const { orden_interna } = orden_interna_parte
             const { oic_numero, odt_numero } = orden_interna
 
-            const rowItem = document.createElement('tr')
-            rowItem.innerHTML = `
+            // debemos obtener la condicion de reserva segun los stocks requeridos y disponibles
+            let condicionalReserva = true
+            if (producto === null) {
+                condicionalReserva = false
+            } else {
+                if (producto.stock === null) {
+                    condicionalReserva = false
+                } else {
+                    if (parseFloat(producto.stock.alp_stock) < parseFloat(material.odm_cantidad)) {
+                        condicionalReserva = false
+                    }
+                }
+            }
+
+            content += `
                 <tr>
-                    <td></td>
-                    <td class="text-center">
-                        <input type="checkbox" style="width: 25px; height: 25px; border: 2px solid black;" class="form-check-input row-select" ${selectedRows.has(material.odm_id) ? 'checked' : ''}/>
+                    <td data-id-detalle="${material.odm_id}" class="text-center">
+                        <input type="checkbox" class="row-select">
                     </td>
                     <td>${odt_numero}</td>
                     <td>${oic_numero}</td>
@@ -61,7 +61,7 @@ $(document).ready(() => {
                     <td>${producto?.pro_codigo || 'N/A'}</td>
                     <td>${material.odm_descripcion}</td>
                     <td>${material.odm_observacion || 'N/A'}</td>
-                    <td class="text-center">${material.odm_cantidad}</td>
+                    <td>${material.odm_cantidad}</td>
                     <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                     <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
                     <td class="text-center">
@@ -76,33 +76,27 @@ $(document).ready(() => {
                     <td>
                         <button class="btn btn-primary">Responsable</button>
                     </td>
+                    <td>
+                        <div class="d-flex justify-content-around">
+                            <button class="btn btn-sm ${condicionalReserva ? 'btn-primary' : 'btn-secondary'} me-2" ${condicionalReserva ? '' : 'disabled'}>
+                                Reservar
+                            </button>
+                            <button class="btn btn-sm btn-success btn-cotizar" data-id="${material.odm_id}">
+                                Cotizar
+                            </button>
+                        </div>
+                    </td>
                 </tr>
             `
-            // Añadimos el evento `change` al checkbox
-            const checkbox = rowItem.querySelector('.row-select');
-            checkbox.addEventListener('change', function () {
-                const isChecked = this.checked; // Verificamos si está marcado o no
-                seleccionarRowDetalle(material, isChecked); // Pasamos `material` y si está seleccionado
-            });
-
-            $('#data-container-body').append(rowItem)
         })
-    }
-
-    function seleccionarRowDetalle(material, isChecked) {
-        if (isChecked) {
-            selectedRows.set(material.odm_id, material)
-        } else {
-            selectedRows.delete(material.odm_id)
-        }
-        console.log(selectedRows)
+        $('#data-container-body').html(content)
     }
 
     filterFechas.on('click', () => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         let filteredURL = `${apiURL}?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+        initPagination(filteredURL, initDataTable, dataTableOptions)
     })
 
     filterButton.on('click', () => {
@@ -123,11 +117,11 @@ $(document).ready(() => {
             filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
         }
 
-        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+        initPagination(filteredURL, initDataTable, dataTableOptions)
     })
 
     // inicializamos la paginacion con datatable
-    initPagination(`${apiURL}?alm_id=1&fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions, 50)
+    initPagination(`${apiURL}?alm_id=1&fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
 
     // exportamos a excel
     $('#btn-export-data').click(async function () {
@@ -151,50 +145,37 @@ $(document).ready(() => {
     })
 
     // ---------- MANEJO DE COTIZACIONES -----------
-    $('#btn-cotizar-materiales').on('click', async (event) => {
-        let content = ''
+    $('#data-container-body').on('click', '.btn-cotizar', async (event) => {
+        const id = $(event.currentTarget).data('id')
+        // seteamos el detalle de materiales
+        $('#id-detalle-materiales').val(id)
         // reset de los valores de ingreso
         limpiarLista()
         $('#proveedoresInput').val('')
         $('#tipo-proveedor').val('')
-        $('#tbl-cotizaciones-proveedores tbody').empty()
-        $('#tbl-cotizaciones-materiales tbody').empty()
-        // debemos formar los materiales seleccionados
-        selectedRows.forEach((value, key) => {
-            content = `
-                <tr data-id="${value.odm_id}">
-                    <td>${value.producto?.pro_codigo ?? 'N/A'}</td>
-                    <td>${value.producto?.unidad?.uni_codigo ?? 'N/A'}</td>
-                    <td>
-                        <input type="text" class="form-control" value="${value.producto?.pro_descripcion ?? 'N/A'}"/>
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" value="${value.odm_observacion ?? ''}"/>
-                    </td>
-                    <td>
-                        <input type="number" class="form-control" value="${value.odm_cantidad}"/>
-                    </td>
-                    <td>
-                        <div class="d-flex justify-content-around">
-                            <button class="btn btn-sm btn-danger btn-cotizacion-material">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `
-            $('#tbl-cotizaciones-materiales tbody').append(content)
-        })
+        $('#tbl-despliegue-materiales-cotizaciones tbody').empty()
         // abrimos el modal
         const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
         dialogCotizacion.show()
     })
 
+    $('#tipo-proveedor').on('change', () => {
+        const value = $('#tipo-proveedor').val().trim()
+        if (value.length !== 0) {
+            limpiarLista()
+            $('#proveedoresInput').val('')
+            $('#proveedoresInput').attr('placeholder', 'Ingrese el número de documento...');
+        } else {
+            limpiarLista()
+            $('#proveedoresInput').val('')
+            $('#proveedoresInput').attr('placeholder', 'Buscar proveedor...');
+        }
+    })
+
     $('#proveedoresInput').on('input', debounce(async function () {
+        const isTyping = $('#tipo-proveedor').val().trim().length === 0
         const query = $(this).val().trim()
-        if (query.length >= 3) {
+        if (query.length >= 3 && isTyping) {
             await buscarProveedores(query)
         } else {
             limpiarLista()
@@ -202,18 +183,52 @@ $(document).ready(() => {
     }))
 
     // al momento de presionar enter
-    $('#searchProveedorSUNAT').on('click', async function (event) {
-        console.log("first")
-        const query = $('#proveedoresSUNAT').val().trim()
+    $('#proveedoresInput').on('keydown', async function (event) {
+        const query = $(this).val().trim()
         // si es la tecla de enter
         if (event.keyCode === 13) {
             event.preventDefault();
-            await buscarProveedorBySUNAT(query)
+            const isTyping = $('#tipo-proveedor').val().trim().length === 0
+            // si se desea agregar un producto sin código
+            if (!isTyping) {
+                await buscarProveedorByDocumento(query)
+            } else {
+                return
+            }
         }
     });
 
-    async function buscarProveedorBySUNAT(documento) {
-        console.log(documento)
+    async function buscarProveedorByDocumento(documento) {
+        try {
+            const tipoDocumento = $('#tipo-proveedor').val().trim()
+            const queryEncoded = encodeURIComponent(documento)
+            const queryEncoded2 = encodeURIComponent(tipoDocumento)
+            const { data } = await client.get(`/proveedoresByDocumento?query=${queryEncoded}&tdo_codigo=${queryEncoded2}`)
+            // Limpiamos la lista
+            limpiarLista()
+            // si la data esta vacia
+            if (data.length === 0) {
+                alert('No se encontró ninguño proveedor con ese documento')
+                return
+            }
+            // formamos la lista
+            data.forEach(proveedor => {
+                const listItem = document.createElement('li')
+                listItem.className = 'list-group-item list-group-item-action'
+                listItem.textContent = `${proveedor.prv_nrodocumento} - ${proveedor.prv_nombre}`
+                listItem.dataset.id = proveedor.prv_id
+                listItem.addEventListener('click', () => seleccionarProveedor(proveedor))
+                // agregar la lista completa
+                $('#resultadosLista').append(listItem)
+            })
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Petición abortada'); // Maneja el error de la petición abortada
+            } else {
+                console.error('Error al buscar proveedores:', error);
+                alert('Error al buscar proveedores. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
+            }
+        }
     }
 
     async function buscarProveedores(query) {
@@ -255,11 +270,12 @@ $(document).ready(() => {
     function seleccionarProveedor(proveedor) {
         const { prv_id, prv_nrodocumento, prv_nombre, tdo_codigo } = proveedor
 
-        const $rows = $('#tbl-cotizaciones-proveedores tbody tr')
+        const $rows = $('#tbl-despliegue-materiales-cotizaciones tbody tr')
 
         const array_prov = $rows.map(function () {
             return $(this).data('id-proveedor')
         }).get()
+        console.log(array_prov)
         const findElement = array_prov.find(element => element == prv_id)
 
         if (findElement) {
@@ -294,6 +310,6 @@ $(document).ready(() => {
             </td>
         </tr>
         `
-        $('#tbl-cotizaciones-proveedores tbody').append(row)
+        $('#tbl-despliegue-materiales-cotizaciones tbody').append(row)
     }
 })

@@ -52,23 +52,31 @@
     </div>
 </div>
 
+<div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
+    <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
+    <button class="btn btn-primary" id="btn-reservar-materiales">Reservar</button>
+</div>
+
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
     <thead>
+        <th></th>
+        <th class="text-center">
+            Check
+        </th>
         <th>OT</th>
         <th>OI</th>
         <th>Fec. Det OI</th>
-        <th>Tipo</th>
+        <th class="text-center">Tipo</th>
         <th>Cod Producto</th>
         <th>Producto</th>
         <th>Obs Producto</th>
-        <th>Cantidad</th>
-        <th>Und.</th>
-        <th>Stock Alm</th>
-        <th>Reservado</th>
-        <th>Ordenado</th>
-        <th>Atendido</th>
+        <th class="text-center">Cantidad</th>
+        <th class="text-center">Und.</th>
+        <th class="text-center">Stock Alm</th>
+        <th class="text-center">Reservado</th>
+        <th class="text-center">Ordenado</th>
+        <th class="text-center">Atendido</th>
         <th>Responasble</th>
-        <th class="text-center">Acciones</th>
     </thead>
     <tbody id="data-container-body">
     </tbody>
@@ -77,39 +85,77 @@
 <!-- DIALOG DE COTIZACION -->
 <div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="cotizacionesModalLabel">Cotización</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="id-detalle-materiales">
                 <!-- SECCION DE FORM -->
-                <div class="mb-2">
-                    <select name="tipo-proveedor" id="tipo-proveedor" class="form-select form-select-sm w-25">
-                        <option value="" selected>Búsqueda libre</option>
-                        <option value="RUC">RUC</option>
-                        <option value="DNI">DNI</option>
-                    </select>
+                <div>
+                    <h2 class="fs-5">Proveedores</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="proveedoresSUNAT" class="form-label">
+                                RUC/DNI
+                            </label>
+                            <div class="input-group">
+                                <input type="text" id="proveedoresSUNAT" class="form-control"
+                                    placeholder="Ingrese Nro. documento..." autocomplete="off">
+                                <button id="searchProveedorSUNAT" class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-search" viewBox="0 0 16 16">
+                                        <path
+                                            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="proveedoresInput" class="form-label">
+                                Razón Social
+                            </label>
+                            <input type="text" id="proveedoresInput" class="form-control"
+                                placeholder="Ingrese razón social..." autocomplete="off">
+                            <ul id="resultadosLista" class="list-group mt-2"></ul>
+                        </div>
+                    </div>
+                    <!-- SECCION DE DATA PROVEEDORES-->
+                    <table id="tbl-cotizaciones-proveedores" class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th class="col-4">Nombre</th>
+                                <th class="col-1">Tip. Documento</th>
+                                <th class="col-2">Documento</th>
+                                <th class="col-2">Fec. Ult. Compra</th>
+                                <th class="col-2">Prec. Ult. Compra</th>
+                                <th class="col-1">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-proveedores-container-body">
+                        </tbody>
+                    </table>
                 </div>
-                <input type="text" id="proveedoresInput" class="form-control" placeholder="Buscar proveedor...">
-                <ul id="resultadosLista" class="list-group mt-2"></ul>
-                <!-- SECCION DE DATA -->
-                <table id="tbl-despliegue-materiales-cotizaciones" class="table mt-3">
-                    <thead>
-                        <tr>
-                            <th class="col-4">Nombre</th>
-                            <th class="col-1">Tip. Documento</th>
-                            <th class="col-2">Documento</th>
-                            <th class="col-2">Fec. Ult. Compra</th>
-                            <th class="col-2">Prec. Ult. Compra</th>
-                            <th class="col-1">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="data-container-body">
-                    </tbody>
-                </table>
+                <hr>
+                <div>
+                    <h2 class="fs-5">Materiales</h2>
+                    <!-- SECCION DE DATA DE MATERIALES -->
+                    <table id="tbl-cotizaciones-materiales" class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th class="col-1">Código</th>
+                                <th class="col-1">Und. Medida</th>
+                                <th class="col-4">Descripción</th>
+                                <th class="col-4">Observación</th>
+                                <th class="col-1">Cant.</th>
+                                <th class="col-1">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-materiales-container-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
