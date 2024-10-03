@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
+use App\Proveedor;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -272,5 +274,21 @@ class OrdenInternaMaterialesController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function exportPDFCotizacion(Request $request)
+    {
+        $idProveedor = $request->input('id_proveedor', null);
+        $detalleMateriales = $request->input('detalle_materiales', []);
+
+        $proveedor = Proveedor::find($idProveedor);
+
+        $data = [
+            'proveedor' => $proveedor,
+            'detalleMateriales' => $detalleMateriales
+        ];
+
+        $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
+        return $pdf->download('cotizacion.pdf');
     }
 }

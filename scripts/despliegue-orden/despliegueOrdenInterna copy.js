@@ -29,6 +29,9 @@ $(document).ready(() => {
     // Inicializacion de data table
     function initDataTable(data) {
         let content = ''
+        // vaciamos la lista
+        $('#data-container-body').empty()
+        // recorremos la lista
         data.forEach((material, index) => {
             // obtenemos los datos
             const { producto, orden_interna_parte } = material
@@ -49,10 +52,11 @@ $(document).ready(() => {
                 }
             }
 
-            content += `
+            const rowItem = document.createElement('tr')
+            rowItem.innerHTML = `
                 <tr>
-                    <td data-id-detalle="${material.odm_id}" class="text-center">
-                        <input type="checkbox" class="row-select">
+                    <td class="text-center">
+                        <input type="checkbox" class="row-select"/>
                     </td>
                     <td>${odt_numero}</td>
                     <td>${oic_numero}</td>
@@ -76,19 +80,40 @@ $(document).ready(() => {
                     <td>
                         <button class="btn btn-primary">Responsable</button>
                     </td>
-                    <td>
-                        <div class="d-flex justify-content-around">
-                            <button class="btn btn-sm ${condicionalReserva ? 'btn-primary' : 'btn-secondary'} me-2" ${condicionalReserva ? '' : 'disabled'}>
-                                Reservar
-                            </button>
-                            <button class="btn btn-sm btn-success btn-cotizar" data-id="${material.odm_id}">
-                                Cotizar
-                            </button>
-                        </div>
-                    </td>
                 </tr>
             `
+
+            // content += `
+            //     <tr>
+            //         <td class="text-center">
+            //             <input type="checkbox" class="row-select"/>
+            //         </td>
+            //         <td>${odt_numero}</td>
+            //         <td>${oic_numero}</td>
+            //         <td>${parseDate(material.odm_feccreacion)}</td>
+            //         <td class="text-center">${material.odm_tipo == 1 ? 'R' : 'A'}</td>
+            //         <td>${producto?.pro_codigo || 'N/A'}</td>
+            //         <td>${material.odm_descripcion}</td>
+            //         <td>${material.odm_observacion || 'N/A'}</td>
+            //         <td>${material.odm_cantidad}</td>
+            //         <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
+            //         <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
+            //         <td class="text-center">
+            //             <button class="btn btn-primary">0.00</button>
+            //         </td>
+            //         <td class="text-center">
+            //             <button class="btn btn-primary">0.00</button>
+            //         </td>
+            //         <td class="text-center">
+            //             <button class="btn btn-primary">0.00</button>
+            //         </td>
+            //         <td>
+            //             <button class="btn btn-primary">Responsable</button>
+            //         </td>
+            //     </tr>
+            // `
         })
+
         $('#data-container-body').html(content)
     }
 
