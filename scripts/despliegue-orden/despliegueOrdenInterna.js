@@ -258,7 +258,7 @@ $(document).ready(() => {
     }
 
     function seleccionarProveedor(proveedor) {
-        const { prv_id, prv_nrodocumento, prv_nombre, tdo_codigo } = proveedor
+        const { prv_id, prv_nrodocumento, prv_nombre, tdo_codigo, prv_telefono, prv_whatsapp } = proveedor
 
         const $rows = $('#tbl-cotizaciones-proveedores tbody tr')
 
@@ -280,8 +280,7 @@ $(document).ready(() => {
             <td>${prv_nombre}</td>
             <td>${tdo_codigo}</td>
             <td>${prv_nrodocumento}</td>
-            <td>No aplica</td>
-            <td>No aplica</td>
+            <td>${prv_telefono ?? ''}/${prv_whatsapp ?? ''}</td>
             <td>
                 <div class="d-flex justify-content-around">
                     <button class="btn btn-sm btn-danger btn-cotizacion-exportar-pdf me-2">
