@@ -291,4 +291,40 @@ class OrdenInternaMaterialesController extends Controller
         $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
         return $pdf->download('cotizacion.pdf');
     }
+
+    public function exportTXTCotizacion(Request $request)
+    {
+        $idProveedor = $request->input('id_proveedor', null);
+        $detalleMateriales = $request->input('detalle_materiales', []);
+
+        $proveedor = Proveedor::find($idProveedor);
+
+        $ruc = "20134690080";
+        $razon_social = "FAMAI SEAL JET S.A.C.";
+        $fecha = date('d') . ' de ' . date('F') . ' ' . date('Y');
+
+        $txt_content = "Estimado proveedor\n";
+        $txt_content .= "Por la presente sírvase cotizar lo siguiente a nombre de:\n";
+        $txt_content .= "RUC: $ruc\n";
+        $txt_content .= "Razón Social: $razon_social\n";
+        $txt_content .= "=========\n";
+        $txt_content .= "   PRODUCTO   CANTIDAD\n";
+
+        // Agregar los productos
+        foreach ($detalleMateriales as $index => $item) {
+            $txt_content .= ($index + 1) . ". " . $item["odm_descripcion"] . "     " . $item["odm_cantidad"] . "\n";
+        }
+
+        $txt_content .= "======\n";
+        $txt_content .= "Contacto: " . ($proveedor->prv_contacto ?? '') . "\n";
+        $txt_content .= "Nombre: " . ($proveedor->prv_nombre ?? '') . "\n";
+        $txt_content .= "Correo: " . ($proveedor->correo ?? '') . "\n";
+        $txt_content .= "Celular/Whatsapp: " . ($proveedor->prv_telefono ?? '') . "/" . ($proveedor->prv_whatsapp ?? '') . "\n\n";
+        $txt_content .= "Arequipa, $fecha\n";
+
+
+        return response()->streamDownload(function () use ($txt_content) {
+            echo $txt_content;
+        }, 'cotizacion_proveedor.txt', ['Content-Type' => 'text/plain']);
+    }
 }

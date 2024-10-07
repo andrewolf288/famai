@@ -344,4 +344,47 @@ $(document).ready(() => {
             console.log(error)
         }
     })
+
+    $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-text', async (event) => {
+        const row = $(event.currentTarget).closest('tr')
+        const id_proveedor = row.data('id-proveedor')
+
+        const detalleMateriales = []
+
+        const rows = $('#tbl-cotizaciones-materiales tbody tr')
+        rows.each(function () {
+            const data = {
+                uni_codigo: $(this).find('td').eq(1).text(),
+                odm_descripcion: $(this).find('td').eq(2).find('input').val(),
+                odm_observacion: $(this).find('td').eq(3).find('input').val(),
+                odm_cantidad: $(this).find('td').eq(4).find('input').val(),
+            }
+            detalleMateriales.push(data)
+        })
+
+        try {
+            const formatData = {
+                id_proveedor: id_proveedor,
+                detalle_materiales: detalleMateriales
+            }
+            console.log(formatData)
+            const response = await client.post('/ordeninternamateriales/export-cotizacion-text', formatData, {
+                headers: {
+                    'Accept': 'text/plain'
+                },
+                responseType: 'blob'
+            })
+
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `cotizacion.txt`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            console.log(error)
+        }
+    })
 })

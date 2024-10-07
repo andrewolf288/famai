@@ -186,6 +186,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::delete('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'destroy']);
     Route::get('ordeninternamateriales/export-excel', [OrdenInternaMaterialesController::class, 'exportExcel']);
     Route::post('ordeninternamateriales/export-cotizacion', [OrdenInternaMaterialesController::class, 'exportPDFCotizacion']);
+    Route::post('ordeninternamateriales/export-cotizacion-text', [OrdenInternaMaterialesController::class, 'exportTXTCotizacion']);
 });
 
 // rutas detalle procesos orden interna
