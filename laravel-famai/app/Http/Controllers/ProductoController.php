@@ -27,18 +27,18 @@ class ProductoController extends Controller
         $almID = $request->input('alm_id', 1);
 
         $query = Producto::with([
-            'unidad', 
-            'grupoInventario', 
-            'familia', 
-            'subfamilia', 
-            'marca', 
+            'unidad',
+            'grupoInventario',
+            'familia',
+            'subfamilia',
+            'marca',
             'ultimaCompra.proveedor',
             'stock' => function ($q) use ($almID) {
                 // Filtrar por almacén si se especifica
                 if ($almID !== null) {
                     // Filtrar por almacén si se especifica
                     $q->where('alm_id', $almID)
-                      ->select('pro_id', 'alm_id', 'alp_stock');
+                        ->select('pro_id', 'alm_id', 'alp_stock');
                 } else {
                     // Si no hay alm_id, devolver stock como null
                     $q->selectRaw('null as alp_stock');
@@ -87,6 +87,42 @@ class ProductoController extends Controller
         return response()->json($materiales);
     }**/
 
+    public function findProductoByQuery(Request $request)
+    {
+        $query = $request->input('query', null);
+        $almID = $request->input('alm_id', '01_AQPAG');
+
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+        $symbol = '+';
+        $subqueries = explode($symbol, $query);
+        // Construir la consulta
+        $queryBuilder = DB::connection('sqlsrv_secondary')
+            ->table('OITM as T0')
+            ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
+            ->select([
+                'T0.ItemCode as pro_codigo',
+                'T0.ItemName as pro_descripcion',
+                'T0.BuyUnitMsr as uni_codigo',
+                'T1.OnHand as alp_stock'
+            ])
+            ->selectRaw('T0.ItemCode as pro_id')
+            ->where('T1.WhsCode', '=', $almID);
+
+        foreach ($subqueries as $term) {
+            $queryBuilder->where(function ($q) use ($term) {
+                $q->where('T0.ItemCode', 'like', '%' . $term . '%')
+                    ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
+            });
+        }
+
+        // Ejecutar la consulta y devolver los resultados
+        $results = $queryBuilder->get();
+
+        return response()->json($results);
+    }
+
     public function findProductoByQuery2(Request $request)
     {
         $query = $request->input('query', null);
@@ -99,71 +135,112 @@ class ProductoController extends Controller
         $subqueries = explode($symbol, $query);
         // Construir la consulta
         $queryBuilder = DB::connection('sqlsrv_secondary')
-                        ->table('OITM as T0')
-        ->leftJoin('OITW as T1', function($join) use ($almID) {
-            $join->on('T0.ItemCode', '=', 'T1.ItemCode')
-                 ->where('T1.WhsCode', '=', $almID);
-        })
-        ->select([
-            'T0.ItemCode as pro_codigo', 
-            'T0.ItemName as pro_descripcion', 
-		    'T0.BuyUnitMsr as uni_codigo' , 
-            'T1.OnHand as alp_stock'
-        ])
-        ->selectRaw('T0.ItemCode as pro_id');
+            ->table('OITM as T0')
+            ->leftJoin('OITW as T1', function ($join) use ($almID) {
+                $join->on('T0.ItemCode', '=', 'T1.ItemCode')
+                    ->where('T1.WhsCode', '=', $almID);
+            })
+            ->select([
+                'T0.ItemCode as pro_codigo',
+                'T0.ItemName as pro_descripcion',
+                'T0.BuyUnitMsr as uni_codigo',
+                'T1.OnHand as alp_stock'
+            ])
+            ->selectRaw('T0.ItemCode as pro_id');
 
         foreach ($subqueries as $term) {
             $queryBuilder->where(function ($q) use ($term) {
                 $q->where('T0.ItemCode', 'like', '%' . $term . '%')
-                  ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
+                    ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
             });
         }
-    
+
         // Ejecutar la consulta y devolver los resultados
         $results = $queryBuilder->get();
-    
+
         return response()->json($results);
     }
 
-    public function findProductoByQuery(Request $request)
+    public function findProductoByQuery3(Request $request)
     {
         $query = $request->input('query', null);
-        $almID = $request->input('alm_id', 1); // Para filtrar por almacén si se proporciona
+        $almID = $request->input('alm_id', '01_AQPAG');
 
         if ($query === null) {
             return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
         }
-        $symbol = '+'; // Aquí se define el símbolo permitido de separacion
-
-        //en el frontent se debe codificar adecuadamente el simbolo + a %2B
-
+        $symbol = '+';
         $subqueries = explode($symbol, $query);
+        // Construir la consulta
+        $queryBuilder = DB::connection('sqlsrv_secondary')
+            ->table('OITM as T0')
+            ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
+            ->join('OINM as T2', 'T0.ItemCode', '=', 'T2.ItemCode')
+            ->select([
+                'T0.ItemCode as pro_codigo',
+                'T0.ItemName as pro_descripcion',
+                'T1.WhsCode',
+                DB::raw('SUM(T2.InQty - T2.OutQty) as alp_stock'),
+                'T0.CntUnitMsr',
+                'T1.AvgPrice',
+                'T0.validFor',
+                'T0.InvntItem',
+                DB::raw('MAX(T2.DocDate) as UltimaFechaMovimiento'),
+                DB::raw(
+                    "(CASE 
+                        WHEN (
+                            SELECT MAX(OPDN.DocDate) 
+                            FROM OPDN 
+                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                            WHERE PDN1.ItemCode = T0.ItemCode
+                        ) IS NULL 
+                        THEN (
+                            SELECT MAX(OIGN.DocDate) 
+                            FROM OIGN 
+                            JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                            WHERE IGN1.ItemCode = T0.ItemCode
+                        )
+                        ELSE (
+                            SELECT MAX(OPDN.DocDate) 
+                            FROM OPDN 
+                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                            WHERE PDN1.ItemCode = T0.ItemCode
+                        )
+                        END) as UltimaFechaIngreso"
+                )
+            ])
+            ->selectRaw('T0.ItemCode as pro_id')
+            ->where('T1.WhsCode', '=', $almID)
+            ->where('T2.Warehouse', '=', $almID)
+            ->where('T0.validFor', '=', 'Y')
+            ->whereDate('T2.CreateDate', '<=', now())
+            ->groupBy(
+                'T0.ItemCode',
+                'T0.ItemName',
+                'T1.WhsCode',
+                'T0.CntUnitMsr',
+                'T1.AvgPrice',
+                'T0.validFor',
+                'T0.InvntItem'
+            );
 
-        $materialesQuery = Producto::where('pro_activo', 1)
-            ->with([
-                'stock' => function ($q) use ($almID) {
-                        // Filtrar por almacén si se especifica
-                    if ($almID !== null) {
-                        // Filtrar por almacén si se especifica
-                        $q->where('alm_id', $almID)
-                        ->select('pro_id', 'alm_id', 'alp_stock');
-                    } else {
-                        // Si no hay alm_id, devolver stock como null
-                        $q->selectRaw('null as alp_stock');
-                    }
-                }
-            ]);
-
-        foreach ($subqueries as $subquery) {
-            $materialesQuery->where(function($q) use ($subquery) {
-                $q->where('pro_descripcion', 'like', '%' . $subquery . '%')
-                ->orWhere('pro_codigo', 'like', '%' . $subquery . '%');
+        foreach ($subqueries as $term) {
+            $queryBuilder->where(function ($q) use ($term) {
+                $q->where('T0.ItemCode', 'like', '%' . $term . '%')
+                    ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
             });
         }
+        $queryBuilder->orderBy('T0.ItemName', 'asc');
+        $queryBuilder->orderBy('alp_stock', 'desc');
+        $queryBuilder->orderBy('UltimaFechaIngreso', 'desc');
 
-        $materiales = $materialesQuery->select('pro_id', 'pro_codigo', 'pro_descripcion')->get();
+        // Ejecutar la consulta y devolver los resultados
+        $results = $queryBuilder->get();
 
-        return response()->json($materiales);
+        return response()->json($results);
+
+        // Devolver los resultados filtrados en formato JSON
+        return response()->json($filteredResults);
     }
 
     /**

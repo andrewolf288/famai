@@ -663,7 +663,7 @@ $(document).ready(function () {
                 const listItem = document.createElement('li')
                 listItem.className = 'list-group-item list-group-item-action'
                 // listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - ${material.stock?.alp_stock || 0}`
-                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - Stock: ${material.alp_stock || '0.000000'}`
+                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - Stock: ${material.alp_stock || '0.000000'} - Fec. Ult. Ingreso: ${material["UltimaFechaIngreso"] ? parseDateSimple(material["UltimaFechaIngreso"]) : 'No Aplica'}`
                 listItem.dataset.id = material.pro_id
                 listItem.addEventListener('click', () => seleccionarMaterial(material))
                 // agregar la lista completa
