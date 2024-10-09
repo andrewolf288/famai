@@ -382,13 +382,13 @@ $(document).ready(function () {
             <tr class="${element['odp_editable_descripcion'] ? 'editable-descripcion' : ''}">
                 <td>${element["opp_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${element["odp_descripcion"]}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${element["odp_descripcion"]}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="${element["odp_observacion"]}" readonly/>
+                    <input type="text" class="form-control observacion-input" value='${element["odp_observacion"]}' readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -448,13 +448,13 @@ $(document).ready(function () {
             <tr class="${claseCondicional ? 'editable-descripcion' : ''}">
                 <td>${data["opp_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${data["odp_descripcion"]}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${data["odp_descripcion"]}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="${data["odp_observacion"]}" readonly/>
+                    <input type="text" class="form-control observacion-input" value='${data["odp_observacion"]}' readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -564,13 +564,13 @@ $(document).ready(function () {
             <tr>
                 <td>${element["pro_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${element["odm_descripcion"]}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${element["odm_descripcion"]}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value="${element["odm_cantidad"]}" readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="${element["odm_observacion"]}" readonly/>
+                    <input type="text" class="form-control observacion-input" value='${element["odm_observacion"]}' readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -709,13 +709,13 @@ $(document).ready(function () {
              <tr>
                  <td>${data["pro_codigo"]}</td>
                  <td>
-                     <input type="text" class="form-control descripcion-input" value="${data["odm_descripcion"]}" readonly/>
+                     <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"]}' readonly/>
                  </td>
                  <td>
                      <input type="number" class="form-control cantidad-input" value="${data["odm_cantidad"]}" readonly/>
                  </td>
                  <td>
-                     <input type="text" class="form-control observacion-input" value="${data["odm_observacion"]}" readonly/>
+                     <input type="text" class="form-control observacion-input" value='${data["odm_observacion"]}' readonly/>
                  </td>
                  <td>
                      <div class="d-flex justify-content-around">

@@ -147,7 +147,7 @@ $(document).ready(async function () {
                     <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="${element.odp_observacion || ''}" readonly/>
+                    <input type="text" class="form-control observacion-input" value='${element.odp_observacion || ''}' readonly/>
                 </td>
                 <td>${element.odp_usumodificacion ?? 'No aplica'}</td>
                 <td>${element.odp_fecmodificacion ? parseDate(element.odp_fecmodificacion) : 'No aplica'}</td>
@@ -220,13 +220,13 @@ $(document).ready(async function () {
             <tr class="row-editable table-warning ${claseCondicional ? 'editable-descripcion' : ''}" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${selectedProcesoName}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${selectedProcesoName}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="" readonly/>
+                    <input type="text" class="form-control observacion-input" value='' readonly/>
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
@@ -464,13 +464,13 @@ $(document).ready(async function () {
             <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary">
                 <td>${element.producto?.pro_codigo ?? '-'}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${element.odm_descripcion}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${element.odm_descripcion}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control cantidad-input" value="${element.odm_cantidad}" readonly/>
+                    <input type="number" class="form-control cantidad-input" value='${element.odm_cantidad}' readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="${element.odm_observacion || ''}" readonly/>
+                    <input type="text" class="form-control observacion-input" value='${element.odm_observacion || ''}' readonly/>
                 </td>
                 <td>${element.odm_usumodificacion ?? 'No aplica'}</td>
                 <td>${element.odm_fecmodificacion ? parseDate(element.odm_fecmodificacion) : 'No aplica'}</td>
@@ -590,13 +590,13 @@ $(document).ready(async function () {
             <tr class="row-editable table-warning" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value="${pro_descripcion}" readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control cantidad-input" value="1.00" readonly/>
+                    <input type="number" class="form-control cantidad-input" value='1.00' readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value="" readonly/>
+                    <input type="text" class="form-control observacion-input" value='' readonly/>
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
