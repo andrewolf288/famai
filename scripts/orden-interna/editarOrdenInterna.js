@@ -142,7 +142,9 @@ $(document).ready(async function () {
             const row = `
             <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary">
                 <td>${element.proceso.opp_codigo}</td>
-                <td>${element.odp_descripcion || element.proceso.opp_descripcion}</td>
+                <td>
+                    <input type="text" class="form-control descripcion-input" value='${element.odp_descripcion || element.proceso.opp_descripcion}'/>
+                </td>
                 <td class="text-center">
                     <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
                 </td>
