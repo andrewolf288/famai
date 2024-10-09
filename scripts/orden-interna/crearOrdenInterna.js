@@ -1,6 +1,7 @@
 
 $(document).ready(function () {
     let abortController
+    var { pdfjsLib } = globalThis
 
     window.onbeforeunload = function (e) {
         e.preventDefault();
@@ -142,6 +143,7 @@ $(document).ready(function () {
                         odm_descripcion: material.odm_descripcion,
                         odm_cantidad: material.odm_cantidad,
                         odm_observacion: "",
+                        odm_tipo: 1,
                         odm_asociar: material.producto === null ? false : true
                     })
                 })
@@ -577,10 +579,13 @@ $(document).ready(function () {
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar" data-producto="${element["pro_id"]}">
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${element["pro_id"]}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
+                        </button>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" data-producto="${element["pro_id"]}" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
+                            C
                         </button>
                     </div>
                 </td>
@@ -696,6 +701,7 @@ $(document).ready(function () {
                 odm_descripcion: pro_descripcion,
                 odm_cantidad: 1.00,
                 odm_observacion: "",
+                odm_tipo: 1,
                 odm_asociar: false
             }
 
@@ -718,11 +724,14 @@ $(document).ready(function () {
                                  <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                              </svg>
                          </button>
-                         <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar" data-producto="${data["pro_id"]}">
+                         <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}">
                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                  <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                              </svg>
                          </button>
+                         <button class="btn btn-sm ${data["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 3 ? 'disabled' : ''}>
+                            C
+                        </button>
                      </div>
                  </td>
              </tr>`
@@ -755,6 +764,7 @@ $(document).ready(function () {
                 odm_descripcion: pro_descripcion,
                 odm_cantidad: 1.00,
                 odm_observacion: "",
+                odm_tipo: 1,
                 odm_asociar: true
             }
 
@@ -777,10 +787,13 @@ $(document).ready(function () {
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar" data-producto="${data["pro_id"]}">
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
+                        </button>
+                        <button class="btn btn-sm ${data["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 3 ? 'disabled' : ''}>
+                            C
                         </button>
                     </div>
                 </td>
@@ -795,6 +808,28 @@ $(document).ready(function () {
             $(idCantidadProducto).text(totalProductos)
         }
     }
+    // funcion de cambiar estado
+    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-proporcionado-cliente', function () {
+        const id_producto = $(this).data('producto')
+        const $row = $(this).closest('tr')
+        const $observacionInput = $row.find('.observacion-input')
+        // añadimos el texto
+        const textNota = 'proporcionado por cliente ' + $observacionInput.val()
+        $observacionInput.val(textNota)
+
+        // actualizamos la data
+        const findElement = buscarDetalleParte(currentParte)
+        const { detalle_materiales } = findElement
+        const findElementProducto = detalle_materiales.find(element => element.pro_id == id_producto)
+        findElementProducto["odm_tipo"] = 3
+        findElementProducto["odm_observacion"] = textNota
+
+        // deshabilitar el input
+        $(this).attr('disabled', true)
+        // cambiamos los estilos del boton
+        $(this).removeClass('btn-success btn-detalle-proporcionado-cliente')
+                .addClass('btn-secondary btn-detalle-proporcionado-cliente')
+    })
 
     // funcion de editar detalle de productos
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-editar', function () {
@@ -1080,13 +1115,7 @@ $(document).ready(function () {
             })
 
             const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `previsualizacion_orden_trabajo.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            showModalPreview(url)
         } catch (error) {
             console.log(error)
             alert('Error al generar el reporte')
@@ -1094,6 +1123,28 @@ $(document).ready(function () {
             hideLoaderModal()
         }
     })
+
+    function showModalPreview(pdfUrl) {
+        const canvas = document.getElementById("pdf-viewer");
+        pdfjsLib.getDocument(pdfUrl).promise.then(function (pdf) {
+            // Renderizar la primera página del PDF
+            pdf.getPage(1).then(function (page) {
+                const viewport = page.getViewport({ scale: 1.5 });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const context = canvas.getContext("2d");
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            });
+        });
+        // mostramos el modal
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
 
     // Funcion de cancelar
     $('#btn-cancelar-orden-interna').on('click', function () {

@@ -232,10 +232,10 @@ class OrdenInternaController extends Controller
                     'opd_id' => $ordenInternaParte->opd_id,
                     'pro_id' => $pro_id,
                     'odm_item' => $material['odm_item'],
-                    'odm_descripcion' => $material['odm_descrcipcion'],
+                    'odm_descripcion' => $material['odm_descripcion'],
                     'odm_cantidad' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
-                    'odm_tipo' => 2,
+                    'odm_tipo' => $material['odm_tipo'],
                     'odm_estado' => 1,
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
@@ -250,6 +250,7 @@ class OrdenInternaController extends Controller
             // actualizamos informacion de actualizacion de orden interna
             $ordenInterna = OrdenInterna::find($ordenInternaParte->oic_id);
             $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_fecha = date('Y-m-d H:i:s');
             $ordenInterna->oic_usumodificacion = $user->usu_codigo;
             $ordenInterna->save();
 
@@ -308,6 +309,7 @@ class OrdenInternaController extends Controller
             // actualizamos informacion de actualizacion de orden interna
             $ordenInterna = OrdenInterna::find($ordenInternaParte->oic_id);
             $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_fecha = date('Y-m-d H:i:s');
             $ordenInterna->oic_usumodificacion = $user->usu_codigo;
             $ordenInterna->save();
 
@@ -608,6 +610,7 @@ class OrdenInternaController extends Controller
                         'odm_cantidad' => 'required|numeric|min:1',
                         'odm_item' => 'required|integer',
                         'odm_observacion' => 'nullable|string',
+                        'odm_tipo' => 'required|integer',
                         'odm_asociar' => 'required|boolean'
                     ])->validate();
 
@@ -679,7 +682,7 @@ class OrdenInternaController extends Controller
                         'odm_cantidad' => $material['odm_cantidad'],
                         'odm_item' => $material['odm_item'],
                         'odm_observacion' => $material['odm_observacion'],
-                        'odm_tipo' => 1,
+                        'odm_tipo' => $material['odm_tipo'],
                         'odm_estado' => 1,
                         'odm_usucreacion' => $user->usu_codigo,
                         'odm_fecmodificacion' => null

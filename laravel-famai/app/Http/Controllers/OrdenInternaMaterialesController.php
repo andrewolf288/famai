@@ -117,6 +117,7 @@ class OrdenInternaMaterialesController extends Controller
 
             // actualizamos la orden interna
             $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_fecha = date('Y-m-d H:i:s');
             $ordenInterna->oic_usumodificacion = $user->usu_codigo;
             $ordenInterna->save();
 
@@ -126,6 +127,42 @@ class OrdenInternaMaterialesController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al actualizar el detalle de producto: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateTipoMaterial(Request $request, $id)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($id);
+            $request->validate([
+                'odm_tipo' => 'required|integer',
+                'odm_observacion' => 'nullable|string|max:255',
+            ]);
+
+            $ordenInternaMaterial->update([
+                'odm_tipo' => $request->input('odm_tipo'),
+                'odm_observacion' => $request->input('odm_observacion'),
+                'odm_usumodificacion' => $user->usu_codigo,
+            ]);
+
+            // buscamos el detalle de parte
+            $ordenInternaParte = OrdenInternaPartes::findOrFail($ordenInternaMaterial->opd_id);
+            $ordenInterna = OrdenInterna::findOrFail($ordenInternaParte->oic_id);
+
+            // actualizamos la orden interna
+            $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_fecha = date('Y-m-d H:i:s');
+            $ordenInterna->oic_usumodificacion = $user->usu_codigo;
+            $ordenInterna->save();
+
+            DB::commit();
+
+            return response()->json($ordenInternaMaterial, 200);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
         }
     }
 
@@ -142,6 +179,7 @@ class OrdenInternaMaterialesController extends Controller
 
             // actualizamos la orden interna
             $ordenInterna->oic_fecmodificacion = date('Y-m-d H:i:s');
+            $ordenInterna->oic_fecha = date('Y-m-d H:i:s');
             $ordenInterna->oic_usumodificacion = $user->usu_codigo;
             $ordenInterna->save();
 

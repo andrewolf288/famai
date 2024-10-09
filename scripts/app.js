@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     // Ruta para la creacion de orden interna
     router.on('/orden-interna/crear', () => {
-        console.log("entro")
         privateRoute(() => {
             loadContent('pages/orden-interna/crearOrdenInterna.html', 'scripts/orden-interna/crearOrdenInterna.js')
         })

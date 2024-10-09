@@ -48,10 +48,9 @@
 
   .generaltable td {
     border: 0.5mm solid #888888;
-
     text-align: center;
     font-size: 8pt;
-    padding: 0px;
+    padding-left: 2px;
     margin: 0px;
   }
 
@@ -150,25 +149,40 @@
   &nbsp;
   <table class="generaltable">
     <tr>
-      <td class="lefty-align" width="40%"><strong>CLIENTE:</strong>&nbsp; {varClientenombre}</td>
+      <td class="lefty-align" width="20%"><strong>CLIENTE:</strong></td>
+      <td class="lefty-align" width="50%">{varClientenombre}</td>
+      <td class="lefty-align" width="20%"><strong>FECHA DE APROBACIÓN:</strong></td>
+      <td class="lefty-align" width="10%"></td>
     </tr>
     <tr>
-      <td class="lefty-align"><strong>EQUIPO:</strong>&nbsp; {varEquipoDescripcion}</td>
+      <td class="lefty-align" width="20%"><strong>EQUIPO:</strong></td>
+      <td class="lefty-align" width="50%">{varEquipoDescripcion}</td>
+      <td class="lefty-align" width="20%"><strong>FECHA DE ENTREGA ESTIMADA:</strong></td>
+      <td class="lefty-align" width="10%"></td>
     </tr>
     <tr>
-      <td class="lefty-align" width="50%"><strong>FECHA:</strong>&nbsp;&nbsp;&nbsp; {varFecha}</td>
+      <td class="lefty-align" width="20%"><strong>FECHA DE EVALUACIÓN:</strong></td>
+      <td class="lefty-align" width="50%">{varFecha}</td>
+      <td class="lefty-align" width="20%"><strong>FECHA DE :</strong></td>
+      <td class="lefty-align" width="10%"></td>
     </tr>
     <tr>
-      <td class="lefty-align"><strong>OT:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {varOrdenTrabajo}</td>
+      <td class="lefty-align" width="20%"><strong>OT:</strong></td>
+      <td class="lefty-align" width="50%">{varOrdenTrabajo}</td>
+      <td class="lefty-align" width="20%"></td>
+      <td class="lefty-align" width="10%"></td>
     </tr>
     <tr>
-      <td class="lefty-align"><strong>OI:</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {varOrdenInterna}</td>
+      <td class="lefty-align" width="20%"><strong>OI:</strong></td>
+      <td class="lefty-align" width="50%">{varOrdenInterna}</td>
+      <td class="lefty-align" width="20%"></td>
+      <td class="lefty-align" width="10%"></td>
     </tr>
   </table>
   &nbsp;
   <table class="generaltable">
     <tr>
-      <th colspan="6">{varArea}</th> <!--HIDRAULICA-->
+      <th colspan="6">{varArea}</th>
     </tr>
     <tr>
       <td width="10%"><strong>Respon. ORIGEN</strong></td>
@@ -183,12 +197,12 @@
   <table class="secondarytable">
     <tr>
       <th rowspan="2" width="6%"></th>
-      <th colspan="3">ORDEN INTERNA DE TRABAJO</th>
-      <th colspan="4">ORDEN DE PEDIDO DE MATERIALES</th>
+      <th colspan="3">ACTIVIDADES A REALIZAR</th>
+      <th colspan="4">PEDIDO DE MATERIALES</th>
     </tr>
     <tr>
       <td width="4%" class="sub-header">COD.</td>
-      <td width="15%" class="sub-header">PROCESOS</td>
+      <td width="15%" class="sub-header">DESCRIPCIÓN</td>
       <td width="20%" class="sub-header">OBSERVACIONES</td>
       <td width="4%" class="sub-header">ITEM</td>
       <td width="25%" class="sub-header">DESCRIPCION</td>

@@ -38,8 +38,9 @@ $(document).ready(async function () {
             data.partes.forEach(function (item, index) {
                 const totalDetalleProcesos = item.procesos.filter(element => element.odp_estado == 1).length
                 const totalDetalleProductos = item.materiales.filter(element => element.odm_estado == 1).length
-                const totalAdicionales = item.materiales.filter((element) => element.odm_tipo == 2 && element.odm_estado == 1).length
                 const totalRegulares = item.materiales.filter((element) => element.odm_tipo == 1 && element.odm_estado == 1).length
+                const totalAdicionales = item.materiales.filter((element) => element.odm_tipo == 2 && element.odm_estado == 1).length
+                const totalClientes = item.materiales.filter((element) => element.odm_tipo == 3 && element.odm_estado == 1).length
 
                 const row = `
                 <tr>
@@ -71,6 +72,9 @@ $(document).ready(async function () {
                     </td>
                     <td>
                         <p class="text-center" id="cantidad-adicionales-${item.opd_id}">${totalAdicionales}</p>
+                    </td>
+                    <td>
+                        <p class="text-center" id="cantidad-clientes-${item.opd_id}">${totalClientes}</p>
                     </td>
                 </tr>
                 `
@@ -479,10 +483,13 @@ $(document).ready(async function () {
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar">
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
+                        </button>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
+                            C
                         </button>
                     </div>
                 </td>
@@ -602,10 +609,13 @@ $(document).ready(async function () {
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar">
+                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
+                        </button>
+                        <button class="btn btn-sm btn-success btn-detalle-proporcionado-cliente">
+                            C
                         </button>
                     </div>
                 </td>
@@ -663,6 +673,9 @@ $(document).ready(async function () {
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
                         </button>
+                        <button class="btn btn-sm btn-success btn-detalle-proporcionado-cliente">
+                            C
+                        </button>
                     </div>
                 </td>
             </tr>`
@@ -670,6 +683,55 @@ $(document).ready(async function () {
             $('#tbl-orden-interna-productos tbody').append(row)
         }
     }
+
+    // funcion de cambiar de tipo
+    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-proporcionado-cliente', async function () {
+        const $row = $(this).closest('tr')
+        const $observacionInput = $row.find('.observacion-input')
+        const textNota = 'proporcionado por cliente ' + $observacionInput.val()
+
+        if (!$row.hasClass('row-editable')) {
+            const odm_id = $row.data('id-detalle')
+            const odm_tipo = 3
+            const formatData = {
+                odm_tipo,
+                odm_observacion: textNota
+            }
+            try {
+                const { data } = await client.put(`/ordeninternamateriales/tipo/${odm_id}`, formatData)
+                const { materiales } = buscarDetalleParte(currentDetalleParte)
+                const findMaterial = materiales.find(element => element.odm_id == odm_id)
+
+                const tipo_anterior = findMaterial["odm_tipo"]
+                findMaterial["odm_observacion"] = data.odm_observacion
+                findMaterial["odm_tipo"] = data.odm_tipo
+                findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
+                findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
+
+                $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
+                $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
+
+                // se actualiza las cantidades
+                const idCantidadClientes = `#cantidad-clientes-${currentDetalleParte}`
+                $(idCantidadClientes).text(parseInt($(idCantidadClientes).text()) + 1)
+
+                const idCantidad = tipo_anterior == 1 ? `#cantidad-regulares-${currentDetalleParte}` : `#cantidad-adicionales-${currentDetalleParte}`
+                $(idCantidad).text(parseInt($(idCantidad).text()) - 1)
+
+                alert('Se actualizo correctamente')
+            } catch (error) {
+                alert('Error al actualizar el detalle de material')
+            }
+
+        }
+
+        $observacionInput.val(textNota)
+        // deshabilitar el input
+        $(this).attr('disabled', true)
+        // cambiamos los estilos del boton
+        $(this).removeClass('btn-success btn-detalle-proporcionado-cliente')
+            .addClass('btn-secondary btn-detalle-proporcionado-cliente')
+    })
 
     // funcion de editar detalle de productos
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-producto-editar', function () {
@@ -753,7 +815,7 @@ $(document).ready(async function () {
                 await client.delete(`/ordeninternamateriales/${odm_id}`)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterialIndex = materiales.findIndex(element => element.odm_id == odm_id)
-                const findMaterial = materiales.findIndex(element => element.odm_id == odm_id)
+                const findMaterial = materiales[findMaterialIndex]
                 const tipo = findMaterial["odm_tipo"]
                 materiales.splice(findMaterialIndex, 1)
                 // actualizamos el total de procesos
@@ -762,9 +824,15 @@ $(document).ready(async function () {
                 if (tipo == '1') {
                     cantidadTotal = parseInt($(`#cantidad-regulares-${currentDetalleParte}`).text()) - 1
                     $(`#cantidad-regulares-${currentDetalleParte}`).text(cantidadTotal)
-                } else {
+                } 
+                if (tipo == '2') {
                     cantidadTotal = parseInt($(`#cantidad-adicionales-${currentDetalleParte}`).text()) - 1
                     $(`#cantidad-adicionales-${currentDetalleParte}`).text(cantidadTotal)
+                }
+                if (tipo == '3') {
+                    cantidadTotal = parseInt($(`#cantidad-clientes-${currentDetalleParte}`).text()) - 1
+                    console.log(cantidadTotal)
+                    $(`#cantidad-clientes-${currentDetalleParte}`).text(cantidadTotal)
                 }
                 $row.remove()
                 setTimeout(function () {
@@ -821,9 +889,10 @@ $(document).ready(async function () {
                 pro_id: $(this).data('id-producto'),
                 odm_item: item,
                 odm_asociar: asociar,
-                odm_descrcipcion: $(this).find('.descripcion-input').val().trim(),
+                odm_descripcion: $(this).find('.descripcion-input').val().trim(),
                 odm_cantidad: $(this).find('.cantidad-input').val().trim(),
                 odm_observacion: $(this).find('.observacion-input').val().trim(),
+                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 2 : 3
             }
             dataArray.push(dataObject)
         })
@@ -842,7 +911,6 @@ $(document).ready(async function () {
         try {
             const { data } = await client.put(`/ordeninterna/guardar-materiales/${currentDetalleParte}`, { materiales: dataArray })
             // actualizamos la data
-
             data.data.forEach(element => {
                 materiales.push(element)
             })
@@ -851,9 +919,12 @@ $(document).ready(async function () {
             const totalProductos = materiales.length
             const idCantidadProductos = `#cantidad-productos-${currentDetalleParte}`
             const idCantidadAdicionales = `#cantidad-adicionales-${currentDetalleParte}`
-            const totalAdicionales = data.data.length + parseInt($(idCantidadAdicionales).text())
+            const idCantidadClientes = `#cantidad-clientes-${currentDetalleParte}`
+            const totalAdicionales = materiales.filter(element => element.odm_tipo == 2).length
+            const totalClientes = materiales.filter(element => element.odm_tipo == 3).length
             $(idCantidadProductos).text(totalProductos)
             $(idCantidadAdicionales).text(totalAdicionales)
+            $(idCantidadClientes).text(totalClientes)
 
             // borramos los datos temporales
             $('#tbl-orden-interna-productos tbody .row-editable').remove()
