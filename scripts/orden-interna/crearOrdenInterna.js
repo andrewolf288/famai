@@ -128,7 +128,7 @@ $(document).ready(function () {
                         opp_id: proceso.proceso.opp_id,
                         opp_codigo: proceso.proceso.opp_codigo,
                         odp_descripcion: proceso.odp_descripcion || '',
-                        odp_observacion: "",
+                        odp_observacion: proceso.odp_observacion || '',
                         odp_ccalidad: false,
                         odp_editable_descripcion: false
                     })
@@ -140,9 +140,9 @@ $(document).ready(function () {
                         // pro_id: material.producto === null ? obtenerIdUnico(): material.producto.pro_id,
                         pro_id: material.producto === null ? obtenerIdUnico() : material.producto.pro_codigo,
                         pro_codigo: material.producto === null ? '' : material.producto.pro_codigo,
-                        odm_descripcion: material.odm_descripcion,
-                        odm_cantidad: material.odm_cantidad,
-                        odm_observacion: "",
+                        odm_descripcion: material.odm_descripcion || '',
+                        odm_cantidad: material.odm_cantidad || 1,
+                        odm_observacion: material.odm_observacion || '',
                         odm_tipo: 1,
                         odm_asociar: material.producto === null ? false : true
                     })
