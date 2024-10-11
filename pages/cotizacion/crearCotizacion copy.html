@@ -57,6 +57,12 @@
                         <input type="text" id="whatsappProveedorInput" class="form-control" readonly />
                     </div>
                 </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <label for="direccionProveedorInput">Dirección</label>
+                        <textarea id="direccionProveedorInput" class="form-control" readonly></textarea>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -71,6 +77,8 @@
                     <div class="col-md-4">
                         <label for="monedaInput">Moneda</label>
                         <select name="moneda" id="monedaInput" class="form-select">
+                            <option value="SOL">S/ Soles</option>
+                            <option value="DOL">$ Dolares</option>
                         </select>
                     </div>
                     <div class="col-md-8">
@@ -79,21 +87,29 @@
                     </div>
                 </div>
                 <div class="row mt-2">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label for="fechaPicker">Fecha cotización</label>
                         <input type="text" id="fechaCotizacionPicker" class="form-control">
                     </div>
+                    <div class="col-md-6">
+                        <label for="fechaPicker">Fecha entrega</label>
+                        <input type="text" id="fechaEntregaCotizacionPicker" class="form-control">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <label for="referenciaCotizacionInput">Referencia</label>
+                        <input type="text" id="referenciaCotizacionInput" class="form-control">
+                    </div>
                     <div class="col-md-8">
-                        <label for="solicitanteCotizacionInput">Solicitado por</label>
-                        <select id="solicitanteCotizacionInput" class="form-select">
-                            <option value="" selected>Seleccione un trabajador</option>
-                        </select>
+                        <label for="solicitanteCotizacionInput">Elaborado por</label>
+                        <input type="text" id="solicitanteCotizacionInput" class="form-control" readonly>
                     </div>
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-12">
                         <label for="notaCotizacionInput">Nota</label>
-                        <textarea id="notaCotizacionInput" class="form-control" rows="1"></textarea>
+                        <textarea id="notaCotizacionInput" class="form-control"></textarea>
                     </div>
                 </div>
 
@@ -156,6 +172,14 @@
     <div class="col-md-6 col-lg-4">
         <div class="card">
             <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Subtotal:</span>
+                    <span>S/<span id="subtotalCotizacion">0.00</span></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">IGV (18%):</span>
+                    <span>S/<span id="igvCotizacion">0.00</span></span>
+                </div>
                 <div class="d-flex justify-content-between">
                     <span class="fw-bold">Total:</span>
                     <span>S/<span id="totalCotizacion">0.00</span></span>

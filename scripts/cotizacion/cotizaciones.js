@@ -34,11 +34,9 @@ $(document).ready(() => {
                     <td>${cotizacion.coc_numero ?? 'No aplica'}</td>
                     <td>${cotizacion.proveedor?.prv_nombre ?? 'No aplica'}</td>
                     <td class="text-center">${cotizacion.moneda?.mon_descripcion ?? 'No aplica'}</td>
-                    <td class="text-center">${cotizacion.coc_subtotal}</td>
-                    <td class="text-center">${cotizacion.coc_impuesto}</td>
                     <td class="text-center">${cotizacion.coc_total}</td>
                     <td>${cotizacion.coc_fechacotizacion !== null ? parseDateSimple(cotizacion.coc_fechacotizacion) : 'No aplica'}</td>
-                    <td>${cotizacion.coc_activo == 1 ? 'Activo' : 'Inactivo'}</td>
+                    <td>${cotizacion.coc_estado == '1' ? 'Activo' : 'Inactivo'}</td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-orden-interna-editar" data-cotizacion="${cotizacion.coc_id}">

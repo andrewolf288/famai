@@ -47,31 +47,24 @@ class CotizacionController extends Controller
             $validatedData = validator($data, [
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
                 'coc_fechacotizacion' => 'required|date',
-                'coc_fechaentrega' => 'nullable|date',
-                'coc_referencia' => 'nullable|string',
                 'mon_codigo' => 'nullable|string|exists:tblmonedas_mon,mon_codigo',
                 'coc_formapago' => 'nullable|string',
-                'tra_solicitante' => 'nullable|string',
+                'tra_solicitante' => 'nullable|exists:tbltrabajadores_tra,tra_id',
                 'coc_notas' => 'nullable|string',
                 'coc_total' => 'required|numeric|min:1',
-                'coc_subtotal' => 'required|numeric|min:1',
-                'coc_impuesto' => 'required|numeric|min:1',
                 'detalle_productos' => 'required|array|min:1',
+                'detalle_descripciones' => 'nullable|array|min:1',
             ])->validate();
 
             $cotizacion = Cotizacion::create([
                 'prv_id' => $validatedData['prv_id'],
                 'coc_fechacotizacion' => $validatedData['coc_fechacotizacion'],
-                'coc_fechaentrega' => $validatedData['coc_fechaentrega'],
-                'coc_referencia' => $validatedData['coc_referencia'],
                 'mon_codigo' => $validatedData['mon_codigo'],
                 'coc_formapago' => $validatedData['coc_formapago'],
                 'tra_solicitante' => $validatedData['tra_solicitante'],
                 'coc_notas' => $validatedData['coc_notas'],
                 'coc_total' => $validatedData['coc_total'],
-                'coc_subtotal' => $validatedData['coc_subtotal'],
-                'coc_impuesto' => $validatedData['coc_impuesto'],
-                'coc_activo' => 1,
+                'coc_estado' => '1',
                 'coc_usucreacion' => $user->usu_codigo,
                 'coc_fecmodificacion' => null
             ]);
@@ -91,20 +84,23 @@ class CotizacionController extends Controller
                 ]);
             }
 
+            $detalle_descripcion = $validatedData['detalle_descripciones'];
+
             if ($request->hasFile('files')) {
                 // Obtenemos todos los archivos
                 $files = $request->file('files');
-                
+                $countArray = 0;
                 foreach ($files as $file) {
                     $path = $file->store('cotizacion-adjuntos', 'public');
                     $cotizacionDetalleArchivo = CotizacionDetalleArchivos::create([
                         'coc_id' => $cotizacion->coc_id,
-                        'cda_descripcion' => null,
+                        'cda_descripcion' => $detalle_descripcion[$countArray],
                         'cda_url' => $path,
                         'cda_activo' => 1,
                         'cda_usucreacion' => $user->usu_codigo,
                         'cda_fecmodificacion' => null
                     ]);
+                    $countArray++;
                 }
             }
 

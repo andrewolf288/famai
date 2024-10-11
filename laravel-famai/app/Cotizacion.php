@@ -14,24 +14,19 @@ class Cotizacion extends Model
         'coc_numero',
         'prv_id',
         'coc_fechacotizacion',
-        'coc_fechaentrega',
         'mon_codigo',
+        'coc_vendedor',
+        'coc_deposito',
         'coc_tipocambio',
-        'coc_referencia',
         'coc_formapago',
         'tra_solicitante',
-        'usu_autorizador',
         'coc_notas',
         'coc_total',
-        'coc_subtotal',
-        'coc_impuesto',
-        'coc_adelanto',
-        'coc_observacionpago',
-        'coc_activo',
         'coc_usucreacion',
         'coc_feccreacion',
         'coc_usumodificacion',
-        'coc_fecmodificacion'
+        'coc_fecmodificacion',
+        'coc_estado',
     ];
 
     const CREATED_AT = 'coc_feccreacion';

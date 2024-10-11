@@ -8,52 +8,10 @@ $(document).ready(() => {
         setDate: new Date()
     }).datepicker("setDate", new Date())
 
-    // cargar areas
-    const cargarTipoMonedas = async () => {
-        try {
-            const { data } = await client.get('/monedasSimple')
-            const $monedaSelect = $('#monedaInput')
-
-            data.forEach((moneda) => {
-                const option = $(`<option ${moneda["mon_codigo"] == 'SOL' ? 'selected' : ''}>`).val(moneda["mon_codigo"]).text(moneda["mon_descripcion"])
-                $monedaSelect.append(option)
-            })
-
-        } catch (error) {
-            alert('Error al obtener las areas')
-        }
-    }
-
-    // cargamos responsables
-    const cargarTrabajadores = async () => {
-        try {
-            const { data } = await client.get('/trabajadoresSimple')
-            const $solicitanteCotizacion = $('#solicitanteCotizacionInput')
-
-            // Ordenar la data alfabéticamente según el nombre (índice [1])
-            data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
-
-            data.forEach(trabajador => {
-                const option = $('<option>').val(trabajador.tra_id).text(trabajador.tra_nombre)
-                $solicitanteCotizacion.append(option.clone())
-            })
-        } catch (error) {
-            alert('Error al obtener los encargados')
-        }
-    }
-
-    const initInformacion = async () => {
-        try {
-            await Promise.all([
-                cargarTipoMonedas(),
-                cargarTrabajadores(),
-            ])
-        } catch (error) {
-            alert("Error al cargar los datos")
-        }
-    }
-
-    initInformacion()
+    $("#fechaEntregaCotizacionPicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+        setDate: new Date()
+    }).datepicker("setDate", new Date())
 
     // gestionamos informacion de proveedor
     $('#proveedoresInput').on('input', debounce(async function () {
@@ -67,6 +25,7 @@ $(document).ready(() => {
 
     // al momento de presionar enter
     $('#searchProveedorSUNAT').on('click', async function (event) {
+        console.log("first")
         const query = $('#proveedoresSUNAT').val().trim()
         // si es la tecla de enter
         if (event.keyCode === 13) {
@@ -127,43 +86,33 @@ $(document).ready(() => {
         $('#correoProveedorInput').val(prv_correo || '')
         $('#contactoProveedorInput').val(prv_contacto || '')
         $('#whatsappProveedorInput').val(prv_whatsapp || '')
+        $('#direccionProveedorInput').val(prv_direccion || '')
     }
 
     $('#fileInput').on('change', function (e) {
         // Obtenemos los archivos seleccionados
         var files = e.target.files;
 
+        // Recorremos los archivos y los agregamos al arreglo y a la lista
         $.each(files, function (i, file) {
-            // Añadimos el archivo al arreglo
             detalle_archivos.push(file);
 
-            // Crear el elemento de lista
-            var li = $('<li class="list-group-item d-flex justify-content-between align-items-center"></li>');
+            // Agregar el archivo a la lista
+            var li = $('<li class="list-group-item d-flex justify-content-between align-items-center"></li>').text(file.name);
 
-            // Crear el contenedor de nombre de archivo
-            var fileNameText = $('<span></span>').text(file.name);
-
-            // Crear el input para la descripción del archivo
-            var descriptionInput = $('<input type="text" class="form-control mx-2 descripcion-file" placeholder="Descripción del archivo">');
-
-            // Crear el botón de eliminar
+            // Botón de eliminar
             var removeButton = $('<button class="btn btn-danger btn-sm">Eliminar</button>');
-
-            // Acción del botón de eliminar
             removeButton.on('click', function () {
+                // Eliminar archivo del arreglo y de la lista
                 removeArchivo(i);
-                li.remove(); // Elimina el <li> de la lista
+                li.remove();
             });
 
-            // Agregar todos los elementos al <li>
-            li.append(fileNameText);
-            li.append(descriptionInput);
             li.append(removeButton);
-
-            // Añadir el <li> al contenedor de la lista
             $('#fileList').append(li);
         });
 
+        // Limpiamos el input para que se puedan volver a seleccionar los mismos archivos si se desea
         $('#fileInput').val('');
     });
 
@@ -507,6 +456,8 @@ $(document).ready(() => {
         $(rowItem).find('.precio-input').prop('readonly', true)
         $(rowItem).find('.btn-cotizacion-guardar').css('display', 'none')
         $(rowItem).find('.btn-cotizacion-editar').css('display', '')
+
+
     }
 
     function editarDetalleCotizacion(rowItem) {
@@ -519,15 +470,20 @@ $(document).ready(() => {
 
     // funcion para calcular resumen de cotizacion
     function calcularResumenCotizacion() {
+        const subtotalCotizacion = $('#subtotalCotizacion')
+        const igvCotizacion = $('#igvCotizacion')
         const totalCotizacion = $('#totalCotizacion')
+
         const productos = $('#productosCotizacionTable tbody tr')
-        let totalCotizacionAcumulado = 0
+        let subtotalCotizacionAcumulado = 0
         productos.each(function (index, row) {
             const total = parseFloat($(row).find('.total-input').val())
-            totalCotizacionAcumulado += total
+            subtotalCotizacionAcumulado += total
         })
 
-        totalCotizacion.text((totalCotizacionAcumulado).toFixed(2))
+        subtotalCotizacion.text(subtotalCotizacionAcumulado.toFixed(2))
+        igvCotizacion.text((subtotalCotizacionAcumulado * 0.18).toFixed(2))
+        totalCotizacion.text((subtotalCotizacionAcumulado * 1.18).toFixed(2))
     }
 
     // funcion para validar ingreso unico de producto
@@ -545,35 +501,37 @@ $(document).ready(() => {
     $('#btn-guardar-cotizacion').on('click', async function () {
         const prv_id = $('#idProveedorInput').val()
         const coc_fechacotizacion = $('#fechaCotizacionPicker').val()
+        const coc_fechaentrega = $('#fechaEntregaCotizacionPicker').val()
         const mon_codigo = $('#monedaInput').val()
+        const coc_referencia = $('#referenciaCotizacionInput').val()
         const coc_formapago = $('#formaDePagoInput').val()
         const tra_solicitante = $('#solicitanteCotizacionInput').val()
         const coc_notas = $('#notaCotizacionInput').val()
         const coc_total = $('#totalCotizacion').text()
+        const coc_subtotal = $('#subtotalCotizacion').text()
+        const coc_impuesto = $('#igvCotizacion').text()
         const detalle_productos = $('#productosCotizacionTable tbody tr')
-        const detalle_descripciones = $('#fileList')
 
         let handleError = ''
-        if (coc_fechacotizacion.length === 0 || prv_id.length === 0 || detalle_productos.length === 0) {
-            if (coc_fechacotizacion.length === 0) {
+        if(coc_fechacotizacion.length === 0 || prv_id.length === 0 || detalle_productos.length === 0) {
+            if(coc_fechacotizacion.length === 0) {
                 handleError += '- La fecha de cotización es requerida\n'
             }
-            if (prv_id.length === 0) {
+            if(prv_id.length === 0) {
                 handleError += '- El proveedor es requerido\n'
             }
-            if (detalle_productos.length === 0) {
+            if(detalle_productos.length === 0) {
                 handleError += '- Se debe agregar al menos un producto al detalle\n'
             }
 
         }
-
-        if (handleError.length > 0) {
+        
+        if(handleError.length > 0) {
             alert(handleError)
             return
         }
 
         const formatDetalleProductos = []
-        const formatDetalleDescripciones = []
         detalle_productos.each(function (index, row) {
             const item = {
                 cod_orden: $(row).find('.orden').text(),
@@ -586,22 +544,21 @@ $(document).ready(() => {
             formatDetalleProductos.push(item)
         })
 
-        detalle_descripciones.each(function (index, row){
-            const cda_descripcion = $(row).find('.descripcion-file').val() || null
-            formatDetalleDescripciones.push(cda_descripcion)
-        })
-
         const data = {
             prv_id,
             coc_fechacotizacion: transformarFecha(coc_fechacotizacion),
+            coc_fechaentrega: transformarFecha(coc_fechaentrega),
+            coc_referencia: coc_referencia || null,
             mon_codigo: mon_codigo || null,
             coc_formapago: coc_formapago || null,
             tra_solicitante: tra_solicitante || null,
             coc_notas: coc_notas || null,
             coc_total: coc_total,
+            coc_subtotal: coc_subtotal,
+            coc_impuesto: coc_impuesto,
             detalle_productos: formatDetalleProductos,
-            detalle_descripciones: formatDetalleDescripciones
         }
+        console.log(data)
 
         const formData = new FormData()
         formData.append('cotizacion', JSON.stringify(data))

@@ -14,6 +14,7 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\ModuloController;
+use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
 use App\Http\Controllers\ReporteController;
@@ -247,6 +248,12 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('sedes', [SedeController::class, 'index']);
     Route::get('sedesSimple', [SedeController::class, 'indexSimple']);
+});
+
+// rutas de monedas
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('monedas', [MonedaController::class, 'index']);
+    Route::get('monedasSimple', [MonedaController::class, 'indexSimple']);
 });
 
 // rutas de cotizaciones
