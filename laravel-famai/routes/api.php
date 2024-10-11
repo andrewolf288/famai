@@ -12,6 +12,7 @@ use App\Http\Controllers\ParteController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
@@ -246,4 +247,10 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('sedes', [SedeController::class, 'index']);
     Route::get('sedesSimple', [SedeController::class, 'indexSimple']);
+});
+
+// rutas de cotizaciones
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('cotizaciones', [CotizacionController::class, 'index']);
+    Route::post('cotizaciones', [CotizacionController::class, 'store']);
 });

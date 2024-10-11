@@ -52,7 +52,7 @@ class ProveedorController extends Controller
         $subqueries = explode($symbol, $query);
         // Realiza la búsqueda de materiales por nombre o código
         $queryBuilder = Proveedor::where('prv_activo', 1)
-            ->select('prv_id', 'tdo_codigo', 'prv_nrodocumento', 'prv_nombre', 'prv_telefono', 'prv_whatsapp');
+            ->select('prv_id', 'tdo_codigo', 'prv_nrodocumento', 'prv_nombre', 'prv_telefono', 'prv_whatsapp', 'prv_direccion', 'prv_contacto', 'prv_correo');
 
         foreach ($subqueries as $term) {
             $queryBuilder->where(function ($q) use ($term) {

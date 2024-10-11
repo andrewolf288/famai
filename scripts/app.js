@@ -120,6 +120,25 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta para cotizacion
+    router.on('/cotizacion', () => {
+        privateRoute(() => {
+            loadContent('pages/cotizacion/cotizacion.html', 'scripts/cotizacion/cotizaciones.js')
+        })
+    })
+    // Ruta creacion de cotizacion
+    router.on('/cotizacion/crear', () => {
+        privateRoute(() => {
+            loadContent('pages/cotizacion/crearCotizacion.html', 'scripts/cotizacion/crearCotizacion.js')
+        })
+    })
+    // Ruta edicion de cotizacion
+    router.on('/cotizacion/editar/:id', () => {
+        privateRoute(() => {
+            loadContent('pages/cotizacion/editarCotizacion.html', 'scripts/cotizacion/editarCotizacion.js')
+        })
+    })
+
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {
