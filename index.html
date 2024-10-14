@@ -87,7 +87,7 @@
         </div>
         <!-- FOOTER -->
         <footer class="custom-footer text-white text-center py-3 mt-auto">
-            <p>&copy; 2024 Famai</p>
+            <p>&copy; 2024 Famai | Versión: <span id="app-version"></span></p>
         </footer>
     </div>
 
@@ -126,5 +126,8 @@
     <!-- script de multiselect -->
     <script src="assets/js/jquery.multiselect.js"></script>
 </body>
-
+<script>
+    let version = 'v1.0.2';
+    document.getElementById('app-version').textContent = version;
+</script>
 </html>
