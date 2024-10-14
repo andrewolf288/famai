@@ -736,13 +736,13 @@ class OrdenInternaController extends Controller
 
     public function destroy($id)
     {
-        $ordenInterna = OrdenInterna::with('partes.materiales')->findOrFail($id);
+        $ordenInterna = OrdenInterna::with(['partes.materiales', 'partes.procesos'])->findOrFail($id);
 
         // Verificar si alguna parte tiene materiales asociados
         foreach ($ordenInterna->partes as $parte) {
-            if ($parte->materiales->count() > 0) {
+            if ($parte->materiales->count() > 0 || $parte->procesos->count() > 0) {
                 // Si alguna parte tiene materiales, no se puede eliminar
-                return response()->json(['error' => 'No se puede eliminar la orden interna porque alguna de sus partes tiene materiales asociados.'], 400);
+                return response()->json(['error' => 'No se puede eliminar la orden interna porque alguna de sus partes tiene materiales o actividades asociados.'], 400);
             }
         }
 

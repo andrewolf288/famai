@@ -122,14 +122,9 @@ $(document).ready(() => {
                 responseType: 'blob'
             })
 
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `reporte_orden_trabajo_${id}.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            showModalPreview(pdfUrl)
         } catch (error) {
             alert('Error al generar el reporte')
         }
@@ -190,3 +185,9 @@ $(document).ready(() => {
         }
     })
 })
+
+function showModalPreview(pdfUrl) {
+    document.getElementById('pdf-frame').src = pdfUrl;
+    const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+    modal.show();
+}

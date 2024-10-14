@@ -98,14 +98,9 @@ $(document).ready(async function () {
                 responseType: 'blob'
             })
 
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `reporte_orden_trabajo_${id}.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            showModalPreview(pdfUrl)
         } catch (error) {
             alert('Error al generar el reporte')
         }
@@ -126,7 +121,7 @@ $(document).ready(async function () {
                 $procesosSelect.append(option)
             })
         } catch (error) {
-            alert('Error al cargar el lsitado de procesos')
+            alert('Error al cargar el listado de procesos')
         }
     }
 
@@ -310,7 +305,6 @@ $(document).ready(async function () {
 
                 $row.find('td').eq(4).text(data.odp_usumodificacion || 'No aplica')
                 $row.find('td').eq(5).text(data.odp_fecmodificacion ? parseDate(data.odp_fecmodificacion) : 'No aplica')
-                alert('Se actualizo correctamente')
             } catch (error) {
                 alert('Error al actualizar el detalle de proceso')
             }
@@ -343,9 +337,6 @@ $(document).ready(async function () {
                 // actualizamos el total de procesos
                 $(`#cantidad-procesos-${currentDetalleParte}`).text(procesos.length)
                 $row.remove()
-                setTimeout(function () {
-                    alert('Se eliminó correctamente');
-                }, 0);
             } catch (error) {
                 alert('Error al eliminar el detalle de proceso')
             }
@@ -720,7 +711,6 @@ $(document).ready(async function () {
                 const idCantidad = tipo_anterior == 1 ? `#cantidad-regulares-${currentDetalleParte}` : `#cantidad-adicionales-${currentDetalleParte}`
                 $(idCantidad).text(parseInt($(idCantidad).text()) - 1)
 
-                alert('Se actualizo correctamente')
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
             }
@@ -788,7 +778,6 @@ $(document).ready(async function () {
 
                 $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
                 $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
-                alert('Se actualizo correctamente')
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
             }
@@ -837,9 +826,6 @@ $(document).ready(async function () {
                     $(`#cantidad-clientes-${currentDetalleParte}`).text(cantidadTotal)
                 }
                 $row.remove()
-                setTimeout(function () {
-                    alert('Se eliminó correctamente');
-                }, 0);
             } catch (error) {
                 alert('Error al eliminar el detalle de material')
             }
@@ -959,3 +945,9 @@ $(document).ready(async function () {
         guardarProductos()
     })
 })
+
+function showModalPreview(pdfUrl) {
+    document.getElementById('pdf-frame').src = pdfUrl;
+    const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+    modal.show();
+}
