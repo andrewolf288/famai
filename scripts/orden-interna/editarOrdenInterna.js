@@ -894,7 +894,9 @@ $(document).ready(async function () {
                 odm_descripcion: $(this).find('.descripcion-input').val().trim(),
                 odm_cantidad: $(this).find('.cantidad-input').val().trim(),
                 odm_observacion: $(this).find('.observacion-input').val().trim(),
-                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 2 : 3
+                // aqui se pone estado 1: regular (por el momento, se debe manejar a nivel de estado de OI)
+                // odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 2 : 3,
+                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 1 : 3
             }
             dataArray.push(dataObject)
         })
@@ -920,11 +922,14 @@ $(document).ready(async function () {
             // aumentamos el total de productos
             const totalProductos = materiales.length
             const idCantidadProductos = `#cantidad-productos-${currentDetalleParte}`
+            const idCantidadRegulares = `#cantidad-regulares-${currentDetalleParte}`
             const idCantidadAdicionales = `#cantidad-adicionales-${currentDetalleParte}`
             const idCantidadClientes = `#cantidad-clientes-${currentDetalleParte}`
+            const totalRegulares = materiales.filter(element => element.odm_tipo == 1).length
             const totalAdicionales = materiales.filter(element => element.odm_tipo == 2).length
             const totalClientes = materiales.filter(element => element.odm_tipo == 3).length
             $(idCantidadProductos).text(totalProductos)
+            $(idCantidadRegulares).text(totalRegulares)
             $(idCantidadAdicionales).text(totalAdicionales)
             $(idCantidadClientes).text(totalClientes)
 
@@ -934,6 +939,7 @@ $(document).ready(async function () {
             // cerramos el modal
             $('#productosModal').modal('hide')
         } catch (error) {
+            console.log(error)
             alert('Error al guardar los materiales')
         }
     }

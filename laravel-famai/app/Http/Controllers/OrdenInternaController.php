@@ -84,6 +84,9 @@ class OrdenInternaController extends Controller
         $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
             ->where('oic_numero', $numero)
             ->first();
+        if (!$ordenInterna) {
+            return response()->json(['error' => 'Orden interna no encontrada'], 404);
+        }
         return response()->json($ordenInterna);
     }
 
@@ -729,5 +732,35 @@ class OrdenInternaController extends Controller
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
+    }
+
+    public function destroy($id)
+    {
+        $ordenInterna = OrdenInterna::with('partes.materiales')->findOrFail($id);
+
+        // Verificar si alguna parte tiene materiales asociados
+        foreach ($ordenInterna->partes as $parte) {
+            if ($parte->materiales->count() > 0) {
+                // Si alguna parte tiene materiales, no se puede eliminar
+                return response()->json(['error' => 'No se puede eliminar la orden interna porque alguna de sus partes tiene materiales asociados.'], 400);
+            }
+        }
+
+        // Iniciar una transacción para asegurar la consistencia
+        DB::transaction(function () use ($ordenInterna) {
+            // Primero eliminar los detalles de procesos de cada parte
+            foreach ($ordenInterna->partes as $parte) {
+                $parte->procesos()->delete();  // Eliminar procesos
+                $parte->materiales()->delete(); // Eliminar materiales (por seguridad)
+            }
+
+            // Luego eliminar las partes
+            $ordenInterna->partes()->delete();
+
+            // Finalmente eliminar la orden interna
+            $ordenInterna->delete();
+        });
+
+        return response()->json(['success' => 'Orden interna eliminada correctamente.'], 200);
     }
 }

@@ -396,7 +396,7 @@ class ReporteController extends Controller
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
 				$varMpdf->WriteHTML($varData);
-				$varMpdf->SetFooter('Usuario impresión: ' . $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
 
 				return response()->streamDownload(
 					function () use ($varMpdf) {
@@ -780,7 +780,7 @@ class ReporteController extends Controller
 				$varMpdf->SetDisplayMode('fullpage');
 				$varMpdf->SetHeader($this->fechaHoraActual);
 				$varMpdf->WriteHTML($varData);
-				$varMpdf->SetFooter('Usuario impresión: ' . $userAuth->usu_codigo . '<br>' . 'Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
 				return response()->streamDownload(
 					function () use ($varMpdf) {
 						echo $varMpdf->Output('', 'S');

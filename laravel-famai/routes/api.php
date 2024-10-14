@@ -179,6 +179,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordeninterna/guardar-procesos/{id}', [OrdenInternaController::class, 'update_proceso']);
     Route::put('ordeninterna/guardar-materiales/{id}', [OrdenInternaController::class, 'update_material']);
     Route::put('ordeninterna/{id}', [OrdenInternaController::class, 'update']);
+    Route::delete('ordeninterna/{id}', [OrdenInternaController::class, 'destroy']);
 });
 
 // rutas detalle materiales orden interna

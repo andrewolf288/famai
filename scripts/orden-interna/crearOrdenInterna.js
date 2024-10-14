@@ -73,6 +73,7 @@ $(document).ready(function () {
             $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
         } catch (error) {
+            console.log(error)
             const { response } = error
             if (response.status === 404) {
                 alert(response.data.error)
@@ -191,7 +192,12 @@ $(document).ready(function () {
             ordenInterna["detalle_partes"] = formatData
 
         } catch (error) {
-            alert('Error al buscar la orden interna')
+            const { response } = error
+            if (response.status === 404) {
+                alert(response.data.error)
+            } else {
+                alert('Error al buscar la orden interna')
+            }
         }
     }
 
@@ -828,7 +834,7 @@ $(document).ready(function () {
         $(this).attr('disabled', true)
         // cambiamos los estilos del boton
         $(this).removeClass('btn-success btn-detalle-proporcionado-cliente')
-                .addClass('btn-secondary btn-detalle-proporcionado-cliente')
+            .addClass('btn-secondary btn-detalle-proporcionado-cliente')
     })
 
     // funcion de editar detalle de productos
@@ -929,8 +935,9 @@ $(document).ready(function () {
         let validation = false
         const { detalle_partes } = ordenInterna
         detalle_partes.forEach(element => {
-            if (element.detalle_materiales.length !== 0 && element.detalle_procesos.length !== 0) {
-                validation = true
+            console.log(element.detalle_materiales.length, element.detalle_procesos.length)
+            if (element.detalle_materiales.length !== 0 || element.detalle_procesos.length !== 0) {
+                validation =  true
             }
         })
         return validation
@@ -960,18 +967,18 @@ $(document).ready(function () {
 
         if (
             $oiCliente.length === 0 ||
-            $otInput.length === 0 ||
-            $oiInput.length === 0 ||
+            $otInput.length < 7 ||
+            $oiInput.length < 7 ||
             $oiValorEquipo.length === 0 ||
             $oiCodigoArea.length === 0 ||
             $oiFecha.length === 0 ||
             $oiEncargadoOrigen.length === 0
         ) {
-            if ($otInput.length === 0) {
-                handleError += '- Se debe ingresar información de orden trabajo\n'
+            if ($otInput.length < 7) {
+                handleError += '- Se debe ingresar información de orden trabajo con minimo 7 caracteres\n'
             }
-            if ($oiInput.length === 0) {
-                handleError += '- Se debe ingresar información de orden interna\n'
+            if ($oiInput.length < 7) {
+                handleError += '- Se debe ingresar información de orden interna con minimo 7 caracteres\n'
             }
             if ($oiCliente.length === 0) {
                 handleError += '- Se debe ingresar información del cliente\n'
@@ -990,86 +997,86 @@ $(document).ready(function () {
             }
         }
 
+        if (handleError.length !== 0) {
+            alert(handleError)
+            return
+        }
         // manejamos el error
-        if (handleError.length === 0) {
-            const formatData = {
-                odt_numero: $otInput,
-                oic_numero: $oiInput,
-                cli_id: $oiCliente,
-                are_codigo: $oiCodigoArea,
-                oic_fecha: transformarFecha($oiFecha),
-                tra_idorigen: $oiEncargadoOrigen,
-                tra_idmaestro: $oiEncargadoMaestro || null,
-                tra_idalmacen: $oiEncargadoAlmacen || null,
-                oic_equipo_descripcion: $oiValorEquipo,
-                detalle_partes: ordenInterna.detalle_partes,
-            }
+        const formatData = {
+            odt_numero: $otInput,
+            oic_numero: $oiInput,
+            cli_id: $oiCliente,
+            are_codigo: $oiCodigoArea,
+            oic_fecha: transformarFecha($oiFecha),
+            tra_idorigen: $oiEncargadoOrigen,
+            tra_idmaestro: $oiEncargadoMaestro || null,
+            tra_idalmacen: $oiEncargadoAlmacen || null,
+            oic_equipo_descripcion: $oiValorEquipo,
+            detalle_partes: ordenInterna.detalle_partes,
+        }
 
-            console.log(formatData)
+        console.log(formatData)
 
-            // // formateamos la data de numero de orden
-            formatData.detalle_partes.forEach(element => {
-                element.detalle_materiales.forEach((detalle, index) => {
-                    detalle["odm_item"] = index + 1
-                })
+        // // formateamos la data de numero de orden
+        formatData.detalle_partes.forEach(element => {
+            element.detalle_materiales.forEach((detalle, index) => {
+                detalle["odm_item"] = index + 1
             })
+        })
 
-            // VALIDAMOS SI LOS DETALLES DE LAS PARTES NO ESTAN VACIOS
-            const validacionDetallePartes = validarInformacionDetallePartes()
-            if (validacionDetallePartes) {
-                // VALIDAMOS QUE LAS CANTIDADES DE LOS DETALLES DE MATERIALES NO ESTEN VACIOS
-                const validacionDetalleMateriales = validarInformacionDetalleMateriales()
-                if (validacionDetalleMateriales.length === 0) {
-                    showLoaderModal()
-                    try {
-                        const { data } = await client.post('/ordenesinternas', formatData)
-                        // si se desea imprimir
-                        if (confirm('¿Deseas imprimir la orden interna?')) {
-                            try {
-                                const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${data.oic_id}`, {
-                                    headers: {
-                                        'Accept': 'application/pdf'
-                                    },
-                                    responseType: 'blob'
-                                })
+        // VALIDAMOS SI LOS DETALLES DE LAS PARTES NO ESTAN VACIOS
+        const validacionDetallePartes = validarInformacionDetallePartes()
+        if (validacionDetallePartes) {
+            // VALIDAMOS QUE LAS CANTIDADES DE LOS DETALLES DE MATERIALES NO ESTEN VACIOS
+            const validacionDetalleMateriales = validarInformacionDetalleMateriales()
+            if (validacionDetalleMateriales.length === 0) {
+                showLoaderModal()
+                try {
+                    const { data } = await client.post('/ordenesinternas', formatData)
+                    // si se desea imprimir
+                    if (confirm('¿Deseas imprimir la orden interna?')) {
+                        try {
+                            const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${data.oic_id}`, {
+                                headers: {
+                                    'Accept': 'application/pdf'
+                                },
+                                responseType: 'blob'
+                            })
 
-                                const url = window.URL.createObjectURL(new Blob([response.data]))
-                                const a = document.createElement('a')
-                                a.href = url
-                                a.download = `reporte_orden_trabajo_${data.oic_id}.pdf`
-                                document.body.appendChild(a)
-                                a.click()
-                                window.URL.revokeObjectURL(url)
-                                document.body.removeChild(a)
-                            } catch (error) {
-                                alert('Error al generar el reporte')
-                            }
+                            const url = window.URL.createObjectURL(new Blob([response.data]))
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `reporte_orden_trabajo_${data.oic_id}.pdf`
+                            document.body.appendChild(a)
+                            a.click()
+                            window.URL.revokeObjectURL(url)
+                            document.body.removeChild(a)
+                        } catch (error) {
+                            alert('Error al generar el reporte')
                         }
-
-                        //verificamos si quiere seguir editando la orden interna
-                        if (confirm('¿Deseas seguir editando la orden interna?')) {
-                            window.location.href = `orden-interna/editar/${data.oic_id}`
-                        } else {
-                            window.location.href = 'orden-interna'
-                        }
-                    } catch (error) {
-                        const { response } = error
-                        if (response.status === 500) {
-                            alert(response.data.error)
-                        } else {
-                            alert('Hubo un error en la creacion de orden interna')
-                        }
-                    } finally {
-                        hideLoaderModal()
                     }
-                } else {
-                    alert(validacionDetalleMateriales)
+
+                    //verificamos si quiere seguir editando la orden interna
+                    if (confirm('¿Deseas seguir editando la orden interna?')) {
+                        window.location.href = `orden-interna/editar/${data.oic_id}`
+                    } else {
+                        window.location.href = 'orden-interna'
+                    }
+                } catch (error) {
+                    const { response } = error
+                    if (response.status === 500) {
+                        alert(response.data.error)
+                    } else {
+                        alert('Hubo un error en la creacion de orden interna')
+                    }
+                } finally {
+                    hideLoaderModal()
                 }
             } else {
-                alert('- Al menos una parte debe tener procesos y materiales')
+                alert(validacionDetalleMateriales)
             }
         } else {
-            alert(handleError)
+            alert('- Al menos se debe agregar un proceso o un material')
         }
     })
 
@@ -1113,9 +1120,9 @@ $(document).ready(function () {
                 },
                 responseType: 'blob'
             })
-
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            showModalPreview(url)
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            showModalPreview(pdfUrl)
         } catch (error) {
             console.log(error)
             alert('Error al generar el reporte')
@@ -1125,23 +1132,7 @@ $(document).ready(function () {
     })
 
     function showModalPreview(pdfUrl) {
-        const canvas = document.getElementById("pdf-viewer");
-        pdfjsLib.getDocument(pdfUrl).promise.then(function (pdf) {
-            // Renderizar la primera página del PDF
-            pdf.getPage(1).then(function (page) {
-                const viewport = page.getViewport({ scale: 1.5 });
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                const context = canvas.getContext("2d");
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                page.render(renderContext);
-            });
-        });
-        // mostramos el modal
+        document.getElementById('pdf-frame').src = pdfUrl;
         const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
         modal.show();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\OrdenInterna;
 use App\OrdenTrabajo;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,13 @@ class OrdenTrabajoController extends Controller
     // }
     public function findByNumero($numero)
     {
+        // primero debemos verificar si ya se uso este numero de OT
+        $ordeninterna = OrdenInterna::where('odt_numero', $numero)->first();
+        if ($ordeninterna) {
+            return response()->json(['error' => 'Ya se uso el numero de OT ' . $numero], 404);
+        }
+
+        // caso contrario consultamos la informacion
         $queryBuilder = DB::connection('sqlsrv_secondary')
                         ->table('OWOR as OT')
                         ->leftJoin('OCRD as C', 'OT.CardCode', '=', 'C.CardCode')
@@ -69,7 +77,7 @@ class OrdenTrabajoController extends Controller
                         ->first();
         if(!$queryBuilder){
             return response()->json([
-                'message' => 'Registro no encontrado.',
+                'error' => 'Registro no encontrado.',
             ], 404);
         }
 
