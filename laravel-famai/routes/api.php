@@ -15,6 +15,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
+use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
 use App\Http\Controllers\ReporteController;
@@ -260,4 +261,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizaciones', [CotizacionController::class, 'index']);
     Route::post('cotizaciones', [CotizacionController::class, 'store']);
+    Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
+});
+
+// rutas de ordenes de compra
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('ordenescompra', [OrdenCompraController::class, 'index']);
+    Route::post('ordenescompra', [OrdenCompraController::class, 'store']);
 });

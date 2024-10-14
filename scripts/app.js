@@ -138,6 +138,25 @@ document.addEventListener('DOMContentLoaded', () => {
             loadContent('pages/cotizacion/editarCotizacion.html', 'scripts/cotizacion/editarCotizacion.js')
         })
     })
+    // Ruta para orden de compra
+    router.on('/orden-compra', () => {
+        privateRoute(() => {
+            loadContent('pages/orden-compra/ordenCompra.html', 'scripts/orden-compra/ordenCompra.js')
+        })
+    })
+    // Ruta creacion de orden compra
+    router.on('/orden-compra/crear', () => {
+        privateRoute(() => {
+            loadContent('pages/orden-compra/crearOrderCompra.html', 'scripts/orden-compra/crearOrdenCompra.js')
+        })
+    })
+
+    // Ruta edicion de orden compra
+    router.on('/orden-compra/editar/:id', () => {
+        privateRoute(() => {
+            loadContent('pages/orden-compra/editarOrdenCompra.html', 'scripts/orden-compra/editarOrdenCompra.js')
+        })
+    })
 
     // Ruta para el perfil
     router.on('/perfil', () => {

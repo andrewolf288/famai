@@ -1,8 +1,8 @@
-<h2 class="mb-3 fs-4">Lista de Cotizaciones</h2>
+<h2 class="mb-3 fs-4">Lista de Ordenes de Compra</h2>
 <div class="row justify-content-end mb-2">
   <div class="col-auto">
-    <a href="cotizacion/crear" class="btn btn-agregar">
-      Crear Cotizacion
+    <a href="orden-compra/crear" class="btn btn-agregar">
+      Crear Orden de Compra
     </a>
   </div>
 </div>
@@ -33,7 +33,7 @@
     <div class="d-flex flex-column flex-md-row">
       <select id="filter-selector" class="form-select w-100 w-md-auto">
         <option value="">Seleccione un filtro</option>
-        <option value="coc_numero">Número cotización</option>
+        <option value="occ_numero">Número orden compra</option>
       </select>
 
       <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -51,9 +51,11 @@
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
   <thead>
-    <th class="text-start">Nro. Cotizacion</th>
+    <th class="text-start">Nro. Ord. Compra</th>
     <th>Proveedor</th>
     <th class="text-center">Moneda</th>
+    <th class="text-center">Subtotal</th>
+    <th class="text-center">Impuesto</th>
     <th class="text-center">Total</th>
     <th>Fecha</th>
     <th>Estado</th>

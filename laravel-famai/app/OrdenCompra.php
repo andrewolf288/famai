@@ -40,4 +40,14 @@ class OrdenCompra extends Model
 
     const CREATED_AT = 'occ_feccreacion';
     const UPDATED_AT = 'occ_fecmodificacion';
+
+    public function proveedor()
+    {
+        return $this->belongsTo(Proveedor::class, 'prv_id', 'prv_id');
+    }
+
+    public function moneda()
+    {
+        return $this->belongsTo(Moneda::class, 'mon_codigo', 'mon_codigo');
+    }
 }

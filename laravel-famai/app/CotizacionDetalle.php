@@ -28,6 +28,4 @@ class CotizacionDetalle extends Model
 
     const CREATED_AT = 'cod_feccreacion';
     const UPDATED_AT = 'cod_fecmodificacion';
-
-    
 }

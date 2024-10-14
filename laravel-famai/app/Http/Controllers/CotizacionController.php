@@ -21,10 +21,22 @@ class CotizacionController extends Controller
 
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
-            'message' => 'Se listan las ordenes internas',
+            'message' => 'Se listan las cotizaciones',
             'data' => $cotizaciones->items(),
             'count' => $cotizaciones->total()
         ]);
+    }
+
+    public function findByNumero(Request $request)
+    {
+        $numero = $request->input('numero');
+        try {
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion'])->where('coc_numero', $numero)->first();
+            return response()->json($cotizacion);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'No se encontro la cotización'], 404);
+        }
+        
     }
 
     public function store(Request $request)
@@ -56,7 +68,15 @@ class CotizacionController extends Controller
                 'detalle_descripciones' => 'nullable|array|min:1',
             ])->validate();
 
+            $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
+            if(!$lastCotizacion){
+                $numero = 1;
+            } else {
+                $numero = intval($lastCotizacion->coc_numero) + 1;
+            }
+
             $cotizacion = Cotizacion::create([
+                'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $validatedData['prv_id'],
                 'coc_fechacotizacion' => $validatedData['coc_fechacotizacion'],
                 'mon_codigo' => $validatedData['mon_codigo'],

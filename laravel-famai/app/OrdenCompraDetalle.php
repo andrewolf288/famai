@@ -11,6 +11,7 @@ class OrdenCompraDetalle extends Model
     protected $primaryKey = 'ocd_id';
 
     protected $fillable = [
+        'occ_id',
         'pro_id',
         'ocd_orden',
         'ocd_descripcion',
