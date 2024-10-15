@@ -104,24 +104,25 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-orden-compra-pdf', async function () {
         const id = $(this).data('ordencompra')
         console.log("Generar pdf de ID ORDEN DE COMPRA: ", id)
-        // try {
-        //     const response = await client.get(`/generarReporteOrdenTrabajo?coc_id=${id}`, {
-        //         headers: {
-        //             'Accept': 'application/pdf'
-        //         },
-        //         responseType: 'blob'
-        //     })
+        try {
+            const response = await client.get(`/ordenescompra/exportarPDF?occ_id=${id}`, {
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            })
 
-        //     const url = window.URL.createObjectURL(new Blob([response.data]))
-        //     const a = document.createElement('a')
-        //     a.href = url
-        //     a.download = `reporte_orden_trabajo_${id}.pdf`
-        //     document.body.appendChild(a)
-        //     a.click()
-        //     window.URL.revokeObjectURL(url)
-        //     document.body.removeChild(a)
-        // } catch (error) {
-        //     alert('Error al generar el reporte')
-        // }
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `reporte_orden_compra_${id}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            console.log(error)
+            alert('Error al generar el reporte')
+        }
     })
 })

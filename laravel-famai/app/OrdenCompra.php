@@ -50,4 +50,24 @@ class OrdenCompra extends Model
     {
         return $this->belongsTo(Moneda::class, 'mon_codigo', 'mon_codigo');
     }
+
+    public function elaborador()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_elaborado', 'tra_id');
+    }
+
+    public function solicitador()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_solicitado', 'tra_id');
+    }
+
+    public function autorizador()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_autorizado', 'tra_id');
+    }
+
+    public function detalleOrdenCompra()
+    {
+        return $this->hasMany(OrdenCompraDetalle::class, 'occ_id', 'occ_id');
+    }
 }

@@ -27,4 +27,10 @@ class OrdenCompraDetalle extends Model
 
     const CREATED_AT = 'ocd_feccreacion';
     const UPDATED_AT = 'ocd_fecmodificacion';
+
+    // relacion con producto
+    public function producto()
+    {
+        return $this->belongsTo(Producto::class, 'pro_id', 'pro_id');
+    }
 }

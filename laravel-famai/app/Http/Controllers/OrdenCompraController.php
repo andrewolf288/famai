@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\OrdenCompra;
 use App\OrdenCompraDetalle;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,10 +28,7 @@ class OrdenCompraController extends Controller
         ]);
     }
 
-    public function findByNumero($numero)
-    {
-
-    }
+    public function findByNumero($numero) {}
 
     public function store(Request $request)
     {
@@ -60,7 +59,7 @@ class OrdenCompraController extends Controller
             ])->validate();
 
             $lastOrdenCompra = OrdenCompra::orderBy('occ_id', 'desc')->first();
-            if(!$lastOrdenCompra){
+            if (!$lastOrdenCompra) {
                 $numero = 1;
             } else {
                 $numero = intval($lastOrdenCompra->occ_numero) + 1;
@@ -110,6 +109,24 @@ class OrdenCompraController extends Controller
         } catch (Exception $e) {
             // hacemos rollback y devolvemos el error
             DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    public function exportarPDF(Request $request)
+    {
+        try {
+            $occ_id = $request->input('occ_id');
+            $ordenCompra = OrdenCompra::with(['proveedor', 'moneda', 'elaborador', 'solicitador', 'autorizador', 'detalleOrdenCompra.producto.unidad'])->findOrFail($occ_id);
+            $data = array_merge(
+                $ordenCompra->toArray(),
+                [
+                    'occ_fecha_formateada' => Carbon::parse($ordenCompra->occ_fecha)->format('d/m/Y'),
+                ]
+            );
+            $pdf = Pdf::loadView('orden-compra.ordencompra', $data);
+            return $pdf->download('ordencompra.pdf');
+        } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }

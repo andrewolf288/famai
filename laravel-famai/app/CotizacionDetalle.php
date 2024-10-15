@@ -28,4 +28,9 @@ class CotizacionDetalle extends Model
 
     const CREATED_AT = 'cod_feccreacion';
     const UPDATED_AT = 'cod_fecmodificacion';
+
+    public function producto()
+    {
+        return $this->belongsTo(Producto::class, 'pro_id', 'pro_id');
+    }
 }

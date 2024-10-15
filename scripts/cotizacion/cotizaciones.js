@@ -102,24 +102,25 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-cotizacion-pdf', async function () {
         const id = $(this).data('cotizacion')
         console.log("Generar pdf de ID COTIZACION: ", id)
-        // try {
-        //     const response = await client.get(`/generarReporteOrdenTrabajo?coc_id=${id}`, {
-        //         headers: {
-        //             'Accept': 'application/pdf'
-        //         },
-        //         responseType: 'blob'
-        //     })
+        try {
+            const response = await client.get(`/cotizaciones/exportarPDF?coc_id=${id}`, {
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            })
 
-        //     const url = window.URL.createObjectURL(new Blob([response.data]))
-        //     const a = document.createElement('a')
-        //     a.href = url
-        //     a.download = `reporte_orden_trabajo_${id}.pdf`
-        //     document.body.appendChild(a)
-        //     a.click()
-        //     window.URL.revokeObjectURL(url)
-        //     document.body.removeChild(a)
-        // } catch (error) {
-        //     alert('Error al generar el reporte')
-        // }
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `reporte_cotizacion_${id}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            console.log(error)
+            alert('Error al generar el reporte')
+        }
     })
 })

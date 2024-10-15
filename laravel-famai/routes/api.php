@@ -263,10 +263,12 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizaciones', [CotizacionController::class, 'index']);
     Route::post('cotizaciones', [CotizacionController::class, 'store']);
     Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
+    Route::get('cotizaciones/exportarPDF', [CotizacionController::class, 'exportarPDF']);
 });
 
 // rutas de ordenes de compra
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordenescompra', [OrdenCompraController::class, 'index']);
     Route::post('ordenescompra', [OrdenCompraController::class, 'store']);
+    Route::get('ordenescompra/exportarPDF', [OrdenCompraController::class, 'exportarPDF']);
 });

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -133,8 +135,21 @@ class CotizacionController extends Controller
         }
     }
 
-    public function show($id)
+    public function exportarPDF(Request $request)
     {
-
+        try {
+            $coc_id = $request->input('coc_id');
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion.producto.unidad'])->findOrFail($coc_id);
+            $data = array_merge(
+                $cotizacion->toArray(),
+                [
+                    'coc_fecha_formateada' => Carbon::parse($cotizacion->coc_fechacotizacion)->format('d/m/Y'),
+                ]
+            );
+            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
+            return $pdf->download('cotizacion.pdf');
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
     }
 }
