@@ -121,7 +121,7 @@ class ReporteController extends Controller
 						$varCodigoProceso = isset($varResultProcesos[0]['opp_codigo']) ? $varResultProcesos[0]['opp_codigo'] : $this->varTab;
 						// $varDescripcionProceso = isset($varResultProcesos[0]['opp_descripcion']) ? $varResultProcesos[0]['opp_descripcion'] : $this->varTab;
 						$varDescripcionProceso = isset($varResultProcesos[0]['odp_descripcion']) ? $varResultProcesos[0]['odp_descripcion'] : $this->varTab;
-						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? $varResultProcesos[0]['odp_observacion'] : $this->varTab;
+						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[0]['odp_observacion']) : $this->varTab;
 						//materiales
 						$varItem = isset($varResultMateriales[0]['odm_item']) ? $varResultMateriales[0]['odm_item'] : $this->varTab;
 						$varProDescripcion = isset($varResultMateriales[0]['odm_descripcion']) ? $varResultMateriales[0]['odm_descripcion'] : $this->varTab;
@@ -200,7 +200,7 @@ class ReporteController extends Controller
 							$varCodigoProceso = isset($varResultProcesos[$i]['opp_codigo']) ? $varResultProcesos[$i]['opp_codigo'] : $this->varTab;
 							// $varDescripcionProceso = isset($varResultProcesos[$i]['opp_descripcion']) ? $varResultProcesos[$i]['opp_descripcion'] : $this->varTab;
 							$varDescripcionProceso = isset($varResultProcesos[$i]['odp_descripcion']) ? $varResultProcesos[$i]['odp_descripcion'] : $this->varTab;
-							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? $varResultProcesos[$i]['odp_observacion'] : $this->varTab;
+							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[$i]['odp_observacion']) : $this->varTab;
 							//materiales
 							$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
@@ -318,7 +318,7 @@ class ReporteController extends Controller
 							$varCodigoProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_codigo']) ? $varResultProcesos[$i + $nuevoindice]['opp_codigo'] : $this->varTab;
 							// $varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['odp_descripcion'] : $this->varTab;
-							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? $varResultProcesos[$i + $nuevoindice]['odp_observacion'] : $this->varTab;
+							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[$i + $nuevoindice]['odp_observacion']) : $this->varTab;
 							$htmlFila = "";
 							$htmlFila = str_replace(
 								[
@@ -504,9 +504,9 @@ class ReporteController extends Controller
 						//procesos
 						$varProcesoParte = $varParteNombre;
 						$varCodigoProceso = isset($varResultProcesos[0]['opp_codigo']) ? $varResultProcesos[0]['opp_codigo'] : $this->varTab;
-						// $varDescripcionProceso = isset($varResultProcesos[0]['opp_descripcion']) ? $varResultProcesos[0]['opp_descripcion'] : $this->varTab;
 						$varDescripcionProceso = isset($varResultProcesos[0]['odp_descripcion']) ? $varResultProcesos[0]['odp_descripcion'] : $this->varTab;
-						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? $varResultProcesos[0]['odp_observacion'] : $this->varTab;
+						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[0]['odp_observacion']) : $this->varTab;
+						// $varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? $varResultProcesos[0]['odp_observacion'] : $this->varTab;
 						//materiales
 						$varItem = isset($varResultMateriales[0]['odm_item']) ? $varResultMateriales[0]['odm_item'] : $this->varTab;
 						$varProDescripcion = isset($varResultMateriales[0]['odm_descripcion']) ? $varResultMateriales[0]['odm_descripcion'] : $this->varTab;
@@ -585,7 +585,7 @@ class ReporteController extends Controller
 							$varCodigoProceso = isset($varResultProcesos[$i]['opp_codigo']) ? $varResultProcesos[$i]['opp_codigo'] : $this->varTab;
 							// $varDescripcionProceso = isset($varResultProcesos[$i]['opp_descripcion']) ? $varResultProcesos[$i]['opp_descripcion'] : $this->varTab;
 							$varDescripcionProceso = isset($varResultProcesos[$i]['odp_descripcion']) ? $varResultProcesos[$i]['odp_descripcion'] : $this->varTab;
-							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? $varResultProcesos[$i]['odp_observacion'] : $this->varTab;
+							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[$i]['odp_observacion']) : $this->varTab;
 							//materiales
 							$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
@@ -703,7 +703,7 @@ class ReporteController extends Controller
 							$varCodigoProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_codigo']) ? $varResultProcesos[$i + $nuevoindice]['opp_codigo'] : $this->varTab;
 							// $varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['opp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['opp_descripcion'] : $this->varTab;
 							$varDescripcionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_descripcion']) ? $varResultProcesos[$i + $nuevoindice]['odp_descripcion'] : $this->varTab;
-							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? $varResultProcesos[$i + $nuevoindice]['odp_observacion'] : $this->varTab;
+							$varObservacionProceso = isset($varResultProcesos[$i + $nuevoindice]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[$i + $nuevoindice]['odp_observacion']) : $this->varTab;
 							$htmlFila = "";
 							$htmlFila = str_replace(
 								[

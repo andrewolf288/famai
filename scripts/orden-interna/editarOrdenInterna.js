@@ -133,18 +133,19 @@ $(document).ready(async function () {
 
         procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
+        // <input type="text" class="form-control observacion-input" value='${element.odp_observacion.replace(/'/g, "&#39;") || ''}' readonly/>
         procesos.forEach(element => {
             const row = `
             <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary">
                 <td>${element.proceso.opp_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${element.odp_descripcion || element.proceso.opp_descripcion}'/>
+                    <input type="text" class="form-control descripcion-input" value='${element.odp_descripcion.replace(/'/g, "&#39;") || element.proceso.opp_descripcion.replace(/'/g, "&#39;")}'/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='${element.odp_observacion || ''}' readonly/>
+                    <textarea type="text" class="form-control observacion-input" readonly>${element.odp_observacion || ''}</textarea>
                 </td>
                 <td>${element.odp_usumodificacion ?? 'No aplica'}</td>
                 <td>${element.odp_fecmodificacion ? parseDate(element.odp_fecmodificacion) : 'No aplica'}</td>
@@ -217,13 +218,13 @@ $(document).ready(async function () {
             <tr class="row-editable table-warning ${claseCondicional ? 'editable-descripcion' : ''}" data-id-proceso="${selectedProcesoId}">
                 <td>${selectedProcesoCode}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${selectedProcesoName}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${selectedProcesoName.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='' readonly/>
+                    <textarea type="text" class="form-control observacion-input" readonly></textarea>
                 </td>
                 <td>No aplica</td>
                 <td>No aplica</td>
@@ -457,13 +458,13 @@ $(document).ready(async function () {
             <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary">
                 <td>${element.producto?.pro_codigo ?? '-'}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${element.odm_descripcion}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${element.odm_descripcion?.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value='${element.odm_cantidad}' readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='${element.odm_observacion || ''}' readonly/>
+                    <input type="text" class="form-control observacion-input" value='${element.odm_observacion?.replace(/'/g, "&#39;") || ''}' readonly/>
                 </td>
                 <td>${element.odm_usumodificacion ?? 'No aplica'}</td>
                 <td>${element.odm_fecmodificacion ? parseDate(element.odm_fecmodificacion) : 'No aplica'}</td>
@@ -583,7 +584,7 @@ $(document).ready(async function () {
             <tr class="row-editable table-warning" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value='1.00' readonly/>
@@ -642,7 +643,7 @@ $(document).ready(async function () {
             <tr class="row-editable table-warning" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value='1.00' readonly/>

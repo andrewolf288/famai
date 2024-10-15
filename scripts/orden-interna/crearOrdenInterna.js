@@ -383,18 +383,20 @@ $(document).ready(function () {
 
         detalle_procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
+        // <input type="text" class="form-control observacion-input" value='${element["odp_observacion"]}' readonly/>
+
         detalle_procesos.forEach(element => {
             const row = `
             <tr class="${element['odp_editable_descripcion'] ? 'editable-descripcion' : ''}">
                 <td>${element["opp_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${element["odp_descripcion"]}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${element["odp_descripcion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" ${element["odp_ccalidad"] ? 'checked' : ''} disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='${element["odp_observacion"]}' readonly/>
+                    <textarea type="text" class="form-control observacion-input" rows="3" readonly>${element["odp_observacion"]}</textarea>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -450,17 +452,19 @@ $(document).ready(function () {
                 odp_editable_descripcion: claseCondicional
             }
 
+            // <input type="text" class="form-control observacion-input" value='${data["odp_observacion"]}' readonly/>
+
             const row = `
             <tr class="${claseCondicional ? 'editable-descripcion' : ''}">
                 <td>${data["opp_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${data["odp_descripcion"]}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${data["odp_descripcion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" disabled/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='${data["odp_observacion"]}' readonly/>
+                    <textarea type="text" class="form-control observacion-input" rows="3" readonly>${data["odp_observacion"]}</textarea>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -517,6 +521,8 @@ $(document).ready(function () {
         const valueDescripcion = $inputDescripcion.val()
         const valueObservacion = $inputObservacion.val()
 
+        console.log(valueObservacion)
+
         $inputDescripcion.prop('readonly', true)
         $inputObservacion.prop('readonly', true)
         $inputCheckbox.prop('disabled', true)
@@ -559,6 +565,7 @@ $(document).ready(function () {
     }
 
     // ------------ JAVASCRIPT PARA GESTION DE PRODUCTOS -------------
+
     // carga de detalle de materiales en tabla
     function cargarProductosDetalle(id_parte) {
         $('#tbl-orden-interna-productos tbody').empty()
@@ -570,13 +577,13 @@ $(document).ready(function () {
             <tr>
                 <td>${element["pro_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${element["odm_descripcion"]}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${element["odm_descripcion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value="${element["odm_cantidad"]}" readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='${element["odm_observacion"]}' readonly/>
+                    <input type="text" class="form-control observacion-input" value='${element["odm_observacion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -715,13 +722,13 @@ $(document).ready(function () {
              <tr>
                  <td>${data["pro_codigo"]}</td>
                  <td>
-                     <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"]}' readonly/>
+                     <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"].replace(/'/g, "&#39;")}' readonly/>
                  </td>
                  <td>
                      <input type="number" class="form-control cantidad-input" value="${data["odm_cantidad"]}" readonly/>
                  </td>
                  <td>
-                     <input type="text" class="form-control observacion-input" value='${data["odm_observacion"]}' readonly/>
+                     <input type="text" class="form-control observacion-input" value='${data["odm_observacion"].replace(/'/g, "&#39;")}' readonly/>
                  </td>
                  <td>
                      <div class="d-flex justify-content-around">
@@ -778,13 +785,13 @@ $(document).ready(function () {
             <tr>
                 <td>${data["pro_codigo"]}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"]}' readonly/>
+                    <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value='${data["odm_cantidad"]}' readonly/>
                 </td>
                 <td>
-                    <input type="text" class="form-control observacion-input" value='${data["odm_observacion"]}' readonly/>
+                    <input type="text" class="form-control observacion-input" value='${data["odm_observacion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <div class="d-flex justify-content-around">
@@ -1114,6 +1121,7 @@ $(document).ready(function () {
 
         showLoaderModal()
         try {
+            console.log(formatData)
             const response = await client.post(`/previsualizarReporteOrdenTrabajo`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'
