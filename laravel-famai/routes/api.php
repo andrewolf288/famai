@@ -28,6 +28,8 @@ use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\OrdenInternaMateriales;
+use App\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -271,4 +273,16 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordenescompra', [OrdenCompraController::class, 'index']);
     Route::post('ordenescompra', [OrdenCompraController::class, 'store']);
     Route::get('ordenescompra/exportarPDF', [OrdenCompraController::class, 'exportarPDF']);
+});
+
+Route::get('script-update', function (){
+    $registros = OrdenInternaMateriales::whereNotNull('pro_id')->get();
+
+    foreach ($registros as $registro) {
+        $producto = Producto::find($registro->pro_id);
+        if($producto){
+            $registro->odm_descripcion = $producto->pro_descripcion;
+            $registro->save();
+        }
+    }
 });
