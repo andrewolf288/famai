@@ -12,6 +12,7 @@ class Cotizacion extends Model
 
     protected $fillable = [
         'coc_numero',
+        'coc_cotizacionproveedor',
         'prv_id',
         'coc_fechacotizacion',
         'mon_codigo',
@@ -45,5 +46,10 @@ class Cotizacion extends Model
     public function detalleCotizacion()
     {
         return $this->hasMany(CotizacionDetalle::class, 'coc_id', 'coc_id');
+    }
+
+    public function detalleCotizacionArchivos()
+    {
+        return $this->hasMany(CotizacionDetalleArchivos::class, 'coc_id', 'coc_id');
     }
 }

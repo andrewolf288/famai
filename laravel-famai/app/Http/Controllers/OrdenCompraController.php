@@ -113,6 +113,12 @@ class OrdenCompraController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $ordencompra = OrdenCompra::with(['proveedor', 'moneda', 'elaborador', 'solicitador', 'autorizador', 'detalleOrdenCompra.producto'])->findOrFail($id);
+        return response()->json($ordencompra);
+    }
+
     public function exportarPDF(Request $request)
     {
         try {

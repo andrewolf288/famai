@@ -543,6 +543,7 @@ $(document).ready(() => {
     }
 
     $('#btn-guardar-cotizacion').on('click', async function () {
+        const coc_cotizacionproveedor = $('#numeroCotizacionProveedorInput').val()
         const prv_id = $('#idProveedorInput').val()
         const coc_fechacotizacion = $('#fechaCotizacionPicker').val()
         const mon_codigo = $('#monedaInput').val()
@@ -593,6 +594,7 @@ $(document).ready(() => {
 
         const data = {
             prv_id,
+            coc_cotizacionproveedor: coc_cotizacionproveedor || null,
             coc_fechacotizacion: transformarFecha(coc_fechacotizacion),
             mon_codigo: mon_codigo || null,
             coc_formapago: coc_formapago || null,

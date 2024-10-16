@@ -266,6 +266,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('cotizaciones', [CotizacionController::class, 'store']);
     Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
     Route::get('cotizaciones/exportarPDF', [CotizacionController::class, 'exportarPDF']);
+    Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
 });
 
 // rutas de ordenes de compra
@@ -273,6 +274,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordenescompra', [OrdenCompraController::class, 'index']);
     Route::post('ordenescompra', [OrdenCompraController::class, 'store']);
     Route::get('ordenescompra/exportarPDF', [OrdenCompraController::class, 'exportarPDF']);
+    Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
 });
 
 Route::get('script-update', function (){

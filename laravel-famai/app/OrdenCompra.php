@@ -12,8 +12,11 @@ class OrdenCompra extends Model
 
     protected $fillable = [
         'occ_numero',
+        'coc_id',
         'prv_id',
-        'pvc_id',
+        'pvc_cuentasoles',
+        'pvc_cuentadolares',
+        'pvc_cuentabanconacion',
         'occ_fecha',
         'occ_fechaentrega',
         'mon_codigo',

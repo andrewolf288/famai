@@ -60,6 +60,7 @@ class CotizacionController extends Controller
             // Valida el request
             $validatedData = validator($data, [
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
+                'coc_cotizacionproveedor' => 'nullable|string',
                 'coc_fechacotizacion' => 'required|date',
                 'mon_codigo' => 'nullable|string|exists:tblmonedas_mon,mon_codigo',
                 'coc_formapago' => 'nullable|string',
@@ -80,6 +81,7 @@ class CotizacionController extends Controller
             $cotizacion = Cotizacion::create([
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $validatedData['prv_id'],
+                'coc_cotizacionproveedor' => $validatedData['coc_cotizacionproveedor'],
                 'coc_fechacotizacion' => $validatedData['coc_fechacotizacion'],
                 'mon_codigo' => $validatedData['mon_codigo'],
                 'coc_formapago' => $validatedData['coc_formapago'],
@@ -133,6 +135,12 @@ class CotizacionController extends Controller
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
+    }
+
+    public function show($id)
+    {
+        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion.producto', 'detalleCotizacionArchivos'])->findOrFail($id);
+        return response()->json($cotizacion);
     }
 
     public function exportarPDF(Request $request)
