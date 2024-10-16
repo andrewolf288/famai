@@ -31,7 +31,7 @@
             <th>Teléfono</th>
             <th>Correo</th>
             <th>Estado</th>
-            <th>Acciones</th>
+            <th class="text-center">Acciones</th>
             <th>Usu. Creador</th>
             <th>Fec. Creación</th>
             <th>Usu. Actualizador</th>
@@ -180,6 +180,124 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="submit" class="btn btn-primary" id="btnEditarProveedor"
                     form="editarProveedorForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cuentas proveedor -->
+<div class="modal fade" id="cuentasBancariasProveedorModal" tabindex="-1"
+    aria-labelledby="cuentasBancariasProveedorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="cuentasBancariasProveedorModalLabel">Cuentas Bancarias Proveedor</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-2">
+                    <button class="btn btn-agregar" id="btn-link-create-cuenta-proveedor">Crear cuenta</button>
+                </div>
+                <table id="data-container-cuentas-proveedor" class="table table-striped nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Entidad bancaria</th>
+                            <th>Moneda</th>
+                            <th>Número cuenta</th>
+                            <th>Estado</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Actualización</th>
+                            <th>Usu. Actualizador</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CREAR CUENTA BANCARIA -->
+<div class="modal fade" id="crearCuentasBancariasProveedorModal" tabindex="-1"
+    aria-labelledby="crearCuentasBancariasProveedorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="z-index: 1056;">
+            <div class="modal-header bg-secondary">
+                <h5 class="modal-title text-light" id="crearCuentasBancariasProveedorModalLabel">Crear Cuenta Bancaria
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="crearCuentaBancariaForm">
+                    <div class="row">
+                        <input type="hidden" id="idProveedor">
+                        <div class="col-12 mb-3">
+                            <label for="entidadBancariaCuentaProveedor" class="form-label">Entidad bancaria</label>
+                            <select class="form-select" id="entidadBancariaCuentaProveedor" required></select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="monedaCuentaProveedor" class="form-label">Moneda</label>
+                            <select class="form-select" id="monedaCuentaProveedor" required></select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="numeroCuentaProveedor" class="form-label">Número de cuenta</label>
+                            <input class="form-control" id="numeroCuentaProveedor" required />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnCrearCuentaBancaria"
+                    form="crearCuentaBancariaForm">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDITAR CUENTA BANCARIA -->
+<div class="modal fade" id="editarCuentasBancariasProveedorModal" tabindex="-1"
+    aria-labelledby="editarCuentasBancariasProveedorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="z-index: 1056;">
+            <div class="modal-header bg-secondary">
+                <h5 class="modal-title text-light" id="editarCuentasBancariasProveedorModalLabel">Editar Cuenta Bancaria
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarCuentaBancariaForm">
+                    <div class="row">
+                        <input type="hidden" id="cuentaProveedorId">
+                        <div class="col-12 mb-3">
+                            <label for="entidadBancariaCuentaProveedorEdit" class="form-label">Entidad bancaria</label>
+                            <select class="form-select" id="entidadBancariaCuentaProveedorEdit" required></select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="monedaCuentaProveedorEdit" class="form-label">Moneda</label>
+                            <select class="form-select" id="monedaCuentaProveedorEdit" required></select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="numeroCuentaProveedorEdit" class="form-label">Número de cuenta</label>
+                            <input class="form-control" id="numeroCuentaProveedorEdit" required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <input type="checkbox" class="form-check-input me-2" id="activoCuentaProveedorEdit" checked>
+                            <label class="form-check-label" for="activoCuentaProveedorEdit">Activo</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="submit" class="btn btn-primary" id="btnEditarCuentaBancaria"
+                    form="editarCuentaBancariaForm">Guardar</button>
             </div>
         </div>
     </div>

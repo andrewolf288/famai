@@ -26,6 +26,7 @@ use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ProveedorCuentaBancoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
@@ -256,6 +257,15 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('entidadbancaria/{id}', [EntidadBancariaController::class, 'show']);
     Route::post('entidadesbancarias', [EntidadBancariaController::class, 'store']);
     Route::put('entidadbancaria/{id}', [EntidadBancariaController::class, 'update']);
+});
+
+// rutas cuentas bancarias proveedores
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('cuentasbancariasproveedor', [ProveedorCuentaBancoController::class, 'index']);
+    Route::get('findCuentaBancoByProveedor/{id}', [ProveedorCuentaBancoController::class, 'findCuentasBancariasByProveedor']);
+    Route::get('cuentabancariaproveedor/{id}', [ProveedorCuentaBancoController::class, 'show']);
+    Route::post('cuentasbancariasproveedor', [ProveedorCuentaBancoController::class, 'store']);
+    Route::put('cuentabancariaproveedor/{id}', [ProveedorCuentaBancoController::class, 'update']);
 });
 
 // rutas de sedes

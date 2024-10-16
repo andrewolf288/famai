@@ -24,4 +24,14 @@ class ProveedorCuentaBanco extends Model
 
     const CREATED_AT = 'pvc_feccreacion';
     const UPDATED_AT = 'pvc_fecmodificacion';
+
+    public function moneda()
+    {
+        return $this->belongsTo(Moneda::class, 'mon_codigo', 'mon_codigo');
+    }
+
+    public function entidadBancaria()
+    {
+        return $this->belongsTo(EntidadBancaria::class, 'eba_id', 'eba_id');
+    }
 }
