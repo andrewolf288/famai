@@ -120,6 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta para entidades bancarias
+    router.on('/entidad-bancaria', () => {
+        privateRoute(() => {
+            loadContent('pages/entidad-bancaria/entidadBancaria.html', 'scripts/entidad-bancaria/entidadBancaria.js')
+        })
+    })
+
     // Ruta para cotizacion
     router.on('/cotizacion', () => {
         privateRoute(() => {

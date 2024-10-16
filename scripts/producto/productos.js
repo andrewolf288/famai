@@ -225,9 +225,6 @@ $(document).ready(() => {
             initPagination(apiURL, initDataTable, dataTableOptions)
         } catch (error) {
             console.log(error)
-            // alert()
-        } finally {
-            // hideLoaderModal()
         }
     })
 

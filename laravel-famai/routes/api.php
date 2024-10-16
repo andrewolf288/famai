@@ -13,6 +13,7 @@ use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\EntidadBancariaController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\OrdenCompraController;
@@ -246,6 +247,15 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('familias', [FamiliaController::class, 'store']);
     Route::put('familia/{id}', [FamiliaController::class, 'update']);
     Route::get('/familiasByQuery', [FamiliaController::class, 'findFamiliaByQuery']);
+});
+
+// rutas de entidades bancarias
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('entidadesbancarias', [EntidadBancariaController::class, 'index']);
+    Route::get('entidadesbancariasSimple', [EntidadBancariaController::class, 'indexSimple']);
+    Route::get('entidadbancaria/{id}', [EntidadBancariaController::class, 'show']);
+    Route::post('entidadesbancarias', [EntidadBancariaController::class, 'store']);
+    Route::put('entidadbancaria/{id}', [EntidadBancariaController::class, 'update']);
 });
 
 // rutas de sedes
