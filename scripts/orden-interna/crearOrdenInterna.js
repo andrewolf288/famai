@@ -615,7 +615,7 @@ $(document).ready(function () {
             // Si no está marcado, vuelve al placeholder original
             $('#productosInput').attr('placeholder', 'Buscar material...');
         }
-        $('#productosInput').val('')
+        // $('#productosInput').val('')
         limpiarLista()
     });
 
@@ -687,7 +687,7 @@ $(document).ready(function () {
                 console.log('Petición abortada'); // Maneja el error de la petición abortada
             } else {
                 console.error('Error al buscar materiales:', error);
-                alert('Error al buscar materiales. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
+                // alert('Error al buscar materiales. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
             }
         }
     }
