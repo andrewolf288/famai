@@ -170,8 +170,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordenestrabajos', [OrdenTrabajoController::class, 'index']);
     Route::get('ordenestrabajos/{id}', [OrdenTrabajoController::class, 'show']);
-    Route::get('ordenestrabajosByNumero/{numero}', [OrdenTrabajoController::class, 'findByNumero']);
-    // Route::get('ordenestrabajosByNumeroExt/{numero}', [OrdenTrabajoController::class, 'findByNumero2']);
+    // Route::get('ordenestrabajosByNumero/{numero}', [OrdenTrabajoController::class, 'findByNumero']);
+    Route::get('ordenestrabajosByNumero/{numero}', [OrdenTrabajoController::class, 'findByNumero2']);
 });
 
 // rutas de ordenes internas

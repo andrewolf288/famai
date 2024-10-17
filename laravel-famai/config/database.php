@@ -102,7 +102,20 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
-        ]
+        ],
+
+        'sqlsrv_andromeda' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL_ANDROMEDA'),
+            'host' => env('DB_HOST_ANDROMEDA', 'localhost'),
+            'port' => env('DB_PORT_ANDROMEDA', '1433'),
+            'database' => env('DB_DATABASE_ANDROMEDA', 'forge'),
+            'username' => env('DB_USERNAME_ANDROMEDA', 'forge'),
+            'password' => env('DB_PASSWORD_ANDROMEDA', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
 
     ],
 

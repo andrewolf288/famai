@@ -444,6 +444,8 @@ class OrdenInternaController extends Controller
                 'oic_numero' => 'required|string|unique:tblordenesinternascab_oic,oic_numero',
                 'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
                 'oic_fecha' => 'required|date',
+                'oic_fechaaprobacion' => 'nullable|date',
+                'oic_fechaentregaestimada' => 'nullable|date',
                 'tra_idalmacen' => 'nullable|integer|exists:tbltrabajadores_tra,tra_id',
                 'tra_idmaestro' => 'nullable|integer|exists:tbltrabajadores_tra,tra_id',
                 'tra_idorigen' => 'required|integer|exists:tbltrabajadores_tra,tra_id',
@@ -460,16 +462,22 @@ class OrdenInternaController extends Controller
             } else {
                 // si no existe debemos crearlo
                 // debemos buscar la informacion correspondiente en la tabla secundaria
-                $clienteSecondary = DB::connection('sqlsrv_secondary')
-                    ->table('OCRD')
+                // $clienteSecondary = DB::connection('sqlsrv_secondary')
+                //     ->table('OCRD')
+                //     ->select('CardCode', 'CardName')
+                //     ->where('CardCode', $request->input('cli_id'))
+                //     ->first();
+                $clienteSecondary = DB::connection('sqlsrv_andromeda')
+                    ->table('SAP_Cliente')
                     ->select('CardCode', 'CardName')
                     ->where('CardCode', $request->input('cli_id'))
                     ->first();
+
                 if ($clienteSecondary) {
                     $documento = substr($clienteSecondary->CardCode, 1);
                     $longitud = strlen($documento);
                     $clienteCreated = Cliente::create([
-                        'tdo_codigo' => $longitud == 8 ? 'DNI' : 'RUC',
+                        'tdo_codigo' => $longitud == 8 ? 'DNI' : 'RUC', // verificar??
                         'cli_nrodocumento' => $clienteSecondary->CardCode,
                         'cli_nombre' => $clienteSecondary->CardName,
                         'cli_activo' => 1,
@@ -493,33 +501,53 @@ class OrdenInternaController extends Controller
             } else {
                 // si no existe debemos crearlo
                 // debemos buscar la informacion correspondiente en la tabla secundaria
-                $otSecondary = DB::connection('sqlsrv_secondary')
-                    ->table('OWOR as OT')
+                // $otSecondary = DB::connection('sqlsrv_secondary')
+                //     ->table('OWOR as OT')
+                //     ->select(
+                //         'OT.DocNum as odt_numero',
+                //         DB::raw('CAST(OT.PostDate AS DATE) as odt_fecha'),
+                //         'OT.ProdName as odt_equipo',
+                //         DB::raw("
+                //                 CASE 
+                //                     WHEN OT.U_EXX_TIPOSERV = 1 THEN 'Reparacion'
+                //                     WHEN OT.U_EXX_TIPOSERV = 2 THEN 'Fabricacion'
+                //                     WHEN OT.U_EXX_TIPOSERV = 3 THEN 'Compra/Venta'
+                //                     WHEN OT.U_EXX_TIPOSERV = 4 THEN 'Garantia Total'
+                //                     WHEN OT.U_EXX_TIPOSERV = 5 THEN 'Interno'
+                //                     WHEN OT.U_EXX_TIPOSERV = 6 THEN 'Garantia Parcial'
+                //                     WHEN OT.U_EXX_TIPOSERV = 7 THEN 'Sellos'
+                //                     ELSE 'Otro'
+                //                 END as odt_trabajo
+                //             "),
+                //         DB::raw("
+                //                 CASE 
+                //                     WHEN OT.Status = 'L' THEN 'Cerrado'
+                //                     WHEN OT.Status = 'R' THEN 'Abierto'
+                //                     ELSE 'Planificado'
+                //                 END as odt_estado
+                //             ")
+                //     )
+                //     ->where('OT.DocNum', $request->input('odt_numero'))
+                //     ->first();
+
+                $otSecondary = DB::connection('sqlsrv_andromeda')
+                    ->table('OT_OrdenTrabajo as T1')
+                    ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
+                    ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', 'T1.IdTipoEstado')
+                    ->leftJoin('SAP_Cliente as T2', 'T2.CardCode', 'T1.CardCode')
+                    ->leftJoin('OT_TipoServicio as T3', 'T3.IdTipoServicio', 'T1.IdTipoServicio')
                     ->select(
-                        'OT.DocNum as odt_numero',
-                        DB::raw('CAST(OT.PostDate AS DATE) as odt_fecha'),
-                        'OT.ProdName as odt_equipo',
-                        DB::raw("
-                                CASE 
-                                    WHEN OT.U_EXX_TIPOSERV = 1 THEN 'Reparacion'
-                                    WHEN OT.U_EXX_TIPOSERV = 2 THEN 'Fabricacion'
-                                    WHEN OT.U_EXX_TIPOSERV = 3 THEN 'Compra/Venta'
-                                    WHEN OT.U_EXX_TIPOSERV = 4 THEN 'Garantia Total'
-                                    WHEN OT.U_EXX_TIPOSERV = 5 THEN 'Interno'
-                                    WHEN OT.U_EXX_TIPOSERV = 6 THEN 'Garantia Parcial'
-                                    WHEN OT.U_EXX_TIPOSERV = 7 THEN 'Sellos'
-                                    ELSE 'Otro'
-                                END as odt_trabajo
-                            "),
-                        DB::raw("
-                                CASE 
-                                    WHEN OT.Status = 'L' THEN 'Cerrado'
-                                    WHEN OT.Status = 'R' THEN 'Abierto'
-                                    ELSE 'Planificado'
-                                END as odt_estado
-                            ")
+                        'T1.NumOTSAP as odt_numero',
+                        'T4.DesTipoEstado as odt_estado',
+                        'T2.CardName as cli_nombre',
+                        'T2.CardCode as cli_nrodocumento',
+                        'T8.NomEquipo as odt_equipo',
+                        'T1.FecIngreso as odt_fecha',
+                        'T1.FecAprobacion as odt_fechaaprobacion',
+                        'T1.FecEntregaEstimada as odt_fechaentregaestimada',
+                        'T3.DesTipoServicio as odt_trabajo'
                     )
-                    ->where('OT.DocNum', $request->input('odt_numero'))
+                    ->where('T1.NumOTSAP', $request->input('odt_numero'))
                     ->first();
 
                 if ($otSecondary) {
@@ -554,6 +582,8 @@ class OrdenInternaController extends Controller
             $ordeninterna = OrdenInterna::create([
                 'oic_numero' => $request->input('oic_numero'),
                 'oic_fecha' => $request->input('oic_fecha'),
+                'oic_fechaaprobacion' => $request->input('oic_fechaaprobacion'),
+                'oic_fechaentregaestimada' => $request->input('oic_fechaentregaestimada'),
                 'odt_numero' => $odt_numero,
                 'cli_id' => $cli_id,
                 'are_codigo' => $request->input('are_codigo'),

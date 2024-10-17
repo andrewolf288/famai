@@ -2,6 +2,9 @@
 $(document).ready(function () {
     let abortController
     const tiempoAutoguardado = 5 * 60 * 1000
+    let oic_fechaaprobacion = ""
+    let oic_fechaentregaestimada = ""
+
 
     window.onbeforeunload = function (e) {
         e.preventDefault();
@@ -100,8 +103,8 @@ $(document).ready(function () {
         try {
             const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
             const estadoOrdenTrabajo = data.odt_estado
-            if (estadoOrdenTrabajo === 'Cerrado') {
-                if (!confirm('La orden de trabajo ya ha sido cerrada. ¿Desea jalar los datos?')) {
+            if (estadoOrdenTrabajo !== 'INGRESO') {
+                if (!confirm('La orden de trabajo no tiene un estado "INGRESO". ¿Desea jalar los datos?')) {
                     return
                 }
             }
@@ -109,6 +112,8 @@ $(document).ready(function () {
             $('#oiInput').val(data.odt_numero)
             $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
+            oic_fechaaprobacion = data.odt_fechaaprobacion
+            oic_fechaentregaestimada = data.odt_fechaentregaestimada
         } catch (error) {
             console.log(error)
             const { response } = error
@@ -1055,6 +1060,8 @@ $(document).ready(function () {
             tra_idmaestro: $oiEncargadoMaestro || null,
             tra_idalmacen: $oiEncargadoAlmacen || null,
             oic_equipo_descripcion: $oiValorEquipo,
+            oic_fechaaprobacion: oic_fechaaprobacion || null,
+            oic_fechaentregaestimada: oic_fechaentregaestimada || null,
             detalle_partes: ordenInterna.detalle_partes,
         }
 
@@ -1203,6 +1210,8 @@ $(document).ready(function () {
             tra_idmaestro: $oiEncargadoMaestro || null,
             tra_idalmacen: $oiEncargadoAlmacen || null,
             oic_equipo_descripcion: $oiValorEquipo,
+            oic_fechaaprobacion: oic_fechaaprobacion || null,
+            oic_fechaentregaestimada: oic_fechaentregaestimada || null,
             detalle_partes: ordenInterna.detalle_partes,
         };
 
