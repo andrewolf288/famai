@@ -1,12 +1,49 @@
 
 $(document).ready(function () {
     let abortController
-    var { pdfjsLib } = globalThis
+    const tiempoAutoguardado = 5 * 60 * 1000
 
     window.onbeforeunload = function (e) {
         e.preventDefault();
         e.returnValue = '';
     }
+
+    function intentarEjecutarFuncion() {
+        crearAutomatica()
+            .then(() => {
+                console.log("Ejecución exitosa, no es necesario volver a intentarlo.");
+            })
+            .catch((error) => {
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr["error"](parserAlert(error), "Error en el guardado automático")
+
+                setTimeout(() => {
+                    intentarEjecutarFuncion();
+                }, tiempoAutoguardado);
+            });
+    }
+
+    // Ejecutar por primera vez
+
+    setTimeout(() => {
+        intentarEjecutarFuncion();
+    }, tiempoAutoguardado);
 
     // evento para cargar
     $('select[multiple]').multiselect(
@@ -944,7 +981,7 @@ $(document).ready(function () {
         detalle_partes.forEach(element => {
             console.log(element.detalle_materiales.length, element.detalle_procesos.length)
             if (element.detalle_materiales.length !== 0 || element.detalle_procesos.length !== 0) {
-                validation =  true
+                validation = true
             }
         })
         return validation
@@ -958,7 +995,6 @@ $(document).ready(function () {
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
-        console.log(ordenInterna.detalle_partes)
         // deshabilitamos el evento de recarga
         window.onbeforeunload = null;
         let handleError = ''
@@ -1022,8 +1058,6 @@ $(document).ready(function () {
             detalle_partes: ordenInterna.detalle_partes,
         }
 
-        console.log(formatData)
-
         // // formateamos la data de numero de orden
         formatData.detalle_partes.forEach(element => {
             element.detalle_materiales.forEach((detalle, index) => {
@@ -1086,6 +1120,130 @@ $(document).ready(function () {
             alert('- Al menos se debe agregar un proceso o un material')
         }
     })
+
+    // funcion de creacion automatica
+    async function crearAutomatica() {
+        // iniciar un loader toast
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "10000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+        toastr["info"]("Espere mientras se ejecuta el autoguardado.", "Autoguardando")
+
+        // ejecutamos la funcion
+        window.onbeforeunload = null;
+        let handleError = '';
+        const $oiCliente = $('#idClienteInput').val().trim();
+        const $otInput = $('#otInput').val().trim();
+        const $oiInput = $('#oiInput').val().trim();
+        const $oiValorEquipo = $('#equipoInput').val().trim();
+        const $oiCodigoArea = $('#areaSelect').val();
+        const $oiFecha = $('#fechaPicker').val();
+        const $oiEncargadoOrigen = $('#responsableOrigen').val();
+        const $oiEncargadoMaestro = $('#responsableMaestro').val();
+        const $oiEncargadoAlmacen = $('#responsableAlmacen').val();
+
+        if (
+            $oiCliente.length === 0 ||
+            $otInput.length < 7 ||
+            $oiInput.length < 7 ||
+            $oiValorEquipo.length === 0 ||
+            $oiCodigoArea.length === 0 ||
+            $oiFecha.length === 0 ||
+            $oiEncargadoOrigen.length === 0
+        ) {
+            if ($otInput.length < 7) {
+                handleError += 'Se debe ingresar información de orden trabajo con mínimo 7 caracteres\n';
+            }
+            if ($oiInput.length < 7) {
+                handleError += 'Se debe ingresar información de orden interna con mínimo 7 caracteres\n';
+            }
+            if ($oiCliente.length === 0) {
+                handleError += 'Se debe ingresar información del cliente\n';
+            }
+            if ($oiCodigoArea.length === 0) {
+                handleError += 'Se debe ingresar información del área\n';
+            }
+            if ($oiValorEquipo.length === 0) {
+                handleError += 'Se debe ingresar información del equipo\n';
+            }
+            if ($oiFecha.length === 0) {
+                handleError += 'Se debe ingresar información de la fecha\n';
+            }
+            if ($oiEncargadoOrigen.length === 0) {
+                handleError += 'Se debe ingresar información de encargado origen\n';
+            }
+        }
+
+        if (handleError.length !== 0) {
+            toastr.remove()
+            return Promise.reject(handleError); // Rechazamos la promesa con el mensaje de error
+        }
+
+        const formatData = {
+            odt_numero: $otInput,
+            oic_numero: $oiInput,
+            cli_id: $oiCliente,
+            are_codigo: $oiCodigoArea,
+            oic_fecha: transformarFecha($oiFecha),
+            tra_idorigen: $oiEncargadoOrigen,
+            tra_idmaestro: $oiEncargadoMaestro || null,
+            tra_idalmacen: $oiEncargadoAlmacen || null,
+            oic_equipo_descripcion: $oiValorEquipo,
+            detalle_partes: ordenInterna.detalle_partes,
+        };
+
+        // Formateamos la data de numero de orden
+        formatData.detalle_partes.forEach(element => {
+            element.detalle_materiales.forEach((detalle, index) => {
+                detalle["odm_item"] = index + 1;
+            });
+        });
+
+        const validacionDetallePartes = validarInformacionDetallePartes();
+        if (validacionDetallePartes) {
+            const validacionDetalleMateriales = validarInformacionDetalleMateriales();
+            if (validacionDetalleMateriales.length === 0) {
+                showLoaderModal();
+                try {
+                    const { data } = await client.post('/ordenesinternas', formatData);
+                    toastr.remove()
+                    window.location.href = `orden-interna/editar/${data.oic_id}`;
+                    return Promise.resolve(); // Si la orden se crea, resolvemos la promesa
+                } catch (error) {
+                    const { response } = error;
+                    if (response.status === 500) {
+                        toastr.remove()
+                        return Promise.reject(response.data.error); // Error del servidor
+                    } else {
+                        toastr.remove()
+                        return Promise.reject('Hubo un error en la creación de la orden interna');
+                    }
+                } finally {
+                    hideLoaderModal();
+                }
+            } else {
+                toastr.remove()
+                return Promise.reject(validacionDetalleMateriales);
+            }
+        } else {
+            toastr.remove()
+            return Promise.reject('Al menos se debe agregar un proceso o un material');
+        }
+    }
 
     // previsualizar orden interna
     $("#btn-previsualizar-orden-interna").on('click', async function () {

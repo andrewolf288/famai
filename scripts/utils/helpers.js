@@ -68,3 +68,13 @@ function debounce(func) {
         timeout = setTimeout(() => func.apply(this, args), 300);
     };
 }
+
+function parserAlert(error, simbolo = '\n') {
+    const lineasError = error.split(simbolo)
+    const listaErroresHTML = `
+        <ul>
+            ${lineasError.map(linea => linea.trim() !== '' ? `<li>${linea}</li>` : '').join('')}
+        </ul>
+    `;
+    return listaErroresHTML
+}

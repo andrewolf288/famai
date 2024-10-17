@@ -3,9 +3,44 @@ $(document).ready(async function () {
     const path = window.location.pathname
     const segments = path.split('/')
     const id = segments.pop()
+    const tiempoAutoguardado = 5 * 60 * 1000
 
     let detalleOrdenInterna = []
     let currentDetalleParte = 0
+
+    function intentarEjecutarFuncion() {
+        guardadoAutomatico()
+            .then(() => {
+                console.log("Se resolvio")
+                setTimeout(() => {
+                    intentarEjecutarFuncion();
+                }, tiempoAutoguardado);
+            })
+            .catch((error) => {
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": false,
+                    "positionClass": "toast-top-center",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                }
+                toastr["error"](parserAlert(error), "Error en el autoguardado")
+
+                setTimeout(() => {
+                    intentarEjecutarFuncion();
+                }, tiempoAutoguardado);
+            });
+    }
 
     // funcion de busqueda de detalle de parte
     function buscarDetalleParte(id_detalle_parte) {
@@ -87,6 +122,10 @@ $(document).ready(async function () {
     }
 
     await cargarDetalleOrdenInterna()
+
+    setTimeout(() => {
+        intentarEjecutarFuncion();
+    }, tiempoAutoguardado);
 
     // ---------- JAVASCRIPT PARA IMPRESION DE PDF ------------------
     $('#btn-imprimir-orden-interna').on('click', async function () {
@@ -816,7 +855,7 @@ $(document).ready(async function () {
                 if (tipo == '1') {
                     cantidadTotal = parseInt($(`#cantidad-regulares-${currentDetalleParte}`).text()) - 1
                     $(`#cantidad-regulares-${currentDetalleParte}`).text(cantidadTotal)
-                } 
+                }
                 if (tipo == '2') {
                     cantidadTotal = parseInt($(`#cantidad-adicionales-${currentDetalleParte}`).text()) - 1
                     $(`#cantidad-adicionales-${currentDetalleParte}`).text(cantidadTotal)
@@ -945,10 +984,184 @@ $(document).ready(async function () {
         // invocamos la funcion de guardar producto
         guardarProductos()
     })
-})
 
-function showModalPreview(pdfUrl) {
-    document.getElementById('pdf-frame').src = pdfUrl;
-    const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
-    modal.show();
-}
+    // mostrar preview de PDF
+    function showModalPreview(pdfUrl) {
+        document.getElementById('pdf-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
+
+    // funcion guardado automatico de procesos
+    async function guardadoAutomaticoProcesos() {
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "10000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+        toastr["info"]("Espere mientras se ejecuta el autoguardado.", "Autoguardando")
+
+        let dataArray = []
+        $('.row-editable').each(function () {
+            let dataObject = {
+                opp_id: $(this).data('id-proceso'),
+                odp_descripcion: $(this).find('.descripcion-input').val().trim(),
+                odp_observacion: $(this).find('.observacion-input').val().trim(),
+                odp_ccalidad: $(this).find('input[type="checkbox"]').is(':checked') ? true : false
+            }
+            dataArray.push(dataObject)
+        })
+
+        if (dataArray.length === 0) {
+            toastr.remove()
+            return Promise.resolve()
+        }
+        try {
+            const { data } = await client.put(`/ordeninterna/guardar-procesos/${currentDetalleParte}`, { procesos: dataArray })
+
+            // actualizamos la data
+            const findElement = buscarDetalleParte(currentDetalleParte)
+            const { procesos } = findElement
+
+            data.data.forEach(element => {
+                procesos.push(element)
+            })
+
+            // aumentamos el total de procesos
+            const totalProcesos = procesos.length
+            const idCantidadProceso = `#cantidad-procesos-${currentDetalleParte}`
+            $(idCantidadProceso).text(totalProcesos)
+
+            // borramos los datos temporales
+            $('#tbl-orden-interna-procesos tbody .row-editable').remove()
+
+            // cerramos el modal
+            $('#procesosModal').modal('hide')
+            toastr.remove()
+            return Promise.resolve()
+        } catch (error) {
+            console.log(error)
+            toastr.remove()
+            return Promise.reject('Error al guardar los procesos')
+        }
+    }
+
+    async function guardadoAutomaticoProductos() {
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-center",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "10000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+        toastr["info"]("Espere mientras se ejecuta el autoguardado.", "Autoguardando")
+
+        const findElement = buscarDetalleParte(currentDetalleParte)
+        const { materiales } = findElement
+
+        let dataArray = []
+        let item = materiales.length + 1
+
+        $('.row-editable').each(function () {
+            const asociar = $(this).data('asociar')
+            let dataObject = {
+                pro_id: $(this).data('id-producto'),
+                odm_item: item,
+                odm_asociar: asociar,
+                odm_descripcion: $(this).find('.descripcion-input').val().trim(),
+                odm_cantidad: $(this).find('.cantidad-input').val().trim(),
+                odm_observacion: $(this).find('.observacion-input').val().trim(),
+                // aqui se pone estado 1: regular (por el momento, se debe manejar a nivel de estado de OI)
+                // odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 2 : 3,
+                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 1 : 3
+            }
+            dataArray.push(dataObject)
+        })
+
+        if (dataArray.length === 0) {
+            toastr.remove()
+            return Promise.resolve()
+        }
+
+        // validacion de cantidades
+        const validatedCantidades = dataArray.every(element => esValorNumericoValidoYMayorQueCero(element.odm_cantidad))
+        if (!validatedCantidades) {
+            toastr.remove()
+            return Promise.resolve('Asegurate que todas las cantidades sean valores numéricos mayores a 0')
+        }
+        try {
+            const { data } = await client.put(`/ordeninterna/guardar-materiales/${currentDetalleParte}`, { materiales: dataArray })
+            // actualizamos la data
+            data.data.forEach(element => {
+                materiales.push(element)
+            })
+
+            // aumentamos el total de productos
+            const totalProductos = materiales.length
+            const idCantidadProductos = `#cantidad-productos-${currentDetalleParte}`
+            const idCantidadRegulares = `#cantidad-regulares-${currentDetalleParte}`
+            const idCantidadAdicionales = `#cantidad-adicionales-${currentDetalleParte}`
+            const idCantidadClientes = `#cantidad-clientes-${currentDetalleParte}`
+            const totalRegulares = materiales.filter(element => element.odm_tipo == 1).length
+            const totalAdicionales = materiales.filter(element => element.odm_tipo == 2).length
+            const totalClientes = materiales.filter(element => element.odm_tipo == 3).length
+            $(idCantidadProductos).text(totalProductos)
+            $(idCantidadRegulares).text(totalRegulares)
+            $(idCantidadAdicionales).text(totalAdicionales)
+            $(idCantidadClientes).text(totalClientes)
+
+            // borramos los datos temporales
+            $('#tbl-orden-interna-productos tbody .row-editable').remove()
+
+            // cerramos el modal
+            $('#productosModal').modal('hide')
+            toastr.remove()
+            return Promise.resolve()
+        } catch (error) {
+            console.log(error)
+            toastr.remove()
+            return Promise.reject('Error al guardar los materiales')
+        }
+    }
+
+    // funcion guardado automatico de productos
+
+    async function guardadoAutomatico() {
+        // comprobar si el modal de procesos esta abierto
+        const modalProcesos = document.getElementById('procesosModal')
+        const modalProductos = document.getElementById('productosModal')
+
+        if (modalProcesos.classList.contains('show')) {
+            console.log("Procesos abierto")
+            await guardadoAutomaticoProcesos()
+        } else if (modalProductos.classList.contains('show')) {
+            console.log("Productos abierto")
+            await guardadoAutomaticoProductos()
+        }
+
+        // si no esta abierto ningun modal, pues simplemente no hacemos nada
+        return Promise.resolve()
+    }
+})
