@@ -4,6 +4,7 @@ $(document).ready(async function () {
     const segments = path.split('/')
     const id = segments.pop()
     const tiempoAutoguardado = 5 * 60 * 1000
+    let estadoOI = ""
 
     let detalleOrdenInterna = []
     let currentDetalleParte = 0
@@ -50,6 +51,7 @@ $(document).ready(async function () {
     async function cargarDetalleOrdenInterna() {
         try {
             const { data } = await client.get(`/ordeninterna/${id}`)
+            estadoOI = data.oic_estado
             detalleOrdenInterna = data.partes
             // reemplazamos el valor en orden trabajo
             $('#otInput').val(data.odt_numero)
@@ -913,6 +915,7 @@ $(document).ready(async function () {
 
         $('.row-editable').each(function () {
             const asociar = $(this).data('asociar')
+            const tipoProducto = estadoOI === "INGRESO" ? 1 : 2
             let dataObject = {
                 pro_id: $(this).data('id-producto'),
                 odm_item: item,
@@ -920,9 +923,7 @@ $(document).ready(async function () {
                 odm_descripcion: $(this).find('.descripcion-input').val().trim(),
                 odm_cantidad: $(this).find('.cantidad-input').val().trim(),
                 odm_observacion: $(this).find('.observacion-input').val().trim(),
-                // aqui se pone estado 1: regular (por el momento, se debe manejar a nivel de estado de OI)
-                // odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 2 : 3,
-                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 1 : 3
+                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? tipoProducto : 3
             }
             dataArray.push(dataObject)
         })
@@ -1086,6 +1087,7 @@ $(document).ready(async function () {
 
         $('.row-editable').each(function () {
             const asociar = $(this).data('asociar')
+            const tipoProducto = estadoOI === "INGRESO" ? 1 : 2
             let dataObject = {
                 pro_id: $(this).data('id-producto'),
                 odm_item: item,
@@ -1093,9 +1095,7 @@ $(document).ready(async function () {
                 odm_descripcion: $(this).find('.descripcion-input').val().trim(),
                 odm_cantidad: $(this).find('.cantidad-input').val().trim(),
                 odm_observacion: $(this).find('.observacion-input').val().trim(),
-                // aqui se pone estado 1: regular (por el momento, se debe manejar a nivel de estado de OI)
-                // odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 2 : 3,
-                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? 1 : 3
+                odm_tipo: $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-success') ? tipoProducto : 3
             }
             dataArray.push(dataObject)
         })
@@ -1164,4 +1164,15 @@ $(document).ready(async function () {
         // si no esta abierto ningun modal, pues simplemente no hacemos nada
         return Promise.resolve()
     }
+
+    // enviar orden interna
+    $('#btn-enviar-orden-interna').on('click', async function () {
+        const estado = "ENVIADO"
+        try {
+            await client.put(`/ordeninterna/${id}`, { oic_estado: estado })
+            window.location.href = 'orden-interna';
+        } catch (error) {
+            alert('Error al cambiar el estado')
+        }
+    })
 })

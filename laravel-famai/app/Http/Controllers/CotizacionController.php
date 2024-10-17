@@ -60,8 +60,8 @@ class CotizacionController extends Controller
             // Valida el request
             $validatedData = validator($data, [
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
-                'coc_cotizacionproveedor' => 'nullable|string',
                 'coc_fechacotizacion' => 'required|date',
+                'coc_cotizacionproveedor' => 'nullable|string',
                 'mon_codigo' => 'nullable|string|exists:tblmonedas_mon,mon_codigo',
                 'coc_formapago' => 'nullable|string',
                 'tra_solicitante' => 'nullable|exists:tbltrabajadores_tra,tra_id',
@@ -81,14 +81,14 @@ class CotizacionController extends Controller
             $cotizacion = Cotizacion::create([
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $validatedData['prv_id'],
-                'coc_cotizacionproveedor' => $validatedData['coc_cotizacionproveedor'],
                 'coc_fechacotizacion' => $validatedData['coc_fechacotizacion'],
+                'coc_cotizacionproveedor' => $validatedData['coc_cotizacionproveedor'],
                 'mon_codigo' => $validatedData['mon_codigo'],
                 'coc_formapago' => $validatedData['coc_formapago'],
                 'tra_solicitante' => $validatedData['tra_solicitante'],
                 'coc_notas' => $validatedData['coc_notas'],
                 'coc_total' => $validatedData['coc_total'],
-                'coc_estado' => '1',
+                'coc_estado' => 1,
                 'coc_usucreacion' => $user->usu_codigo,
                 'coc_fecmodificacion' => null
             ]);

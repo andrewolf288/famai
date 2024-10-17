@@ -29,8 +29,8 @@ class OrdenInternaController extends Controller
         $page = $request->input('page', 1);
         $odtNumero = $request->input('odt_numero', null);
         $oicNumero = $request->input('oic_numero', null);
-        $equipo = $request->input('oic_equipo_descripcion', null);
-        $estado = $request->input('oic_activo', null);
+        $oicEstado = $request->input('oic_estado', null);
+
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
@@ -43,12 +43,8 @@ class OrdenInternaController extends Controller
             $query->where('oic_numero', $oicNumero);
         }
 
-        if ($equipo !== null) {
-            $query->where('oic_equipo_descripcion', 'like', "%{$equipo}%");
-        }
-
-        if ($estado !== null) {
-            $query->where('oic_activo', $estado);
+        if ($oicEstado !== null) {
+            $query->where('oic_estado', $oicEstado);
         }
 
         if ($fecha_desde !== null && $fecha_hasta !== null) {
@@ -566,7 +562,7 @@ class OrdenInternaController extends Controller
                 'tra_idmaestro' => $request->input('tra_idmaestro'),
                 'tra_idalmacen' => $request->input('tra_idalmacen'),
                 'oic_activo' => 1,
-                'oic_estado' => 'PENDIENTE',
+                'oic_estado' => 'INGRESO',
                 'oic_usucreacion' => $user->usu_codigo,
                 'oic_fecmodificacion' => null, // para colocar que la fecha de modificacion no se setee al crearse el registro
             ]);

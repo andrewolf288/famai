@@ -27,6 +27,7 @@ $(document).ready(() => {
     // cargamos responsables
     const cargarTrabajadores = async () => {
         try {
+            const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
             const { data } = await client.get('/trabajadoresSimple')
             const $solicitanteCotizacion = $('#solicitanteCotizacionInput')
 
@@ -37,6 +38,10 @@ $(document).ready(() => {
                 const option = $('<option>').val(trabajador.tra_id).text(trabajador.tra_nombre)
                 $solicitanteCotizacion.append(option.clone())
             })
+
+            // debo buscar el trabajador que corresponda al usuario logeado
+            const { data: trabajador } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
+            $solicitanteCotizacion.val(trabajador.tra_id)
         } catch (error) {
             alert('Error al obtener los encargados')
         }
@@ -116,7 +121,7 @@ $(document).ready(() => {
     }
 
     function seleccionarProveedor(proveedor) {
-        const { prv_id, prv_nrodocumento, prv_nombre, tdo_codigo, prv_correo, prv_telefono, prv_whatsapp, prv_contacto, prv_direccion } = proveedor
+        const { prv_id, prv_nrodocumento, prv_nombre, tdo_codigo, prv_correo, prv_whatsapp, prv_contacto, prv_direccion } = proveedor
 
         limpiarListaProveedores()
         $('#proveedoresInput').val('')
@@ -460,7 +465,7 @@ $(document).ready(() => {
                 // escuchadores de acciones
                 botonEditar.addEventListener('click', function () { editarDetalleCotizacion(rowItem) })
                 botonGuardar.addEventListener('click', function () { guardarDetalleCotizacion(rowItem) })
-                botonEliminar.addEventListener('click', function () { eliminarDetalleCotizacion(rowData, rowItem) })
+                botonEliminar.addEventListener('click', function () { eliminarDetalleCotizacion(rowItem) })
 
                 $('#productosCotizacionTable tbody').append(rowItem)
                 $('#tbl-cotizacion-productos tbody').empty()
@@ -471,7 +476,7 @@ $(document).ready(() => {
         }
     })
 
-    function eliminarDetalleCotizacion(rowData, rowItem) {
+    function eliminarDetalleCotizacion(rowItem) {
         $(rowItem).remove()
         const productos = $('#productosCotizacionTable tbody tr')
         productos.each(function (index, row) {
@@ -543,30 +548,28 @@ $(document).ready(() => {
     }
 
     $('#btn-guardar-cotizacion').on('click', async function () {
-        const coc_cotizacionproveedor = $('#numeroCotizacionProveedorInput').val()
         const prv_id = $('#idProveedorInput').val()
         const coc_fechacotizacion = $('#fechaCotizacionPicker').val()
+        const coc_cotizacionproveedor = $('#numeroCotizacionProveedorInput').val()
         const mon_codigo = $('#monedaInput').val()
         const coc_formapago = $('#formaDePagoInput').val()
         const tra_solicitante = $('#solicitanteCotizacionInput').val()
         const coc_notas = $('#notaCotizacionInput').val()
         const coc_total = $('#totalCotizacion').text()
         const detalle_productos = $('#productosCotizacionTable tbody tr')
-        const detalle_descripciones = $('#fileList')
+        const detalle_descripciones = $('#fileList').find('li')
 
         let handleError = ''
-        if (coc_fechacotizacion.length === 0 || prv_id.length === 0 || detalle_productos.length === 0) {
-            if (coc_fechacotizacion.length === 0) {
-                handleError += '- La fecha de cotización es requerida\n'
-            }
-            if (prv_id.length === 0) {
-                handleError += '- El proveedor es requerido\n'
-            }
-            if (detalle_productos.length === 0) {
-                handleError += '- Se debe agregar al menos un producto al detalle\n'
-            }
-
+        if (coc_fechacotizacion.length === 0) {
+            handleError += '- La fecha de cotización es requerida\n'
         }
+        if (prv_id.length === 0) {
+            handleError += '- El proveedor es requerido\n'
+        }
+        if (detalle_productos.length === 0) {
+            handleError += '- Se debe agregar al menos un producto al detalle\n'
+        }
+
 
         if (handleError.length > 0) {
             alert(handleError)
@@ -587,7 +590,7 @@ $(document).ready(() => {
             formatDetalleProductos.push(item)
         })
 
-        detalle_descripciones.each(function (index, row){
+        detalle_descripciones.each(function (index, row) {
             const cda_descripcion = $(row).find('.descripcion-file').val() || null
             formatDetalleDescripciones.push(cda_descripcion)
         })
@@ -604,6 +607,8 @@ $(document).ready(() => {
             detalle_productos: formatDetalleProductos,
             detalle_descripciones: formatDetalleDescripciones
         }
+
+        console.log(data)
 
         const formData = new FormData()
         formData.append('cotizacion', JSON.stringify(data))
@@ -623,6 +628,5 @@ $(document).ready(() => {
             console.log(error)
             alert('Error al crear la cotización')
         }
-
     })
 })
