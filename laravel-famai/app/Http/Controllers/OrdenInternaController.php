@@ -470,7 +470,7 @@ class OrdenInternaController extends Controller
                 $clienteSecondary = DB::connection('sqlsrv_andromeda')
                     ->table('SAP_Cliente')
                     ->select('CardCode', 'CardName')
-                    ->where('CardCode', $request->input('cli_id'))
+                    ->where(DB::raw('CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'), $request->input('cli_id'))
                     ->first();
 
                 if ($clienteSecondary) {
@@ -534,7 +534,9 @@ class OrdenInternaController extends Controller
                     ->table('OT_OrdenTrabajo as T1')
                     ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
                     ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', 'T1.IdTipoEstado')
-                    ->leftJoin('SAP_Cliente as T2', 'T2.CardCode', 'T1.CardCode')
+                    ->leftJoin('SAP_Cliente as T2', function ($join) {
+                        $join->on(DB::raw('T2.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'), '=', DB::raw('T1.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'));
+                    })
                     ->leftJoin('OT_TipoServicio as T3', 'T3.IdTipoServicio', 'T1.IdTipoServicio')
                     ->select(
                         'T1.NumOTSAP as odt_numero',
@@ -547,7 +549,7 @@ class OrdenInternaController extends Controller
                         'T1.FecEntregaEstimada as odt_fechaentregaestimada',
                         'T3.DesTipoServicio as odt_trabajo'
                     )
-                    ->where('T1.NumOTSAP', $request->input('odt_numero'))
+                    ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $request->input('odt_numero'))
                     ->first();
 
                 if ($otSecondary) {
