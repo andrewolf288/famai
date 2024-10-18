@@ -84,6 +84,9 @@ class ReporteController extends Controller
 				$varFecCreacion = isset($dato['oic_feccreacion']) ? (new DateTime($dato['oic_feccreacion']))->format('Y-m-d H:i') : $this->varTab;
 				$varUsuModificacion = isset($dato['oic_usumodificacion']) ? $dato['oic_usumodificacion'] : $this->varTab;
 				$varFecModificacion = isset($dato['oic_fecmodificacion']) ? (new DateTime($dato['oic_fecmodificacion']))->format('Y-m-d H:i') : $this->varTab;
+				// Fechas adicionales
+				$varFechaAprobacion = isset($dato['oic_fechaaprobacion']) ? (new DateTime($dato['oic_fechaaprobacion']))->format('Y-m-d') : $this->varTab;
+				$varFechaEntregaEstimada = isset($dato['oic_fechaentregaestimada']) ? (new DateTime($dato['oic_fechaentregaestimada']))->format('Y-m-d') : $this->varTab;
 			}
 			//Obtenemos el registro de las partes
 			$varPartes = $reporte->metobtenerPartes($varOIC);
@@ -387,6 +390,8 @@ class ReporteController extends Controller
 				$varData = str_replace("{varTraNombreOrigen}", $varTraNombreOrigen, $varData);
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
 				$varData = str_replace("{varTraNombreAlmacen}", $varTraNombreAlmacen, $varData);
+				$varData = str_replace("{varFechaAprobacion}", $varFechaAprobacion, $varData);
+				$varData = str_replace("{varFechaEntregaEstimada}", $varFechaEntregaEstimada, $varData);
 				$varData .= $htmlFilasTotal . $finalHtmlString;
 				$varData = str_replace($this->varProcCampos, $this->varTab, $varData);
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);
@@ -465,6 +470,9 @@ class ReporteController extends Controller
 			$varTraNombreOrigen = isset($result['tra_nombreorigen']) ? $result['tra_nombreorigen'] : $this->varTab;
 			$varTraNombreMaestro = isset($result['tra_nombremaestro']) ? $result['tra_nombremaestro'] : $this->varTab;
 			$varTraNombreAlmacen = isset($result['tra_nombrealmacen']) ? $result['tra_nombrealmacen'] : $this->varTab;
+			// Fechas adicionales
+			$varFechaAprobacion = isset($dato['oic_fechaaprobacion']) ? (new DateTime($dato['oic_fechaaprobacion']))->format('Y-m-d') : $this->varTab;
+			$varFechaEntregaEstimada = isset($dato['oic_fechaentregaestimada']) ? (new DateTime($dato['oic_fechaentregaestimada']))->format('Y-m-d') : $this->varTab;
 			//Llenamos las variables de seguimiento
 			$varUsuCreacion = 'No Aplica';
 			$varFecCreacion = 'No Aplica';
@@ -772,6 +780,8 @@ class ReporteController extends Controller
 				$varData = str_replace("{varTraNombreOrigen}", $varTraNombreOrigen, $varData);
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
 				$varData = str_replace("{varTraNombreAlmacen}", $varTraNombreAlmacen, $varData);
+				$varData = str_replace("{varFechaAprobacion}", $varFechaAprobacion, $varData);
+				$varData = str_replace("{varFechaEntregaEstimada}", $varFechaEntregaEstimada, $varData);
 				$varData .= $htmlFilasTotal . $finalHtmlString;
 				$varData = str_replace($this->varProcCampos, $this->varTab, $varData);
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);

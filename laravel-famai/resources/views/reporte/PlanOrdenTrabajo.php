@@ -152,18 +152,18 @@
       <td class="lefty-align" width="20%"><strong>CLIENTE:</strong></td>
       <td class="lefty-align" width="50%">{varClientenombre}</td>
       <td class="lefty-align" width="20%"><strong>FECHA DE APROBACIÓN:</strong></td>
-      <td class="lefty-align" width="10%"></td>
+      <td class="lefty-align" width="10%">{varFechaAprobacion}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>EQUIPO:</strong></td>
       <td class="lefty-align" width="50%">{varEquipoDescripcion}</td>
       <td class="lefty-align" width="20%"><strong>FECHA DE ENTREGA ESTIMADA:</strong></td>
-      <td class="lefty-align" width="10%"></td>
+      <td class="lefty-align" width="10%">{varFechaEntregaEstimada}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>FECHA DE EVALUACIÓN:</strong></td>
       <td class="lefty-align" width="50%">{varFecha}</td>
-      <td class="lefty-align" width="20%"><strong>FECHA DE :</strong></td>
+      <td class="lefty-align" width="20%"></td>
       <td class="lefty-align" width="10%"></td>
     </tr>
     <tr>

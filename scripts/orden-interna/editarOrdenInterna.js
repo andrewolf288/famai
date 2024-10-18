@@ -1045,11 +1045,13 @@ $(document).ready(async function () {
             const idCantidadProceso = `#cantidad-procesos-${currentDetalleParte}`
             $(idCantidadProceso).text(totalProcesos)
 
+            const findParte = buscarDetalleParte(currentDetalleParte)
+            cargarProcesosDetalle(findParte.opd_id)
             // borramos los datos temporales
-            $('#tbl-orden-interna-procesos tbody .row-editable').remove()
+            // $('#tbl-orden-interna-procesos tbody .row-editable').remove()
 
             // cerramos el modal
-            $('#procesosModal').modal('hide')
+            // $('#procesosModal').modal('hide')
             toastr.remove()
             return Promise.resolve()
         } catch (error) {
@@ -1132,11 +1134,13 @@ $(document).ready(async function () {
             $(idCantidadAdicionales).text(totalAdicionales)
             $(idCantidadClientes).text(totalClientes)
 
-            // borramos los datos temporales
-            $('#tbl-orden-interna-productos tbody .row-editable').remove()
+            const findParte = buscarDetalleParte(currentDetalleParte)
+            cargarProductosDetalle(findParte.opd_id)
 
+            // borramos los datos temporales
+            // $('#tbl-orden-interna-productos tbody .row-editable').remove()
             // cerramos el modal
-            $('#productosModal').modal('hide')
+            // $('#productosModal').modal('hide')
             toastr.remove()
             return Promise.resolve()
         } catch (error) {
