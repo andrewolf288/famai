@@ -31,11 +31,11 @@ class OrdenTrabajoController extends Controller
 
         $queryBuilder = DB::connection('sqlsrv_andromeda')
             ->table('OT_OrdenTrabajo as T1')
-            ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
-            ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', 'T1.IdTipoEstado')
+            ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', '=', 'T1.IdEquipo')
+            ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', '=', 'T1.IdTipoEstado')
             ->leftJoin('SAP_Cliente as T2', function ($join) {
                 $join->on('T2.CardCode', '=', 'T1.CardCode')
-                     ->collate('SQL_Latin1_General_CP1_CI_AS');
+                    ->collate('SQL_Latin1_General_CP1_CI_AS'); // Ajusta la intercalación aquí si es necesario
             })
             ->select(
                 'T1.NumOTSAP as odt_numero',
@@ -48,6 +48,7 @@ class OrdenTrabajoController extends Controller
                 'T1.FecEntregaEstimada as odt_fechaentregaestimada'
             )
             ->where('T1.NumOTSAP', $numero)
+            ->collate('SQL_Latin1_General_CP1_CI_AS') // Ajusta la intercalación en el WHERE
             ->first();
 
         if (!$queryBuilder) {
