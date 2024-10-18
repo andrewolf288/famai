@@ -4,6 +4,7 @@ $(document).ready(function () {
     const tiempoAutoguardado = 5 * 60 * 1000
     let oic_fechaaprobacion = ""
     let oic_fechaentregaestimada = ""
+    let isRequestInProgress = false;
 
 
     window.onbeforeunload = function (e) {
@@ -1007,6 +1008,7 @@ $(document).ready(function () {
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
+        isRequestInProgress = true
         // deshabilitamos el evento de recarga
         window.onbeforeunload = null;
         let handleError = ''
@@ -1053,6 +1055,7 @@ $(document).ready(function () {
         }
 
         if (handleError.length !== 0) {
+            isRequestInProgress = false
             alert(handleError)
             return
         }
@@ -1125,18 +1128,22 @@ $(document).ready(function () {
                         alert('Hubo un error en la creacion de orden interna')
                     }
                 } finally {
+                    isRequestInProgress = false
                     hideLoaderModal()
                 }
             } else {
+                isRequestInProgress = false
                 alert(validacionDetalleMateriales)
             }
         } else {
+            isRequestInProgress = false
             alert('- Al menos se debe agregar un proceso o un material')
         }
     })
 
     // funcion de creacion automatica
     async function crearAutomatica() {
+        if (isRequestInProgress) return Promise.reject("Se esta ejecutando una consulta de creación en estos momentos");
         // iniciar un loader toast
         toastr.options = {
             "closeButton": false,
