@@ -33,7 +33,10 @@ class OrdenTrabajoController extends Controller
             ->table('OT_OrdenTrabajo as T1')
             ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
             ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', 'T1.IdTipoEstado')
-            ->leftJoin('SAP_Cliente as T2', 'T2.CardCode', 'T1.CardCode')
+            ->leftJoin('SAP_Cliente as T2', function ($join) {
+                $join->on('T2.CardCode', '=', 'T1.CardCode')
+                     ->collate('SQL_Latin1_General_CP1_CI_AS');
+            })
             ->select(
                 'T1.NumOTSAP as odt_numero',
                 'T4.DesTipoEstado as odt_estado',
