@@ -1,7 +1,7 @@
 
 $(document).ready(function () {
     let abortController
-    const tiempoAutoguardado = 10000
+    const tiempoAutoguardado = 5 * 60 * 1000
     let oic_fechaaprobacion = ""
     let oic_fechaentregaestimada = ""
 
