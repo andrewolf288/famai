@@ -1,7 +1,7 @@
 
 $(document).ready(function () {
     let abortController
-    const tiempoAutoguardado = 5 * 60 * 1000
+    const tiempoAutoguardado = 10000
     let oic_fechaaprobacion = ""
     let oic_fechaentregaestimada = ""
 
@@ -12,11 +12,18 @@ $(document).ready(function () {
     }
 
     function intentarEjecutarFuncion() {
+        // bloqueamos los botones
+        $('#btn-guardar-orden-interna').prop('disabled', true);
+        $('#btn-cancelar-orden-interna').prop('disabled', true);
         crearAutomatica()
             .then(() => {
+                // desbloqueamos el boton de creacion
                 console.log("Ejecución exitosa, no es necesario volver a intentarlo.");
             })
             .catch((error) => {
+                // desbloqueamos los botones
+                $('#btn-guardar-orden-interna').prop('disabled', false);
+                $('#btn-cancelar-orden-interna').prop('disabled', false);
                 toastr.options = {
                     "closeButton": false,
                     "debug": false,
