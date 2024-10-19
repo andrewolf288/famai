@@ -33,6 +33,7 @@ class OrdenTrabajoController extends Controller
             ->table('OT_OrdenTrabajo as T1')
             ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', '=', 'T1.IdEquipo')
             ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', '=', 'T1.IdTipoEstado')
+            ->leftJoin('OT_Componente as T9', 'T9.IdComponente', '=', 'T1.IdComponente')
             ->leftJoin('SAP_Cliente as T2', function ($join) {
                 $join->on(DB::raw('T2.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'), '=', DB::raw('T1.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'));
             })
@@ -44,7 +45,8 @@ class OrdenTrabajoController extends Controller
                 'T8.NomEquipo as odt_equipo',
                 'T1.FecIngreso as odt_fecha',
                 'T1.FecAprobacion as odt_fechaaprobacion',
-                'T1.FecEntregaEstimada as odt_fechaentregaestimada'
+                'T1.FecEntregaEstimada as odt_fechaentregaestimada',
+                'T9.NomComponente as odt_componente'
             )
             ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
             ->first();

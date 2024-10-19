@@ -120,6 +120,7 @@ $(document).ready(function () {
             $('#oiInput').val(data.odt_numero)
             $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
+            $('#componenteInput').val(data.odt_componente)
             oic_fechaaprobacion = data.odt_fechaaprobacion
             oic_fechaentregaestimada = data.odt_fechaentregaestimada
         } catch (error) {
@@ -1016,6 +1017,7 @@ $(document).ready(function () {
         const $otInput = $('#otInput').val().trim()
         const $oiInput = $('#oiInput').val().trim()
         const $oiValorEquipo = $('#equipoInput').val().trim()
+        const $oiValorComponente = $('#componenteInput').val().trim();
         const $oiCodigoArea = $('#areaSelect').val()
         const $oiFecha = $('#fechaPicker').val()
         const $oiEncargadoOrigen = $('#responsableOrigen').val()
@@ -1070,6 +1072,7 @@ $(document).ready(function () {
             tra_idmaestro: $oiEncargadoMaestro || null,
             tra_idalmacen: $oiEncargadoAlmacen || null,
             oic_equipo_descripcion: $oiValorEquipo,
+            oic_componente: $oiValorComponente,
             oic_fechaaprobacion: oic_fechaaprobacion || null,
             oic_fechaentregaestimada: oic_fechaentregaestimada || null,
             detalle_partes: ordenInterna.detalle_partes,
@@ -1171,6 +1174,7 @@ $(document).ready(function () {
         const $otInput = $('#otInput').val().trim();
         const $oiInput = $('#oiInput').val().trim();
         const $oiValorEquipo = $('#equipoInput').val().trim();
+        const $oiValorComponente = $('#componenteInput').val().trim();
         const $oiCodigoArea = $('#areaSelect').val();
         const $oiFecha = $('#fechaPicker').val();
         const $oiEncargadoOrigen = $('#responsableOrigen').val();
@@ -1224,6 +1228,7 @@ $(document).ready(function () {
             tra_idmaestro: $oiEncargadoMaestro || null,
             tra_idalmacen: $oiEncargadoAlmacen || null,
             oic_equipo_descripcion: $oiValorEquipo,
+            oic_componente: $oiValorComponente,
             oic_fechaaprobacion: oic_fechaaprobacion || null,
             oic_fechaentregaestimada: oic_fechaentregaestimada || null,
             detalle_partes: ordenInterna.detalle_partes,
@@ -1274,6 +1279,7 @@ $(document).ready(function () {
         const $otInput = $('#otInput').val().trim()
         const $oiInput = $('#oiInput').val().trim()
         const $oiValorEquipo = $('#equipoInput').val().trim()
+        const $oiValorComponente = $('#componenteInput').val().trim()
         const $oiCodigoArea = $('#areaSelect option:selected').text()
         const $oiFecha = $('#fechaPicker').val()
         const $oiEncargadoOrigen = $('#responsableOrigen option:selected').text()
@@ -1290,8 +1296,11 @@ $(document).ready(function () {
             tra_idmaestro: $oiEncargadoMaestro,
             tra_idalmacen: $oiEncargadoAlmacen,
             oic_equipo_descripcion: $oiValorEquipo,
+            oic_componente: $oiValorComponente,
             detalle_partes: ordenInterna.detalle_partes,
         }
+
+        console.log(formatData)
 
         // // formateamos la data de numero de orden
         formatData.detalle_partes.forEach(element => {
@@ -1302,7 +1311,6 @@ $(document).ready(function () {
 
         showLoaderModal()
         try {
-            console.log(formatData)
             const response = await client.post(`/previsualizarReporteOrdenTrabajo`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'

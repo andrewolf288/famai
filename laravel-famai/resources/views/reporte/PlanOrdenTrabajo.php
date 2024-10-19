@@ -5,6 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <style>
+
   .maintable {
     width: 100%;
     font-family: serif;
@@ -161,6 +162,12 @@
       <td class="lefty-align" width="10%">{varFechaEntregaEstimada}</td>
     </tr>
     <tr>
+      <td class="lefty-align" width="20%"><strong>COMPONENTE</strong></td>
+      <td class="lefty-align" width="50%">{varComponente}</td>
+      <td class="lefty-align" width="20%"></td>
+      <td class="lefty-align" width="10%"></td>
+    </tr>
+    <tr>
       <td class="lefty-align" width="20%"><strong>FECHA DE EVALUACIÓN:</strong></td>
       <td class="lefty-align" width="50%">{varFecha}</td>
       <td class="lefty-align" width="20%"></td>
@@ -169,12 +176,6 @@
     <tr>
       <td class="lefty-align" width="20%"><strong>OT:</strong></td>
       <td class="lefty-align" width="50%">{varOrdenTrabajo}</td>
-      <td class="lefty-align" width="20%"></td>
-      <td class="lefty-align" width="10%"></td>
-    </tr>
-    <tr>
-      <td class="lefty-align" width="20%"><strong>OI:</strong></td>
-      <td class="lefty-align" width="50%">{varOrdenInterna}</td>
       <td class="lefty-align" width="20%"></td>
       <td class="lefty-align" width="10%"></td>
     </tr>
@@ -204,7 +205,7 @@
       <td width="4%" class="sub-header">COD.</td>
       <td width="15%" class="sub-header">DESCRIPCIÓN</td>
       <td width="20%" class="sub-header">OBSERVACIONES</td>
-      <td width="4%" class="sub-header">ITEM</td>
+      <td width="8%" class="sub-header">COD.</td>
       <td width="25%" class="sub-header">DESCRIPCION</td>
       <td width="5%" class="sub-header">CANT.</td>
       <td class="sub-header">OBSERVACION</td>

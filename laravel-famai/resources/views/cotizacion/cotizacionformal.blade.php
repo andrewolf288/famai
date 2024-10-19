@@ -234,7 +234,7 @@
                 </div>
                 <div class="info-row">
                     <span class="label">ELABORADO POR:</span>
-                    <span class="value"></span>
+                    <span class="value">{{$solicitante['tra_nombre']}}</span>
                 </div>
             </td>
             <td>
@@ -244,7 +244,7 @@
                 </div>
                 <div class="info-row">
                     <span class="label">FORMA DE PAGO</span>
-                    <span class="value"></span>
+                    <span class="value">{{$coc_formapago}}</span>
                 </div>
             </td>
             <td>

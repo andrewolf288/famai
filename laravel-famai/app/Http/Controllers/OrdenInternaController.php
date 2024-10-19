@@ -590,6 +590,7 @@ class OrdenInternaController extends Controller
                 'cli_id' => $cli_id,
                 'are_codigo' => $request->input('are_codigo'),
                 'oic_equipo_descripcion' => $request->input('oic_equipo_descripcion'),
+                'oic_componente' => $request->input('oic_componente'),
                 'tra_idorigen' => $request->input('tra_idorigen'),
                 'tra_idmaestro' => $request->input('tra_idmaestro'),
                 'tra_idalmacen' => $request->input('tra_idalmacen'),

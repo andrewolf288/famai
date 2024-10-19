@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CotizacionController extends Controller
 {
@@ -38,7 +39,6 @@ class CotizacionController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'No se encontro la cotización'], 404);
         }
-        
     }
 
     public function store(Request $request)
@@ -72,7 +72,7 @@ class CotizacionController extends Controller
             ])->validate();
 
             $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
-            if(!$lastCotizacion){
+            if (!$lastCotizacion) {
                 $numero = 1;
             } else {
                 $numero = intval($lastCotizacion->coc_numero) + 1;
@@ -115,8 +115,15 @@ class CotizacionController extends Controller
                 $files = $request->file('files');
                 $countArray = 0;
                 foreach ($files as $file) {
-                    $path = $file->store('cotizacion-adjuntos', 'public');
-                    $cotizacionDetalleArchivo = CotizacionDetalleArchivos::create([
+                    // obtenemos la extension
+                    $extension = $file->getClientOriginalExtension();
+                    // Generamos un nombre único para el archivo, conservando la extensión original
+                    $fileName = uniqid() . '.' . $extension;
+
+                    // Guardamos el archivo con la extensión correcta
+                    $path = $file->storeAs('cotizacion-adjuntos', $fileName, 'public');
+
+                    CotizacionDetalleArchivos::create([
                         'coc_id' => $cotizacion->coc_id,
                         'cda_descripcion' => $detalle_descripcion[$countArray],
                         'cda_url' => $path,
@@ -147,7 +154,7 @@ class CotizacionController extends Controller
     {
         try {
             $coc_id = $request->input('coc_id');
-            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion.producto.unidad'])->findOrFail($coc_id);
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante','detalleCotizacion.producto.unidad'])->findOrFail($coc_id);
             $data = array_merge(
                 $cotizacion->toArray(),
                 [
@@ -158,6 +165,39 @@ class CotizacionController extends Controller
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Buscar la cotización junto con sus detalles y archivos
+            $cotizacion = Cotizacion::with(['detalleCotizacion', 'detalleCotizacionArchivos'])->findOrFail($id);
+
+            // Eliminamos los archivos relacionados a la cotización
+            foreach ($cotizacion->detalleCotizacionArchivos as $archivo) {
+                $urlArchivo = $archivo->cda_url;
+                // Eliminar archivo físico del disco
+                Storage::disk('public')->delete($urlArchivo);
+                // Eliminar el registro de detalleCotizacionArchivos
+                $archivo->delete();
+            }
+
+            // Eliminamos los detalles de la cotización
+            foreach ($cotizacion->detalleCotizacion as $detalle) {
+                $detalle->delete();
+            }
+
+            // Finalmente, eliminamos la cotización principal
+            $cotizacion->delete();
+
+            DB::commit();
+            return response()->json(['success' => 'Cotización y sus detalles eliminados correctamente.'], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Error al eliminar la cotización: ' . $e->getMessage()], 500);
         }
     }
 }

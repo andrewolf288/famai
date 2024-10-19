@@ -65,6 +65,8 @@ $(document).ready(async function () {
             $('#areaSelect').val(data.area.are_descripcion || 'No aplica')
             // reemplazamos el valor en equipo de trabajo
             $('#equipoInput').val(data.oic_equipo_descripcion || 'No aplica')
+            // reemplazamos el valor de componente
+            $('#componenteInput').val(data.oic_componente_descripcion || 'No aplica')
             // reemplazamos el valor de encargado origen
             $('#responsableOrigen').val(data.trabajador_origen?.tra_nombre ?? 'No aplica')
             // reemplazamos el valor de encargado maestro

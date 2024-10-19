@@ -40,6 +40,11 @@ class Cotizacion extends Model
         return $this->belongsTo(Moneda::class, 'mon_codigo', 'mon_codigo');
     }
 
+    public function solicitante()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_solicitante', 'tra_id');
+    }
+
     public function detalleCotizacion()
     {
         return $this->hasMany(CotizacionDetalle::class, 'coc_id', 'coc_id');

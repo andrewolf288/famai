@@ -17,6 +17,7 @@ class OrdenInterna extends Model
         'cli_id',
         'are_codigo',
         'oic_equipo_descripcion',
+        'oic_componente',
         'oic_estado',
         'tra_idorigen',
         'tra_idmaestro',

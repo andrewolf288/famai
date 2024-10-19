@@ -13,6 +13,7 @@ use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\CotizacionDetalleController;
 use App\Http\Controllers\EntidadBancariaController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
@@ -287,6 +288,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
     Route::get('cotizaciones/exportarPDF', [CotizacionController::class, 'exportarPDF']);
     Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
+    Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
+    Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
 });
 
 // rutas de ordenes de compra

@@ -36,10 +36,15 @@ $(document).ready(() => {
                     <td>${cotizacion.proveedor?.prv_nombre ?? 'No aplica'}</td>
                     <td class="text-left">${cotizacion.proveedor?.prv_nrodocumento ?? 'No aplica'}</td>
                     <td class="text-center">${cotizacion.coc_total}</td>
-                    <td>
-                        <button class="btn btn-primary" data-cotizacion="${cotizacion.coc_id}">Ver detalle</button>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary btn-cotizacion-detalle" data-cotizacion="${cotizacion.coc_id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                            </svg>
+                        </button>
                     </td>
-                    <td>${cotizacion.coc_estado == '1' ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
+                    <td>${cotizacion.coc_estado == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-cotizacion-editar me-2" data-cotizacion="${cotizacion.coc_id}">
@@ -103,10 +108,53 @@ $(document).ready(() => {
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
     $('#data-container').on('click', '.btn-cotizacion-editar', function () {
         const id = $(this).data('cotizacion')
-        // localStorage.setItem('cotizacionId', id)
         window.location.href = `cotizacion/editar/${id}`
     })
 
+    // FUNCION PARA VER DETALLE DE COTIZACION
+    $('#data-container').on('click', '.btn-cotizacion-detalle', async function () {
+        const id = $(this).data('cotizacion')
+        try {
+            const {data} = await client.get(`/cotizacion-detalle/${id}`)
+            // llenamos la tabla con los datos
+            $('#tbl-cotizacion-detalle tbody').empty()
+            data.forEach(detalle => {
+                $('#tbl-cotizacion-detalle tbody').append(`
+                    <tr>
+                        <td>${detalle.cod_orden}</td>
+                        <td>${detalle.cod_descripcion}</td>
+                        <td>${detalle.cod_cantidad}</td>
+                        <td>${detalle.cod_preciounitario}</td>
+                        <td>${detalle.cod_total}</td>
+                    </tr>
+                `)
+            })
+
+            // abrimos el modal
+            const modalDetalleCotizacion = new bootstrap.Modal(document.getElementById('detalleCotizacionModal'))
+            modalDetalleCotizacion.show()
+        } catch(error){
+            alert('Error al obtener el detalle de la cotización')
+        }
+    })
+
+    // FUNCION PARA ELIMINAR COTIZACION
+    $('#data-container').on('click', '.btn-cotizacion-eliminar', async function () {
+        const id = $(this).data('cotizacion')
+        if (!confirm('¿Desea eliminar esta cotización?')) {
+            return
+        }
+        try {
+            await client.delete(`/cotizacion/${id}`)
+            const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
+            initPagination(URL, initDataTable, dataTableOptions)
+        } catch (error) {
+            console.log(error)
+            alert('Error al eliminar la cotización')
+        }
+    })
+
+    // FUNCION PARA GENERAR PDF
     $('#data-container').on('click', '.btn-cotizacion-pdf', async function () {
         const id = $(this).data('cotizacion')
         console.log("Generar pdf de ID COTIZACION: ", id)

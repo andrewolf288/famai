@@ -71,9 +71,9 @@ class ReporteController extends Controller
 				//Llenamos las variables para la cabecera (cliente, descripcion del equipo y OT)
 				$varClienteNombre = isset($dato['nombre_del_cliente']) ? $dato['nombre_del_cliente'] : $this->varTab;
 				$varDescripcionEquipo = isset($dato['descripcion_equipo']) ? $dato['descripcion_equipo'] : $this->varTab;
+				$varComponente = isset($dato['oic_componente']) ? $dato['oic_componente'] : $this->varTab;
 				$varFecha = isset($dato['oic_fecha']) ? $dato['oic_fecha'] : $this->varTab;
 				$varOT = isset($dato['odt_numero']) ? $dato['odt_numero'] : $this->varTab;
-				$varOI = isset($dato['oic_numero']) ? $dato['oic_numero'] : $this->varTab;
 				$varArea = isset($dato['are_descripcion']) ? strtoupper($dato['are_descripcion']) : $this->varTab;
 				//Llenamos las variables para la cabecera (Los 3 Trabajadores responsables)
 				$varTraNombreOrigen = isset($dato['tra_nombreorigen']) ? $dato['tra_nombreorigen'] : $this->varTab;
@@ -126,7 +126,7 @@ class ReporteController extends Controller
 						$varDescripcionProceso = isset($varResultProcesos[0]['odp_descripcion']) ? $varResultProcesos[0]['odp_descripcion'] : $this->varTab;
 						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[0]['odp_observacion']) : $this->varTab;
 						//materiales
-						$varItem = isset($varResultMateriales[0]['odm_item']) ? $varResultMateriales[0]['odm_item'] : $this->varTab;
+						$varItem = isset($varResultMateriales[0]['pro_codigo']) ? $varResultMateriales[0]['pro_codigo'] : $this->varTab;
 						$varProDescripcion = isset($varResultMateriales[0]['odm_descripcion']) ? $varResultMateriales[0]['odm_descripcion'] : $this->varTab;
 						$varCantidad = isset($varResultMateriales[0]['odm_cantidad']) ? $varResultMateriales[0]['odm_cantidad'] : $this->varTab;
 						$varProObservaciones = isset($varResultMateriales[0]['odm_observacion']) ? $varResultMateriales[0]['odm_observacion'] : $this->varTab;
@@ -205,7 +205,7 @@ class ReporteController extends Controller
 							$varDescripcionProceso = isset($varResultProcesos[$i]['odp_descripcion']) ? $varResultProcesos[$i]['odp_descripcion'] : $this->varTab;
 							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[$i]['odp_observacion']) : $this->varTab;
 							//materiales
-							$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
+							$varItem = isset($varResultMateriales[$i]['pro_codigo']) ? $varResultMateriales[$i]['pro_codigo'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
 							$varCantidad = isset($varResultMateriales[$i]['odm_cantidad']) ? $varResultMateriales[$i]['odm_cantidad'] : $this->varTab;
 							$varProObservaciones = isset($varResultMateriales[$i]['odm_observacion']) ? $varResultMateriales[$i]['odm_observacion'] : $this->varTab;
@@ -342,7 +342,7 @@ class ReporteController extends Controller
 								continue;
 							}
 							//materiales
-							$varItem = isset($varResultMateriales[$i + $nuevoindice]['odm_item']) ? $varResultMateriales[$i + $nuevoindice]['odm_item'] : $this->varTab;
+							$varItem = isset($varResultMateriales[$i + $nuevoindice]['pro_codigo']) ? $varResultMateriales[$i + $nuevoindice]['pro_codigo'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i + $nuevoindice]['odm_descripcion']) ? $varResultMateriales[$i + $nuevoindice]['odm_descripcion'] : $this->varTab;
 							$varCantidad = isset($varResultMateriales[$i + $nuevoindice]['odm_cantidad']) ? $varResultMateriales[$i + $nuevoindice]['odm_cantidad'] : $this->varTab;
 							$varProObservaciones = isset($varResultMateriales[$i + $nuevoindice]['odm_observacion']) ? $varResultMateriales[$i + $nuevoindice]['odm_observacion'] : $this->varTab;
@@ -384,9 +384,9 @@ class ReporteController extends Controller
 				$varData = str_replace("{varClientenombre}", $varClienteNombre, $varData);
 				$varData = str_replace("{varEquipoDescripcion}", $varDescripcionEquipo, $varData);
 				$varData = str_replace("{varFecha}", $varFecha, $varData);
+				$varData = str_replace("{varComponente}", $varComponente, $varData);
 				$varData = str_replace("{varArea}", $varArea, $varData);
 				$varData = str_replace("{varOrdenTrabajo}", $varOT, $varData);
-				$varData = str_replace("{varOrdenInterna}", $varOI, $varData);
 				$varData = str_replace("{varTraNombreOrigen}", $varTraNombreOrigen, $varData);
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
 				$varData = str_replace("{varTraNombreAlmacen}", $varTraNombreAlmacen, $varData);
@@ -428,7 +428,6 @@ class ReporteController extends Controller
 
 	public function previsualizarReporteOrdenTrabajo(Request $request)
 	{
-		$userAuth = auth()->user();
 		try {
 			$this->initializePaths();
 			$this->fechaHoraActual = date('Y-m-d H:i:s');
@@ -450,6 +449,7 @@ class ReporteController extends Controller
 			$result = array(
 				'nombre_del_cliente' => $request->input('cli_id'),
 				'descripcion_equipo' => $request->input('oic_equipo_descripcion'),
+				'oic_componente' => $request->input('oic_componente'),
 				'oic_fecha' => $request->input('oic_fecha'),
 				'odt_numero' => $request->input('odt_numero'),
 				'oic_numero' => $request->input('oic_numero'),
@@ -462,9 +462,9 @@ class ReporteController extends Controller
 			//Llenamos las variables para la cabecera (cliente, descripcion del equipo y OT)
 			$varClienteNombre = isset($result['nombre_del_cliente']) ? $result['nombre_del_cliente'] : $this->varTab;
 			$varDescripcionEquipo = isset($result['descripcion_equipo']) ? $result['descripcion_equipo'] : $this->varTab;
+			$varComponente = isset($result['oic_componente']) ? $result['oic_componente'] : $this->varTab;
 			$varFecha = isset($result['oic_fecha']) ? $result['oic_fecha'] : $this->varTab;
 			$varOT = isset($result['odt_numero']) ? $result['odt_numero'] : $this->varTab;
-			$varOI = isset($result['oic_numero']) ? $result['oic_numero'] : $this->varTab;
 			$varArea = isset($result['are_descripcion']) ? strtoupper($result['are_descripcion']) : $this->varTab;
 			//Llenamos las variables para la cabecera (Los 3 Trabajadores responsables)
 			$varTraNombreOrigen = isset($result['tra_nombreorigen']) ? $result['tra_nombreorigen'] : $this->varTab;
@@ -516,7 +516,7 @@ class ReporteController extends Controller
 						$varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[0]['odp_observacion']) : $this->varTab;
 						// $varObservacionProceso = isset($varResultProcesos[0]['odp_observacion']) ? $varResultProcesos[0]['odp_observacion'] : $this->varTab;
 						//materiales
-						$varItem = isset($varResultMateriales[0]['odm_item']) ? $varResultMateriales[0]['odm_item'] : $this->varTab;
+						$varItem = isset($varResultMateriales[0]['pro_codigo']) ? $varResultMateriales[0]['pro_codigo'] : $this->varTab;
 						$varProDescripcion = isset($varResultMateriales[0]['odm_descripcion']) ? $varResultMateriales[0]['odm_descripcion'] : $this->varTab;
 						$varCantidad = isset($varResultMateriales[0]['odm_cantidad']) ? $varResultMateriales[0]['odm_cantidad'] : $this->varTab;
 						$varProObservaciones = isset($varResultMateriales[0]['odm_observacion']) ? $varResultMateriales[0]['odm_observacion'] : $this->varTab;
@@ -595,7 +595,7 @@ class ReporteController extends Controller
 							$varDescripcionProceso = isset($varResultProcesos[$i]['odp_descripcion']) ? $varResultProcesos[$i]['odp_descripcion'] : $this->varTab;
 							$varObservacionProceso = isset($varResultProcesos[$i]['odp_observacion']) ? str_replace("\n", "<br>", $varResultProcesos[$i]['odp_observacion']) : $this->varTab;
 							//materiales
-							$varItem = isset($varResultMateriales[$i]['odm_item']) ? $varResultMateriales[$i]['odm_item'] : $this->varTab;
+							$varItem = isset($varResultMateriales[$i]['pro_codigo']) ? $varResultMateriales[$i]['pro_codigo'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i]['odm_descripcion']) ? $varResultMateriales[$i]['odm_descripcion'] : $this->varTab;
 							$varCantidad = isset($varResultMateriales[$i]['odm_cantidad']) ? $varResultMateriales[$i]['odm_cantidad'] : $this->varTab;
 							$varProObservaciones = isset($varResultMateriales[$i]['odm_observacion']) ? $varResultMateriales[$i]['odm_observacion'] : $this->varTab;
@@ -732,7 +732,7 @@ class ReporteController extends Controller
 								continue;
 							}
 							//materiales
-							$varItem = isset($varResultMateriales[$i + $nuevoindice]['odm_item']) ? $varResultMateriales[$i + $nuevoindice]['odm_item'] : $this->varTab;
+							$varItem = isset($varResultMateriales[$i + $nuevoindice]['pro_codigo']) ? $varResultMateriales[$i + $nuevoindice]['pro_codigo'] : $this->varTab;
 							$varProDescripcion = isset($varResultMateriales[$i + $nuevoindice]['odm_descripcion']) ? $varResultMateriales[$i + $nuevoindice]['odm_descripcion'] : $this->varTab;
 							$varCantidad = isset($varResultMateriales[$i + $nuevoindice]['odm_cantidad']) ? $varResultMateriales[$i + $nuevoindice]['odm_cantidad'] : $this->varTab;
 							$varProObservaciones = isset($varResultMateriales[$i + $nuevoindice]['odm_observacion']) ? $varResultMateriales[$i + $nuevoindice]['odm_observacion'] : $this->varTab;
@@ -773,10 +773,10 @@ class ReporteController extends Controller
 				$varData = str_replace("{varLogo}", $this->varRutaLogo, $varData);
 				$varData = str_replace("{varClientenombre}", $varClienteNombre, $varData);
 				$varData = str_replace("{varEquipoDescripcion}", $varDescripcionEquipo, $varData);
+				$varData = str_replace("{varComponente}", $varComponente, $varData);
 				$varData = str_replace("{varFecha}", $varFecha, $varData);
 				$varData = str_replace("{varArea}", $varArea, $varData);
 				$varData = str_replace("{varOrdenTrabajo}", $varOT, $varData);
-				$varData = str_replace("{varOrdenInterna}", $varOI, $varData);
 				$varData = str_replace("{varTraNombreOrigen}", $varTraNombreOrigen, $varData);
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
 				$varData = str_replace("{varTraNombreAlmacen}", $varTraNombreAlmacen, $varData);
