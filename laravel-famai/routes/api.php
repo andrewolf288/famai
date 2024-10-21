@@ -315,8 +315,10 @@ Route::get('script-update', function () {
             ->select('T9.NomComponente as odt_componente')
             ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
             ->first();
-
-        $orden->oic_componente = $queryBuilder->odt_componente;
-        $orden->save();
+            
+        if ($queryBuilder) {
+            $orden->oic_componente = $queryBuilder->odt_componente;
+            $orden->save();
+        }
     }
 });
