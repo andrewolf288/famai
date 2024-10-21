@@ -13,6 +13,7 @@ use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\CotizacionDetalleArchivoController;
 use App\Http\Controllers\CotizacionDetalleController;
 use App\Http\Controllers\EntidadBancariaController;
 use App\Http\Controllers\ModuloController;
@@ -290,8 +291,20 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
     Route::get('cotizaciones/exportarPDF', [CotizacionController::class, 'exportarPDF']);
     Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
+    Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
     Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
+});
+
+// rutas de detalle de cotizacion
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::delete('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'destroy']);
+    Route::put('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'update']);
+});
+
+// rutas de detalle de archivo de cotizacion
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::delete('cotizacion-archivo/{id}', [CotizacionDetalleArchivoController::class, 'destroy']);
 });
 
 // rutas de ordenes de compra
@@ -304,21 +317,21 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 Route::get('script-update', function () {
 
-    $ordenes = OrdenInterna::all();
+    // $ordenes = OrdenInterna::all();
 
-    foreach ($ordenes as $orden) {
-        $numero = $orden->oic_numero;
+    // foreach ($ordenes as $orden) {
+    //     $numero = $orden->oic_numero;
 
-        $queryBuilder = DB::connection('sqlsrv_andromeda')
-            ->table('OT_OrdenTrabajo as T1')
-            ->leftJoin('OT_Componente as T9', 'T9.IdComponente', '=', 'T1.IdComponente')
-            ->select('T9.NomComponente as odt_componente')
-            ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
-            ->first();
-            
-        if ($queryBuilder) {
-            $orden->oic_componente = $queryBuilder->odt_componente;
-            $orden->save();
-        }
-    }
+    //     $queryBuilder = DB::connection('sqlsrv_andromeda')
+    //         ->table('OT_OrdenTrabajo as T1')
+    //         ->leftJoin('OT_Componente as T9', 'T9.IdComponente', '=', 'T1.IdComponente')
+    //         ->select('T9.NomComponente as odt_componente')
+    //         ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
+    //         ->first();
+
+    //     if ($queryBuilder) {
+    //         $orden->oic_componente = $queryBuilder->odt_componente;
+    //         $orden->save();
+    //     }
+    // }
 });

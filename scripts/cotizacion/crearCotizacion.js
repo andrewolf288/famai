@@ -629,4 +629,8 @@ $(document).ready(() => {
             alert('Error al crear la cotización')
         }
     })
+
+    $('btn-cancelar-cotizacion').on('click', function () {
+        window.location.href = 'cotizacion'
+    })
 })
