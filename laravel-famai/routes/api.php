@@ -31,9 +31,11 @@ use App\Http\Controllers\ProveedorCuentaBancoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -300,14 +302,21 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
 });
 
-Route::get('script-update', function (){
-    $registros = OrdenInternaMateriales::whereNotNull('pro_id')->get();
+Route::get('script-update', function () {
 
-    foreach ($registros as $registro) {
-        $producto = Producto::find($registro->pro_id);
-        if($producto){
-            $registro->odm_descripcion = $producto->pro_descripcion;
-            $registro->save();
-        }
+    $ordenes = OrdenInterna::all();
+
+    foreach ($ordenes as $orden) {
+        $numero = $orden->oic_numero;
+
+        $queryBuilder = DB::connection('sqlsrv_andromeda')
+            ->table('OT_OrdenTrabajo as T1')
+            ->leftJoin('OT_Componente as T9', 'T9.IdComponente', '=', 'T1.IdComponente')
+            ->select('T9.NomComponente as odt_componente')
+            ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
+            ->first();
+
+        $orden->oic_componente = $queryBuilder->odt_componente;
+        $orden->save();
     }
 });
