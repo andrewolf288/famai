@@ -28,6 +28,7 @@ class OrdenInternaMaterialesController extends Controller
 
         $query = OrdenInternaMateriales::with(
             [
+                'responsable',
                 'producto.unidad',
                 'producto.stock' => function ($q) use ($almID) {
                     if ($almID !== null) {

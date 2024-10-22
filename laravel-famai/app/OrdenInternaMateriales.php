@@ -13,6 +13,7 @@ class OrdenInternaMateriales extends Model
     protected $fillable = [
         'opd_id',
         'pro_id',
+        'tra_responsable',
         'odm_item',
         'odm_descripcion',
         'odm_cantidad',
@@ -44,5 +45,11 @@ class OrdenInternaMateriales extends Model
     public function parte()
     {
         return $this->belongsTo(OrdenInternaPartes::class, 'opd_id');
+    }
+
+    // resposnable
+    public function responsable()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_responsable', 'tra_id');
     }
 }

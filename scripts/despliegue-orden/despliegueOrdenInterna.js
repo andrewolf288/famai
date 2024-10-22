@@ -65,16 +65,16 @@ $(document).ready(() => {
                     <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                     <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
                     <td class="text-center">
-                        <button class="btn btn-primary">0.00</button>
+                        <button class="btn btn-primary btn-reservado">0.00</button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-primary">0.00</button>
+                        <button class="btn btn-primary btn-ordenado">0.00</button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-primary">0.00</button>
+                        <button class="btn btn-primary btn-atendido">0.00</button>
                     </td>
                     <td>
-                        <button class="btn btn-primary">Responsable</button>
+                        <button class="btn btn-primary btn-responsable">Responsable</button>
                     </td>
                 </tr>
             `
@@ -88,6 +88,22 @@ $(document).ready(() => {
             $('#data-container-body').append(rowItem)
         })
     }
+
+    // funciones de control
+    $("#data-container-body").on('click', '.btn-reservado', function () {
+        const loadModalReservado = new bootstrap.Modal(document.getElementById('reservacionModal'))
+        loadModalReservado.show()
+    })
+
+    $("#data-container-body").on('click', '.btn-ordenado', function () {
+        const loadModalOrdenado = new bootstrap.Modal(document.getElementById('ordenadoModal'))
+        loadModalOrdenado.show()
+    })
+
+    $("#data-container-body").on('click', '.btn-atendido', function () {
+        const loadModalAtendido = new bootstrap.Modal(document.getElementById('atendidoModal'))
+        loadModalAtendido.show()
+    })
 
     function seleccionarRowDetalle(material, isChecked) {
         if (isChecked) {

@@ -76,7 +76,7 @@
         <th class="text-center">Reservado</th>
         <th class="text-center">Ordenado</th>
         <th class="text-center">Atendido</th>
-        <th>Responasble</th>
+        <th>Responsable</th>
     </thead>
     <tbody id="data-container-body">
     </tbody>
@@ -162,3 +162,105 @@
         </div>
     </div>
 </div>
+
+<!-- DIALOG RESERVADO -->
+<div class="modal fade" id="reservacionModal" tabindex="-1" aria-labelledby="reservacionModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservacionModalLabel">Nota de transferencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Fecha transferencia</th>
+                                <th>Responsable</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>20/10/2024 14:45:23</td>
+                                <td>Andrew Jacobo Castillo</td>
+                                <td>30.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- DIALOG ORDENADO -->
+<div class="modal fade" id="ordenadoModal" tabindex="-1" aria-labelledby="ordenadoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ordenadoModalLabel">Nota de orden de compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Num. Ord. Compra</th>
+                                <th>Fecha Ord. Compra</th>
+                                <th>Cantidad</th>
+                                <th>Pre. Unitario</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0000001</td>
+                                <td>24/10/2024 17:45:23</td>
+                                <td>6.00</td>
+                                <td>45.50</td>
+                                <td>S/ 273.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- DIALOG ATENDIDO -->
+<div class="modal fade" id="atendidoModal" tabindex="-1" aria-labelledby="atendidoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="atendidoModalLabel">Nota de almacen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Fecha atención</th>
+                                <th>Responsable atención</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>20/10/2024 14:45:23</td>
+                                <td>Jose Ayala Pineda</td>
+                                <td>30.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- DIALOG RESPONSABLE -->
