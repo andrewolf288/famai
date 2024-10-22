@@ -104,6 +104,70 @@
         </footer>
     </div>
 
+    <!-- NOTIFICACIONES -->
+    <div class="modal fade" id="dialogNotificacionesModal" tabindex="-1" aria-labelledby="dialogNotificacionesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productosCrearModalLabel">Notificaciones</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Fecha Hora</th>
+                                <th>Area</th>
+                                <th>Usuario</th>
+                                <th>Proceso</th>
+                                <th>Descripcion</th>
+                                <th>Visto el</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>05/10/2024 08:15:12</td>
+                                <td>HIDRAULICA</td>
+                                <td>JGOMEZ</td>
+                                <td>Ordenes Internas</td>
+                                <td>OI Nro XXX - Estado Enviado</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2024 08:15:12</td>
+                                <td>HIDRAULICA</td>
+                                <td>JGOMEZ</td>
+                                <td>Ordenes Internas</td>
+                                <td>OI Nro XXX - Estado Enviado</td>
+                                <td>05/10/2024 09:15:45</td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2024 08:15:12</td>
+                                <td>HIDRAULICA</td>
+                                <td>JGOMEZ</td>
+                                <td>Ordenes Internas</td>
+                                <td>OI Nro XXX - Estado Enviado</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>05/10/2024 08:15:12</td>
+                                <td>HIDRAULICA</td>
+                                <td>JGOMEZ</td>
+                                <td>Ordenes Internas</td>
+                                <td>OI Nro XXX - Estado Enviado</td>
+                                <td>05/10/2024 10:15:45</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- SECCION DE SCRIPTS -->
     <!-- JQUERY -->
     <script src="assets/js/bootstrap.bundle.min.js"></script>
@@ -144,6 +208,12 @@
 <script>
     let version = '241018.10';
     document.getElementById('app-version').textContent = version;
+
+    $("#notificaciones").on("click", function () {
+        // bootstrap modal
+        const dialogNotificaciones = new bootstrap.Modal(document.getElementById('dialogNotificacionesModal'));
+        dialogNotificaciones.show();
+    })
 </script>
 
 </html>

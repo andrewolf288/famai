@@ -167,7 +167,8 @@
                                 20134690080</td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">COTIZACIÓN
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">SOLICITUD DE
+                                COTIZACIÓN
                             </td>
                         </tr>
                         <tr style="border: 1px solid black;">
@@ -179,7 +180,7 @@
             </tr>
         </table>
         <hr style="margin-top: 5px">
-        <p style="font-size: 12px">Lima, 24 de mayo del 2024</p>
+        <p style="font-size: 12px">Arequipa, 24 de mayo del 2024</p>
     </header>
     <div class="section-title">DATOS DEL PROVEEDOR</div>
     {{-- Table de datos del proveedor --}}
@@ -225,7 +226,9 @@
         </tr>
     </table>
     {{-- table de cabecera de factura --}}
-    <table class="table-factura-cabecera">
+    {{-- <table class="table-factura-cabecera">
+        <tr>
+            <td>-cabecera">
         <tr>
             <td>
                 <div class="info-row">
@@ -259,6 +262,37 @@
             </td>
         </tr>
     </table>
+                <div class="info-row">
+                    <span class="label">FECH. ENTREGA</span>
+                    <span class="value">24/05/2024</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">ELABORADO POR:</span>
+                    <span class="value">PAZ REVOREDO, OMAR</span>
+                </div>
+            </td>
+            <td>
+                <div class="info-row">
+                    <span class="label">Moneda</span>
+                    <span class="value">Soles</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">FORMA DE PAGO</span>
+                    <span class="value">Factura 30 días</span>
+                </div>
+            </td>
+            <td>
+                <div class="info-row">
+                    <span class="label">REFERENCIA</span>
+                    <span class="value">01-140</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">ACTIVO:</span>
+                    <span class="value">NO</span>
+                </div>
+            </td>
+        </tr>
+    </table> --}}
     {{-- Detalle de factura --}}
     <table class="table-detalle-factura">
         <thead>
@@ -283,7 +317,7 @@
                 </tr>
             @endforeach
 
-            @for ($i = count($detalleMateriales); $i < 22; $i++)
+            @for ($i = count($detalleMateriales); $i < 32; $i++)
                 <tr>
                     <td class="col-item">&nbsp;</td>
                     <td class="col-descripcion">&nbsp;</td>
@@ -295,7 +329,16 @@
             @endfor
         </tbody>
     </table>
-    <table style="width: 100%;height: 210px;border-collapse: collapse;">
+    <table style="width: 100%;height: 50px;border-collapse: collapse;">
+        <tr>
+            <td style="width: 77.5%;"></td>
+            <td style="width: 22.5%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
+                <span style="float: left;">TOTAL S/</span>
+                <span style="float: right;"></span>
+            </td>
+        </tr>
+    </table>
+    {{-- <table style="width: 100%;height: 210px;border-collapse: collapse;">
         <tr>
             <td style="width: 77.5%;">
                 <table style="border-collapse: collapse">
@@ -374,8 +417,8 @@
                 </table>
             </td>
         </tr>
-    </table>
-    <hr style="margin-top: 5px">
+    </table> --}}
+    <hr style="margin-top: 2px">
     <table style="width: 100%; border-collapse: collapse">
         <tr>
             <td style="width: 45%; color:#0000FF;font-size: 10px;text-align:center;">

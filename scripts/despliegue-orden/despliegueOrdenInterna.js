@@ -75,7 +75,7 @@ $(document).ready(() => {
                         <button class="btn btn-primary btn-atendido">0.00</button>
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">Responsable</button>
+                        <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
                     </td>
                 </tr>
             `
@@ -403,18 +403,19 @@ $(document).ready(() => {
                 responseType: 'blob'
             })
 
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `cotizacion.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            showModalPreview(pdfUrl)
         } catch (error) {
             console.log(error)
         }
     })
+
+    function showModalPreview(pdfUrl) {
+        document.getElementById('pdf-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
 
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-text', async (event) => {
         const row = $(event.currentTarget).closest('tr')
@@ -446,16 +447,25 @@ $(document).ready(() => {
                 responseType: 'blob'
             })
 
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `cotizacion.txt`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            // const url = window.URL.createObjectURL(new Blob([response.data]))
+            // const a = document.createElement('a')
+            // a.href = url
+            // a.download = `cotizacion.txt`
+            // document.body.appendChild(a)
+            // a.click()
+            // window.URL.revokeObjectURL(url)
+            // document.body.removeChild(a)
+            const textBlob = new Blob([response.data], { type: 'text/plain' });
+            const textUrl = URL.createObjectURL(textBlob);
+            showModalPreviewText(textUrl)
         } catch (error) {
             console.log(error)
         }
     })
+
+    function showModalPreviewText(pdfUrl) {
+        document.getElementById('txt-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewTXTModal"));
+        modal.show();
+    }
 })
