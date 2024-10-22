@@ -19,6 +19,7 @@ use App\Http\Controllers\EntidadBancariaController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\OrdenCompraController;
+use App\Http\Controllers\OrdenCompraDetalleController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
 use App\Http\Controllers\ReporteController;
@@ -313,6 +314,13 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordenescompra', [OrdenCompraController::class, 'store']);
     Route::get('ordenescompra/exportarPDF', [OrdenCompraController::class, 'exportarPDF']);
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
+    Route::put('ordencompra/{id}', [OrdenCompraController::class, 'update']);
+});
+
+// rutas de ordendes de compra detalle
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::delete('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'destroy']);
+    Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
 });
 
 Route::get('script-update', function () {

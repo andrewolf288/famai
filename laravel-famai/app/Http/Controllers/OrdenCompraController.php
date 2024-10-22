@@ -38,8 +38,11 @@ class OrdenCompraController extends Controller
         try {
             // Valida el request
             $validatedData = validator($request->all(), [
+                'coc_id' => 'nullable|exists:tblcotizacionescab_coc,coc_id',
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
-                'pvc_id' => 'nullable|integer',
+                'pvc_cuentasoles' => 'nullable|integer',
+                'pvc_cuentadolares' => 'nullable|integer',
+                'pvc_cuentabanconacion' => 'nullable|integer',
                 'occ_fecha' => 'required|date',
                 'occ_fechaentrega' => 'nullable|date',
                 'mon_codigo' => 'nullable|string|exists:tblmonedas_mon,mon_codigo',
@@ -67,8 +70,11 @@ class OrdenCompraController extends Controller
 
             $ordencompra = OrdenCompra::create([
                 'occ_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+                'coc_id' => $validatedData['coc_id'],
                 'prv_id' => $validatedData['prv_id'],
-                'pvc_id' => $validatedData['pvc_id'],
+                'pvc_cuentasoles' => $validatedData['pvc_cuentasoles'],
+                'pvc_cuentadolares' => $validatedData['pvc_cuentadolares'],
+                'pvc_cuentabanconacion' => $validatedData['pvc_cuentabanconacion'],
                 'occ_fecha' => $validatedData['occ_fecha'],
                 'occ_fechaentrega' => $validatedData['occ_fechaentrega'],
                 'mon_codigo' => $validatedData['mon_codigo'],
@@ -87,6 +93,92 @@ class OrdenCompraController extends Controller
                 'occ_estado' => '1',
                 'occ_usucreacion' => $user->usu_codigo,
                 'occ_fecmodificacion' => null
+            ]);
+
+            foreach ($validatedData['detalle_productos'] as $detalle) {
+                $ordencompraDetalle = OrdenCompraDetalle::create([
+                    'pro_id' => $detalle['pro_id'],
+                    'occ_id' => $ordencompra->occ_id,
+                    'ocd_orden' => $detalle['ocd_orden'],
+                    'ocd_descripcion' => $detalle['ocd_descripcion'],
+                    'ocd_cantidad' => $detalle['ocd_cantidad'],
+                    'ocd_preciounitario' => $detalle['ocd_preciounitario'],
+                    'ocd_total' => $detalle['ocd_total'],
+                    'ocd_activo' => 1,
+                    'ocd_usucreacion' => $user->usu_codigo,
+                    'ocd_fecmodificacion' => null
+                ]);
+            }
+
+            DB::commit();
+            return response()->json($ordencompra, 200);
+        } catch (Exception $e) {
+            // hacemos rollback y devolvemos el error
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    // funcion de actualizar
+    public function update(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        $ordencompra = OrdenCompra::find($id);
+
+        if (!$ordencompra) {
+            return response()->json(['error' => 'Orden de compra no encontrada.'], 404);
+        }
+
+        try {
+            DB::beginTransaction();
+            // Valida el request
+            $validatedData = validator($request->all(), [
+                'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
+                'pvc_cuentasoles' => 'nullable|integer',
+                'pvc_cuentadolares' => 'nullable|integer',
+                'pvc_cuentabanconacion' => 'nullable|integer',
+                'occ_fecha' => 'required|date',
+                'occ_fechaentrega' => 'nullable|date',
+                'mon_codigo' => 'nullable|string|exists:tblmonedas_mon,mon_codigo',
+                'occ_formapago' => 'nullable|string',
+                'occ_referencia' => 'nullable|string',
+                'tra_elaborado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
+                'tra_solicitado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
+                'tra_autorizado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
+                'occ_notas' => 'nullable|string',
+                'occ_total' => 'required|numeric|min:1',
+                'occ_subtotal' => 'required|numeric|min:1',
+                'occ_impuesto' => 'required|numeric|min:1',
+                'occ_observacionpago' => 'nullable|string',
+                'occ_adelanto' => 'nullable|numeric|min:1',
+                'occ_saldo' => 'nullable|numeric|min:1',
+                'detalle_productos' => 'nullable|array|min:0',
+            ])->validate();
+
+            // actualizamos la orden de compra
+            $ordencompra->update([
+                'prv_id' => $validatedData['prv_id'],
+                'pvc_cuentasoles' => $validatedData['pvc_cuentasoles'],
+                'pvc_cuentadolares' => $validatedData['pvc_cuentadolares'],
+                'pvc_cuentabanconacion' => $validatedData['pvc_cuentabanconacion'],
+                'occ_fecha' => $validatedData['occ_fecha'],
+                'occ_fechaentrega' => $validatedData['occ_fechaentrega'],
+                'mon_codigo' => $validatedData['mon_codigo'],
+                'occ_formapago' => $validatedData['occ_formapago'],
+                'occ_referencia' => $validatedData['occ_referencia'],
+                'tra_elaborado' => $validatedData['tra_elaborado'],
+                'tra_solicitado' => $validatedData['tra_solicitado'],
+                'tra_autorizado' => $validatedData['tra_autorizado'],
+                'occ_notas' => $validatedData['occ_notas'],
+                'occ_total' => $validatedData['occ_total'],
+                'occ_subtotal' => $validatedData['occ_subtotal'],
+                'occ_impuesto' => $validatedData['occ_impuesto'],
+                'occ_observacionpago' => $validatedData['occ_observacionpago'],
+                'occ_adelanto' => $validatedData['occ_adelanto'],
+                'occ_saldo' => $validatedData['occ_saldo'],
+                'occ_estado' => '1',
+                'occ_usumodificacion' => $user->usu_codigo,
             ]);
 
             foreach ($validatedData['detalle_productos'] as $detalle) {

@@ -1,0 +1,263 @@
+<div class="row">
+    <!-- Columna para Proveedor -->
+    <div class="col-md-6 col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Proveedor</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="proveedoresSUNAT">
+                            RUC/DNI
+                        </label>
+                        <div class="input-group">
+                            <input type="text" id="proveedoresSUNAT" class="form-control"
+                                placeholder="Ingrese Nro. documento..." autocomplete="off">
+                            <button id="searchProveedorSUNAT" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-search" viewBox="0 0 16 16">
+                                    <path
+                                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <label for="proveedoresInput">
+                            Razón Social
+                        </label>
+                        <input type="text" id="proveedoresInput" class="form-control"
+                            placeholder="Ingrese razón social..." autocomplete="off">
+                        <ul id="resultadosListaProveedores" class="list-group"></ul>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
+                    <div class="col-md-3">
+                        <label for="documentoProveedorInput">Documento</label>
+                        <input type="text" id="documentoProveedorInput" class="form-control" readonly />
+                    </div>
+                    <div class="col-md-9">
+                        <label for="razonSocialProveedorInput">Nombre</label>
+                        <input type="text" id="razonSocialProveedorInput" class="form-control" readonly />
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <label for="correoProveedorInput">Correo</label>
+                        <input type="email" id="correoProveedorInput" class="form-control" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="contactoProveedorInput">Contacto</label>
+                        <input type="text" id="contactoProveedorInput" class="form-control" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="whatsappProveedorInput">Whatsapp</label>
+                        <input type="text" id="whatsappProveedorInput" class="form-control" readonly />
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <label for="direccionProveedorInput">Dirección</label>
+                        <textarea id="direccionProveedorInput" class="form-control" readonly></textarea>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <label for="cuentaProveedorOrdenCompra">Cuenta Proveedor</label>
+                    <select id="cuentaProveedorOrdenCompra" class="form-select"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Columna para Datos cotización -->
+    <div class="col-md-6 col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Datos orden de compra</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="monedaOrdenCompraInput">Moneda</label>
+                        <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
+                        <input type="text" id="formaDePagoOrdenCompraInput" class="form-control">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label for="fechaOrdenCompraPicker">Fecha orden de compra</label>
+                        <input type="text" id="fechaOrdenCompraPicker" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fechaEntregaOrdenCompraPicker">Fecha entrega</label>
+                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <label for="referenciaOrdenCompraInput">Referencia</label>
+                        <input type="text" id="referenciaOrdenCompraInput" class="form-control">
+                    </div>
+                    <div class="col-md-8">
+                        <label for="elaboradoOrdenCompraInput">Elaborado por</label>
+                        <select id="elaboradoOrdenCompraInput" class="form-select">
+                            <option value="" selected>Seleccione un trabajador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label for="solicitadoOrdenCompraInput">Solicitado por</label>
+                        <select id="solicitadoOrdenCompraInput" class="form-select">
+                            <option value="" selected>Seleccione un trabajador</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="autorizadoOrdenCompraInput">Autorizado por</label>
+                        <select id="autorizadoOrdenCompraInput" class="form-select">
+                            <option value="" selected>Seleccione un trabajador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <label for="notaOrdenCompraInput">Nota</label>
+                        <textarea id="notaOrdenCompraInput" class="form-control"></textarea>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Archivos adjuntos -->
+<div class="card mt-3">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Detalle de pago</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row ps-2 pe-2 mb-2">
+                        <label for="adelantoOrdenCompraInput">Adelanto:</label>
+                        <input type="number" id="adelantoOrdenCompraInput" class="form-control">
+                    </div>
+                    <div class="row ps-2 pe-2">
+                        <label for="saldoOrdenCompraInput">Saldo:</label>
+                        <input type="number" id="saldoOrdenCompraInput" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="row ps-2 pe-2">
+                        <label for="observacionPagoOrdenCompraInput">Observación de Pago:</label>
+                        <textarea class="form-control" id="observacionPagoOrdenCompraInput" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Detalle de productos -->
+<div class="card mt-3">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Productos</h5>
+            <button class="btn btn-success" id="addProductBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                    <path
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                </svg>
+            </button>
+        </div>
+        <div class="card-body">
+            <table class="table" id="productosOrdenCompraTable">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="productosOrdenCompraBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Resumen de OrdenCompra -->
+<div class="d-flex justify-content-end mt-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Subtotal:</span>
+                    <span>S/<span id="subtotalOrdenCompra">0.00</span></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">IGV (18%):</span>
+                    <span>S/<span id="igvOrdenCompra">0.00</span></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Total:</span>
+                    <span>S/<span id="totalOrdenCompra">0.00</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex flex-row justify-content-end mt-3">
+    <button class="btn btn-secondary me-2" id="btn-cancelar-orden-compra">Cancelar</button>
+    <button class="btn btn-primary" id="btn-editar-orden-compra">Guardar</button>
+</div>
+
+<!-- DIALOG AGREGAR PRODUCTOS -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="mb-2">
+                        <input type="checkbox" class="form-check-input me-2" id="checkAsociarProducto">
+                        <label class="form-check-label" for="generaStockProductoEdit">Sin código</label>
+                    </div>
+                    <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
+                    <ul id="resultadosLista" class="list-group mt-2"></ul>
+                </div>
+                <table id="tbl-orden-compra-productos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-2">Código</th>
+                            <th class="col-5">Descripción</th>
+                            <th class="col-1 text-center">Cantidad</th>
+                            <th class="col-2 text-center">Precio s/IGV</th>
+                            <th class="col-2 text-center">Total s/IGV</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>

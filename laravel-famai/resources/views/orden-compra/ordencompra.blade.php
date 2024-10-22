@@ -345,7 +345,7 @@
                         <td
                             style="height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
                             <span style="float: left;">TOTAL S/</span>
-                            <span style="float: right;">{{$occ_observacionpago}}</span>
+                            <span style="float: right;">{{$occ_total}}</span>
                         </td>
                     </tr>
                     <tr>

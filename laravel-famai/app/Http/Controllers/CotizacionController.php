@@ -154,8 +154,8 @@ class CotizacionController extends Controller
             return response()->json(['error' => 'Cotización no encontrada.'], 404);
         }
 
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
             $request->validate([
                 'cotizacion' => 'required|string',
             ]);

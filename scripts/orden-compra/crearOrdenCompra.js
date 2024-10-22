@@ -1,7 +1,7 @@
 $(document).ready(() => {
     let abortController
     // inicializamos la data
-    const detalle_archivos = []
+    let cotizacionRelacionada = null
 
     $("#fechaOrdenCompraPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -32,6 +32,7 @@ $(document).ready(() => {
     // cargamos responsables
     const cargarTrabajadores = async () => {
         try {
+            const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
             const { data } = await client.get('/trabajadoresSimple')
             const $elaboradoOrdenCompraInput = $('#elaboradoOrdenCompraInput')
             const $solicitadoOrdenCompraInput = $('#solicitadoOrdenCompraInput')
@@ -46,6 +47,10 @@ $(document).ready(() => {
                 $solicitadoOrdenCompraInput.append(option.clone())
                 $autorizadoOrdenCompraInput.append(option.clone())
             })
+
+            // debo buscar el trabajador que corresponda al usuario logeado
+            const { data: trabajador } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
+            $elaboradoOrdenCompraInput.val(trabajador.tra_id)
         } catch (error) {
             alert('Error al obtener los encargados')
         }
@@ -78,6 +83,8 @@ $(document).ready(() => {
             console.log(queryEncoded)
             const { data } = await client.get(`/cotizacionByNumero?numero=${queryEncoded}`)
             console.log(data)
+            // DATOS DE LA COTIZACION
+            cotizacionRelacionada = data.coc_id
             // DATOS DEL PROVEEDOR
             const {proveedor, moneda, detalle_cotizacion} = data
             $('#idProveedorOrdenCompraInput').val(proveedor.prv_id)
@@ -93,6 +100,8 @@ $(document).ready(() => {
             $('#notaOrdenCompraInput').val(data.coc_notas || '')
             // DETALLE DE ORDEN DE COMPRA
             $('#productosOrdenCompraBody').empty()
+
+            // recorremos la data del detalle de producto
             detalle_cotizacion.forEach((detalle, index) => {
                 // debemos asegurarnos que este producto no fue agregado al detalle
                 const rowData = {
@@ -701,8 +710,11 @@ $(document).ready(() => {
         })
 
         const data = {
+            coc_id: cotizacionRelacionada,
             prv_id,
-            pvc_id: pvc_id || null,
+            pvc_cuentasoles: null,
+            pvc_cuentadolares: null,
+            pvc_cuentabanconacion: null,
             occ_fecha: transformarFecha(occ_fecha),
             occ_fechaentrega: transformarFecha(occ_fechaentrega),
             mon_codigo: mon_codigo || null,
