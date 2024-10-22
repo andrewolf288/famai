@@ -184,13 +184,37 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>
+                <!-- <div>
                     <div class="mb-2">
                         <input type="checkbox" class="form-check-input me-2" id="checkAsociarProducto">
                         <label class="form-check-label" for="generaStockProductoEdit">Sin código</label>
                     </div>
                     <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
                     <ul id="resultadosLista" class="list-group mt-2"></ul>
+                </div> -->
+                <div>
+                    <div class="mb-2">
+                        <div class="row">
+                            <!-- INPUT DE ORDEN INTERNA -->
+                             <div class="d-flex flex-column col-2">
+                                 <label for="ordenInternaInput">Num. Orden Interna</label>
+                                  <div class="input-group">
+                                     <input type="text" class="form-control" id="ordenInternaInput">
+                                     <button class="btn btn-sm btn-primary" type="button">
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                           </svg>
+                                     </button>
+                                  </div>
+                             </div>
+                             <div class="col-10">
+                                <label for="detalleOrdenInternaSelect">Detalle material</label>
+                                <select id="selectDetalleMaterialOrdenInterna" class="form-select">
+                                    <option selected>Seleccione un detalle de cotización</option>
+                                </select>
+                             </div>
+                        </div>
+                    </div>
                 </div>
                 <table id="tbl-cotizacion-productos" class="table mt-3">
                     <thead>

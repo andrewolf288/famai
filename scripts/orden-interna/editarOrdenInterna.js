@@ -173,16 +173,20 @@ $(document).ready(async function () {
         // buscamos el detalle de la parte correspondiente
         const findElement = buscarDetalleParte(id_parte)
         const { procesos } = findElement
+        const palabraClave = 'otro'
 
         procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
+        console.log(procesos)
+        
         // <input type="text" class="form-control observacion-input" value='${element.odp_observacion.replace(/'/g, "&#39;") || ''}' readonly/>
         procesos.forEach(element => {
+            const claseCondicional = element.proceso.opp_descripcion.toLowerCase().includes(palabraClave) ? true : false
             const row = `
-            <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary">
+            <tr data-id-proceso="${element.proceso.opp_id}" data-id-detalle="${element.odp_id}" class="table-primary ${claseCondicional ? 'editable-descripcion' : ''}">
                 <td>${element.proceso.opp_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${element.odp_descripcion.replace(/'/g, "&#39;") || element.proceso.opp_descripcion.replace(/'/g, "&#39;")}'/>
+                    <input type="text" class="form-control descripcion-input" value='${element.odp_descripcion.replace(/'/g, "&#39;") || element.proceso.opp_descripcion.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td class="text-center">
                     <input type="checkbox" ${element.odp_ccalidad == 1 ? 'checked' : ''} disabled/>
@@ -337,6 +341,7 @@ $(document).ready(async function () {
                 odp_observacion,
                 odp_ccalidad
             }
+            console.log(formatData)
             try {
                 const { data } = await client.put(`/ordeninternaprocesos/${odp_id}`, formatData)
                 const { procesos } = buscarDetalleParte(currentDetalleParte)

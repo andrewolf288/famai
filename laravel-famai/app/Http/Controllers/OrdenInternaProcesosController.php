@@ -19,11 +19,13 @@ class OrdenInternaProcesosController extends Controller
             DB::beginTransaction();
             $ordenInternaProceso = OrdenInternaProcesos::findOrFail($id);
             $request->validate([
+                'odp_descripcion' => 'required|string',
                 'odp_observacion' => 'nullable|string|max:250',
                 'odp_ccalidad' => 'required|boolean',
             ]);
 
             $ordenInternaProceso->update([
+                'odp_descripcion' => $request->input('odp_descripcion'),
                 'odp_observacion' => $request->input('odp_observacion'),
                 'odp_ccalidad' => $request->input('odp_ccalidad'),
                 'odp_usumodificacion' => $user->usu_codigo,

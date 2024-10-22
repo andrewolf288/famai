@@ -397,15 +397,30 @@ class ReporteController extends Controller
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);
 
 				// Generamos el primer PDF
-				$varMpdf = new \Mpdf\Mpdf(['orientation' => 'L', 'tempDir' => $varTempDir]);
+				$varMpdf = new \Mpdf\Mpdf([
+					'orientation' => 'L',
+					'tempDir' => $varTempDir,
+					'margin_left' => 5,
+					'margin_right' => 5,
+				]);
 				$varMpdf->SetDisplayMode('fullpage');
-				$varMpdf->SetHeader($this->fechaHoraActual);
+				$varMpdf->SetHeader('
+					<table width="100%" height="10px">
+						<tr>
+							<td width="50%" style="text-align: left; font-weight: bold;">
+								' . $varOT . '
+							</td>
+							<td width="50%" style="text-align: right;">
+								' . $this->fechaHoraActual . '
+							</td>
+						</tr>
+					</table>
+				');
 				$varMpdf->WriteHTML($varData);
 				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
 
 				return response()->streamDownload(
 					function () use ($varMpdf) {
-						// echo $varMpdf->Output('', 'S');echo $finalMpdf->Output('', 'S');
 						echo $varMpdf->Output('', 'S');
 					},
 					'reporte.pdf',
@@ -786,11 +801,28 @@ class ReporteController extends Controller
 				$varData = str_replace($this->varProcCampos, $this->varTab, $varData);
 				$varData = str_replace($this->varMatCampos, $this->varTab, $varData);
 
-				$varMpdf = new \Mpdf\Mpdf(['orientation' => 'L', 'tempDir' => $varTempDir]);
+				$varMpdf = new \Mpdf\Mpdf([
+					'orientation' => 'L',
+					'tempDir' => $varTempDir,
+					'margin_left' => 5,
+					'margin_right' => 5,
+				]);
 				$varMpdf->SetDisplayMode('fullpage');
-				$varMpdf->SetHeader($this->fechaHoraActual);
+				$varMpdf->SetHeader('
+					<table width="100%" height="10px">
+						<tr>
+							<td width="50%" style="text-align: left; font-weight: bold;">
+								' . $varOT . '
+							</td>
+							<td width="50%" style="text-align: right;">
+								' . $this->fechaHoraActual . '
+							</td>
+						</tr>
+					</table>
+				');
 				$varMpdf->WriteHTML($varData);
 				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+
 				return response()->streamDownload(
 					function () use ($varMpdf) {
 						echo $varMpdf->Output('', 'S');

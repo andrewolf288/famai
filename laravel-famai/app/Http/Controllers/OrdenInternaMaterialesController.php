@@ -72,6 +72,21 @@ class OrdenInternaMaterialesController extends Controller
         ]);
     }
 
+    public function findByNumeroOrdenInterna(Request $request)
+    {
+        $numero = $request->input('oic_numero', null);
+        $ordeninterna = OrdenInterna::with('partes.materiales')->where('oic_numero', $numero)->first();
+
+        $materiales = [];
+        foreach ($ordeninterna->partes as $parte) {
+            foreach ($parte->materiales as $material) {
+                $materiales[] = $material;
+            }
+        }
+
+        return response()->json($materiales);
+    }
+
     public function findByOrdenInterna(Request $request, $id)
     {
         $ordenInterna = OrdenInterna::find($id);

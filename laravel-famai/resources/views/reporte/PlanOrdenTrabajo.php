@@ -147,41 +147,33 @@
       </tr>
     </tbody>
   </table>
-  &nbsp;
-  <table class="generaltable">
+  <table class="generaltable" style="margin-top:10px;">
     <tr>
       <td class="lefty-align" width="20%"><strong>CLIENTE:</strong></td>
-      <td class="lefty-align" width="50%">{varClientenombre}</td>
-      <td class="lefty-align" width="20%"><strong>FECHA DE APROBACIÓN:</strong></td>
-      <td class="lefty-align" width="10%">{varFechaAprobacion}</td>
+      <td class="lefty-align" width="45%">{varClientenombre}</td>
+      <td class="lefty-align" width="25%"><strong>FECHA DE EVALUACIÓN:</strong></td>
+      <td class="lefty-align" width="10%">{varFecha}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>EQUIPO:</strong></td>
-      <td class="lefty-align" width="50%">{varEquipoDescripcion}</td>
-      <td class="lefty-align" width="20%"><strong>FECHA DE ENTREGA ESTIMADA:</strong></td>
-      <td class="lefty-align" width="10%">{varFechaEntregaEstimada}</td>
+      <td class="lefty-align" width="45%">{varEquipoDescripcion}</td>
+      <td class="lefty-align" width="25%"><strong>FECHA DE APROBACIÓN:</strong></td>
+      <td class="lefty-align" width="10%">{varFechaAprobacion}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>COMPONENTE</strong></td>
-      <td class="lefty-align" width="50%">{varComponente}</td>
-      <td class="lefty-align" width="20%"></td>
-      <td class="lefty-align" width="10%"></td>
-    </tr>
-    <tr>
-      <td class="lefty-align" width="20%"><strong>FECHA DE EVALUACIÓN:</strong></td>
-      <td class="lefty-align" width="50%">{varFecha}</td>
-      <td class="lefty-align" width="20%"></td>
-      <td class="lefty-align" width="10%"></td>
+      <td class="lefty-align" width="45%">{varComponente}</td>
+      <td class="lefty-align" width="25%"><strong>FECHA DE ENTREGA ESTIMADA:</strong></td>
+      <td class="lefty-align" width="10%">{varFechaEntregaEstimada}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>OT:</strong></td>
-      <td class="lefty-align" width="50%">{varOrdenTrabajo}</td>
-      <td class="lefty-align" width="20%"></td>
+      <td class="lefty-align" width="45%">{varOrdenTrabajo}</td>
+      <td class="lefty-align" width="25%"> <strong>FECHA DE ENTREGA DE PRODUCCIÓN:</strong></td>
       <td class="lefty-align" width="10%"></td>
     </tr>
   </table>
-  &nbsp;
-  <table class="generaltable">
+  <table class="generaltable" style="margin-top:10px;">
     <tr>
       <th colspan="6">{varArea}</th>
     </tr>
@@ -194,8 +186,7 @@
       <td>{varTraNombreAlmacen}</td>
     </tr>
   </table>
-  &nbsp;
-  <table class="secondarytable">
+  <table class="secondarytable" style="margin-top:10px;">
     <tr>
       <th rowspan="2" width="6%"></th>
       <th colspan="3">ACTIVIDADES A REALIZAR</th>
