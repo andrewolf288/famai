@@ -131,6 +131,29 @@ class OrdenInternaMaterialesController extends Controller
         }
     }
 
+    public function updateResponsableMaterial(Request $request, $id)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($id);
+            $request->validate([
+                'tra_responsable' => 'required|exists:tbltrabajadores_tra,tra_id',
+            ]);
+
+            $ordenInternaMaterial->update([
+                'tra_responsable' => $request->input('tra_responsable'),
+                'odm_usumodificacion' => $user->usu_codigo,
+            ]);
+
+            DB::commit();
+            return response()->json($ordenInternaMaterial, 200);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
     public function updateTipoMaterial(Request $request, $id)
     {
         $user = auth()->user();

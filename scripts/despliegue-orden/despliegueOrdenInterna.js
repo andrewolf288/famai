@@ -37,6 +37,7 @@ $(document).ready(() => {
 
     // Inicializacion de data table
     function initDataTable(data) {
+        console.log(data)
         let content = ''
         // vaciamos la lista
         $('#data-container-body').empty()
@@ -74,7 +75,7 @@ $(document).ready(() => {
                         <button class="btn btn-primary btn-atendido">0.00</button>
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-responsable">Responsable</button>
+                        <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">Responsable</button>
                     </td>
                 </tr>
             `
@@ -103,6 +104,61 @@ $(document).ready(() => {
     $("#data-container-body").on('click', '.btn-atendido', function () {
         const loadModalAtendido = new bootstrap.Modal(document.getElementById('atendidoModal'))
         loadModalAtendido.show()
+    })
+
+    $("#data-container-body").on('click', '.btn-responsable', async function () {
+        // obtenemos el valor del id del detalle de material
+        const idDetalleMaterial = $(this).data('detalle')
+        const responsable = $(this).data('responsable')
+        // establecemos los valores
+        $("#idDetalleMaterialByResponsable").val(idDetalleMaterial)
+        // hacemos llamado a la lista de trabajadores
+        const { data } = await client.get('/trabajadoresSimple')
+
+        if(responsable){
+            const trabajadorResponsable = data.find(trabajador => trabajador.tra_id == responsable)
+            $("#responsableDetalleMaterial").text(trabajadorResponsable.tra_nombre)
+        } else {
+            $("#responsableDetalleMaterial").text("Sin responsable")
+        }
+
+        const $selectorResponsable = $('#selectorResponsableDetalleMaterial')
+        $selectorResponsable.empty()
+
+        // Ordenar la data alfabéticamente según el nombre (índice [1])
+        data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
+
+        $selectorResponsable.append($('<option>').val('').text('Sin responsable'))
+        data.forEach(trabajador => {
+            const option = $(`<option ${trabajador.tra_id == responsable ? 'selected' : ''}>`).val(trabajador.tra_id).text(trabajador.tra_nombre)
+            $selectorResponsable.append(option.clone())
+        })
+        // abrimos el modal
+        const loadModalResponsable = new bootstrap.Modal(document.getElementById('responsableModal'))
+        loadModalResponsable.show()
+    })
+
+    $("#btn-cambiar-responsable-detalle").on('click', async function () {
+        // obtenemos el valor del id del detalle de material
+        const idDetalleMaterial = $("#idDetalleMaterialByResponsable").val()
+        const responsable = $.trim($("#selectorResponsableDetalleMaterial").val())
+        if(responsable.length == 0){
+            alert('Debe seleccionar un responsable')
+            return
+        }
+
+        const formatData = {
+            tra_responsable: responsable
+        }
+        try{
+            await client.put(`/ordeninternamateriales/responsable/${idDetalleMaterial}`, formatData)
+            const loadModalResponsable = bootstrap.Modal.getInstance(document.getElementById('responsableModal'))
+            loadModalResponsable.hide()
+            initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
+        } catch(error){
+            console.log(error)
+            alert('Error al cambiar responsable')
+        }
     })
 
     function seleccionarRowDetalle(material, isChecked) {

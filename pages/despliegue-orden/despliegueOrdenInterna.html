@@ -164,8 +164,7 @@
 </div>
 
 <!-- DIALOG RESERVADO -->
-<div class="modal fade" id="reservacionModal" tabindex="-1" aria-labelledby="reservacionModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="reservacionModal" tabindex="-1" aria-labelledby="reservacionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -196,8 +195,7 @@
     </div>
 </div>
 <!-- DIALOG ORDENADO -->
-<div class="modal fade" id="ordenadoModal" tabindex="-1" aria-labelledby="ordenadoModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="ordenadoModal" tabindex="-1" aria-labelledby="ordenadoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -232,8 +230,7 @@
     </div>
 </div>
 <!-- DIALOG ATENDIDO -->
-<div class="modal fade" id="atendidoModal" tabindex="-1" aria-labelledby="atendidoModalLabel"
-    aria-hidden="true">
+<div class="modal fade" id="atendidoModal" tabindex="-1" aria-labelledby="atendidoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -264,3 +261,26 @@
     </div>
 </div>
 <!-- DIALOG RESPONSABLE -->
+<div class="modal fade" id="responsableModal" tabindex="-1" aria-labelledby="responsableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="responsableModalLabel">Responsable detalle material</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p>Responsable: <span id="responsableDetalleMaterial"></span></p>
+                </div>
+                <div>
+                    <input type="text" id="idDetalleMaterialByResponsable" hidden>
+                    <select id="selectorResponsableDetalleMaterial" class="form-select"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-cambiar-responsable-detalle">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
