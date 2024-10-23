@@ -147,7 +147,6 @@ class CotizacionController extends Controller
     public function updateCotizacion(Request $request, $id)
     {
         $user = auth()->user();
-        // iniciamos una transaccion
         $cotizacion = Cotizacion::find($id);
 
         if (!$cotizacion) {

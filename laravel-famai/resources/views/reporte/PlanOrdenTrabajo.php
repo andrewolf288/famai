@@ -170,7 +170,7 @@
       <td class="lefty-align" width="20%"><strong>OT:</strong></td>
       <td class="lefty-align" width="45%">{varOrdenTrabajo}</td>
       <td class="lefty-align" width="25%"> <strong>FECHA DE ENTREGA DE PRODUCCIÓN:</strong></td>
-      <td class="lefty-align" width="10%"></td>
+      <td class="lefty-align" width="10%">{varFechaEntregaProduccion}</td>
     </tr>
   </table>
   <table class="generaltable" style="margin-top:10px;">
