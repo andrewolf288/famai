@@ -163,13 +163,13 @@
     <tr>
       <td class="lefty-align" width="20%"><strong>COMPONENTE</strong></td>
       <td class="lefty-align" width="45%">{varComponente}</td>
-      <td class="lefty-align" width="25%"><strong>FECHA DE ENTREGA ESTIMADA:</strong></td>
+      <td class="lefty-align" width="25%"><strong>FECHA DE ENTREGA LOGÍSTICA:</strong></td>
       <td class="lefty-align" width="10%">{varFechaEntregaEstimada}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>OT:</strong></td>
       <td class="lefty-align" width="45%">{varOrdenTrabajo}</td>
-      <td class="lefty-align" width="25%"> <strong>FECHA DE ENTREGA DE PRODUCCIÓN:</strong></td>
+      <td class="lefty-align" width="25%"> <strong>FECHA DE ENTREGA PRODUCCIÓN:</strong></td>
       <td class="lefty-align" width="10%">{varFechaEntregaProduccion}</td>
     </tr>
   </table>
