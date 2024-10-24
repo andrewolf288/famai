@@ -482,7 +482,7 @@ class ReporteController extends Controller
 			$varClienteNombre = isset($result['nombre_del_cliente']) ? $result['nombre_del_cliente'] : $this->varTab;
 			$varDescripcionEquipo = isset($result['descripcion_equipo']) ? $result['descripcion_equipo'] : $this->varTab;
 			$varComponente = isset($result['oic_componente']) ? $result['oic_componente'] : $this->varTab;
-			$varFecha = isset($result['oic_fecha']) ? $result['oic_fecha'] : $this->varTab;
+			$varFecha = isset($result['oic_fecha']) ? (new DateTime($result['oic_fecha']))->format('d/m/Y') : $this->varTab;
 			$varOT = isset($result['odt_numero']) ? $result['odt_numero'] : $this->varTab;
 			$varArea = isset($result['are_descripcion']) ? strtoupper($result['are_descripcion']) : $this->varTab;
 			//Llenamos las variables para la cabecera (Los 3 Trabajadores responsables)
