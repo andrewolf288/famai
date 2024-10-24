@@ -175,7 +175,7 @@ class ProductoController extends Controller
         $queryBuilder = DB::connection('sqlsrv_secondary')
             ->table('OITM as T0')
             ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
-            ->join('OINM as T2', 'T0.ItemCode', '=', 'T2.ItemCode')
+            ->join('OILM as T2', 'T0.ItemCode', '=', 'T2.ItemCode')
             ->select([
                 'T0.ItemCode as pro_codigo',
                 'T0.ItemName as pro_descripcion',
