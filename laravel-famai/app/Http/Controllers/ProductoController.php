@@ -180,7 +180,8 @@ class ProductoController extends Controller
                 'T0.ItemCode as pro_codigo',
                 'T0.ItemName as pro_descripcion',
                 'T1.WhsCode',
-                DB::raw('SUM(T2.InQty - T2.OutQty) as alp_stock'),
+                // DB::raw('SUM(T2.InQty - T2.OutQty) as alp_stock'),
+                DB::raw('MAX(T1.OnOrder) as alp_stock'),
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
                 'T0.validFor',
@@ -211,9 +212,11 @@ class ProductoController extends Controller
             ])
             ->selectRaw('T0.ItemCode as pro_id')
             ->where('T1.WhsCode', '=', $almID)
-            ->where('T2.Warehouse', '=', $almID)
+            // ->where('T2.Warehouse', '=', $almID)
+            ->where('T2.LocCode', '=', $almID)
+            // ->where('T1.WhsCode', '=', $almID)
             ->where('T0.validFor', '=', 'Y')
-            ->whereDate('T2.CreateDate', '<=', now())
+            // ->whereDate('T2.CreateDate', '<=', now())
             ->groupBy(
                 'T0.ItemCode',
                 'T0.ItemName',
@@ -221,7 +224,9 @@ class ProductoController extends Controller
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
                 'T0.validFor',
-                'T0.InvntItem'
+                'T0.InvntItem',
+                'T0.frozenFor',
+                'T1.ItemCode '
             );
 
         foreach ($subqueries as $term) {
