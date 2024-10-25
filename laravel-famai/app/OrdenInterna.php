@@ -24,6 +24,7 @@ class OrdenInterna extends Model
         'tra_idalmacen',
         'oic_fechaaprobacion',
         'oic_fechaentregaestimada',
+        'oic_fechaevaluacion',
         'oic_activo',
         'oic_usucreacion',
         'oic_feccreacion',

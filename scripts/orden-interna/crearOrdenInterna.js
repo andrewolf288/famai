@@ -4,6 +4,7 @@ $(document).ready(function () {
     const tiempoAutoguardado = 5 * 60 * 1000
     let oic_fechaaprobacion = ""
     let oic_fechaentregaestimada = ""
+    let oic_fechaevaluacion = ""
     let isRequestInProgress = false;
 
 
@@ -121,8 +122,11 @@ $(document).ready(function () {
             $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
             $('#componenteInput').val(data.odt_componente)
+
+            // asignamos las fechas de Andromeda
             oic_fechaaprobacion = data.odt_fechaaprobacion
             oic_fechaentregaestimada = data.odt_fechaentregaestimada
+            oic_fechaevaluacion = data.odt_fechaevaluacion
         } catch (error) {
             console.log(error)
             const { response } = error
@@ -1075,6 +1079,7 @@ $(document).ready(function () {
             oic_componente: $oiValorComponente,
             oic_fechaaprobacion: oic_fechaaprobacion || null,
             oic_fechaentregaestimada: oic_fechaentregaestimada || null,
+            oic_fechaevaluacion: oic_fechaevaluacion || null,
             detalle_partes: ordenInterna.detalle_partes,
         }
 
@@ -1231,6 +1236,7 @@ $(document).ready(function () {
             oic_componente: $oiValorComponente,
             oic_fechaaprobacion: oic_fechaaprobacion || null,
             oic_fechaentregaestimada: oic_fechaentregaestimada || null,
+            oic_fechaevaluacion: oic_fechaevaluacion || null,
             detalle_partes: ordenInterna.detalle_partes,
         };
 

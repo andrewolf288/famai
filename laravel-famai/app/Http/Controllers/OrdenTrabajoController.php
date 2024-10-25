@@ -46,6 +46,7 @@ class OrdenTrabajoController extends Controller
                 'T1.FecIngreso as odt_fecha',
                 'T1.FecAprobacion as odt_fechaaprobacion',
                 'T1.FecEntregaEstimada as odt_fechaentregaestimada',
+                'T1.FecEvaluacion as odt_fechaevaluacion',
                 'T9.NomComponente as odt_componente'
             )
             ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)

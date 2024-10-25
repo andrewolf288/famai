@@ -124,7 +124,7 @@
                 <td class="lefty-align">Versión : 02</td>
               </tr>
               <tr>
-                <td class="lefty-align">Fecha : 27/09/2024</td>
+                <td class="lefty-align">Fecha: 27/09/2024</td>
               </tr>
               <tr>
                 <td class="lefty-align">Revisado: JPR</td>
@@ -152,7 +152,7 @@
       <td class="lefty-align" width="20%"><strong>CLIENTE:</strong></td>
       <td class="lefty-align" width="45%">{varClientenombre}</td>
       <td class="lefty-align" width="25%"><strong>FECHA DE EVALUACIÓN:</strong></td>
-      <td class="lefty-align" width="10%">{varFecha}</td>
+      <td class="lefty-align" width="10%">{varFechaEvaluacion}</td>
     </tr>
     <tr>
       <td class="lefty-align" width="20%"><strong>EQUIPO:</strong></td>

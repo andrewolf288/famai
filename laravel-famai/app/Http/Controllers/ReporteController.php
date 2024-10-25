@@ -86,10 +86,11 @@ class ReporteController extends Controller
 				$varUsuModificacion = isset($dato['oic_usumodificacion']) ? $dato['oic_usumodificacion'] : $this->varTab;
 				$varFecModificacion = isset($dato['oic_fecmodificacion']) ? (new DateTime($dato['oic_fecmodificacion']))->format('d/m/Y H:i') : $this->varTab;
 				// Fechas adicionales
+				$varFechaEvaluacion = isset($dato['oic_fechaevaluacion']) ? (new DateTime($dato['oic_fechaevaluacion']))->format('d/m/Y') : $this->varTab;
 				$varFechaAprobacion = isset($dato['oic_fechaaprobacion']) ? (new DateTime($dato['oic_fechaaprobacion']))->format('d/m/Y') : $this->varTab;
-				$varFechaEntregaEstimada = isset($dato['oic_fechaentregaestimada']) ? (new DateTime($dato['oic_fechaentregaestimada']))->format('d/m/Y') : $this->varTab;
-				$calculoFechaEntregaProduccion = DateHelper::calcularFechaLimiteLogistica($dato['oic_fechaaprobacion'], $dato['oic_fechaentregaestimada']);
-				$varFechaEntregaProduccion = isset($calculoFechaEntregaProduccion) ? $calculoFechaEntregaProduccion : $this->varTab;
+				$varFechaEntregaProduccion = isset($dato['oic_fechaentregaestimada']) ? (new DateTime($dato['oic_fechaentregaestimada']))->format('d/m/Y') : $this->varTab;
+				$calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($dato['oic_fechaaprobacion'], $dato['oic_fechaentregaestimada']);
+				$varFechaEntregaEstimada = isset($calculoFechaEntregaLogistica) ? $calculoFechaEntregaLogistica : $this->varTab;
 			}
 			//Obtenemos el registro de las partes
 			$varPartes = $reporte->metobtenerPartes($varOIC);
@@ -394,6 +395,7 @@ class ReporteController extends Controller
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
 				$varData = str_replace("{varTraNombreAlmacen}", $varTraNombreAlmacen, $varData);
 				$varData = str_replace("{varFechaAprobacion}", $varFechaAprobacion, $varData);
+				$varData = str_replace("{varFechaEvaluacion}", $varFechaEvaluacion, $varData);
 				$varData = str_replace("{varFechaEntregaEstimada}", $varFechaEntregaEstimada, $varData);
 				$varData = str_replace("{varFechaEntregaProduccion}", $varFechaEntregaProduccion, $varData);
 				$varData .= $htmlFilasTotal . $finalHtmlString;
@@ -490,9 +492,11 @@ class ReporteController extends Controller
 			$varTraNombreMaestro = isset($result['tra_nombremaestro']) ? $result['tra_nombremaestro'] : $this->varTab;
 			$varTraNombreAlmacen = isset($result['tra_nombrealmacen']) ? $result['tra_nombrealmacen'] : $this->varTab;
 			// Fechas adicionales
-			$varFechaAprobacion = isset($dato['oic_fechaaprobacion']) ? (new DateTime($dato['oic_fechaaprobacion']))->format('d/m/Y') : $this->varTab;
-			$varFechaEntregaEstimada = isset($dato['oic_fechaentregaestimada']) ? (new DateTime($dato['oic_fechaentregaestimada']))->format('d/m/Y') : $this->varTab;
-			$varFechaEntregaProduccion = $this->varTab;
+			$varFechaEvaluacion = isset($result['oic_fechaevaluacion']) ? (new DateTime($result['oic_fechaevaluacion']))->format('d/m/Y') : $this->varTab;
+			$varFechaAprobacion = isset($result['oic_fechaaprobacion']) ? (new DateTime($result['oic_fechaaprobacion']))->format('d/m/Y') : $this->varTab;
+			$varFechaEntregaProduccion = isset($result['oic_fechaentregaestimada']) ? (new DateTime($result['oic_fechaentregaestimada']))->format('d/m/Y') : $this->varTab;
+			$calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($result['oic_fechaaprobacion'], $result['oic_fechaentregaestimada']);
+			$varFechaEntregaEstimada = isset($calculoFechaEntregaLogistica) ? $calculoFechaEntregaLogistica : $this->varTab;
 			//Llenamos las variables de seguimiento
 			$varUsuCreacion = 'No Aplica';
 			$varFecCreacion = 'No Aplica';
@@ -800,6 +804,7 @@ class ReporteController extends Controller
 				$varData = str_replace("{varTraNombreOrigen}", $varTraNombreOrigen, $varData);
 				$varData = str_replace("{varTraNombreMaestro}", $varTraNombreMaestro, $varData);
 				$varData = str_replace("{varTraNombreAlmacen}", $varTraNombreAlmacen, $varData);
+				$varData = str_replace("{varFechaEvaluacion}", $varFechaEvaluacion, $varData);
 				$varData = str_replace("{varFechaAprobacion}", $varFechaAprobacion, $varData);
 				$varData = str_replace("{varFechaEntregaEstimada}", $varFechaEntregaEstimada, $varData);
 				$varData = str_replace("{varFechaEntregaProduccion}", $varFechaEntregaProduccion, $varData);
