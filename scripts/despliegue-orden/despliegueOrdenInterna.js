@@ -115,7 +115,7 @@ $(document).ready(() => {
         // hacemos llamado a la lista de trabajadores
         const { data } = await client.get('/trabajadoresSimple')
 
-        if(responsable){
+        if (responsable) {
             const trabajadorResponsable = data.find(trabajador => trabajador.tra_id == responsable)
             $("#responsableDetalleMaterial").text(trabajadorResponsable.tra_nombre)
         } else {
@@ -142,7 +142,7 @@ $(document).ready(() => {
         // obtenemos el valor del id del detalle de material
         const idDetalleMaterial = $("#idDetalleMaterialByResponsable").val()
         const responsable = $.trim($("#selectorResponsableDetalleMaterial").val())
-        if(responsable.length == 0){
+        if (responsable.length == 0) {
             alert('Debe seleccionar un responsable')
             return
         }
@@ -150,12 +150,12 @@ $(document).ready(() => {
         const formatData = {
             tra_responsable: responsable
         }
-        try{
+        try {
             await client.put(`/ordeninternamateriales/responsable/${idDetalleMaterial}`, formatData)
             const loadModalResponsable = bootstrap.Modal.getInstance(document.getElementById('responsableModal'))
             loadModalResponsable.hide()
             initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
-        } catch(error){
+        } catch (error) {
             console.log(error)
             alert('Error al cambiar responsable')
         }
@@ -236,15 +236,15 @@ $(document).ready(() => {
             content = `
                 <tr data-id="${value.odm_id}">
                     <td>${value.producto?.pro_codigo ?? ''}</td>
-                    <td>${value.producto?.unidad?.uni_codigo ?? ''}</td>
+                    <td class="unidad-detalle">${value.producto?.unidad?.uni_codigo ?? ''}</td>
                     <td>
-                        <input type="text" class="form-control" value="${value.odm_descripcion ?? ''}"/>
+                        <input type="text" class="form-control descripcion-detalle" value="${value.odm_descripcion ?? ''}"/>
                     </td>
                     <td>
-                        <input type="text" class="form-control" value="${value.odm_observacion ?? ''}"/>
+                        <input type="text" class="form-control observacion-detalle" value="${value.odm_observacion ?? ''}"/>
                     </td>
                     <td>
-                        <input type="number" class="form-control" value="${value.odm_cantidad}"/>
+                        <input type="number" class="form-control cantidad-detalle" value="${value.odm_cantidad}"/>
                     </td>
                     <td>
                         <div class="d-flex justify-content-around">
@@ -330,7 +330,7 @@ $(document).ready(() => {
     }
 
     function seleccionarProveedor(proveedor) {
-        const { prv_id, prv_nrodocumento, prv_nombre, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto } = proveedor
+        const { prv_id, prv_nrodocumento, prv_direccion, prv_nombre, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto, prv_correo } = proveedor
 
         const $rows = $('#tbl-cotizaciones-proveedores tbody tr')
 
@@ -349,29 +349,36 @@ $(document).ready(() => {
 
         const row = `
         <tr data-id-proveedor="${prv_id}">
-            <td>${prv_nombre}</td>
-            <td>${tdo_codigo}</td>
-            <td>${prv_nrodocumento}</td>
+            <input class="direccion-proveedor" type="hidden" value="${prv_direccion || ''}"/>
+            <input class="correo-proveedor" type="hidden" value="${prv_correo || ''}"/>
+            <td class="nombre-proveedor">${prv_nombre}</td>
+            <td class="tipodocumento-proveedor">${tdo_codigo}</td>
+            <td class="nrodocumento-proveedor">${prv_nrodocumento}</td>
             <td>
-                <input type="text" value="${prv_contacto || ''}" />
+                <input type="text" class="form-control contacto-proveedor" value="${prv_contacto || ''}" />
             </td>
             <td>
-                <input type="text" value="${prv_whatsapp || ''}" />
+                <input type="text" class="form-control celular-proveedor" value="${prv_whatsapp || ''}" />
             </td>
             <td>
-                <input type="text" value="${prv_telefono || ''}" />
+                <input type="text" class="form-control telefono-proveedor" value="${prv_telefono || ''}" />
             </td>
             <td>
                 <div class="d-flex justify-content-around">
-                    <button class="btn btn-sm btn-danger btn-cotizacion-exportar-pdf me-2">
+                    <button class="btn btn-sm btn-danger btn-cotizacion-exportar-pdf me-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf-fill" viewBox="0 0 16 16">
                             <path d="M5.523 12.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.035.012a.3.3 0 0 1-.026-.044c-.056-.11-.054-.216.04-.36.106-.165.319-.354.647-.548m2.455-1.647q-.178.037-.356.078a21 21 0 0 0 .5-1.05 12 12 0 0 0 .51.858q-.326.048-.654.114m2.525.939a4 4 0 0 1-.435-.41q.344.007.612.054c.317.057.466.147.518.209a.1.1 0 0 1 .026.064.44.44 0 0 1-.06.2.3.3 0 0 1-.094.124.1.1 0 0 1-.069.015c-.09-.003-.258-.066-.498-.256M8.278 6.97c-.04.244-.108.524-.2.829a5 5 0 0 1-.089-.346c-.076-.353-.087-.63-.046-.822.038-.177.11-.248.196-.283a.5.5 0 0 1 .145-.04c.013.03.028.092.032.198q.008.183-.038.465z"/>
                             <path fill-rule="evenodd" d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2zM4.165 13.668c.09.18.23.343.438.419.207.075.412.04.58-.03.318-.13.635-.436.926-.786.333-.401.683-.927 1.021-1.51a11.7 11.7 0 0 1 1.997-.406c.3.383.61.713.91.95.28.22.603.403.934.417a.86.86 0 0 0 .51-.138c.155-.101.27-.247.354-.416.09-.181.145-.37.138-.563a.84.84 0 0 0-.2-.518c-.226-.27-.596-.4-.96-.465a5.8 5.8 0 0 0-1.335-.05 11 11 0 0 1-.98-1.686c.25-.66.437-1.284.52-1.794.036-.218.055-.426.048-.614a1.24 1.24 0 0 0-.127-.538.7.7 0 0 0-.477-.365c-.202-.043-.41 0-.601.077-.377.15-.576.47-.651.823-.073.34-.04.736.046 1.136.088.406.238.848.43 1.295a20 20 0 0 1-1.062 2.227 7.7 7.7 0 0 0-1.482.645c-.37.22-.699.48-.897.787-.21.326-.275.714-.08 1.103"/>
                         </svg>
                     </button>
-                    <button class="btn btn-sm btn-primary btn-cotizacion-exportar-text">
+                    <button class="btn btn-sm btn-primary btn-cotizacion-exportar-text me-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
                             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-sm btn-success btn-generar-cotizacion">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707z"/>
                         </svg>
                     </button>
                 </div>
@@ -385,22 +392,34 @@ $(document).ready(() => {
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')
 
+        const proveedor = {
+            prv_id: id_proveedor,
+            prv_direccion: row.find('.direccion-proveedor').val() || '',
+            prv_nombre: row.find('.nombre-proveedor').text() || '',
+            tdo_codigo: row.find('.tipodocumento-proveedor').text() || '',
+            prv_nrodocumento: row.find('.nrodocumento-proveedor').text() || '',
+            prv_contacto: row.find('.contacto-proveedor').val() || '',
+            prv_whatsapp: row.find('.celular-proveedor').val() || '',
+            prv_telefono: row.find('.telefono-proveedor').val() || '',
+            prv_correo: row.find('.correo-proveedor').val() || ''
+        }
+
         const detalleMateriales = []
 
         const rows = $('#tbl-cotizaciones-materiales tbody tr')
         rows.each(function () {
             const data = {
-                uni_codigo: $(this).find('td').eq(1).text(),
-                odm_descripcion: $(this).find('td').eq(2).find('input').val(),
-                odm_observacion: $(this).find('td').eq(3).find('input').val(),
-                odm_cantidad: $(this).find('td').eq(4).find('input').val(),
+                uni_codigo: $(this).find('.unidad-detalle').text(),
+                odm_descripcion: $(this).find('.descripcion-detalle').val(),
+                odm_observacion: $(this).find('.observacion-detalle').val(),
+                odm_cantidad: $(this).find('.cantidad-detalle').val(),
             }
             detalleMateriales.push(data)
         })
 
         try {
             const formatData = {
-                id_proveedor: id_proveedor,
+                proveedor,
                 detalle_materiales: detalleMateriales
             }
             console.log(formatData)
@@ -429,22 +448,34 @@ $(document).ready(() => {
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')
 
+        const proveedor = {
+            prv_id: id_proveedor,
+            prv_direccion: row.find('.direccion-proveedor').val() || '',
+            prv_nombre: row.find('.nombre-proveedor').text() || '',
+            tdo_codigo: row.find('.tipodocumento-proveedor').text() || '',
+            prv_nrodocumento: row.find('.nrodocumento-proveedor').text() || '',
+            prv_contacto: row.find('.contacto-proveedor').val() || '',
+            prv_whatsapp: row.find('.celular-proveedor').val() || '',
+            prv_telefono: row.find('.telefono-proveedor').val() || '',
+            prv_correo: row.find('.correo-proveedor').val() || ''
+        }
+
         const detalleMateriales = []
 
         const rows = $('#tbl-cotizaciones-materiales tbody tr')
         rows.each(function () {
             const data = {
                 uni_codigo: $(this).find('td').eq(1).text(),
-                odm_descripcion: $(this).find('td').eq(2).find('input').val(),
-                odm_observacion: $(this).find('td').eq(3).find('input').val(),
-                odm_cantidad: $(this).find('td').eq(4).find('input').val(),
+                odm_descripcion: $(this).find('.descripcion-detalle').val(),
+                odm_observacion: $(this).find('.observacion-detalle').val(),
+                odm_cantidad: $(this).find('.cantidad-detalle').val(),
             }
             detalleMateriales.push(data)
         })
 
         try {
             const formatData = {
-                id_proveedor: id_proveedor,
+                proveedor,
                 detalle_materiales: detalleMateriales
             }
             console.log(formatData)
@@ -454,15 +485,6 @@ $(document).ready(() => {
                 },
                 responseType: 'blob'
             })
-
-            // const url = window.URL.createObjectURL(new Blob([response.data]))
-            // const a = document.createElement('a')
-            // a.href = url
-            // a.download = `cotizacion.txt`
-            // document.body.appendChild(a)
-            // a.click()
-            // window.URL.revokeObjectURL(url)
-            // document.body.removeChild(a)
             const textBlob = new Blob([response.data], { type: 'text/plain' });
             const textUrl = URL.createObjectURL(textBlob);
             showModalPreviewText(textUrl)
@@ -476,4 +498,46 @@ $(document).ready(() => {
         const modal = new bootstrap.Modal(document.getElementById("previewTXTModal"));
         modal.show();
     }
+
+    // funcion para generar cotizacion
+    $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-generar-cotizacion', async (event) => {
+        const row = $(event.currentTarget).closest('tr')
+        const id_proveedor = row.data('id-proveedor')
+
+        const proveedor = {
+            prv_id: id_proveedor,
+            prv_direccion: row.find('.direccion-proveedor').val() || '',
+            prv_nombre: row.find('.nombre-proveedor').text() || '',
+            tdo_codigo: row.find('.tipodocumento-proveedor').text() || '',
+            prv_nrodocumento: row.find('.nrodocumento-proveedor').text() || '',
+            prv_contacto: row.find('.contacto-proveedor').val() || '',
+            prv_whatsapp: row.find('.celular-proveedor').val() || '',
+            prv_telefono: row.find('.telefono-proveedor').val() || '',
+            prv_correo: row.find('.correo-proveedor').val() || ''
+        }
+
+        const detalleMateriales = []
+
+        const rows = $('#tbl-cotizaciones-materiales tbody tr')
+        rows.each(function () {
+            const data = {
+                odm_id: $(this).data('id'),
+                cod_descripcion: $(this).find('.descripcion-detalle').val(),
+                cod_observacion: $(this).find('.observacion-detalle').val(),
+                cod_cantidad: $(this).find('.cantidad-detalle').val(),
+            }
+            detalleMateriales.push(data)
+        })
+
+        try {
+            const formatData = {
+                proveedor,
+                detalle_materiales: detalleMateriales
+            }
+            console.log(formatData)
+
+        } catch(error) {
+
+        }
+    })
 })

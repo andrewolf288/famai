@@ -335,7 +335,7 @@ Route::get('script-update', function () {
         $queryBuilder = DB::connection('sqlsrv_andromeda')
             ->table('OT_OrdenTrabajo as T1')
             ->select('T1.FecAprobacion as oic_fechaaprobacion',
-            'T1.FecEntregaEstimada as oic_fechaentregaestimada',
+            'T1.FecEntrega as oic_fechaentregaestimada',
             'T1.FecEvaluacion as oic_fechaevaluacion')
             ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
             ->first();

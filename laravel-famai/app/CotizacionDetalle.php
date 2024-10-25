@@ -13,9 +13,9 @@ class CotizacionDetalle extends Model
     protected $fillable = [
         'coc_id',
         'odm_id',
-        'pro_id',
         'cod_orden',
         'cod_descripcion',
+        'cod_observacion',
         'cod_cantidad',
         'cod_preciounitario',
         'cod_total',
@@ -29,8 +29,10 @@ class CotizacionDetalle extends Model
     const CREATED_AT = 'cod_feccreacion';
     const UPDATED_AT = 'cod_fecmodificacion';
 
-    public function producto()
+    // detalle de material
+    public function detalleMaterial() 
     {
-        return $this->belongsTo(Producto::class, 'pro_id', 'pro_id');
+        return $this->belongsTo(OrdenInternaMateriales::class, 'odm_id', 'odm_id');
     }
+
 }

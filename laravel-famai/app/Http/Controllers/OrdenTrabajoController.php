@@ -45,7 +45,7 @@ class OrdenTrabajoController extends Controller
                 'T8.NomEquipo as odt_equipo',
                 'T1.FecIngreso as odt_fecha',
                 'T1.FecAprobacion as odt_fechaaprobacion',
-                'T1.FecEntregaEstimada as odt_fechaentregaestimada',
+                'T1.FecEntrega as odt_fechaentregaestimada',
                 'T1.FecEvaluacion as odt_fechaevaluacion',
                 'T9.NomComponente as odt_componente'
             )

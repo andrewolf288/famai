@@ -144,6 +144,57 @@ class CotizacionController extends Controller
         }
     }
 
+    public function storeDespliegue(Request $request)
+    {
+        $user = auth()->user();
+
+        try {
+            DB::beginTransaction();
+
+            $proveedor = $request->input('proveedor');
+            $detalleMateriales = $request->input('detalle_materiales');
+
+            $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
+            if (!$lastCotizacion) {
+                $numero = 1;
+            } else {
+                $numero = intval($lastCotizacion->coc_numero) + 1;
+            }
+
+            $cotizacion = Cotizacion::create([
+                'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+                'prv_id' => $proveedor['prv_id'],
+                'coc_fechacotizacion' => Carbon::now()->format('Y-m-d'),
+                'coc_usucreacion' => $user->usu_codigo,
+                'coc_fecmodificacion' => null,
+                'coc_estado' => 'SOL',
+            ]);
+
+            $counter = 1;
+            foreach ($detalleMateriales as $detalle) {
+                $cotizacionDetalle = CotizacionDetalle::create([
+                    'coc_id' => $cotizacion->coc_id,
+                    'odm_id' => $detalle['odm_id'],
+                    'cod_orden' => $counter,
+                    'cod_descripcion' => $detalle['cod_descripcion'],
+                    'cod_observacion' => $detalle['cod_observacion'],
+                    'cod_cantidad' => $detalle['cod_cantidad'],
+                    'cod_activo' => 1,
+                    'cod_usucreacion' => $user->usu_codigo,
+                    'cod_fecmodificacion' => null
+                ]);
+                $counter++;
+            }
+
+            DB::commit();
+
+            return response()->json($cotizacion, 200);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
     public function updateCotizacion(Request $request, $id)
     {
         $user = auth()->user();

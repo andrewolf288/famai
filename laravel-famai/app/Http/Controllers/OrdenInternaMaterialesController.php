@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Helpers\DateHelper;
 
 class OrdenInternaMaterialesController extends Controller
 {
@@ -341,7 +342,6 @@ class OrdenInternaMaterialesController extends Controller
                 $row++;
             }
 
-
             return response()->streamDownload(function () use ($spreadsheet) {
                 $writer = new Xlsx($spreadsheet);
                 $writer->save('php://output');
@@ -355,14 +355,15 @@ class OrdenInternaMaterialesController extends Controller
 
     public function exportPDFCotizacion(Request $request)
     {
-        $idProveedor = $request->input('id_proveedor', null);
+        $proveedor = $request->input('proveedor', null);
         $detalleMateriales = $request->input('detalle_materiales', []);
 
-        $proveedor = Proveedor::find($idProveedor);
+        // $proveedor = Proveedor::find($idProveedor);
 
         $data = [
             'proveedor' => $proveedor,
-            'detalleMateriales' => $detalleMateriales
+            'detalleMateriales' => $detalleMateriales,
+            'fechaActual' => DateHelper::parserFechaActual()
         ];
 
         $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
@@ -371,10 +372,10 @@ class OrdenInternaMaterialesController extends Controller
 
     public function exportTXTCotizacion(Request $request)
     {
-        $idProveedor = $request->input('id_proveedor', null);
+        $proveedor = $request->input('proveedor', null);
         $detalleMateriales = $request->input('detalle_materiales', []);
 
-        $proveedor = Proveedor::find($idProveedor);
+        // $proveedor = Proveedor::find($idProveedor);
 
         $ruc = "20134690080";
         $razon_social = "FAMAI SEAL JET S.A.C.";
@@ -393,10 +394,10 @@ class OrdenInternaMaterialesController extends Controller
         }
 
         $txt_content .= "======\n";
-        $txt_content .= "Contacto: " . ($proveedor->prv_contacto ?? '') . "\n";
-        $txt_content .= "Nombre: " . ($proveedor->prv_nombre ?? '') . "\n";
+        $txt_content .= "Contacto: " . ($proveedor['prv_contacto'] ?? '') . "\n";
+        $txt_content .= "Nombre: " . ($proveedor['prv_nombre'] ?? '') . "\n";
         $txt_content .= "Correo: " . ($proveedor->correo ?? '') . "\n";
-        $txt_content .= "Celular/Whatsapp: " . ($proveedor->prv_telefono ?? '') . "/" . ($proveedor->prv_whatsapp ?? '') . "\n\n";
+        $txt_content .= "Celular/Whatsapp: " . ($proveedor['prv_telefono'] ?? '') . "/" . ($proveedor['prv_whatsapp'] ?? '') . "\n\n";
         $txt_content .= "Arequipa, $fecha\n";
 
 

@@ -25,4 +25,10 @@ class DateHelper
 
         return null;
     }
+
+    public static function parserFechaActual()
+    {
+        Carbon::setLocale('es');
+        return Carbon::now()->translatedFormat('j \\de F \\del Y');
+    }
 }
