@@ -327,21 +327,24 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 Route::get('script-update', function () {
 
-    // $ordenes = OrdenInterna::all();
+    $ordenes = OrdenInterna::all();
 
-    // foreach ($ordenes as $orden) {
-    //     $numero = $orden->oic_numero;
+    foreach ($ordenes as $orden) {
+        $numero = $orden->oic_numero;
 
-    //     $queryBuilder = DB::connection('sqlsrv_andromeda')
-    //         ->table('OT_OrdenTrabajo as T1')
-    //         ->leftJoin('OT_Componente as T9', 'T9.IdComponente', '=', 'T1.IdComponente')
-    //         ->select('T9.NomComponente as odt_componente')
-    //         ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
-    //         ->first();
+        $queryBuilder = DB::connection('sqlsrv_andromeda')
+            ->table('OT_OrdenTrabajo as T1')
+            ->select('T1.FecAprobacion as oic_fechaaprobacion',
+            'T1.FecEntregaEstimada as oic_fechaentregaestimada',
+            'T1.FecEvaluacion as oic_fechaevaluacion')
+            ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
+            ->first();
 
-    //     if ($queryBuilder) {
-    //         $orden->oic_componente = $queryBuilder->odt_componente;
-    //         $orden->save();
-    //     }
-    // }
+        if ($queryBuilder) {
+            $orden->oic_fechaaprobacion = $queryBuilder->oic_fechaaprobacion;
+            $orden->oic_fechaentregaestimada = $queryBuilder->oic_fechaentregaestimada;
+            $orden->oic_fechaevaluacion = $queryBuilder->oic_fechaevaluacion;
+            $orden->save();
+        }
+    }
 });

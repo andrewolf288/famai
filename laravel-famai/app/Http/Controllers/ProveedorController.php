@@ -77,7 +77,7 @@ class ProveedorController extends Controller
         $queryBuilder = Proveedor::where('prv_activo', 1)
             ->where('prv_nrodocumento', $query)
             ->where('tdo_codigo', $tipoDocumento)
-            ->select('prv_id', 'tdo_codigo', 'prv_nrodocumento', 'prv_nombre');
+            ->select('prv_id', 'tdo_codigo', 'prv_nrodocumento', 'prv_nombre', 'prv_contacto', 'prv_telefono', 'prv_whatsapp');
         $results = $queryBuilder->get();
         return response()->json($results);
     }
