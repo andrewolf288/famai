@@ -6,7 +6,6 @@ use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
 use App\Helpers\DateHelper;
-use App\Proveedor;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;

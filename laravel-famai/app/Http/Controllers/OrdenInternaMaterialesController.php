@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
-use App\Proveedor;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
