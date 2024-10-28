@@ -423,7 +423,17 @@ class ReporteController extends Controller
 					</table>
 				');
 				$varMpdf->WriteHTML($varData);
+				// $footerHtml = "
+				// <div style='text-align: left; font-size: 10pt; position: absolute; left: 10px; bottom: 20px;'>
+				// 	Usuario Creación: $varUsuCreacion - Fecha: $varFecCreacion <br>
+				// 	Usuario Modifica: $varUsuModificacion - Fecha: $varFecModificacion
+				// </div>
+				// <div style='text-align: right; font-size: 10pt; position: absolute; right: 10px; bottom: 20px;'>
+				// 	Pág. {PAGENO} de {nbpg}
+				// </div>
+				// ";
 				$varMpdf->SetFooter('Usuario Creacion: ' . $varUsuCreacion . ' Fecha: ' . $varFecCreacion . ' <br> Usuario Modifica: ' . $varUsuModificacion . ' Fecha: ' . $varFecModificacion . ' | | Pag. {PAGENO}/{nbpg}');
+				// $varMpdf->SetFooter($footerHtml);
 
 				return response()->streamDownload(
 					function () use ($varMpdf) {

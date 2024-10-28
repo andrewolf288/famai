@@ -1,0 +1,338 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+    <h2 class="mb-3 fs-4">Aprobación de Orden de Compra</h2>
+</div>
+<div class="row mb-3">
+    <!-- Filtros de fechas -->
+    <div class="col-12 col-md-3 mb-3 mb-md-0">
+        <div class="d-flex flex-column flex-md-row align-items-end">
+            <div class="me-3">
+                <label for="fechaDesde" class="form-label">Fecha Desde</label>
+                <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
+            </div>
+            <div>
+                <label for="fechaHasta" class="form-label">Fecha Hasta</label>
+                <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
+            </div>
+            <button id="filter-dates" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros a la izquierda -->
+    <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
+        <div class="d-flex flex-column flex-md-row">
+            <select id="filter-selector" class="form-select w-100 w-md-auto">
+                <option value="">Seleccione un filtro</option>
+                <option value="occ_numero">Número orden compra</option>
+                <option value="occ_estado">Estado</option>
+            </select>
+
+            <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
+                placeholder="Buscar...">
+
+            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
+        </div>
+    </div>
+
+    <!-- Paginación a la derecha -->
+    <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+        <div class="pagination-container" id="pagination-container"></div>
+    </div>
+</div>
+
+<div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
+    <button class="btn btn-success me-2" id="btn-aprobar-ordenes-compra">Aprobar</button>
+</div>
+
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <th></th>
+        <th class="text-center">
+            Check
+        </th>
+        <th class="text-start">Fecha Ord. Comp.</th>
+        <th>Nro Ord. Comp.</th>
+        <th>Doc. proveedor</th>
+        <th>Raz. social proveedor</th>
+        <th class="text-center">Subtotal</th>
+        <th class="text-center">Impuesto</th>
+        <th class="text-center">Total</th>
+        <th>Ver detalle</th>
+        <th>Ver cotización</th>
+        <th>Ver OIs</th>
+        <th>Estado</th>
+        <th>Fec. Creación</th>
+        <th>Usu. Creador</th>
+        <th>Fec. Actualización</th>
+        <th>Usu. Actualizador</th>
+    </thead>
+    <tbody id="data-container-body">
+    </tbody>
+</table>
+
+<!-- DIALOG DE APROBACION -->
+<div class="modal fade" id="aprobacionesModal" tabindex="-1" aria-labelledby="aprobacionesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aprobacionesModalLabel">Aprobaciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- TABLE DE ORDENES DE COMPRAS SELECCIONADAS -->
+                <table id="tbl-aprobaciones-orden-compra" class="table">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Fecha Ord. Comp.</th>
+                            <th>Nro Ord. Comp.</th>
+                            <th>Doc. proveedor</th>
+                            <th>Raz. social proveedor</th>
+                            <th class="text-center">Subtotal</th>
+                            <th class="text-center">Impuesto</th>
+                            <th class="text-center">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>25/10/2024</td>
+                            <td>0000001</td>
+                            <td>10718316800</td>
+                            <td>HUANCOLLO QUISPE, HUGO ABEL</td>
+                            <td>552.38</td>
+                            <td>99.43</td>
+                            <td>651.81</td>
+                        </tr>
+                        <tr>
+                            <td>25/10/2024</td>
+                            <td>0000002</td>
+                            <td>10718316800</td>
+                            <td>HUANCOLLO QUISPE, HUGO ABEL</td>
+                            <td>552.38</td>
+                            <td>99.43</td>
+                            <td>651.81</td>
+                        </tr>
+                        <tr>
+                            <td>25/10/2024</td>
+                            <td>0000003</td>
+                            <td>10718316800</td>
+                            <td>HUANCOLLO QUISPE, HUGO ABEL</td>
+                            <td>552.38</td>
+                            <td>99.43</td>
+                            <td>651.81</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal"
+                    id="btn-asignar-usuario-aprobacion">Aprobar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VER DETALLE DE ORDEN DE COMPRA -->
+<div class="modal fade" id="detalleOrdenCompraModal" tabindex="-1" aria-labelledby="detalleOrdenCompraModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detalleOrdenCompraModalLabel">Detalle Orden de Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>OI</th>
+                                <th class="text-start">Item</th>
+                                <th>Descripcion</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Precio unitario</th>
+                                <th class="text-center">Total</th>
+                                <th>Fec. Creación</th>
+                                <th>Usu. Creador</th>
+                                <th>Fec. Modificación</th>
+                                <th>Usu. Modificador</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1050001</td>
+                                <td>1</td>
+                                <td>Producto de prueba 1</td>
+                                <td>3</td>
+                                <td>15.00</td>
+                                <td>45.00</td>
+                                <td>25/10/2024 08:15:12</td>
+                                <td>ANDREWJA</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>1050002</td>
+                                <td>2</td>
+                                <td>Producto de prueba 2</td>
+                                <td>3</td>
+                                <td>15.00</td>
+                                <td>45.00</td>
+                                <td>25/10/2024 08:15:12</td>
+                                <td>ANDREWJA</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>1050003</td>
+                                <td>3</td>
+                                <td>Producto de prueba 3</td>
+                                <td>3</td>
+                                <td>15.00</td>
+                                <td>45.00</td>
+                                <td>25/10/2024 08:15:12</td>
+                                <td>ANDREWJA</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- VER COTIZACION ASOCIADA -->
+<div class="modal fade" id="cotizacionAsociadaModal" tabindex="-1" aria-labelledby="cotizacionAsociadaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cotizacionAsociadaModalLabel">Cotización asociada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Fecha Cot.</th>
+                            <th>Nro Cot proveedor</th>
+                            <th>Doc. proveedor</th>
+                            <th>Raz. social proveedor</th>
+                            <th class="text-center">Total</th>
+                            <th>Estado</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Actualización</th>
+                            <th>Usu. Actualizador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>25/10/2024 08:15:12</td>
+                            <td>0000001</td>
+                            <td>20313031221</td>
+                            <td>FERREYROS S.A.C.</td>
+                            <td>45.00</td>
+                            <td>RTR</td>
+                            <td>25/10/2024 08:15:12</td>
+                            <td>ANDREWJA</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VER OTS ASOCIADAS-->
+<div class="modal fade" id="otsAsociadasModal" tabindex="-1" aria-labelledby="otsAsociadasModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="otsAsociadasModalLabel">Ordenes de compra asociadas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nro. OT</th>
+                            <th>Estado OT</th>
+                            <th>Cliente</th>
+                            <th>Nro. OI</th>
+                            <th>Fecha</th>
+                            <th>Área</th>
+                            <th>Estado OI</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Actualización</th>
+                            <th>Usu. Actualizador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1050001</td>
+                            <td>PROCESO</td>
+                            <td>Andrew Pold Jacobo Castillo</td>
+                            <td>1050001</td>
+                            <td>12/10/2024 08:15:12</td>
+                            <td>HIDRAULICA</td>
+                            <td>PROCESO</td>
+                            <td>25/10/2024 08:15:12</td>
+                            <td>ANDREWJA</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>1050002</td>
+                            <td>PROCESO</td>
+                            <td>Andrew Pold Jacobo Castillo</td>
+                            <td>1050002</td>
+                            <td>12/10/2024 08:15:12</td>
+                            <td>HIDRAULICA</td>
+                            <td>PROCESO</td>
+                            <td>25/10/2024 08:15:12</td>
+                            <td>ANDREWJA</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>1050003</td>
+                            <td>PROCESO</td>
+                            <td>Andrew Pold Jacobo Castillo</td>
+                            <td>1050003</td>
+                            <td>12/10/2024 08:15:12</td>
+                            <td>HIDRAULICA</td>
+                            <td>PROCESO</td>
+                            <td>25/10/2024 08:15:12</td>
+                            <td>ANDREWJA</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

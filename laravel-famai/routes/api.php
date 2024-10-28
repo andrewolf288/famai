@@ -329,6 +329,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 // RUTAS ABIERTAS
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
+Route::get('test-orden-interna', [OrdenInternaController::class, 'exportPDF']);
 
 Route::get('script-update', function () {
 

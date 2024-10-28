@@ -20,7 +20,18 @@ class CotizacionController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
 
+        $coc_numero = $request->input('coc_numero', null);
+        $coc_estado = $request->input('coc_estado', null);
+
         $query = Cotizacion::with(['proveedor', 'moneda']);
+
+        if($coc_numero !== null){
+            $query->where('coc_numero', $coc_numero);
+        }
+        if($coc_estado !== null){
+            $query->where('coc_estado', $coc_estado);
+        }
+
         $query->orderBy('coc_fechacotizacion', 'desc');
 
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);

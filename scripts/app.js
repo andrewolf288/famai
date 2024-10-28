@@ -165,6 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta de aprobacion de orden de compra
+    router.on('/aprobacion-orden-compra', () => {
+        privateRoute(() => {
+            loadContent('pages/aprobacion-orden-compra/aprobacionOrdenCompra.html', 'scripts/aprobacion-orden-compra/aprobacion-orden-compra.js')
+        })
+    })
+
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {

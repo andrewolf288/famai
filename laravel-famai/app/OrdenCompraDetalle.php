@@ -12,7 +12,7 @@ class OrdenCompraDetalle extends Model
 
     protected $fillable = [
         'occ_id',
-        'pro_id',
+        'odm_id',
         'ocd_orden',
         'ocd_descripcion',
         'ocd_cantidad',
@@ -28,9 +28,9 @@ class OrdenCompraDetalle extends Model
     const CREATED_AT = 'ocd_feccreacion';
     const UPDATED_AT = 'ocd_fecmodificacion';
 
-    // relacion con producto
-    public function producto()
+    // detalle de material
+    public function detalleMaterial() 
     {
-        return $this->belongsTo(Producto::class, 'pro_id', 'pro_id');
+        return $this->belongsTo(OrdenInternaMateriales::class, 'odm_id', 'odm_id');
     }
 }

@@ -11,10 +11,13 @@ use App\OrdenTrabajo;
 use App\Producto;
 use App\Unidad;
 use Carbon\Carbon;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
 
 class OrdenInternaController extends Controller
 {
@@ -628,5 +631,33 @@ class OrdenInternaController extends Controller
         });
 
         return response()->json(['success' => 'Orden interna eliminada correctamente.'], 200);
+    }
+
+
+    // exportar orden interna
+    public function exportPDF()
+    {
+        // Configurar opciones de DOMPDF
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $options->set('isJavascriptEnabled', true);
+
+        // Crear instancia de DOMPDF
+        $dompdf = new Dompdf($options);
+
+        // Cargar la vista Blade y pasar datos si es necesario
+        $html = View::make('orden-interna.ordeninterna')->render();
+        $dompdf->loadHtml($html);
+
+        // Configurar el tamaño de papel y orientación
+        $dompdf->setPaper('A4', 'landscape');
+
+        // Renderizar el PDF
+        $dompdf->render();
+
+        // Mostrar el PDF en el navegador o descargar
+        return $dompdf->stream("reporte.pdf", ["Attachment" => false]);
     }
 }

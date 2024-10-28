@@ -50,34 +50,32 @@ $(document).ready(() => {
 
             const rowItem = document.createElement('tr')
             rowItem.innerHTML = `
-                <tr>
-                    <td></td>
-                    <td class="text-center">
-                        <input type="checkbox" style="width: 25px; height: 25px; border: 2px solid black;" class="form-check-input row-select" ${selectedRows.has(material.odm_id) ? 'checked' : ''}/>
-                    </td>
-                    <td>${odt_numero}</td>
-                    <td>${oic_numero}</td>
-                    <td>${parseDate(material.odm_feccreacion)}</td>
-                    <td class="text-center">${material.odm_tipo == 1 ? 'R' : 'A'}</td>
-                    <td>${producto?.pro_codigo || 'N/A'}</td>
-                    <td>${material.odm_descripcion}</td>
-                    <td>${material.odm_observacion || 'N/A'}</td>
-                    <td class="text-center">${material.odm_cantidad}</td>
-                    <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
-                    <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-reservado">0.00</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-ordenado">0.00</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-atendido">0.00</button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
-                    </td>
-                </tr>
+                <td></td>
+                <td class="text-center">
+                    <input type="checkbox" style="width: 25px; height: 25px; border: 2px solid black;" class="form-check-input row-select" ${selectedRows.has(material.odm_id) ? 'checked' : ''}/>
+                </td>
+                <td>${odt_numero}</td>
+                <td>${oic_numero}</td>
+                <td>${parseDate(material.odm_feccreacion)}</td>
+                <td class="text-center">${material.odm_tipo == 1 ? 'R' : 'A'}</td>
+                <td>${producto?.pro_codigo || 'N/A'}</td>
+                <td>${material.odm_descripcion}</td>
+                <td>${material.odm_observacion || 'N/A'}</td>
+                <td class="text-center">${material.odm_cantidad}</td>
+                <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
+                <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-reservado">0.00</button>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-ordenado">0.00</button>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-atendido">0.00</button>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
+                </td>
             `
             // Añadimos el evento `change` al checkbox
             const checkbox = rowItem.querySelector('.row-select');
@@ -374,11 +372,6 @@ $(document).ready(() => {
                     <button class="btn btn-sm btn-primary btn-cotizacion-exportar-text me-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
                             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
-                        </svg>
-                    </button>
-                    <button class="btn btn-sm btn-success btn-generar-cotizacion">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
-                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707z"/>
                         </svg>
                     </button>
                 </div>
