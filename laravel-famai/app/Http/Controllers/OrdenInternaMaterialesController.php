@@ -353,29 +353,28 @@ class OrdenInternaMaterialesController extends Controller
         }
     }
 
+    // EXPORTAR EN PDF COTIZACION
     public function exportPDFCotizacion(Request $request)
     {
         $proveedor = $request->input('proveedor', null);
         $detalleMateriales = $request->input('detalle_materiales', []);
 
-        // $proveedor = Proveedor::find($idProveedor);
-
         $data = [
             'proveedor' => $proveedor,
             'detalleMateriales' => $detalleMateriales,
-            'fechaActual' => DateHelper::parserFechaActual()
+            'fechaActual' => DateHelper::parserFechaActual(),
+            'url_cotizacion' => null
         ];
 
         $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
         return $pdf->download('cotizacion.pdf');
     }
 
+    // EXPORTAR EN TXT COTIZACION
     public function exportTXTCotizacion(Request $request)
     {
         $proveedor = $request->input('proveedor', null);
         $detalleMateriales = $request->input('detalle_materiales', []);
-
-        // $proveedor = Proveedor::find($idProveedor);
 
         $ruc = "20134690080";
         $razon_social = "FAMAI SEAL JET S.A.C.";
@@ -390,7 +389,7 @@ class OrdenInternaMaterialesController extends Controller
 
         // Agregar los productos
         foreach ($detalleMateriales as $index => $item) {
-            $txt_content .= ($index + 1) . ". " . $item["odm_descripcion"] . "     " . $item["odm_cantidad"] . "\n";
+            $txt_content .= ($index + 1) . ". " . $item["cod_descripcion"] . "     " . $item["cod_cantidad"] . "\n";
         }
 
         $txt_content .= "======\n";

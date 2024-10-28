@@ -240,8 +240,8 @@
             @foreach ($detalleMateriales as $material)
                 <tr>
                     <td class="col-item">{{ $loop->iteration }}</td>
-                    <td class="col-descripcion">{{ $material['odm_descripcion'] }}</td>
-                    <td class="col-cantidad">{{ $material['odm_cantidad'] }}</td>
+                    <td class="col-descripcion">{{ $material['cod_descripcion'] }}</td>
+                    <td class="col-cantidad">{{ $material['cod_cantidad'] }}</td>
                     <td class="col-und">{{ $material['uni_codigo'] }}</td>
                     <td class="col-precio">&nbsp;</td>
                     <td class="col-total">&nbsp;</td>
@@ -260,7 +260,7 @@
             @endfor
         </tbody>
     </table>
-    <table style="width: 100%;height: 50px;border-collapse: collapse;">
+    <table style="width: 100%;height: 20px;border-collapse: collapse;">
         <tr>
             <td style="width: 77.5%;"></td>
             <td style="width: 22.5%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
@@ -269,6 +269,13 @@
             </td>
         </tr>
     </table>
+
+    {{-- URL COTIZACION --}}
+    @if($url_cotizacion != null)
+        <p style="margin-top: 10px;margin-bottom: 10px;font-size: 12.5px;text-align: center;">Para ingresar su cotización debes abrir el siguiente enlace en un navegador: <span style="color: #0000FF">{{$url_cotizacion}}</span></p>
+    @endif
+
+
     <hr style="margin-top: 2px">
     <table style="width: 100%; border-collapse: collapse">
         <tr>

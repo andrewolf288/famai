@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
+use App\Helpers\DateHelper;
+use App\Proveedor;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -144,7 +146,7 @@ class CotizacionController extends Controller
         }
     }
 
-    public function storeDespliegue(Request $request)
+    public function storeDespliegueMateriales(Request $request)
     {
         $user = auth()->user();
 
@@ -188,8 +190,18 @@ class CotizacionController extends Controller
 
             DB::commit();
 
-            return response()->json($cotizacion, 200);
-        } catch(Exception $e) {
+            // retorna la generacion de un PDF
+            $API_URL = "http://localhost/famai";
+            $data = [
+                'proveedor' => $proveedor,
+                'detalleMateriales' => $detalleMateriales,
+                'fechaActual' => DateHelper::parserFechaActual(),
+                'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id"
+            ];
+
+            $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
+            return $pdf->download('cotizacion.pdf');
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
@@ -295,7 +307,7 @@ class CotizacionController extends Controller
 
     public function show($id)
     {
-        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion.producto', 'detalleCotizacionArchivos'])->findOrFail($id);
+        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad', 'detalleCotizacionArchivos'])->findOrFail($id);
         return response()->json($cotizacion);
     }
 
@@ -303,11 +315,11 @@ class CotizacionController extends Controller
     {
         try {
             $coc_id = $request->input('coc_id');
-            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.producto.unidad'])->findOrFail($coc_id);
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad'])->findOrFail($coc_id);
             $data = array_merge(
                 $cotizacion->toArray(),
                 [
-                    'coc_fecha_formateada' => Carbon::parse($cotizacion->coc_fechacotizacion)->format('d/m/Y'),
+                    'coc_fecha_formateada' => DateHelper::parserFechaActual(),
                 ]
             );
             $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
@@ -347,6 +359,75 @@ class CotizacionController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al eliminar la cotización: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // CONTROLADOR PARA COTIZACION PROVEEDOR
+
+    // funcion para mostrar cotizacion para proveedor
+    public function showCotizacionProveedor($id)
+    {
+        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad', 'detalleCotizacionArchivos'])->findOrFail($id);
+        return response()->json($cotizacion);
+    }
+
+    // funcion para editar cotizacion para proveedor
+    public function updateCotizacionProveedor(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $validatedData = validator($request->all(), [
+                'coc_cotizacionproveedor' => 'required|string',
+                'coc_correcontacto' => 'required|string',
+                'coc_fechaentrega' => 'required|date',
+                'coc_fechavalidez' => 'required|date',
+                'coc_notas' => 'nullable|string',
+                'coc_total' => 'required|numeric|min:1',
+                'detalle_cotizacion' => 'required|array|min:1',
+            ])->validate();
+
+            // actualizamos la cotizacion
+            $cotizacion = Cotizacion::findOrFail($id);
+
+            $cotizacion->update([
+                'coc_cotizacionproveedor' => $validatedData['coc_cotizacionproveedor'],
+                'coc_correcontacto' => $validatedData['coc_correcontacto'],
+                'coc_fechaentrega' => $validatedData['coc_fechaentrega'],
+                'coc_fechavalidez' => $validatedData['coc_fechavalidez'],
+                'coc_notas' => $validatedData['coc_notas'],
+                'coc_total' => $validatedData['coc_total'],
+                'coc_estado' => 'RPR'
+            ]);
+
+            // actualizamos los detalles de la cotizacion
+            $detalleCotizacion = $validatedData['detalle_cotizacion'];
+            foreach ($detalleCotizacion as $detalle) {
+                // Buscamos el detalle de cotizacion
+                $detalleCotizacion = CotizacionDetalle::findOrFail($detalle['cod_id']);
+                // actualizamos
+                $detalleCotizacion->update([
+                    'cod_observacion' => $detalle['cod_observacion'],
+                    'cod_cantidad' => $detalle['cod_cantidad'],
+                    'cod_preciounitario' => $detalle['cod_preciounitario'],
+                    'cod_total' => $detalle['cod_total'],
+                ]);
+            }
+
+            DB::commit();
+
+            // proveedor
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad'])->findOrFail($id);
+            $data = array_merge(
+                $cotizacion->toArray(),
+                [
+                    'coc_fecha_formateada' => DateHelper::parserFechaActual(),
+                ]
+            );
+            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
+            return $pdf->download('cotizacion.pdf');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Ocurrió un error al enviar la cotización'], 500);
         }
     }
 }

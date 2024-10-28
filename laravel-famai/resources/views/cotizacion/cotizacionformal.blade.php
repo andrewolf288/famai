@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF de Prueba</title>
+    <title>Cotizacion proveedor</title>
     <style>
         * {
             margin: 0;
@@ -167,12 +167,10 @@
                                 20134690080</td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">COTIZACIÓN
-                            </td>
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">COTIZACIÓN</td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">L- {{$coc_numero}}
-                            </td>
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">{{$coc_numero}}</td>
                         </tr>
                     </table>
                 </td>
@@ -224,41 +222,6 @@
             </td>
         </tr>
     </table>
-    {{-- table de cabecera de factura --}}
-    <table class="table-factura-cabecera">
-        <tr>
-            <td>
-                <div class="info-row">
-                    <span class="label">FECH. ENTREGA</span>
-                    <span class="value">{{$coc_fechacotizacion}}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">ELABORADO POR:</span>
-                    <span class="value">{{$solicitante['tra_nombre']}}</span>
-                </div>
-            </td>
-            <td>
-                <div class="info-row">
-                    <span class="label">Moneda</span>
-                    <span class="value">{{$moneda['mon_descripcion']}}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">FORMA DE PAGO</span>
-                    <span class="value">{{$coc_formapago}}</span>
-                </div>
-            </td>
-            <td>
-                <div class="info-row">
-                    <span class="label">REFERENCIA</span>
-                    <span class="value"></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">ACTIVO:</span>
-                    <span class="value"></span>
-                </div>
-            </td>
-        </tr>
-    </table>
     {{-- Detalle de factura --}}
     <table class="table-detalle-factura">
         <thead>
@@ -272,18 +235,18 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($detalle_cotizacion as $detalle)
+            @foreach ($detalle_cotizacion as $material)
                 <tr>
-                    <td class="col-item">{{ $detalle['cod_orden'] }}</td>
-                    <td class="col-descripcion">{{ $detalle['cod_descripcion'] }}</td>
-                    <td class="col-cantidad">{{ $detalle['cod_cantidad'] }}</td>
-                    <td class="col-und">{{ $detalle['pro_id'] != null ? $detalle['producto']['unidad']['uni_codigo'] : '' }}</td>
-                    <td class="col-precio">{{ $detalle['cod_preciounitario'] }}</td>
-                    <td class="col-total">{{ $detalle['cod_total'] }}</td>
+                    <td class="col-item">{{ $loop->iteration }}</td>
+                    <td class="col-descripcion">{{ $material['cod_descripcion'] }}</td>
+                    <td class="col-cantidad">{{ $material['cod_cantidad'] }}</td>
+                    <td class="col-und">{{ $material['detalle_material']['producto'] ? $material['detalle_material']['producto']['unidad']['uni_codigo'] : ''}}</td>
+                    <td class="col-precio">{{ $material['cod_preciounitario']}} </td>
+                    <td class="col-total">{{ $material['cod_total'] }}</td>
                 </tr>
             @endforeach
 
-            @for ($i = count($detalle_cotizacion); $i < 22; $i++)
+            @for ($i = count($detalle_cotizacion); $i < 32; $i++)
                 <tr>
                     <td class="col-item">&nbsp;</td>
                     <td class="col-descripcion">&nbsp;</td>
@@ -295,87 +258,23 @@
             @endfor
         </tbody>
     </table>
-    <table style="width: 100%;height: 210px;border-collapse: collapse;">
+    <table style="width: 100%;height: 20px;border-collapse: collapse;">
         <tr>
-            <td style="width: 77.5%;">
-                <table style="border-collapse: collapse">
-                    <tr>
-                        <td
-                            style="width: 25%;height: 110px;font-size: 12px; font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;">
-                            SOLICITADO POR:</td>
-                        <td
-                            style="width: 75%;height: 110px;font-size: 12px; font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;">
-                            AUTORIZADO POR:</td>
-                    </tr>
-                    <tr>
-                        <td style="font-size: 12px;height: 50px;font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;"
-                            colspan="2">NOTAS: {{$coc_notas}}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-size: 9px;height: 50px;border: 1px solid #000000;padding-left: 1px;"
-                            colspan="2">
-                            <span style="font-weight: bold;">COLOCAR EL NUMERO DE ORDEN DE COMPRA EN LA
-                                FACTURA.</span><br>
-                            SIRVANSE ENTREGAR EL MATERIAL DEBIDAMENTE EMBALADO Y ROTULADO CON EL NUMERO DE ORDEN DE
-                            COMPRA Y LA CANTIDAD DE PAQUETES QUE SE ENTREGAN DE ACUERDO A LO SIGUIENTE : REFERENCIA DE
-                            O/C (ADJUNTANDO GUIA DE REMISION Y FACTURA ORIGINAL MAS TRES COPIAS).
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td style="width: 22.5%;">
-                <table style="border-collapse: collapse; width: 100%;">
-                    <tr>
-                        <td
-                            style="height: 55px;border: 1px solid #000000;font-size: 12px;font-weight: bold;vertical-align: top;padding: 0px 1px 0px 1px">
-                            <table style="border-collapse: collapse; width: 100%;">
-                                <tr>
-                                    <td style="text-align: left; padding: 0;">SUBTOT S/</td>
-                                    <td style="text-align: right; padding: 0;"></td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align: left; padding: 0;">I.G.V. 18%</td>
-                                    <td style="text-align: right; padding: 0;"></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td
-                            style="height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
-                            <span style="float: left;">TOTAL S/</span>
-                            <span style="float: right;">{{$coc_total}}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td
-                            style="height: 85px;border: 1px solid #000000;vertical-align: top;font-weight: bold;padding: 0px 2px 0px 2px;">
-                            <span style="font-size:10px;">Observación de Pago:</span>
-                            <hr style="margin-top: 20px;border-color: #171717;">
-                            <hr style="margin-top: 20px;border-color: #171717;">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td
-                            style="font-size: 11px;height: 50px;border: 1px solid #000000;font-weight: bold;padding: 0px 4px 0px 4px;">
-                            <table style="border-collapse: collapse; width: 100%;">
-                                <tr>
-                                    <td style="text-align: left; padding: 0;">Adelanto:</td>
-                                    <td style="text-align: right; padding: 0;">______________</td>
-                                </tr>
-                                <br>
-                                <tr>
-                                    <td style="text-align: left; padding: 0;">Saldo:</td>
-                                    <td style="text-align: right; padding: 0;">______________</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
+            <td style="width: 77.5%;"></td>
+            <td style="width: 22.5%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
+                <span style="float: left;">TOTAL S/</span>
+                <span style="float: right;">{{ $coc_total }}</span>
             </td>
         </tr>
     </table>
-    <hr style="margin-top: 5px">
+
+    {{-- URL COTIZACION --}}
+    {{-- @if($url_cotizacion != null)
+        <p style="margin-top: 10px;margin-bottom: 10px;font-size: 12.5px;text-align: center;">Para ingresar su cotización debes abrir el siguiente enlace en un navegador: <span style="color: #0000FF">{{$url_cotizacion}}</span></p>
+    @endif --}}
+
+
+    <hr style="margin-top: 20px">
     <table style="width: 100%; border-collapse: collapse">
         <tr>
             <td style="width: 45%; color:#0000FF;font-size: 10px;text-align:center;">

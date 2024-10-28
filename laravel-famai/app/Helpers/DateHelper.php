@@ -29,6 +29,6 @@ class DateHelper
     public static function parserFechaActual()
     {
         Carbon::setLocale('es');
-        return Carbon::now()->translatedFormat('j \\de F \\del Y');
+        return Carbon::now()->isoFormat('D [de] MMMM [del] YYYY');
     }
 }

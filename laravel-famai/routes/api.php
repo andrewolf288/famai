@@ -291,6 +291,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizaciones', [CotizacionController::class, 'index']);
     Route::post('cotizaciones', [CotizacionController::class, 'store']);
+    Route::post('cotizacionesByDespliegue', [CotizacionController::class, 'storeDespliegueMateriales']);
     Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
     Route::get('cotizaciones/exportarPDF', [CotizacionController::class, 'exportarPDF']);
     Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
@@ -325,26 +326,30 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
 });
 
+// RUTAS ABIERTAS
+Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
+Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
+
 Route::get('script-update', function () {
 
-    $ordenes = OrdenInterna::all();
+    // $ordenes = OrdenInterna::all();
 
-    foreach ($ordenes as $orden) {
-        $numero = $orden->oic_numero;
+    // foreach ($ordenes as $orden) {
+    //     $numero = $orden->oic_numero;
 
-        $queryBuilder = DB::connection('sqlsrv_andromeda')
-            ->table('OT_OrdenTrabajo as T1')
-            ->select('T1.FecAprobacion as oic_fechaaprobacion',
-            'T1.FecEntrega as oic_fechaentregaestimada',
-            'T1.FecEvaluacion as oic_fechaevaluacion')
-            ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
-            ->first();
+    //     $queryBuilder = DB::connection('sqlsrv_andromeda')
+    //         ->table('OT_OrdenTrabajo as T1')
+    //         ->select('T1.FecAprobacion as oic_fechaaprobacion',
+    //         'T1.FecEntrega as oic_fechaentregaestimada',
+    //         'T1.FecEvaluacion as oic_fechaevaluacion')
+    //         ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
+    //         ->first();
 
-        if ($queryBuilder) {
-            $orden->oic_fechaaprobacion = $queryBuilder->oic_fechaaprobacion;
-            $orden->oic_fechaentregaestimada = $queryBuilder->oic_fechaentregaestimada;
-            $orden->oic_fechaevaluacion = $queryBuilder->oic_fechaevaluacion;
-            $orden->save();
-        }
-    }
+    //     if ($queryBuilder) {
+    //         $orden->oic_fechaaprobacion = $queryBuilder->oic_fechaaprobacion;
+    //         $orden->oic_fechaentregaestimada = $queryBuilder->oic_fechaentregaestimada;
+    //         $orden->oic_fechaevaluacion = $queryBuilder->oic_fechaevaluacion;
+    //         $orden->save();
+    //     }
+    // }
 });

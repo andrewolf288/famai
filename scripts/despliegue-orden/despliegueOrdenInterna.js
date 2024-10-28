@@ -406,35 +406,72 @@ $(document).ready(() => {
 
         const detalleMateriales = []
 
-        const rows = $('#tbl-cotizaciones-materiales tbody tr')
-        rows.each(function () {
-            const data = {
-                uni_codigo: $(this).find('.unidad-detalle').text(),
-                odm_descripcion: $(this).find('.descripcion-detalle').val(),
-                odm_observacion: $(this).find('.observacion-detalle').val(),
-                odm_cantidad: $(this).find('.cantidad-detalle').val(),
-            }
-            detalleMateriales.push(data)
-        })
+        if (confirm('¿Deseas generar una cotización?')) {
+            const rows = $('#tbl-cotizaciones-materiales tbody tr')
+            rows.each(function () {
+                const data = {
+                    odm_id: $(this).data('id'),
+                    uni_codigo: $(this).find('.unidad-detalle').text(),
+                    cod_descripcion: $(this).find('.descripcion-detalle').val(),
+                    cod_observacion: $(this).find('.observacion-detalle').val(),
+                    cod_cantidad: $(this).find('.cantidad-detalle').val(),
+                }
+                detalleMateriales.push(data)
+            })
 
-        try {
             const formatData = {
                 proveedor,
                 detalle_materiales: detalleMateriales
             }
-            console.log(formatData)
-            const response = await client.post('/ordeninternamateriales/export-cotizacion', formatData, {
-                headers: {
-                    'Accept': 'application/pdf'
-                },
-                responseType: 'blob'
+
+            try {
+                console.log(formatData)
+                const response = await client.post('/cotizacionesByDespliegue', formatData, {
+                    headers: {
+                        'Accept': 'application/pdf'
+                    },
+                    responseType: 'blob'
+                })
+
+                const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                showModalPreview(pdfUrl)
+            } catch (error) {
+                console.log(error)
+            }
+
+        } else {
+            const rows = $('#tbl-cotizaciones-materiales tbody tr')
+            rows.each(function () {
+                const data = {
+                    uni_codigo: $(this).find('.unidad-detalle').text(),
+                    cod_descripcion: $(this).find('.descripcion-detalle').val(),
+                    cod_observacion: $(this).find('.observacion-detalle').val(),
+                    cod_cantidad: $(this).find('.cantidad-detalle').val(),
+                }
+                detalleMateriales.push(data)
             })
 
-            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            showModalPreview(pdfUrl)
-        } catch (error) {
-            console.log(error)
+            const formatData = {
+                proveedor,
+                detalle_materiales: detalleMateriales
+            }
+
+            try {
+                console.log(formatData)
+                const response = await client.post('/ordeninternamateriales/export-cotizacion', formatData, {
+                    headers: {
+                        'Accept': 'application/pdf'
+                    },
+                    responseType: 'blob'
+                })
+
+                const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                showModalPreview(pdfUrl)
+            } catch (error) {
+                console.log(error)
+            }
         }
     })
 
@@ -444,6 +481,7 @@ $(document).ready(() => {
         modal.show();
     }
 
+    // Funcion para exportar en txt
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-text', async (event) => {
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')
@@ -466,9 +504,9 @@ $(document).ready(() => {
         rows.each(function () {
             const data = {
                 uni_codigo: $(this).find('td').eq(1).text(),
-                odm_descripcion: $(this).find('.descripcion-detalle').val(),
-                odm_observacion: $(this).find('.observacion-detalle').val(),
-                odm_cantidad: $(this).find('.cantidad-detalle').val(),
+                cod_descripcion: $(this).find('.descripcion-detalle').val(),
+                cod_observacion: $(this).find('.observacion-detalle').val(),
+                cod_cantidad: $(this).find('.cantidad-detalle').val(),
             }
             detalleMateriales.push(data)
         })
@@ -498,46 +536,4 @@ $(document).ready(() => {
         const modal = new bootstrap.Modal(document.getElementById("previewTXTModal"));
         modal.show();
     }
-
-    // funcion para generar cotizacion
-    $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-generar-cotizacion', async (event) => {
-        const row = $(event.currentTarget).closest('tr')
-        const id_proveedor = row.data('id-proveedor')
-
-        const proveedor = {
-            prv_id: id_proveedor,
-            prv_direccion: row.find('.direccion-proveedor').val() || '',
-            prv_nombre: row.find('.nombre-proveedor').text() || '',
-            tdo_codigo: row.find('.tipodocumento-proveedor').text() || '',
-            prv_nrodocumento: row.find('.nrodocumento-proveedor').text() || '',
-            prv_contacto: row.find('.contacto-proveedor').val() || '',
-            prv_whatsapp: row.find('.celular-proveedor').val() || '',
-            prv_telefono: row.find('.telefono-proveedor').val() || '',
-            prv_correo: row.find('.correo-proveedor').val() || ''
-        }
-
-        const detalleMateriales = []
-
-        const rows = $('#tbl-cotizaciones-materiales tbody tr')
-        rows.each(function () {
-            const data = {
-                odm_id: $(this).data('id'),
-                cod_descripcion: $(this).find('.descripcion-detalle').val(),
-                cod_observacion: $(this).find('.observacion-detalle').val(),
-                cod_cantidad: $(this).find('.cantidad-detalle').val(),
-            }
-            detalleMateriales.push(data)
-        })
-
-        try {
-            const formatData = {
-                proveedor,
-                detalle_materiales: detalleMateriales
-            }
-            console.log(formatData)
-
-        } catch(error) {
-
-        }
-    })
 })

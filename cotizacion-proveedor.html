@@ -4,42 +4,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAMAI | COTIZACION</title>
+    <title>FAMAI | COTIZACION PROVEEDOR</title>
     <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="./assets/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
     <!-- ICON -->
     <link rel="icon" href="assets/images/cropped-famai-icon-32x32.png" type="image/png">
 </head>
 
 <body>
     <!-- Contenido del Formulario Oculto -->
-    <div id="formContent" style="display:none;" class="container-fluid mt-5">
+    <div id="formContent" class="container-fluid mt-5">
         <div class="row">
-            <div class="col-12 d-flex flex-row justify-content-end mb-2">
-                <div>
-                    <label for="">Num. Cotización Proveedor</label>
-                    <input type="text" class="form-control" id="numeroCotizacionProveedorInput">
+            <!-- DATOS DEL PROVEEDOR -->
+            <div class="col-md-6 col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Datos proveedor</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <input type="text" id="idProveedorInput" value="" hidden>
+                            <div class="col-md-3">
+                                <label for="documentoProveedorInput">Documento</label>
+                                <input type="text" id="documentoProveedorInput" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-9">
+                                <label for="razonSocialProveedorInput">Nombre</label>
+                                <input type="text" id="razonSocialProveedorInput" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <label for="contactoProveedorInput">Contacto</label>
+                                <input type="text" id="contactoProveedorInput" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="telefonoProveedorInput">Teléfono</label>
+                                <input type="text" id="telefonoProveedorInput" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="whatsappProveedorInput">Celular</label>
+                                <input type="text" id="whatsappProveedorInput" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- DATOS DE LA COTIZACION -->
-            <div class="col-12">
+            <div class="col-md-6 col-12">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title">Datos cotización</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-8">
-                                <label for="documentoProveedorInput">Documento</label>
-                                <input type="text" id="documentoProveedorInput" class="form-control" />
+                            <div class="col-md-6">
+                                <label for="cotizacionProveedorCotizacionInput">Número cotización</label>
+                                <input type="text" id="cotizacionProveedorCotizacionInput" class="form-control" />
                             </div>
-                            <div class="col-4">
+                            <div class="col-md-6">
+                                <div>
+                                    <label for="correoContactoCotizacionInput">Correo contacto</label>
+                                    <input type="text" id="correoContactoCotizacionInput" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
                                 <div>
                                     <label for="fechaEntregaPicker">Fecha entrega</label>
                                     <input type="text" id="fechaEntregaPicker" class="form-control">
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div>
+                                    <label for="fechaValidezPicker">Fecha validez</label>
+                                    <input type="text" id="fechaValidezPicker" class="form-control">
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Nota cotización</h5>
+                    </div>
+                    <div class="card-body">
+                        <label for="notasCotizacionInput">Nota</label>
+                        <textarea id="notasCotizacionInput" rows="3" class="form-control"></textarea>
                     </div>
                 </div>
             </div>
@@ -47,26 +103,20 @@
         <!-- DATOS DE DETALLE DE PRODUCTOS -->
         <div class="card mt-3">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5 class="card-title">Productos</h5>
-                    <button class="btn btn-success" id="addProductBtn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                            <path
-                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
-                        </svg>
-                    </button>
                 </div>
-                <div class="card-body">
+                <div class="card-body table-responsive">
                     <table class="table" id="productosCotizacionTable">
                         <thead>
                             <tr>
-                                <th>Item</th>
-                                <th>Descripción</th>
-                                <th>Cantidad</th>
-                                <th>Precio Unitario</th>
-                                <th>Total</th>
-                                <th>Acciones</th>
+                                <th class="col-1">Item</th>
+                                <th class="col-3">Descripción</th>
+                                <th class="col-4">Observación</th>
+                                <th class="col-1 text-center">Cantidad</th>
+                                <th class="col-1 text-center">Pre. Unitario</th>
+                                <th class="col-1 text-center">Total</th>
+                                <th class="col-1 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="productosCotizacionBody">
@@ -89,71 +139,22 @@
             </div>
         </div>
         <!-- Acciones -->
-        <div class="d-flex flex-row justify-content-end mt-3">
-            <button class="btn btn-primary" id="btn-guardar-cotizacion-proveedor">Guardar</button>
+        <div class="d-flex flex-row justify-content-end mt-3 mb-3">
+            <button class="btn btn-primary" id="btn-guardar-cotizacion-proveedor" disabled>Guardar</button>
         </div>
     </div>
 
-    <!-- DIALOG AGREGAR PRODUCTOS -->
-    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <input type="text" id="productosInput" class="form-control" placeholder="Ingresar material...">
-                    </div>
-                    <table id="tbl-cotizacion-productos" class="table mt-3">
-                        <thead>
-                            <tr>
-                                <th class="col-5">Descripción</th>
-                                <th class="col-1 text-center">Cantidad</th>
-                                <th class="col-2 text-center">Precio s/IGV</th>
-                                <th class="col-2 text-center">Total s/IGV</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
-                </div>
-            </div>
-        </div>
+    <!-- Cuadro de mensaje -->
+    <div id="mensajeExito" class="alert alert-success text-center p-4" role="alert" style="display: none;">
+        ¡Su cotización fue enviada exitosamente! Se adjuntará una copia de la cotización a su correo electrónico ingresado.
     </div>
 
-    <!-- Modal de Código de Ingreso -->
-    <div class="modal fade" id="accessCodeModal" tabindex="-1" aria-labelledby="accessCodeModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="accessCodeModalLabel">Ingresa el Código de Acceso</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="accessForm">
-                        <div class="mb-3">
-                            <label for="accessCodeInput" class="form-label">Código de Acceso</label>
-                            <input type="text" class="form-control" id="accessCodeInput" required>
-                            <div id="error-message" class="text-danger mt-2" style="display: none;">Código incorrecto,
-                                intenta nuevamente.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Ingresar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- libreria de manejo de fechas -->
+    <script src="assets/js/moment-with-locales.min.js"></script>
     <!-- Jquery y bootstrap -->
     <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
     <!-- Libreria de axios -->
     <script src="assets/js/axios.min.js"></script>
     <!-- Javascript de la vista -->

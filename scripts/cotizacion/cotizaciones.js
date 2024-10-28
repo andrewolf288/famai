@@ -33,9 +33,9 @@ $(document).ready(() => {
                 <tr>
                     <td>${cotizacion.coc_fechacotizacion !== null ? parseDateSimple(cotizacion.coc_fechacotizacion) : 'No aplica'}</td>
                     <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
-                    <td>${cotizacion.proveedor?.prv_nombre ?? 'No aplica'}</td>
-                    <td class="text-left">${cotizacion.proveedor?.prv_nrodocumento ?? 'No aplica'}</td>
-                    <td class="text-center">${cotizacion.coc_total}</td>
+                    <td>${cotizacion.proveedor?.prv_nombre || 'No aplica'}</td>
+                    <td class="text-left">${cotizacion.proveedor?.prv_nrodocumento || 'No aplica'}</td>
+                    <td class="text-center">${cotizacion.coc_total || 'No aplica'}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary btn-cotizacion-detalle" data-cotizacion="${cotizacion.coc_id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
@@ -44,7 +44,8 @@ $(document).ready(() => {
                             </svg>
                         </button>
                     </td>
-                    <td>${cotizacion.coc_estado == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
+                    <td>
+                        <span class="badge bg-primary">${cotizacion.coc_estado}</span>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-cotizacion-editar me-2" data-cotizacion="${cotizacion.coc_id}">
