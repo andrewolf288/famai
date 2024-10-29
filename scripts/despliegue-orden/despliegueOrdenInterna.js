@@ -2,6 +2,7 @@ $(document).ready(() => {
     let abortController
     // URL ENDPOINT
     const apiURL = '/detalleMaterialesOrdenInterna'
+    const apiRecursosURL = 'http://localhost:8080/storage/'
 
     // referencias de filtros
     const filterSelector = $('#filter-selector')
@@ -76,6 +77,9 @@ $(document).ready(() => {
                 <td>
                     <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
                 </td>
+                <td>
+                    <button class="btn btn-primary btn-presupuesto" data-notapresupuesto="${material.odm_notapresupuesto}" data-adjuntopresupuesto="${material.odm_adjuntopresupuesto}" data-detalle="${material.odm_id}">Presupuesto</button>
+                </td>
             `
             // Añadimos el evento `change` al checkbox
             const checkbox = rowItem.querySelector('.row-select');
@@ -103,6 +107,83 @@ $(document).ready(() => {
         const loadModalAtendido = new bootstrap.Modal(document.getElementById('atendidoModal'))
         loadModalAtendido.show()
     })
+
+    // ------------------ GESTION DE PRESUPUESTO -------------------
+    $("#data-container-body").on('click', '.btn-presupuesto', async function () {
+        const idDetalleMaterial = $(this).data('detalle')
+        const notapresupuesto = $(this).data('notapresupuesto')
+        const adjuntopresupuesto = $(this).data('adjuntopresupuesto')
+
+        // establecemos los valores
+        $("#idDetalleMaterialByPresupuesto").val(idDetalleMaterial)
+        // restablecemos el adjuntos
+        $("#idPresupuestoAdjunto").val('')
+
+        $("#idPresupuestoNota").val(notapresupuesto)
+
+        if (adjuntopresupuesto) {
+            $("#linkPresupuestoAdjunto")
+                .attr('href', `${apiRecursosURL}${adjuntopresupuesto}`)
+                .text('Ver archivo adjunto')
+                .off('click')
+                .on('click', function (e) {
+                })
+        } else {
+            $("#linkPresupuestoAdjunto")
+                .attr('href', '#')
+                .text('No hay archivo adjunto')
+                .off('click')
+                .on('click', function (e) {
+                    e.preventDefault();
+                })
+        }
+
+        // abrimos el modal
+        const loadModalPresupuesto = new bootstrap.Modal(document.getElementById('presupuestoModal'))
+        loadModalPresupuesto.show()
+    })
+
+    $("#btn-cambiar-presupuesto-detalle").on('click', async function () {
+        // obtenemos el valor del id del detalle de material
+        const idDetalleMaterial = $("#idDetalleMaterialByPresupuesto").val()
+        const notapresupuesto = $('#idPresupuestoNota').val()
+        const archivoAdjunto = document.getElementById('idPresupuestoAdjunto').files[0]
+
+        if (!notapresupuesto || notapresupuesto.length == 0) {
+            alert('Debe ingresar una nota de presupuesto');
+            return;
+        }
+
+        const formatData = {
+            odm_notapresupuesto: notapresupuesto
+        }
+
+        // obtenemos el file adjunto
+        const formData = new FormData();
+        formData.append('notapresupuesto', JSON.stringify(formatData));
+        if (archivoAdjunto) {
+            formData.append('adjuntopresupuesto', archivoAdjunto);
+        }
+
+        // hacemos un form data
+        try {
+            await client.post(`/ordeninternamateriales/presupuesto/${idDetalleMaterial}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+
+            // cerramos el modal
+            const loadModalPresupuesto = bootstrap.Modal.getInstance(document.getElementById('presupuestoModal'))
+            loadModalPresupuesto.hide()
+            initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
+        } catch (error) {
+            console.log(error)
+            alert('Error al cambiar presupuesto')
+        }
+    })
+
+    // ------------------ GESTION DE RESPONSABLE -------------------
 
     $("#data-container-body").on('click', '.btn-responsable', async function () {
         // obtenemos el valor del id del detalle de material
@@ -140,6 +221,7 @@ $(document).ready(() => {
         // obtenemos el valor del id del detalle de material
         const idDetalleMaterial = $("#idDetalleMaterialByResponsable").val()
         const responsable = $.trim($("#selectorResponsableDetalleMaterial").val())
+
         if (responsable.length == 0) {
             alert('Debe seleccionar un responsable')
             return
@@ -203,7 +285,17 @@ $(document).ready(() => {
     $('#btn-export-data').click(async function () {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `/ordeninternamateriales/export-excel?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        const filterField = filterSelector.val().trim()
+        const filterValue = filterInput.val().trim()
+
+        let filteredURL = `/ordeninternamateriales/export-excel`
+
+        if (filterField.length !== 0 && filterValue.length !== 0) {
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+        } else {
+            filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        }
+
         try {
             const response = await client.get(filteredURL, {
                 responseType: 'blob',
@@ -226,7 +318,7 @@ $(document).ready(() => {
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
-        
+
         let filteredURL = `/ordeninternamateriales/export-excel-presupuesto`
 
         if (filterField.length !== 0 && filterValue.length !== 0) {

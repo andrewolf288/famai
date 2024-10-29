@@ -20,6 +20,8 @@ class OrdenInternaMateriales extends Model
         'odm_observacion',
         'odm_tipo',
         'odm_estado',
+        'odm_notapresupuesto',
+        'odm_adjuntopresupuesto',
         'odm_usucreacion',
         'odm_feccreacion',
         'odm_usumodificacion',

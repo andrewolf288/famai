@@ -1,5 +1,6 @@
 $(document).ready(() => {
     let abortController
+    const apiRecursosURL = 'http://localhost:8080/storage/'
 
     const path = window.location.pathname
     const segments = path.split('/')
@@ -198,7 +199,7 @@ $(document).ready(() => {
     }
 
     function descargarRecurso(urlParam) {
-        const urlRecurso = `http://localhost:8080/storage/${urlParam}`
+        const urlRecurso = `${apiRecursosURL}${urlParam}`
         window.open(urlRecurso, '_blank');
     }
 

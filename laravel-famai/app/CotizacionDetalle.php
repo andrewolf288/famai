@@ -35,4 +35,10 @@ class CotizacionDetalle extends Model
         return $this->belongsTo(OrdenInternaMateriales::class, 'odm_id', 'odm_id');
     }
 
+    // detalle cotizacion
+    public function cotizacion()
+    {
+        return $this->belongsTo(Cotizacion::class, 'coc_id', 'coc_id');
+    }
+
 }

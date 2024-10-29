@@ -105,8 +105,8 @@
     </div>
 
     <!-- NOTIFICACIONES -->
-    <div class="modal fade" id="dialogNotificacionesModal" tabindex="-1" aria-labelledby="dialogNotificacionesModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="dialogNotificacionesModal" tabindex="-1"
+        aria-labelledby="dialogNotificacionesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -114,7 +114,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <table class="table mt-3">
+                    <table class="table mt-3" id="data-notificaciones">
                         <thead>
                             <tr>
                                 <th>Fecha Hora</th>
@@ -126,38 +126,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>05/10/2024 08:15:12</td>
-                                <td>HIDRAULICA</td>
-                                <td>JGOMEZ</td>
-                                <td>Ordenes Internas</td>
-                                <td>OI Nro XXX - Estado Enviado</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>05/10/2024 08:15:12</td>
-                                <td>HIDRAULICA</td>
-                                <td>JGOMEZ</td>
-                                <td>Ordenes Internas</td>
-                                <td>OI Nro XXX - Estado Enviado</td>
-                                <td>05/10/2024 09:15:45</td>
-                            </tr>
-                            <tr>
-                                <td>05/10/2024 08:15:12</td>
-                                <td>HIDRAULICA</td>
-                                <td>JGOMEZ</td>
-                                <td>Ordenes Internas</td>
-                                <td>OI Nro XXX - Estado Enviado</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>05/10/2024 08:15:12</td>
-                                <td>HIDRAULICA</td>
-                                <td>JGOMEZ</td>
-                                <td>Ordenes Internas</td>
-                                <td>OI Nro XXX - Estado Enviado</td>
-                                <td>05/10/2024 10:15:45</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -209,11 +177,33 @@
     let version = '241025.01';
     document.getElementById('app-version').textContent = version;
 
-    $("#notificaciones").on("click", function () {
-        // bootstrap modal
+    $("#notificaciones").on("click", async function () {
+        // Hacemos un llamado a la API para traer las notificaciones
+        const { data } = await client.get('notificaciones');
+        console.log(data);
+        $("#data-notificaciones tbody").empty();
+
+        // Recorremos las notificaciones y agregamos cada una como una fila a la tabla
+        data.forEach((notificacion) => {
+            const { ntf_fecha, are_codigo, area, usu_codigo, usuario, ntf_proceso, ntf_descripcion, ntf_visto } = notificacion;
+
+            const rowItem = document.createElement('tr');
+            rowItem.innerHTML = `
+            <td>${ntf_fecha ? parseDate(ntf_fecha) : ''}</td>
+            <td>${are_codigo ? area.are_descripcion : ''}</td>
+            <td>${usu_codigo ? usu_codigo : ''}</td>
+            <td>${ntf_proceso}</td>
+            <td>${ntf_descripcion}</td>
+            <td>${ntf_visto ? parseDate(ntf_visto) : ''}</td>
+            `;
+
+            $("#data-notificaciones tbody").append(rowItem);
+        });
+
+        // Mostramos el modal de Bootstrap
         const dialogNotificaciones = new bootstrap.Modal(document.getElementById('dialogNotificacionesModal'));
         dialogNotificaciones.show();
-    })
+    });
 </script>
 
 </html>

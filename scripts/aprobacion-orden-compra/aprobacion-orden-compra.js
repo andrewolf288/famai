@@ -43,9 +43,11 @@ $(document).ready(() => {
         // recorremos la lista
         data.forEach((ordecompra, index) => {
             // obtenemos los datos
-            const { occ_id, occ_numero, proveedor, occ_fecha, occ_fechaentrega, moneda, occ_total, occ_subtotal, occ_impuesto, occ_estado, occ_feccreacion, occ_usucreacion, occ_fecmodificacion, occ_usumodificacion } = ordecompra
+            const { occ_id, occ_numero, proveedor, occ_fecha, occ_total, occ_subtotal, occ_impuesto, occ_estado, occ_feccreacion, occ_usucreacion, occ_fecmodificacion, occ_usumodificacion } = ordecompra
 
             const rowItem = document.createElement('tr')
+            rowItem.classList.add('row-orden-compra')
+            rowItem.setAttribute('data-id', occ_id)
             rowItem.innerHTML = `
             <td></td>
             <td class="text-center">
@@ -58,21 +60,6 @@ $(document).ready(() => {
             <td>${occ_subtotal}</td>
             <td>${occ_impuesto}</td>
             <td>${occ_total}</td>
-            <td>
-                <button class="btn btn-primary btn-detalle-orden-compra">
-                    Ver detalle
-                </button>
-            </td>
-            <td>
-                <button class="btn btn-primary btn-cotización-asociada">
-                    Ver cotización
-                </button>
-            </td>
-            <td>
-                <button class="btn btn-primary btn-ordenes-internas-asociada">
-                    Ver OIs
-                </button>
-            </td>
             <td class="text-center">
                 <span class="badge bg-primary">${occ_estado}</span>
             </td>
@@ -87,6 +74,10 @@ $(document).ready(() => {
                 const isChecked = this.checked; // Verificamos si está marcado o no
                 seleccionarRowDetalle(ordecompra, isChecked); // Pasamos `material` y si está seleccionado
             });
+
+            rowItem.addEventListener('click', function () {
+                traerInformacionDetalleOrdenCompra(occ_id)
+            })
 
             $('#data-container-body').append(rowItem)
         })
@@ -133,24 +124,71 @@ $(document).ready(() => {
     initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions, 50)
 
     // funciones de control
-    $("#data-container-body").on('click', '.btn-detalle-orden-compra', function () {
-        const loadModalDetalle = new bootstrap.Modal(document.getElementById('detalleOrdenCompraModal'))
-        loadModalDetalle.show()
-    })
-
-    $("#data-container-body").on('click', '.btn-cotización-asociada', function () {
-        const loadModalCotizacion = new bootstrap.Modal(document.getElementById('cotizacionAsociadaModal'))
-        loadModalCotizacion.show()
-    })
-
-    $("#data-container-body").on('click', '.btn-ordenes-internas-asociada', function () {
-        const loadModalOIs = new bootstrap.Modal(document.getElementById('otsAsociadasModal'))
-        loadModalOIs.show()
-    })
-
     $("#btn-aprobar-ordenes-compra").on('click', function() {
         const loadModalAprobacion = new bootstrap.Modal(document.getElementById('aprobacionesModal'))
         loadModalAprobacion.show()
     })
+
+    const traerInformacionDetalleOrdenCompra = async (id) => {
+        const { data } = await client.get(`/ordencompra-detalle/${id}`)
+        $("#data-container-detalle tbody").empty()
+
+        data.forEach(detalle => {
+            const {detalle_material, ocd_id, odm_id, ocd_orden, ocd_descripcion, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_usucreacion, ocd_usumodificacion, ocd_feccreacion, ocd_fecmodificacion} = detalle
+
+            const rowItem = document.createElement('tr')
+            rowItem.className = 'row-orden-compra-detalle'
+            rowItem.setAttribute('data-id', ocd_id)
+
+            rowItem.innerHTML = `
+            <td>${detalle_material.orden_interna_parte.orden_interna.oic_numero}</td>
+            <td>${ocd_orden}</td>
+            <td>${ocd_descripcion}</td>
+            <td>${ocd_cantidad}</td>
+            <td>${ocd_preciounitario}</td>
+            <td>${ocd_total}</td>
+            <td>${ocd_feccreacion === null ? 'No aplica' : parseDate(ocd_feccreacion)}</td>
+            <td>${ocd_usucreacion === null ? 'No aplica' : ocd_usucreacion}</td>
+            <td>${ocd_fecmodificacion === null ? 'No aplica' : parseDate(ocd_fecmodificacion)}</td>
+            <td>${ocd_usumodificacion === null ? 'No aplica' : ocd_usumodificacion}</td>
+            `
+            rowItem.addEventListener('click', function () {
+                traerInformacionCotizacionAsociada(odm_id)
+            })
+
+            $('#data-container-detalle tbody').append(rowItem)
+        })
+    }
+
+    const traerInformacionCotizacionAsociada = async (id) => {
+        console.log(id)
+        const {data} = await client.get(`/ordencompra-cotizacion/${id}`)
+        console.log(data)
+        $("#data-container-cotizacion tbody").empty()
+
+        data.forEach(detalle => {
+            const {cotizacion} = detalle
+            const {proveedor} = cotizacion
+            const rowItem = document.createElement('tr')
+
+            rowItem.innerHTML = `
+            <td>${parseDate(cotizacion.coc_fechacotizacion)}</td>
+            <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
+            <td>${proveedor.prv_nrodocumento}</td>
+            <td>${proveedor.prv_nombre}</td>
+            <td>${cotizacion.coc_total}</td>
+            <td>
+                <span class="badge bg-primary">
+                    ${cotizacion.coc_estado}
+                </span>
+            </td>
+            <td>${cotizacion.coc_feccreacion === null ? 'No aplica' : parseDate(cotizacion.coc_feccreacion)}</td>
+            <td>${cotizacion.coc_usucreacion === null ? 'No aplica' : cotizacion.coc_usucreacion}</td>
+            <td>${cotizacion.coc_fecmodificacion === null ? 'No aplica' : parseDate(cotizacion.coc_fecmodificacion)}</td>
+            <td>${cotizacion.coc_usumodificacion === null ? 'No aplica' : cotizacion.coc_usumodificacion}</td>
+            `
+            $('#data-container-cotizacion tbody').append(rowItem)
+        })
+    }
 
 })

@@ -49,31 +49,95 @@
     <button class="btn btn-success me-2" id="btn-aprobar-ordenes-compra">Aprobar</button>
 </div>
 
-<table id="data-container" class="table table-striped nowrap" style="width:100%">
-    <thead>
-        <th></th>
-        <th class="text-center">
-            Check
-        </th>
-        <th class="text-start">Fecha Ord. Comp.</th>
-        <th>Nro Ord. Comp.</th>
-        <th>Doc. proveedor</th>
-        <th>Raz. social proveedor</th>
-        <th class="text-center">Subtotal</th>
-        <th class="text-center">Impuesto</th>
-        <th class="text-center">Total</th>
-        <th>Ver detalle</th>
-        <th>Ver cotización</th>
-        <th>Ver OIs</th>
-        <th>Estado</th>
-        <th>Fec. Creación</th>
-        <th>Usu. Creador</th>
-        <th>Fec. Actualización</th>
-        <th>Usu. Actualizador</th>
-    </thead>
-    <tbody id="data-container-body">
-    </tbody>
-</table>
+<!-- Lista de orden de compras -->
+<div class="card mt-2">
+    <div class="card-header">
+        <p class="fw-bold">Lista de orden de compras</p>
+    </div>
+    <div class="card-body">
+        <table id="data-container" class="table table-striped nowrap" style="width:100%">
+            <thead>
+                <th></th>
+                <th class="text-center">
+                    Check
+                </th>
+                <th class="text-start">Fecha Ord. Comp.</th>
+                <th>Nro Ord. Comp.</th>
+                <th>Doc. proveedor</th>
+                <th>Raz. social proveedor</th>
+                <th class="text-center">Subtotal</th>
+                <th class="text-center">Impuesto</th>
+                <th class="text-center">Total</th>
+                <th>Estado</th>
+                <th>Fec. Creación</th>
+                <th>Usu. Creador</th>
+                <th>Fec. Actualización</th>
+                <th>Usu. Actualizador</th>
+            </thead>
+            <tbody id="data-container-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- DETALLE DE ORDEN DE COMPRA -->
+<div class="card mt-4">
+    <div class="card-header">
+        <p class="fw-bold">Detalle orden de compra</p>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="data-container-detalle" class="table table-striped nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>OI</th>
+                        <th class="text-start">Item</th>
+                        <th>Descripcion</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-center">Precio unitario</th>
+                        <th class="text-center">Total</th>
+                        <th>Fec. Creación</th>
+                        <th>Usu. Creador</th>
+                        <th>Fec. Modificación</th>
+                        <th>Usu. Modificador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- DETALLE DE COTIZACIÓN -->
+<div class="card mt-4">
+    <div class="card-header">
+        <p class="fw-bold">Cotización asociada</p>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="data-container-cotizacion" class="table table-striped nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="text-start">Fecha Cot.</th>
+                        <th>Nro Cot proveedor</th>
+                        <th>Doc. proveedor</th>
+                        <th>Raz. social proveedor</th>
+                        <th class="text-center">Total</th>
+                        <th>Estado</th>
+                        <th>Fec. Creación</th>
+                        <th>Usu. Creador</th>
+                        <th>Fec. Actualización</th>
+                        <th>Usu. Actualizador</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <!-- DIALOG DE APROBACION -->
 <div class="modal fade" id="aprobacionesModal" tabindex="-1" aria-labelledby="aprobacionesModalLabel"

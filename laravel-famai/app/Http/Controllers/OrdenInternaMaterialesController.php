@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
+use Illuminate\Support\Facades\Storage;
 
 class OrdenInternaMaterialesController extends Controller
 {
@@ -143,6 +144,54 @@ class OrdenInternaMaterialesController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al actualizar el detalle de producto: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updatePresupuesto(Request $request, $id)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($id);
+
+            $request->validate([
+                'notapresupuesto' => 'required|string',
+            ]);
+
+            $data = json_decode($request->input('notapresupuesto'), true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['error' => 'El campo data contiene un JSON inválido.'], 400);
+            }
+
+            // Valida el request
+            $validatedData = validator($data, [
+                'odm_notapresupuesto' => 'required|string',
+            ])->validate();
+
+            $ordenInternaMaterial->odm_notapresupuesto = $validatedData['odm_notapresupuesto'];
+            $ordenInternaMaterial->odm_usumodificacion = $user->usu_codigo;
+
+            if ($request->hasFile('adjuntopresupuesto')) {
+                // primero debemos eliminar el recurso anteriormente guardado
+                if(file_exists($ordenInternaMaterial->odm_adjuntopresupuesto)) {
+                    Storage::disk('public')->delete($ordenInternaMaterial->odm_adjuntopresupuesto);
+                }
+
+                // obtenemos el file y lo guardamos
+                $file = $request->file('adjuntopresupuesto');
+                $extension = $file->getClientOriginalExtension();
+                $fileName = uniqid() . '.' . $extension;
+                $path = $file->storeAs('adjuntos-presupuesto', $fileName, 'public');
+                $ordenInternaMaterial->odm_adjuntopresupuesto = $path;
+            }
+
+            $ordenInternaMaterial->save();
+            DB::commit();
+            return response()->json($ordenInternaMaterial, 200);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
         }
     }
 
@@ -336,7 +385,7 @@ class OrdenInternaMaterialesController extends Controller
             //     }
             // });
 
-            $headers = ['OT', 'OI', 'Fec. Det OI', 'Tipo', 'Parte', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock' ,'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
+            $headers = ['OT', 'OI', 'Fec. Det OI', 'Tipo', 'Actividad', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock' ,'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
             $columnWidths = [15, 15, 19, 5, 18, 10, 50, 40, 10, 15, 10, 10, 7, 10, 10, 10];
             $tipoDato = ['texto', 'texto', 'texto' ,'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'text', 'numero', 'numero', 'texto', 'numero', 'numero', 'numero'];
 
@@ -416,7 +465,7 @@ class OrdenInternaMaterialesController extends Controller
         try {
             $ordenTrabajo = $request->input('ot_numero', null);
             $ordenInterna = $request->input('oi_numero', null);
-            $almID = $request->input('alm_id', 1);
+            $almID = 1;
             $fecha_desde = $request->input('fecha_desde', null);
             $fecha_hasta = $request->input('fecha_hasta', null);
 

@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\CotizacionDetalle;
 use App\OrdenCompraDetalle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class OrdenCompraDetalleController extends Controller
 {
+    public function findDetalleByOrdenCompra($id)
+    {
+        $detalleCotizacion = OrdenCompraDetalle::with('detalleMaterial.ordenInternaParte.ordenInterna')->where('occ_id', $id)->get();
+        return response()->json($detalleCotizacion);
+    }
+
     public function update(Request $request, $id)
     {
         $user = auth()->user();
@@ -54,5 +61,12 @@ class OrdenCompraDetalleController extends Controller
             $numeroOrden++;
         }
         return response()->json(['success' => 'Orden de compra eliminada correctamente.'], 200);
+    }
+
+    // traer informacion de cotizacion detalle asociado
+    public function findCotizacionByOrdenCompraDetalle($id)
+    {
+        $detalleCotizacion = CotizacionDetalle::with('cotizacion.proveedor')->where('odm_id', $id)->get();
+        return response()->json($detalleCotizacion);
     }
 }

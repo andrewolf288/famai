@@ -18,6 +18,7 @@ use App\Http\Controllers\CotizacionDetalleController;
 use App\Http\Controllers\EntidadBancariaController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
+use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\OrdenCompraDetalleController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
@@ -198,6 +199,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'update']);
     Route::put('ordeninternamateriales/tipo/{id}', [OrdenInternaMaterialesController::class, 'updateTipoMaterial']);
     Route::put('ordeninternamateriales/responsable/{id}', [OrdenInternaMaterialesController::class, 'updateResponsableMaterial']);
+    Route::post('ordeninternamateriales/presupuesto/{id}', [OrdenInternaMaterialesController::class, 'updatePresupuesto']);
     Route::delete('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'destroy']);
     Route::get('ordeninternamateriales/export-excel', [OrdenInternaMaterialesController::class, 'exportExcel']);
     Route::get('ordeninternamateriales/export-excel-presupuesto', [OrdenInternaMaterialesController::class, 'exportExcelPresupuesto']);
@@ -323,8 +325,14 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas de ordendes de compra detalle
 Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'findDetalleByOrdenCompra']);
+    Route::get('ordencompra-cotizacion/{id}', [OrdenCompraDetalleController::class, 'findCotizacionByOrdenCompraDetalle']);
     Route::delete('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'destroy']);
     Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
+});
+
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('notificaciones', [NotificacionController::class, 'index']);
 });
 
 // RUTAS ABIERTAS

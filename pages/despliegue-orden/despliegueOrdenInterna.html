@@ -78,6 +78,7 @@
         <th class="text-center">Ordenado</th>
         <th class="text-center">Atendido</th>
         <th>Responsable</th>
+        <th>Presupuesto</th>
     </thead>
     <tbody id="data-container-body">
     </tbody>
@@ -323,6 +324,37 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="btn-cambiar-responsable-detalle">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="presupuestoModal" tabindex="-1" aria-labelledby="presupuestoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="presupuestoModalLabel">Presupuesto detalle material</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="text" id="idDetalleMaterialByPresupuesto" hidden>
+                    <div class="mb-3">
+                        <label for="idPresupuestoNota" class="form-label">Nota de presupuesto</label>
+                        <textarea class="form-control" id="idPresupuestoNota"></textarea>
+                    </div>
+                    <div>
+                        <div class="text-center">
+                            <a href="" target="_blank" id="linkPresupuestoAdjunto"></a>
+                        </div>
+                        <label for="idPresupuestoAdjunto" class="form-label">Adjunto de presupuesto</label>
+                        <input type="file" class="form-control" id="idPresupuestoAdjunto">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-cambiar-presupuesto-detalle">Guardar</button>
             </div>
         </div>
     </div>
