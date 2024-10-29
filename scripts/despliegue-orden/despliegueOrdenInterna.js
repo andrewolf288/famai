@@ -220,6 +220,37 @@ $(document).ready(() => {
         }
     })
 
+    // exportamos excel presupuesto
+    $('#btn-export-data-presupuesto').click(async function () {
+        const fechaDesde = transformarFecha($('#fechaDesde').val())
+        const fechaHasta = transformarFecha($('#fechaHasta').val())
+        const filterField = filterSelector.val().trim()
+        const filterValue = filterInput.val().trim()
+        
+        let filteredURL = `/ordeninternamateriales/export-excel-presupuesto`
+
+        if (filterField.length !== 0 && filterValue.length !== 0) {
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+        } else {
+            filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        }
+
+        try {
+            const response = await client.get(filteredURL, {
+                responseType: 'blob',
+            })
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'reporte.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error("Error al descargar el archivo:", error);
+        }
+    })
+
     // ---------- MANEJO DE COTIZACIONES -----------
     $('#btn-cotizar-materiales').on('click', async (event) => {
         let content = ''

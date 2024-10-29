@@ -200,6 +200,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordeninternamateriales/responsable/{id}', [OrdenInternaMaterialesController::class, 'updateResponsableMaterial']);
     Route::delete('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'destroy']);
     Route::get('ordeninternamateriales/export-excel', [OrdenInternaMaterialesController::class, 'exportExcel']);
+    Route::get('ordeninternamateriales/export-excel-presupuesto', [OrdenInternaMaterialesController::class, 'exportExcelPresupuesto']);
     Route::post('ordeninternamateriales/export-cotizacion', [OrdenInternaMaterialesController::class, 'exportPDFCotizacion']);
     Route::post('ordeninternamateriales/export-cotizacion-text', [OrdenInternaMaterialesController::class, 'exportTXTCotizacion']);
     Route::get('detalleMaterialesByNumero', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenInterna']);

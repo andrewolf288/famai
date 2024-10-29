@@ -163,7 +163,7 @@ class OrdenInternaMaterialesController extends Controller
 
             DB::commit();
             return response()->json($ordenInternaMaterial, 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
@@ -199,7 +199,7 @@ class OrdenInternaMaterialesController extends Controller
             DB::commit();
 
             return response()->json($ordenInternaMaterial, 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
@@ -233,6 +233,184 @@ class OrdenInternaMaterialesController extends Controller
         }
     }
 
+    // Exportacion de excel de presupuestos
+    public function exportExcelPresupuesto(Request $request)
+    {
+        try {
+            $ordenTrabajo = $request->input('ot_numero', null);
+            $ordenInterna = $request->input('oi_numero', null);
+            $fecha_desde = $request->input('fecha_desde', null);
+            $fecha_hasta = $request->input('fecha_hasta', null);
+
+            $query = OrdenInternaMateriales::with(
+                [
+                    'producto.unidad',
+                    'ordenInternaParte.ordenInterna',
+                    'ordenInternaParte.parte',
+                ]
+            );
+
+            // filtro de orden de trabajo
+            if ($ordenTrabajo !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                    $q->where('odt_numero', $ordenTrabajo);
+                });
+            }
+
+            // filtro de orden interna
+            if ($ordenInterna !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenInterna) {
+                    $q->where('oic_numero', $ordenInterna);
+                });
+            }
+
+            // filtro de fecha
+            if ($fecha_desde !== null && $fecha_hasta !== null) {
+                $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            }
+
+            $query->orderBy('odm_feccreacion', 'desc');
+
+            // Obtener los resultados de la primera base de datos
+            $ordenesMateriales = $query->get();
+
+            $productoConInformacionCompras = $ordenesMateriales->map(function ($material){
+                return [
+                    'material' => $material,
+                    'ultimoPrecioCompras' => null,
+                    'ultimaFechaCompras' => null,
+                    'stock' => null
+                ];
+            });
+
+            // $productoConInformacionCompras = $ordenesMateriales->map(function ($material){
+            //     $codigoProducto = $material->producto ? $material->producto->pro_codigo : null;
+            //     // si es un producto diferente de null
+            //     if($codigoProducto !== null){
+            //         $compraInfo = DB::connection('sqlsrv_secondary')
+            //         ->table('OITM as T0')
+            //         ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
+            //         ->select([
+            //             'T1.AvgPrice',
+            //             DB::raw('MAX(T1.OnOrder) as stock'),
+            //             DB::raw(
+            //                 "(CASE 
+            //                     WHEN (
+            //                         SELECT MAX(OPDN.DocDate) 
+            //                         FROM OPDN 
+            //                         JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+            //                         WHERE PDN1.ItemCode = T0.ItemCode
+            //                     ) IS NULL 
+            //                     THEN (
+            //                         SELECT MAX(OIGN.DocDate) 
+            //                         FROM OIGN 
+            //                         JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+            //                         WHERE IGN1.ItemCode = T0.ItemCode
+            //                     )
+            //                     ELSE (
+            //                         SELECT MAX(OPDN.DocDate) 
+            //                         FROM OPDN 
+            //                         JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+            //                         WHERE PDN1.ItemCode = T0.ItemCode
+            //                     )
+            //                     END) as UltimaFechaIngreso"
+            //             )
+            //         ])
+            //         ->where('T0.ItemCode', '=', $codigoProducto)
+            //         ->where('T1.WhsCode', '=', '01_AQPAG')
+            //         ->first();
+
+            //         return [
+            //             'material' => $material,
+            //             'ultimoPrecioCompras' => $compraInfo->value('AvgPrice') ?? null,
+            //             'ultimaFechaCompras' => $compraInfo->value('UltimaFechaIngreso') ?? null,
+            //             'stock' => $compraInfo->value('stock') ?? null
+            //         ];
+            //     } else {
+            //         return [
+            //             'material' => $material,
+            //             'ultimoPrecioCompras' => null,
+            //             'ultimaFechaCompras' => null,
+            //             'stock' => null
+            //         ];
+            //     }
+            // });
+
+            $headers = ['OT', 'OI', 'Fec. Det OI', 'Tipo', 'Parte', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock' ,'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
+            $columnWidths = [15, 15, 19, 5, 18, 10, 50, 40, 10, 15, 10, 10, 7, 10, 10, 10];
+            $tipoDato = ['texto', 'texto', 'texto' ,'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'text', 'numero', 'numero', 'texto', 'numero', 'numero', 'numero'];
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Establecemos anchos de columnas
+            foreach ($columnWidths as $columnIndex => $width) {
+                $sheet->getColumnDimensionByColumn($columnIndex + 1)->setWidth($width);
+            }
+
+            // Establecemos encabezados con formatos
+            foreach ($headers as $columnIndex => $header) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+
+                // Dar color al fondo del encabezado
+                $sheet->getStyle("{$columnLetter}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('c7cdd6');
+
+                // Poner el texto en negrita
+                $sheet->getStyle("{$columnLetter}1")->getFont()->setBold(true);
+
+                // Establecer el valor en la celda
+                $sheet->setCellValue("{$columnLetter}1", $header);
+            }
+
+            // Establecer tipos de datos
+            $SIZE_DATA = sizeof($productoConInformacionCompras) + 1;
+            foreach ($tipoDato as $columnIndex => $tipoDato) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+                $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+                if ($tipoDato === "numero") {
+                    $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode('0.00');
+                }
+            }
+
+            function getValue2($relation, $default = 'N/A')
+            {
+                return $relation ?? $default;
+            }
+
+            // Agregamos la data
+            $row = 2;
+
+            foreach ($productoConInformacionCompras as $rowData) {
+                $sheet->setCellValue("A{$row}", getValue2($rowData['material']->ordenInternaParte && $rowData['material']->ordenInternaParte->ordenInterna) ? $rowData['material']->ordenInternaParte->ordenInterna->oic_numero : null);
+                $sheet->setCellValue("B{$row}", getValue2($rowData['material']->ordenInternaParte && $rowData['material']->ordenInternaParte->ordenInterna ? $rowData['material']->ordenInternaParte->ordenInterna->odt_numero : null));
+                $sheet->setCellValue("C{$row}", getValue2($rowData['material']->odm_feccreacion));
+                $sheet->setCellValue("D{$row}", getValue2($rowData['material']->odm_tipo == 1 ? 'R' : 'A'));
+                $sheet->setCellValue("E{$row}", getValue2($rowData['material']->ordenInternaParte->parte->oip_descripcion));
+                $sheet->setCellValue("F{$row}", getValue2($rowData['material']->producto ? $rowData['material']->producto->pro_codigo : null));
+                $sheet->setCellValue("G{$row}", getValue2($rowData['material']->odm_descripcion));
+                $sheet->setCellValue("H{$row}", getValue2($rowData['material']->odm_observacion));
+                $sheet->setCellValue("I{$row}", getValue2($rowData['ultimoPrecioCompras']));
+                $sheet->setCellValue("J{$row}", getValue2($rowData['ultimaFechaCompras']));
+                $sheet->setCellValue("K{$row}", getValue2($rowData['stock']));
+                $sheet->setCellValue("L{$row}", getValue2($rowData['material']->odm_cantidad));
+                $sheet->setCellValue("M{$row}", getValue2($rowData['material']->producto && $rowData['material']->producto->unidad ? $rowData['material']->producto->unidad->uni_codigo : null));
+                $sheet->setCellValue("N{$row}", 0.00);
+                $sheet->setCellValue("O{$row}", 0.00);
+                $sheet->setCellValue("P{$row}", 0.00);
+                $row++;
+            }
+
+            return response()->streamDownload(function () use ($spreadsheet) {
+                $writer = new Xlsx($spreadsheet);
+                $writer->save('php://output');
+            }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Exportación de excel
     public function exportExcel(Request $request)
     {
         try {
