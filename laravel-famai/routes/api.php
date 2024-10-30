@@ -321,6 +321,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordenescompra/exportarPDF', [OrdenCompraController::class, 'exportarPDF']);
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
     Route::put('ordencompra/{id}', [OrdenCompraController::class, 'update']);
+    Route::post('ordencompra/aprobar-masivo', [OrdenCompraController::class, 'aprobarMasivo']);
 });
 
 // rutas de ordendes de compra detalle

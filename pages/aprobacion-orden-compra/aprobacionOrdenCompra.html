@@ -55,28 +55,33 @@
         <p class="fw-bold">Lista de orden de compras</p>
     </div>
     <div class="card-body">
-        <table id="data-container" class="table table-striped nowrap" style="width:100%">
-            <thead>
-                <th></th>
-                <th class="text-center">
-                    Check
-                </th>
-                <th class="text-start">Fecha Ord. Comp.</th>
-                <th>Nro Ord. Comp.</th>
-                <th>Doc. proveedor</th>
-                <th>Raz. social proveedor</th>
-                <th class="text-center">Subtotal</th>
-                <th class="text-center">Impuesto</th>
-                <th class="text-center">Total</th>
-                <th>Estado</th>
-                <th>Fec. Creación</th>
-                <th>Usu. Creador</th>
-                <th>Fec. Actualización</th>
-                <th>Usu. Actualizador</th>
-            </thead>
-            <tbody id="data-container-body">
-            </tbody>
-        </table>
+        <div style="height: 300px; overflow-y: scroll;">
+            <div class="table-responsive">
+                <table id="data-container" class="table table-striped nowrap" style="width:100%">
+                    <thead>
+                        <th></th>
+                        <th class="text-center">
+                            Check
+                        </th>
+                        <th class="text-start">Fecha Ord. Comp.</th>
+                        <th>Nro Ord. Comp.</th>
+                        <th>Doc. proveedor</th>
+                        <th>Raz. social proveedor</th>
+                        <th class="text-center">Subtotal</th>
+                        <th class="text-center">Impuesto</th>
+                        <th class="text-center">Total</th>
+                        <th>Aprobado por</th>
+                        <th>Estado</th>
+                        <th>Fec. Creación</th>
+                        <th>Usu. Creador</th>
+                        <th>Fec. Actualización</th>
+                        <th>Usu. Actualizador</th>
+                    </thead>
+                    <tbody id="data-container-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -86,25 +91,27 @@
         <p class="fw-bold">Detalle orden de compra</p>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <table id="data-container-detalle" class="table table-striped nowrap" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>OI</th>
-                        <th class="text-start">Item</th>
-                        <th>Descripcion</th>
-                        <th class="text-center">Cantidad</th>
-                        <th class="text-center">Precio unitario</th>
-                        <th class="text-center">Total</th>
-                        <th>Fec. Creación</th>
-                        <th>Usu. Creador</th>
-                        <th>Fec. Modificación</th>
-                        <th>Usu. Modificador</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+        <div class="overflow-auto" style="height: 150px;">
+            <div class="table-responsive">
+                <table id="data-container-detalle" class="table table-striped nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>OI</th>
+                            <th class="text-start">Item</th>
+                            <th>Descripcion</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-center">Precio unitario</th>
+                            <th class="text-center">Total</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Modificación</th>
+                            <th>Usu. Modificador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -115,34 +122,35 @@
         <p class="fw-bold">Cotización asociada</p>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <table id="data-container-cotizacion" class="table table-striped nowrap" style="width:100%">
-                <thead>
-                    <tr>
-                        <th class="text-start">Fecha Cot.</th>
-                        <th>Nro Cot proveedor</th>
-                        <th>Doc. proveedor</th>
-                        <th>Raz. social proveedor</th>
-                        <th class="text-center">Total</th>
-                        <th>Estado</th>
-                        <th>Fec. Creación</th>
-                        <th>Usu. Creador</th>
-                        <th>Fec. Actualización</th>
-                        <th>Usu. Actualizador</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <div class="overflow-auto" style="height: 150px;">
+            <div class="table-responsive">
+                <table id="data-container-cotizacion" class="table table-striped nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Fecha Cot.</th>
+                            <th>Nro Cot proveedor</th>
+                            <th>Doc. proveedor</th>
+                            <th>Raz. social proveedor</th>
+                            <th class="text-center">Total</th>
+                            <th>Estado</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Actualización</th>
+                            <th>Usu. Actualizador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- DIALOG DE APROBACION -->
-<div class="modal fade" id="aprobacionesModal" tabindex="-1" aria-labelledby="aprobacionesModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
+<div class="modal fade" id="aprobacionesModal" tabindex="-1" aria-labelledby="aprobacionesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="aprobacionesModalLabel">Aprobaciones</h5>
@@ -160,242 +168,39 @@
                             <th class="text-center">Subtotal</th>
                             <th class="text-center">Impuesto</th>
                             <th class="text-center">Total</th>
+                            <th class="text-center">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>25/10/2024</td>
-                            <td>0000001</td>
-                            <td>10718316800</td>
-                            <td>HUANCOLLO QUISPE, HUGO ABEL</td>
-                            <td>552.38</td>
-                            <td>99.43</td>
-                            <td>651.81</td>
-                        </tr>
-                        <tr>
-                            <td>25/10/2024</td>
-                            <td>0000002</td>
-                            <td>10718316800</td>
-                            <td>HUANCOLLO QUISPE, HUGO ABEL</td>
-                            <td>552.38</td>
-                            <td>99.43</td>
-                            <td>651.81</td>
-                        </tr>
-                        <tr>
-                            <td>25/10/2024</td>
-                            <td>0000003</td>
-                            <td>10718316800</td>
-                            <td>HUANCOLLO QUISPE, HUGO ABEL</td>
-                            <td>552.38</td>
-                            <td>99.43</td>
-                            <td>651.81</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal"
-                    id="btn-asignar-usuario-aprobacion">Aprobar</button>
+                <button type="button" class="btn btn-primary" id="btn-aprobar-orden-compra">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- VER DETALLE DE ORDEN DE COMPRA -->
-<div class="modal fade" id="detalleOrdenCompraModal" tabindex="-1" aria-labelledby="detalleOrdenCompraModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
+<div class="modal fade" id="confirmarClavePresupuestoModal" tabindex="-1" aria-labelledby="confirmarClavePresupuestoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detalleOrdenCompraModalLabel">Detalle Orden de Compra</h5>
+                <h5 class="modal-title" id="confirmarClavePresupuestoModalLabel">Validación</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>OI</th>
-                                <th class="text-start">Item</th>
-                                <th>Descripcion</th>
-                                <th class="text-center">Cantidad</th>
-                                <th class="text-center">Precio unitario</th>
-                                <th class="text-center">Total</th>
-                                <th>Fec. Creación</th>
-                                <th>Usu. Creador</th>
-                                <th>Fec. Modificación</th>
-                                <th>Usu. Modificador</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1050001</td>
-                                <td>1</td>
-                                <td>Producto de prueba 1</td>
-                                <td>3</td>
-                                <td>15.00</td>
-                                <td>45.00</td>
-                                <td>25/10/2024 08:15:12</td>
-                                <td>ANDREWJA</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>1050002</td>
-                                <td>2</td>
-                                <td>Producto de prueba 2</td>
-                                <td>3</td>
-                                <td>15.00</td>
-                                <td>45.00</td>
-                                <td>25/10/2024 08:15:12</td>
-                                <td>ANDREWJA</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td>1050003</td>
-                                <td>3</td>
-                                <td>Producto de prueba 3</td>
-                                <td>3</td>
-                                <td>15.00</td>
-                                <td>45.00</td>
-                                <td>25/10/2024 08:15:12</td>
-                                <td>ANDREWJA</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <form>
+                    <div>
+                        <label for="inputClaveValidacion">Ingrese la clave:</label>
+                        <input type="text" class="form-control" value="" id="inputClaveValidacion">
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- VER COTIZACION ASOCIADA -->
-<div class="modal fade" id="cotizacionAsociadaModal" tabindex="-1" aria-labelledby="cotizacionAsociadaModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="cotizacionAsociadaModalLabel">Cotización asociada</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="text-start">Fecha Cot.</th>
-                            <th>Nro Cot proveedor</th>
-                            <th>Doc. proveedor</th>
-                            <th>Raz. social proveedor</th>
-                            <th class="text-center">Total</th>
-                            <th>Estado</th>
-                            <th>Fec. Creación</th>
-                            <th>Usu. Creador</th>
-                            <th>Fec. Actualización</th>
-                            <th>Usu. Actualizador</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>25/10/2024 08:15:12</td>
-                            <td>0000001</td>
-                            <td>20313031221</td>
-                            <td>FERREYROS S.A.C.</td>
-                            <td>45.00</td>
-                            <td>RTR</td>
-                            <td>25/10/2024 08:15:12</td>
-                            <td>ANDREWJA</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- VER OTS ASOCIADAS-->
-<div class="modal fade" id="otsAsociadasModal" tabindex="-1" aria-labelledby="otsAsociadasModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="otsAsociadasModalLabel">Ordenes de compra asociadas</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nro. OT</th>
-                            <th>Estado OT</th>
-                            <th>Cliente</th>
-                            <th>Nro. OI</th>
-                            <th>Fecha</th>
-                            <th>Área</th>
-                            <th>Estado OI</th>
-                            <th>Fec. Creación</th>
-                            <th>Usu. Creador</th>
-                            <th>Fec. Actualización</th>
-                            <th>Usu. Actualizador</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1050001</td>
-                            <td>PROCESO</td>
-                            <td>Andrew Pold Jacobo Castillo</td>
-                            <td>1050001</td>
-                            <td>12/10/2024 08:15:12</td>
-                            <td>HIDRAULICA</td>
-                            <td>PROCESO</td>
-                            <td>25/10/2024 08:15:12</td>
-                            <td>ANDREWJA</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>1050002</td>
-                            <td>PROCESO</td>
-                            <td>Andrew Pold Jacobo Castillo</td>
-                            <td>1050002</td>
-                            <td>12/10/2024 08:15:12</td>
-                            <td>HIDRAULICA</td>
-                            <td>PROCESO</td>
-                            <td>25/10/2024 08:15:12</td>
-                            <td>ANDREWJA</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>1050003</td>
-                            <td>PROCESO</td>
-                            <td>Andrew Pold Jacobo Castillo</td>
-                            <td>1050003</td>
-                            <td>12/10/2024 08:15:12</td>
-                            <td>HIDRAULICA</td>
-                            <td>PROCESO</td>
-                            <td>25/10/2024 08:15:12</td>
-                            <td>ANDREWJA</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-validar-clave">Validar</button>
             </div>
         </div>
     </div>

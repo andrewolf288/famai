@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\OrdenCompra;
 use App\OrdenCompraDetalle;
+use App\Trabajador;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -17,7 +18,7 @@ class OrdenCompraController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
 
-        $query = OrdenCompra::with(['proveedor', 'moneda']);
+        $query = OrdenCompra::with(['proveedor', 'moneda', 'autorizador', 'elaborador']);
         $query->orderBy('occ_fecha', 'desc');
 
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -227,5 +228,36 @@ class OrdenCompraController extends Controller
         } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], 500);
         }
+    }
+
+    public function aprobarMasivo(Request $request)
+    {
+        $user = auth()->user();
+        $clave = 'admin123';
+
+        $validatedData = validator($request->all(), [
+            'ordenesCompra' => 'required|array|min:1',
+            'clave' => 'required|string',
+        ])->validate();
+
+        if($clave != $validatedData['clave']){
+            return response()->json(['error' => 'La clave es incorrecta'], 400);
+        }
+
+        // buscamos el trabajador relacionado con el usuario
+        $trabajador_aprobacion = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        if(!$trabajador_aprobacion){
+            return response()->json(['error' => 'No se encontro el trabajador relacionado con el usuario'], 400);
+        }
+
+        // recorremos la lista de ordenes de compra a aprobar
+        foreach ($validatedData['ordenesCompra'] as $ordencompra) {
+            $ordencompra = OrdenCompra::findOrFail($ordencompra);
+            $ordencompra->update([
+                'tra_autorizado' => $trabajador_aprobacion->tra_id,
+            ]);
+        }
+
+        return response()->json('Se aprobaron las ordenes de compra', 200);
     }
 }
