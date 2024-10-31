@@ -652,8 +652,14 @@ $(document).ready(function () {
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" data-producto="${element["pro_id"]}" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-2" data-producto="${element["pro_id"]}" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
                             C
+                        </button>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-2" data-producto="${element["pro_id"]}" ${element["odm_tipo"] == 4 ? 'disabled' : ''}>
+                            X
+                        </button>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 5 ? 'btn-secondary' : 'btn-success'} btn-detalle-recuperado-cliente" data-producto="${element["pro_id"]}" ${element["odm_tipo"] == 5 ? 'disabled' : ''}>
+                            R
                         </button>
                     </div>
                 </td>
@@ -797,8 +803,14 @@ $(document).ready(function () {
                                  <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                              </svg>
                          </button>
-                         <button class="btn btn-sm ${data["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 3 ? 'disabled' : ''}>
+                         <button class="btn btn-sm ${data["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-2" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 3 ? 'disabled' : ''}>
                             C
+                        </button>
+                        <button class="btn btn-sm ${data["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-2" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 4 ? 'disabled' : ''}>
+                            X
+                        </button>
+                        <button class="btn btn-sm ${data["odm_tipo"] == 5 ? 'btn-secondary' : 'btn-success'} btn-detalle-recuperado-cliente" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 5 ? 'disabled' : ''}>
+                            R
                         </button>
                      </div>
                  </td>
@@ -820,14 +832,15 @@ $(document).ready(function () {
         const { detalle_materiales } = findElement
         const findProducto = detalle_materiales.find(element => element.pro_id == pro_id)
 
-        if (findProducto) {
+        // Excepcion de validacion
+        if (findProducto && pro_codigo != 'SU500706') {
             alert('Este producto ya fué agregado')
         } else {
             limpiarLista()
             $('#productosInput').val('')
 
             const data = {
-                pro_id,
+                pro_id: pro_codigo != 'SU500706' ? pro_id : `${pro_id}-${detalle_materiales.filter(element => element.pro_id == pro_id).length + 1}`,
                 pro_codigo,
                 odm_descripcion: pro_descripcion,
                 odm_cantidad: 1.00,
@@ -860,8 +873,14 @@ $(document).ready(function () {
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm ${data["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-success'} btn-detalle-proporcionado-cliente" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 3 ? 'disabled' : ''}>
+                        <button class="btn btn-sm ${data["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-2" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 3 ? 'disabled' : ''}>
                             C
+                        </button>
+                        <button class="btn btn-sm ${data["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-2" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 4 ? 'disabled' : ''}>
+                            X
+                        </button>
+                        <button class="btn btn-sm ${data["odm_tipo"] == 5 ? 'btn-secondary' : 'btn-success'} btn-detalle-recuperado-cliente" data-producto="${data["pro_id"]}" ${data["odm_tipo"] == 5 ? 'disabled' : ''}>
+                            R
                         </button>
                     </div>
                 </td>
@@ -876,14 +895,20 @@ $(document).ready(function () {
             $(idCantidadProducto).text(totalProductos)
         }
     }
-    // funcion de cambiar estado
+
+    // funcion de cambiar estado de proporcionado
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-proporcionado-cliente', function () {
         const id_producto = $(this).data('producto')
         const $row = $(this).closest('tr')
         const $observacionInput = $row.find('.observacion-input')
+        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
         // añadimos el texto
-        const textNota = 'proporcionado por cliente ' + $observacionInput.val()
+        const textNota = 'proporcionado por cliente - ' + observacion
         $observacionInput.val(textNota)
+
+        // accedemos a los estilos de los demas botones
+        const $btnNopedir = $row.find('.btn-detalle-nopedir-cliente')
+        const $btnRecuperado = $row.find('.btn-detalle-recuperado-cliente')
 
         // actualizamos la data
         const findElement = buscarDetalleParte(currentParte)
@@ -895,8 +920,88 @@ $(document).ready(function () {
         // deshabilitar el input
         $(this).attr('disabled', true)
         // cambiamos los estilos del boton
-        $(this).removeClass('btn-success btn-detalle-proporcionado-cliente')
+        $(this).removeClass('btn-primary btn-detalle-proporcionado-cliente')
             .addClass('btn-secondary btn-detalle-proporcionado-cliente')
+        
+        // tenemos que configurar los estilos
+        $btnNopedir.removeClass('btn-secondary btn-danger btn-detalle-nopedir-cliente')
+        $btnNopedir.addClass('btn-danger btn-detalle-nopedir-cliente')
+        $btnNopedir.attr('disabled', false)
+        $btnRecuperado.removeClass('btn-secondary btn-success btn-detalle-recuperado-cliente')
+        $btnRecuperado.addClass('btn-success btn-detalle-recuperado-cliente')
+        $btnRecuperado.attr('disabled', false)
+    })
+
+    // funcion de cambiar estado de no pedir
+    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-nopedir-cliente', function () {
+        const id_producto = $(this).data('producto')
+        const $row = $(this).closest('tr')
+        const $observacionInput = $row.find('.observacion-input')
+        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
+        // añadimos el texto
+        const textNota = 'no pedir - ' + observacion
+        $observacionInput.val(textNota)
+
+        // accedemos a los estilos de los demas botones
+        const $btnProporcionado = $row.find('.btn-detalle-proporcionado-cliente')
+        const $btnRecuperado = $row.find('.btn-detalle-recuperado-cliente')
+
+        // actualizamos la data
+        const findElement = buscarDetalleParte(currentParte)
+        const { detalle_materiales } = findElement
+        const findElementProducto = detalle_materiales.find(element => element.pro_id == id_producto)
+        findElementProducto["odm_tipo"] = 4
+        findElementProducto["odm_observacion"] = textNota
+
+        // deshabilitar el input
+        $(this).attr('disabled', true)
+        // cambiamos los estilos del boton
+        $(this).removeClass('btn-danger btn-detalle-nopedir-cliente')
+            .addClass('btn-secondary btn-detalle-nopedir-cliente')
+        
+        // tenemos que configurar los estilos
+        $btnProporcionado.removeClass('btn-secondary btn-primary btn-detalle-proporcionado-cliente')
+        $btnProporcionado.addClass('btn-primary btn-detalle-proporcionado-cliente')
+        $btnProporcionado.attr('disabled', false)
+        $btnRecuperado.removeClass('btn-secondary btn-success btn-detalle-recuperado-cliente')
+        $btnRecuperado.addClass('btn-success btn-detalle-recuperado-cliente')
+        $btnRecuperado.attr('disabled', false)
+    })
+
+    // funcion de cambiar estado de proporcionado
+    $('#tbl-orden-interna-productos').on('click', '.btn-detalle-recuperado-cliente', function () {
+        const id_producto = $(this).data('producto')
+        const $row = $(this).closest('tr')
+        const $observacionInput = $row.find('.observacion-input')
+        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
+        // añadimos el texto
+        const textNota = 'recuperar - ' + observacion
+        $observacionInput.val(textNota)
+
+        // accedemos a los estilos de los demas botones
+        const $btnProporcionado = $row.find('.btn-detalle-proporcionado-cliente')
+        const $btnNopedir = $row.find('.btn-detalle-nopedir-cliente')
+
+        // actualizamos la data
+        const findElement = buscarDetalleParte(currentParte)
+        const { detalle_materiales } = findElement
+        const findElementProducto = detalle_materiales.find(element => element.pro_id == id_producto)
+        findElementProducto["odm_tipo"] = 5
+        findElementProducto["odm_observacion"] = textNota
+
+        // deshabilitar el input
+        $(this).attr('disabled', true)
+        // cambiamos los estilos del boton
+        $(this).removeClass('btn-success btn-detalle-recuperado-cliente')
+            .addClass('btn-secondary btn-detalle-recuperado-cliente')
+        
+        // tenemos que configurar los estilos
+        $btnProporcionado.removeClass('btn-secondary btn-primary btn-detalle-proporcionado-cliente')
+        $btnProporcionado.addClass('btn-primary btn-detalle-proporcionado-cliente')
+        $btnProporcionado.attr('disabled', false)
+        $btnNopedir.removeClass('btn-secondary btn-danger btn-detalle-nopedir-cliente')
+        $btnNopedir.addClass('btn-danger btn-detalle-nopedir-cliente')
+        $btnNopedir.attr('disabled', false)
     })
 
     // funcion de editar detalle de productos
@@ -974,6 +1079,23 @@ $(document).ready(function () {
     })
 
     // ---------- BOTONES DE CRUD GUARDAR ------------
+
+    // parsear informacion de detalle
+    function parserInformacionDetalle(){
+        const { detalle_partes } = ordenInterna
+        detalle_partes.forEach(element => {
+            element.detalle_materiales = element.detalle_materiales.map((element) => {
+                if(element.pro_codigo == 'SU500706'){
+                    return {
+                        ...element,
+                        pro_id: pro_id.split('-')[0]
+                    }
+                } else {
+                    return element
+                }
+            })
+        })
+    }
 
     // validar información de detalle sin cantidad
     function validarInformacionDetalleMateriales() {
@@ -1065,7 +1187,11 @@ $(document).ready(function () {
             alert(handleError)
             return
         }
-        // manejamos el error
+
+        // debemos formatear la informacion
+        parserInformacionDetalle()
+
+        // generamos el format de la data
         const formatData = {
             odt_numero: $otInput,
             oic_numero: $oiInput,
@@ -1223,6 +1349,10 @@ $(document).ready(function () {
             return Promise.reject(handleError); // Rechazamos la promesa con el mensaje de error
         }
 
+        // parseamos la data
+        parserInformacionDetalle()
+
+        // creamos un format data
         const formatData = {
             odt_numero: $otInput,
             oic_numero: $oiInput,
