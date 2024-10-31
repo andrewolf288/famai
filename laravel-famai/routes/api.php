@@ -34,9 +34,6 @@ use App\Http\Controllers\ProveedorCuentaBancoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
-use App\OrdenInterna;
-use App\OrdenInternaMateriales;
-use App\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -216,8 +213,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas de reportes
 Route::group(['middleware' => ['auth.jwt']], function () {
-    Route::get('/generarReporteOrdenTrabajo', [ReporteController::class, 'generarReporteOrdenTrabajo']);
-    Route::post('/previsualizarReporteOrdenTrabajo', [ReporteController::class, 'previsualizarReporteOrdenTrabajo']);
+    Route::get('/generarReporteOrdenTrabajo', [OrdenInternaController::class, 'exportOrdenInternaPDF']);
+    Route::post('/previsualizarReporteOrdenTrabajo', [OrdenInternaController::class, 'previsualizarOrdenInternaPDF']);
 });
 
 // rutas de proveedores
@@ -339,7 +336,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 // RUTAS ABIERTAS
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
-Route::get('test-orden-interna', [OrdenInternaController::class, 'exportPDF']);
+// Route::get('test-orden-interna', [OrdenInternaController::class, 'exportPDF']);
 
 Route::get('script-update', function () {
 

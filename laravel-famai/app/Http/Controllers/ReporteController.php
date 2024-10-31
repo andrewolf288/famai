@@ -6,7 +6,6 @@ use App\Reporte;
 use DateTime;
 use Exception;
 use Illuminate\Http\Request;
-use Mpdf\Output\Destination;
 use App\Helpers\DateHelper;
 
 class ReporteController extends Controller

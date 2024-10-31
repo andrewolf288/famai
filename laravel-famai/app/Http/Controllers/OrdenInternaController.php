@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cliente;
+use App\Helpers\DateHelper;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
@@ -18,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use App\Reporte;
 
 class OrdenInternaController extends Controller
 {
@@ -633,10 +635,35 @@ class OrdenInternaController extends Controller
         return response()->json(['success' => 'Orden interna eliminada correctamente.'], 200);
     }
 
-
-    // exportar orden interna
-    public function exportPDF()
+    // previsualizar orden interna
+    public function previsualizarOrdenInternaPDF(Request $request)
     {
+        $reporte = new Reporte();
+        $datosCabecera = array(
+            ['nombre_del_cliente' => $request->input('cli_id'),
+            'descripcion_equipo' => $request->input('oic_equipo_descripcion'),
+            'oic_componente' => $request->input('oic_componente'),
+            'oic_fecha' => $request->input('oic_fecha'),
+            'odt_numero' => $request->input('odt_numero'),
+            'oic_numero' => $request->input('oic_numero'),
+            'are_descripcion' => $request->input('are_codigo'),
+            'tra_idorigen' => $request->input('tra_idorigen'),
+            'tra_nombreorigen' => $request->input('tra_idorigen'),
+            'tra_idmaestro' => null,
+            'tra_nombremaestro' => $request->input('tra_idmaestro'),
+            'tra_idalmacen' => null,
+            'tra_nombrealmacen' => $request->input('tra_idalmacen'),
+            'oic_fechaevaluacion' => null,
+            'oic_fechaaprobacion' => null,
+            'oic_fechaentregaproduccion' => null,
+            'oic_fechaentregaestimada' => null,
+            'oic_usucreacion' => null,
+            'oic_feccreacion' => null,
+            'oic_usumodificacion' => null,
+            'oic_fecmodificacion' => null]
+        );
+        $datosPartes = $request->input('detalle_partes', []);
+
         // Configurar opciones de DOMPDF
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
@@ -648,7 +675,7 @@ class OrdenInternaController extends Controller
         $dompdf = new Dompdf($options);
 
         // Cargar la vista Blade y pasar datos si es necesario
-        $html = View::make('orden-interna.ordeninterna')->render();
+        $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
         $dompdf->loadHtml($html);
 
         // Configurar el tamaño de papel y orientación
@@ -658,6 +685,65 @@ class OrdenInternaController extends Controller
         $dompdf->render();
 
         // Mostrar el PDF en el navegador o descargar
-        return $dompdf->stream("reporte.pdf", ["Attachment" => false]);
+        return response()->streamDownload(
+            function () use ($dompdf) {
+                echo $dompdf->output();
+            },
+            'reporte.pdf',
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="reporte.pdf"'
+            ]
+        );
+    }
+
+    // exportar orden interna
+    public function exportOrdenInternaPDF(Request $request)
+    {
+        $reporte = new Reporte();
+        $idOIC = $request->input('oic_id');
+        $datosCabecera = $reporte->metobtenerCabecera($idOIC);
+        $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
+        $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
+
+        $datosPartes = $reporte->metobtenerPartes($idOIC);
+        foreach ($datosPartes as &$parte) {
+            $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
+            $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
+            $parte['detalle_procesos'] = $procesos;
+            $parte['detalle_materiales'] = $materiales;
+        }
+
+        // Configurar opciones de DOMPDF
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $options->set('isJavascriptEnabled', true);
+
+        // Crear instancia de DOMPDF
+        $dompdf = new Dompdf($options);
+
+        // Cargar la vista Blade y pasar datos si es necesario
+        $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
+        $dompdf->loadHtml($html);
+
+        // Configurar el tamaño de papel y orientación
+        $dompdf->setPaper('A4', 'landscape');
+
+        // Renderizar el PDF
+        $dompdf->render();
+
+        // Mostrar el PDF en el navegador o descargar
+        return response()->streamDownload(
+            function () use ($dompdf) {
+                echo $dompdf->output();
+            },
+            'reporte.pdf',
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="reporte.pdf"'
+            ]
+        );
     }
 }
