@@ -107,27 +107,20 @@
     <!-- NOTIFICACIONES -->
     <div class="modal fade" id="dialogNotificacionesModal" tabindex="-1"
         aria-labelledby="dialogNotificacionesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="productosCrearModalLabel">Notificaciones</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <table class="table mt-3" id="data-notificaciones">
-                        <thead>
-                            <tr>
-                                <th>Fecha Hora</th>
-                                <th>Area</th>
-                                <th>Usuario</th>
-                                <th>Proceso</th>
-                                <th>Descripcion</th>
-                                <th>Visto el</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                    <div class="mb-3 d-flex justify-content-start">
+                        <button class="btn btn-sm btn-primary me-2" id="btn-mostrar-todas-notificaciones">Todos</button>
+                        <button class="btn btn-sm btn-primary" id="btn-mostrar-no-leidas-notificaciones">No leidos</button>
+                    </div>
+                    <!-- Lista donde se cargarán las notificaciones -->
+                    <ul class="list-group" id="data-notificaciones">
+                    </ul>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -172,38 +165,12 @@
     <script src="assets/js/jquery.multiselect.js"></script>
     <!-- script de notificaciones -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="scripts/notificaciones/notificaciones.js"></script>
 </body>
 <script>
     let version = '241025.01';
     document.getElementById('app-version').textContent = version;
 
-    $("#notificaciones").on("click", async function () {
-        // Hacemos un llamado a la API para traer las notificaciones
-        const { data } = await client.get('notificaciones');
-        console.log(data);
-        $("#data-notificaciones tbody").empty();
-
-        // Recorremos las notificaciones y agregamos cada una como una fila a la tabla
-        data.forEach((notificacion) => {
-            const { ntf_fecha, are_codigo, area, usu_codigo, usuario, ntf_proceso, ntf_descripcion, ntf_visto } = notificacion;
-
-            const rowItem = document.createElement('tr');
-            rowItem.innerHTML = `
-            <td>${ntf_fecha ? parseDate(ntf_fecha) : ''}</td>
-            <td>${are_codigo ? area.are_descripcion : ''}</td>
-            <td>${usu_codigo ? usu_codigo : ''}</td>
-            <td>${ntf_proceso}</td>
-            <td>${ntf_descripcion}</td>
-            <td>${ntf_visto ? parseDate(ntf_visto) : ''}</td>
-            `;
-
-            $("#data-notificaciones tbody").append(rowItem);
-        });
-
-        // Mostramos el modal de Bootstrap
-        const dialogNotificaciones = new bootstrap.Modal(document.getElementById('dialogNotificacionesModal'));
-        dialogNotificaciones.show();
-    });
 </script>
 
 </html>

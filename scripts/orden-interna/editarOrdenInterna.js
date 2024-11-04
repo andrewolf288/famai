@@ -1391,6 +1391,7 @@ $(document).ready(async function () {
             await client.put(`/ordeninterna/${id}`, { oic_estado: estado })
             window.location.href = 'orden-interna';
         } catch (error) {
+            console.log(error)
             alert('Error al cambiar el estado')
         }
     })

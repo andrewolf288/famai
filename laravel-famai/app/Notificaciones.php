@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notificaciones extends Model
 {
+    public $timestamps = false;
     protected $table = 'tblnotificaciones_ntf';
     protected $primaryKey = 'ntf_id';
 

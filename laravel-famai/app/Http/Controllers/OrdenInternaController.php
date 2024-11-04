@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Cliente;
 use App\Helpers\DateHelper;
+use App\Notificaciones;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use App\Reporte;
+use App\Trabajador;
 
 class OrdenInternaController extends Controller
 {
@@ -595,6 +597,23 @@ class OrdenInternaController extends Controller
                 'oic_estado' => $request->input('oic_estado'),
                 'oic_usumodificacion' => $user->usu_codigo,
             ]);
+
+            // si el estado cambiado es "ENVIADO"
+            if($request->input('oic_estado') == 'ENVIADO'){
+                // buscamos todos los trabajadores pertenecientes al área de logistica
+                $trabajadores = Trabajador::where('are_codigo', 'LOG')->get();
+                foreach ($trabajadores as $trabajador) {
+                    // creamos una nueva orden interna para cada trabajador
+                    Notificaciones::create([
+                        'ntf_fecha' => Carbon::now(),
+                        'are_codigo' => 'LOG',
+                        'usu_codigo' => $trabajador->usu_codigo,
+                        'ntf_proceso' => "Ordenes Internas",
+                        'ntf_descripcion' => "OI Nro $ordenInterna->odt_numero - Estado Enviado",
+                        'ntf_visto' => null
+                    ]);
+                }
+            }
 
             DB::commit();
 

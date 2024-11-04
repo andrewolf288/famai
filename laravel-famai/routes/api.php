@@ -332,6 +332,10 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('notificaciones', [NotificacionController::class, 'index']);
+    Route::get('notificacionesByUsuarioNoVisto', [NotificacionController::class, 'findByUsuarioNoVisto']);
+    Route::get('notificacionesByUsuarioTodos', [NotificacionController::class, 'findByUsuarioTodos']);
+    Route::get('notificacionesByUsuario', [NotificacionController::class, 'findByUsuario']);
+    Route::put('notificacion/{id}', [NotificacionController::class, 'update']);
 });
 
 // RUTAS ABIERTAS
