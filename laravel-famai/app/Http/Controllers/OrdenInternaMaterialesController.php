@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\OrdenInterna;
+use App\Helpers\UtilHelper;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -282,12 +283,104 @@ class OrdenInternaMaterialesController extends Controller
         }
     }
 
+    // Exportacion de excel de almacen
+    public function exportExcelAlmacen(Request $request)
+    {
+        try {
+            $ordenTrabajo = $request->input('ot_numero', null);
+            $fecha_desde = $request->input('fecha_desde', null);
+            $fecha_hasta = $request->input('fecha_hasta', null);
+
+            $query = OrdenInternaMateriales::with(
+                [
+                    'producto.unidad',
+                    'ordenInternaParte.ordenInterna',
+                    'usuarioCreador'
+                ]
+            );
+
+            // filtro de orden de trabajo
+            if ($ordenTrabajo !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                    $q->where('odt_numero', $ordenTrabajo);
+                });
+            }
+
+            // filtro de fecha
+            if ($fecha_desde !== null && $fecha_hasta !== null) {
+                $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            }
+
+            $query->orderBy('odm_feccreacion', 'desc');
+
+            // Obtener los resultados de la primera base de datos
+            $ordenesMateriales = $query->get();
+
+            $headers = ['OT', 'Fec. Ent. Logística', 'Responsable Origen', 'Cod Producto', 'Descripción', 'Cantidad', 'Obs Producto'];
+            $columnWidths = [15, 19, 30, 10, 50, 10, 40];
+            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'texto'];
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Establecemos anchos de columnas
+            foreach ($columnWidths as $columnIndex => $width) {
+                $sheet->getColumnDimensionByColumn($columnIndex + 1)->setWidth($width);
+            }
+
+            // Establecemos encabezados con formatos
+            foreach ($headers as $columnIndex => $header) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+
+                // Dar color al fondo del encabezado
+                $sheet->getStyle("{$columnLetter}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('c7cdd6');
+
+                // Poner el texto en negrita
+                $sheet->getStyle("{$columnLetter}1")->getFont()->setBold(true);
+
+                // Establecer el valor en la celda
+                $sheet->setCellValue("{$columnLetter}1", $header);
+            }
+
+            // Establecer tipos de datos
+            $SIZE_DATA = sizeof($ordenesMateriales) + 1;
+            foreach ($tipoDato as $columnIndex => $tipoDato) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+                $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+                if ($tipoDato === "numero") {
+                    $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode('0.00');
+                }
+            }
+
+            // Agregamos la data
+            $row = 2;
+
+            foreach ($ordenesMateriales as $rowData) {
+                $sheet->setCellValue("A{$row}", UtilHelper::getValueFormatExcel($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->odt_numero : null));
+                $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData->oic_fechaentregaestimada));
+                $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData->usuarioCreador->usu_nombre));
+                $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData->producto ? $rowData->producto->pro_codigo : null));
+                $sheet->setCellValue("E{$row}", UtilHelper::getValueFormatExcel($rowData->odm_descripcion));
+                $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidad));
+                $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel($rowData->odm_observacion));
+                $row++;
+            }
+
+            return response()->streamDownload(function () use ($spreadsheet) {
+                $writer = new Xlsx($spreadsheet);
+                $writer->save('php://output');
+            }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     // Exportacion de excel de presupuestos
     public function exportExcelPresupuesto(Request $request)
     {
         try {
             $ordenTrabajo = $request->input('ot_numero', null);
-            $ordenInterna = $request->input('oi_numero', null);
             $fecha_desde = $request->input('fecha_desde', null);
             $fecha_hasta = $request->input('fecha_hasta', null);
 
@@ -303,13 +396,6 @@ class OrdenInternaMaterialesController extends Controller
             if ($ordenTrabajo !== null) {
                 $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
                     $q->where('odt_numero', $ordenTrabajo);
-                });
-            }
-
-            // filtro de orden interna
-            if ($ordenInterna !== null) {
-                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenInterna) {
-                    $q->where('oic_numero', $ordenInterna);
                 });
             }
 
@@ -421,28 +507,23 @@ class OrdenInternaMaterialesController extends Controller
                 }
             }
 
-            function getValue2($relation, $default = 'N/A')
-            {
-                return $relation ?? $default;
-            }
-
             // Agregamos la data
             $row = 2;
 
             foreach ($productoConInformacionCompras as $rowData) {
-                $sheet->setCellValue("A{$row}", getValue2($rowData['material']->ordenInternaParte && $rowData['material']->ordenInternaParte->ordenInterna) ? $rowData['material']->ordenInternaParte->ordenInterna->oic_numero : null);
-                $sheet->setCellValue("B{$row}", getValue2($rowData['material']->ordenInternaParte && $rowData['material']->ordenInternaParte->ordenInterna ? $rowData['material']->ordenInternaParte->ordenInterna->odt_numero : null));
-                $sheet->setCellValue("C{$row}", getValue2($rowData['material']->odm_feccreacion));
-                $sheet->setCellValue("D{$row}", getValue2($rowData['material']->odm_tipo == 1 ? 'R' : 'A'));
-                $sheet->setCellValue("E{$row}", getValue2($rowData['material']->ordenInternaParte->parte->oip_descripcion));
-                $sheet->setCellValue("F{$row}", getValue2($rowData['material']->producto ? $rowData['material']->producto->pro_codigo : null));
-                $sheet->setCellValue("G{$row}", getValue2($rowData['material']->odm_descripcion));
-                $sheet->setCellValue("H{$row}", getValue2($rowData['material']->odm_observacion));
-                $sheet->setCellValue("I{$row}", getValue2($rowData['ultimoPrecioCompras']));
-                $sheet->setCellValue("J{$row}", getValue2($rowData['ultimaFechaCompras']));
-                $sheet->setCellValue("K{$row}", getValue2($rowData['stock']));
-                $sheet->setCellValue("L{$row}", getValue2($rowData['material']->odm_cantidad));
-                $sheet->setCellValue("M{$row}", getValue2($rowData['material']->producto && $rowData['material']->producto->unidad ? $rowData['material']->producto->unidad->uni_codigo : null));
+                $sheet->setCellValue("A{$row}", UtilHelper::getValueFormatExcel($rowData['material']->ordenInternaParte && $rowData['material']->ordenInternaParte->ordenInterna) ? $rowData['material']->ordenInternaParte->ordenInterna->oic_numero : null);
+                $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData['material']->ordenInternaParte && $rowData['material']->ordenInternaParte->ordenInterna ? $rowData['material']->ordenInternaParte->ordenInterna->odt_numero : null));
+                $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_feccreacion));
+                $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_tipo == 1 ? 'R' : 'A'));
+                $sheet->setCellValue("E{$row}", UtilHelper::getValueFormatExcel($rowData['material']->ordenInternaParte->parte->oip_descripcion));
+                $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel($rowData['material']->producto ? $rowData['material']->producto->pro_codigo : null));
+                $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel( UtilHelper::limpiarNombreProducto($rowData['material']->odm_descripcion)));
+                $sheet->setCellValue("H{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_observacion));
+                $sheet->setCellValue("I{$row}", UtilHelper::getValueFormatExcel($rowData['ultimoPrecioCompras']));
+                $sheet->setCellValue("J{$row}", UtilHelper::getValueFormatExcel($rowData['ultimaFechaCompras']));
+                $sheet->setCellValue("K{$row}", UtilHelper::getValueFormatExcel($rowData['stock']));
+                $sheet->setCellValue("L{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_cantidad));
+                $sheet->setCellValue("M{$row}", UtilHelper::getValueFormatExcel($rowData['material']->producto && $rowData['material']->producto->unidad ? $rowData['material']->producto->unidad->uni_codigo : null));
                 $sheet->setCellValue("N{$row}", 0.00);
                 $sheet->setCellValue("O{$row}", 0.00);
                 $sheet->setCellValue("P{$row}", 0.00);
@@ -543,25 +624,20 @@ class OrdenInternaMaterialesController extends Controller
                 }
             }
 
-            function getValue($relation, $default = 'N/A')
-            {
-                return $relation ?? $default;
-            }
-
             // Agregamos la data
             $row = 2;
 
             foreach ($data as $rowData) {
-                $sheet->setCellValue("A{$row}", getValue($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna) ? $rowData->ordenInternaParte->ordenInterna->oic_numero : null);
-                $sheet->setCellValue("B{$row}", getValue($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->odt_numero : null));
-                $sheet->setCellValue("C{$row}", getValue($rowData->odm_feccreacion));
-                $sheet->setCellValue("D{$row}", getValue($rowData->odm_tipo == 1 ? 'R' : 'A'));
-                $sheet->setCellValue("E{$row}", getValue($rowData->producto ? $rowData->producto->pro_codigo : null));
-                $sheet->setCellValue("F{$row}", getValue($rowData->odm_descripcion));
-                $sheet->setCellValue("G{$row}", getValue($rowData->odm_observacion));
-                $sheet->setCellValue("H{$row}", getValue($rowData->odm_cantidad));
-                $sheet->setCellValue("I{$row}", getValue($rowData->producto && $rowData->producto->unidad ? $rowData->producto->unidad->uni_codigo : null));
-                $sheet->setCellValue("J{$row}", getValue($rowData->producto && $rowData->producto->stock ? $rowData->producto->stock->alp_stock : null, 0.00));
+                $sheet->setCellValue("A{$row}", UtilHelper::getValueFormatExcel($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna) ? $rowData->ordenInternaParte->ordenInterna->oic_numero : null);
+                $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->odt_numero : null));
+                $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData->odm_feccreacion));
+                $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData->odm_tipo == 1 ? 'R' : 'A'));
+                $sheet->setCellValue("E{$row}", UtilHelper::getValueFormatExcel($rowData->producto ? $rowData->producto->pro_codigo : null));
+                $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel($rowData->odm_descripcion));
+                $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel($rowData->odm_observacion));
+                $sheet->setCellValue("H{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidad));
+                $sheet->setCellValue("I{$row}", UtilHelper::getValueFormatExcel($rowData->producto && $rowData->producto->unidad ? $rowData->producto->unidad->uni_codigo : null));
+                $sheet->setCellValue("J{$row}", UtilHelper::getValueFormatExcel($rowData->producto && $rowData->producto->stock ? $rowData->producto->stock->alp_stock : null, 0.00));
                 $sheet->setCellValue("K{$row}", 0.00);
                 $sheet->setCellValue("L{$row}", 0.00);
                 $sheet->setCellValue("M{$row}", 0.00);

@@ -54,4 +54,10 @@ class OrdenInternaMateriales extends Model
     {
         return $this->belongsTo(Trabajador::class, 'tra_responsable', 'tra_id');
     }
+
+    // usuario creador
+    public function usuarioCreador()
+    {
+        return $this->belongsTo(User::class, 'odm_usucreacion');
+    }
 }
