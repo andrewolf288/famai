@@ -73,13 +73,13 @@ $(document).ready(async function () {
             $('#responsableAlmacen').val(data.trabajador_almacen?.tra_nombre ?? 'No aplica')
 
             data.partes.forEach(function (item, index) {
-                const totalDetalleProcesos = item.procesos.filter(element => element.odp_estado == 1).length
-                const totalDetalleProductos = item.materiales.filter(element => element.odm_estado == 1).length
-                const totalRegulares = item.materiales.filter((element) => element.odm_tipo == 1 && element.odm_estado == 1).length
-                const totalAdicionales = item.materiales.filter((element) => element.odm_tipo == 2 && element.odm_estado == 1).length
-                const totalClientes = item.materiales.filter((element) => element.odm_tipo == 3 && element.odm_estado == 1).length
-                const totalNoPedir = item.materiales.filter((element) => element.odm_tipo == 4 && element.odm_estado == 1).length
-                const totalRecuperado = item.materiales.filter((element) => element.odm_tipo == 5 && element.odm_estado == 1).length
+                const totalDetalleProcesos = item.procesos.length
+                const totalDetalleProductos = item.materiales.length
+                const totalRegulares = item.materiales.filter((element) => element.odm_tipo == 1).length
+                const totalAdicionales = item.materiales.filter((element) => element.odm_tipo == 2).length
+                const totalClientes = item.materiales.filter((element) => element.odm_tipo == 3).length
+                const totalNoPedir = item.materiales.filter((element) => element.odm_tipo == 4).length
+                const totalRecuperado = item.materiales.filter((element) => element.odm_tipo == 5).length
 
                 const row = `
                 <tr>

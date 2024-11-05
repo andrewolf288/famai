@@ -435,6 +435,7 @@ class OrdenInternaController extends Controller
                 'tra_idalmacen' => $request->input('tra_idalmacen'),
                 'oic_activo' => 1,
                 'oic_estado' => 'INGRESO',
+                'oic_tipo' => 'OI',
                 'oic_usucreacion' => $user->usu_codigo,
                 'oic_fecmodificacion' => null, // para colocar que la fecha de modificacion no se setee al crearse el registro
             ]);
