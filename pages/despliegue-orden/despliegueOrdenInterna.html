@@ -37,8 +37,7 @@
         <div class="d-flex flex-column flex-md-row">
             <select id="filter-selector" class="form-select w-100 w-md-auto">
                 <option value="">Seleccione un filtro</option>
-                <option value="ot_numero">Orden trabajo</option>
-                <option value="oi_numero">Orden interna</option>
+                <option value="odt_numero">Orden trabajo</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -66,7 +65,6 @@
             Check
         </th>
         <th>OT</th>
-        <th>OI</th>
         <th>Fec. Det OI</th>
         <th class="text-center">Tipo</th>
         <th>Cod Producto</th>
@@ -75,6 +73,7 @@
         <th class="text-center">Cantidad</th>
         <th class="text-center">Und.</th>
         <th class="text-center">Stock Alm</th>
+        <th class="text-center">Cotizado</th>
         <th class="text-center">Reservado</th>
         <th class="text-center">Ordenado</th>
         <th class="text-center">Atendido</th>
@@ -239,6 +238,47 @@
         </div>
     </div>
 </div>
+
+<!-- DIALOG COTIZADO -->
+<div>
+    <div class="modal fade" id="cotizadoModal" tabindex="-1" aria-labelledby="cotizadoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cotizadoModalLabel">Cotizaciones relacionadas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="data-container-cotizacion" class="table table-striped nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">Fecha Cot.</th>
+                                    <th>Nro Cot proveedor</th>
+                                    <th>Doc. proveedor</th>
+                                    <th>Raz. social proveedor</th>
+                                    <th class="text-center">Total</th>
+                                    <th>Estado</th>
+                                    <th>Fec. Creación</th>
+                                    <th>Usu. Creador</th>
+                                    <th>Fec. Actualización</th>
+                                    <th>Usu. Actualizador</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- DIALOG ORDENADO -->
 <div class="modal fade" id="ordenadoModal" tabindex="-1" aria-labelledby="ordenadoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

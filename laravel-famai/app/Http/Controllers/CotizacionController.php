@@ -6,6 +6,7 @@ use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
 use App\Helpers\DateHelper;
+use App\OrdenInternaMateriales;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -195,6 +196,11 @@ class CotizacionController extends Controller
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null
                 ]);
+
+                $detalleMaterial = OrdenInternaMateriales::findOrFail($detalle['odm_id']);
+                $detalleMaterial->odm_estado = 'COT';
+                $detalleMaterial->save();
+
                 $counter++;
             }
 

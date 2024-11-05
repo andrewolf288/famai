@@ -47,7 +47,7 @@ $(document).ready(() => {
             // obtenemos los datos
             const { producto, orden_interna_parte } = material
             const { orden_interna } = orden_interna_parte
-            const { oic_numero, odt_numero } = orden_interna
+            const { odt_numero } = orden_interna
 
             const rowItem = document.createElement('tr')
             rowItem.innerHTML = `
@@ -56,7 +56,6 @@ $(document).ready(() => {
                     <input type="checkbox" style="width: 25px; height: 25px; border: 2px solid black;" class="form-check-input row-select" ${selectedRows.has(material.odm_id) ? 'checked' : ''}/>
                 </td>
                 <td>${odt_numero}</td>
-                <td>${oic_numero}</td>
                 <td>${parseDate(material.odm_feccreacion)}</td>
                 <td class="text-center">${material.odm_tipo == 1 ? 'R' : 'A'}</td>
                 <td>${producto?.pro_codigo || 'N/A'}</td>
@@ -65,6 +64,9 @@ $(document).ready(() => {
                 <td class="text-center">${material.odm_cantidad}</td>
                 <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                 <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-cotizado" data-detalle="${material.odm_id}">Cotizaciones</button>
+                </td>
                 <td class="text-center">
                     <button class="btn btn-primary btn-reservado">0.00</button>
                 </td>
@@ -96,6 +98,40 @@ $(document).ready(() => {
     $("#data-container-body").on('click', '.btn-reservado', function () {
         const loadModalReservado = new bootstrap.Modal(document.getElementById('reservacionModal'))
         loadModalReservado.show()
+    })
+
+    $("#data-container-body").on('click', '.btn-cotizado', async function () {
+        const id = $(this).data('detalle')
+        const { data } = await client.get(`/ordeninternamateriales/cotizacion/${id}`)
+        console.log(data)
+        $("#data-container-cotizacion tbody").empty()
+
+        data.forEach(detalle => {
+            const { cotizacion } = detalle
+            const { proveedor } = cotizacion
+            const rowItem = document.createElement('tr')
+
+            rowItem.innerHTML = `
+            <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
+            <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
+            <td>${proveedor.prv_nrodocumento}</td>
+            <td>${proveedor.prv_nombre}</td>
+            <td>${cotizacion.coc_total}</td>
+            <td>
+                <span class="badge bg-primary">
+                    ${cotizacion.coc_estado}
+                </span>
+            </td>
+            <td>${cotizacion.coc_feccreacion === null ? 'No aplica' : parseDate(cotizacion.coc_feccreacion)}</td>
+            <td>${cotizacion.coc_usucreacion === null ? 'No aplica' : cotizacion.coc_usucreacion}</td>
+            <td>${cotizacion.coc_fecmodificacion === null ? 'No aplica' : parseDate(cotizacion.coc_fecmodificacion)}</td>
+            <td>${cotizacion.coc_usumodificacion === null ? 'No aplica' : cotizacion.coc_usumodificacion}</td>
+            `
+            $('#data-container-cotizacion tbody').append(rowItem)
+        })
+
+        const loadModalCotizado = new bootstrap.Modal(document.getElementById('cotizadoModal'))
+        loadModalCotizado.show()
     })
 
     $("#data-container-body").on('click', '.btn-ordenado', function () {

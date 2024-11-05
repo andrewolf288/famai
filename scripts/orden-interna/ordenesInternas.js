@@ -39,7 +39,6 @@ $(document).ready(() => {
                     <td>${ordenInterna.orden_trabajo?.odt_numero ?? 'No aplica'}</td>
                     <td>${ordenInterna.orden_trabajo?.odt_estado ?? 'No aplica'}</td>
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'No aplica'}</td>
-                    <td>${ordenInterna.oic_numero}</td>
                     <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'No aplica'}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>

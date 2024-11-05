@@ -11,7 +11,6 @@ class OrdenInterna extends Model
     protected $primaryKey = 'oic_id';
 
     protected $fillable = [
-        'oic_numero',
         'oic_fecha',
         'odt_numero',
         'cli_id',
@@ -19,6 +18,7 @@ class OrdenInterna extends Model
         'oic_equipo_descripcion',
         'oic_componente',
         'oic_estado',
+        'oic_tipo',
         'tra_idorigen',
         'tra_idmaestro',
         'tra_idalmacen',

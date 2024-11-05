@@ -74,6 +74,5 @@ $(document).ready(() => {
     }
   }
 
-
   cargarNotificacionesNoLeidas()
 })

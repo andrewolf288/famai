@@ -55,8 +55,6 @@ $(document).ready(async function () {
             detalleOrdenInterna = data.partes
             // reemplazamos el valor en orden trabajo
             $('#otInput').val(data.odt_numero)
-            // reemplazamos el valor en orden interna
-            $('#oiInput').val(data.oic_numero)
             // reemplazamos el valor en cliente
             $('#clienteInput').val(data.cliente?.cli_nombre ?? 'No aplica')
             // reemplazamos el valor en fecha

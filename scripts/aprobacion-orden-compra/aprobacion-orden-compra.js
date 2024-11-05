@@ -167,7 +167,7 @@ $(document).ready(() => {
             const rowItem = document.createElement('tr')
 
             rowItem.innerHTML = `
-            <td>${parseDate(cotizacion.coc_fechacotizacion)}</td>
+            <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>

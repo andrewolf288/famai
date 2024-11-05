@@ -35,19 +35,16 @@ class OrdenInternaController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $odtNumero = $request->input('odt_numero', null);
-        $oicNumero = $request->input('oic_numero', null);
         $oicEstado = $request->input('oic_estado', null);
 
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
-        $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'ordenTrabajo']);
+        $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'ordenTrabajo'])
+                                ->where('oic_tipo', 'OI');
+
         if ($odtNumero !== null) {
             $query->where('odt_numero', $odtNumero);
-        }
-
-        if ($oicNumero !== null) {
-            $query->where('oic_numero', $oicNumero);
         }
 
         if ($oicEstado !== null) {
@@ -85,7 +82,7 @@ class OrdenInternaController extends Controller
     public function findByNumero($numero)
     {
         $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
-            ->where('oic_numero', $numero)
+            ->where('odt_numero', $numero)
             ->first();
         if (!$ordenInterna) {
             return response()->json(['error' => 'Orden interna no encontrada'], 404);
@@ -182,7 +179,7 @@ class OrdenInternaController extends Controller
                     'odm_cantidad' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
-                    'odm_estado' => 1,
+                    'odm_estado' => 'CRD',
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
                 ]);
@@ -284,7 +281,6 @@ class OrdenInternaController extends Controller
             $validator = Validator::make($request->all(), [
                 'odt_numero' => 'required|string',
                 'cli_id' => 'required|string',
-                'oic_numero' => 'required|string|unique:tblordenesinternascab_oic,oic_numero',
                 'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
                 'oic_fecha' => 'required|date',
                 'oic_fechaaprobacion' => 'nullable|date',
@@ -426,7 +422,6 @@ class OrdenInternaController extends Controller
 
             // creamos la orden interna
             $ordeninterna = OrdenInterna::create([
-                'oic_numero' => $request->input('oic_numero'),
                 'oic_fecha' => $request->input('oic_fecha'),
                 'oic_fechaaprobacion' => $request->input('oic_fechaaprobacion'),
                 'oic_fechaentregaestimada' => $request->input('oic_fechaentregaestimada'),
@@ -559,7 +554,7 @@ class OrdenInternaController extends Controller
                         'odm_item' => $material['odm_item'],
                         'odm_observacion' => $material['odm_observacion'],
                         'odm_tipo' => $material['odm_tipo'],
-                        'odm_estado' => 1,
+                        'odm_estado' => 'CRD',
                         'odm_usucreacion' => $user->usu_codigo,
                         'odm_fecmodificacion' => null
                     ]);
@@ -664,7 +659,6 @@ class OrdenInternaController extends Controller
             'oic_componente' => $request->input('oic_componente'),
             'oic_fecha' => $request->input('oic_fecha'),
             'odt_numero' => $request->input('odt_numero'),
-            'oic_numero' => $request->input('oic_numero'),
             'are_descripcion' => $request->input('are_codigo'),
             'tra_idorigen' => $request->input('tra_idorigen'),
             'tra_nombreorigen' => $request->input('tra_idorigen'),

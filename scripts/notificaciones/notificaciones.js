@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    function cargarListaNotificaciones(data){
+    function cargarListaNotificaciones(data) {
         console.log(data)
         $("#data-notificaciones").empty();
         // Recorremos las notificaciones y agregamos cada una como un elemento de lista
@@ -35,21 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function cargarNotificacionesNoLeidas() {
-        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
-        if(showNotificaciones){
-            const { data } = await client.get(`notificacionesByUsuarioNoVisto?usu_codigo=${usu_codigo}`);
-            if (data.length > 0) {
-                cargarListaNotificaciones(data);
-                // mostramos el modal
-                const dialogNotificaciones = new bootstrap.Modal(document.getElementById('dialogNotificacionesModal'));
-                dialogNotificaciones.show();
-                // ya no volvemos a mostrar notificaciones
-                showNotificaciones = false
-            }
-        }
-    }
-
     $("#notificaciones").on("click", async function (e) {
         e.preventDefault();
         const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
@@ -61,12 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     $("#data-notificaciones").on('click', '.form-check-input', async function () {
-        const notificacion = $(this).data('id'); 
+        const notificacion = $(this).data('id');
         try {
             await client.put(`/notificacion/${notificacion}`)
             $(this).prop('checked', true);
             $(this).prop('disabled', true);
-        } catch(error){
+        } catch (error) {
             console.log(error)
             alert('Hubo un error al cambiar el estado')
         }

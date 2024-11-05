@@ -118,7 +118,6 @@ $(document).ready(function () {
                 }
             }
             $('#clienteInput').val(data.cli_nombre || '')
-            $('#oiInput').val(data.odt_numero)
             $('#idClienteInput').val(data.cli_nrodocumento || '')
             $('#equipoInput').val(data.odt_equipo)
             $('#componenteInput').val(data.odt_componente)
@@ -1141,7 +1140,6 @@ $(document).ready(function () {
         let handleError = ''
         const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
-        const $oiInput = $('#oiInput').val().trim()
         const $oiValorEquipo = $('#equipoInput').val().trim()
         const $oiValorComponente = $('#componenteInput').val().trim();
         const $oiCodigoArea = $('#areaSelect').val()
@@ -1153,7 +1151,6 @@ $(document).ready(function () {
         if (
             $oiCliente.length === 0 ||
             $otInput.length < 7 ||
-            $oiInput.length < 7 ||
             $oiValorEquipo.length === 0 ||
             $oiCodigoArea.length === 0 ||
             $oiFecha.length === 0 ||
@@ -1161,9 +1158,6 @@ $(document).ready(function () {
         ) {
             if ($otInput.length < 7) {
                 handleError += '- Se debe ingresar información de orden trabajo con minimo 7 caracteres\n'
-            }
-            if ($oiInput.length < 7) {
-                handleError += '- Se debe ingresar información de orden interna con minimo 7 caracteres\n'
             }
             if ($oiCliente.length === 0) {
                 handleError += '- Se debe ingresar información del cliente\n'
@@ -1194,7 +1188,6 @@ $(document).ready(function () {
         // generamos el format de la data
         const formatData = {
             odt_numero: $otInput,
-            oic_numero: $oiInput,
             cli_id: $oiCliente,
             are_codigo: $oiCodigoArea,
             oic_fecha: transformarFecha($oiFecha),
@@ -1303,7 +1296,6 @@ $(document).ready(function () {
         let handleError = '';
         const $oiCliente = $('#idClienteInput').val().trim();
         const $otInput = $('#otInput').val().trim();
-        const $oiInput = $('#oiInput').val().trim();
         const $oiValorEquipo = $('#equipoInput').val().trim();
         const $oiValorComponente = $('#componenteInput').val().trim();
         const $oiCodigoArea = $('#areaSelect').val();
@@ -1315,7 +1307,6 @@ $(document).ready(function () {
         if (
             $oiCliente.length === 0 ||
             $otInput.length < 7 ||
-            $oiInput.length < 7 ||
             $oiValorEquipo.length === 0 ||
             $oiCodigoArea.length === 0 ||
             $oiFecha.length === 0 ||
@@ -1323,9 +1314,6 @@ $(document).ready(function () {
         ) {
             if ($otInput.length < 7) {
                 handleError += 'Se debe ingresar información de orden trabajo con mínimo 7 caracteres\n';
-            }
-            if ($oiInput.length < 7) {
-                handleError += 'Se debe ingresar información de orden interna con mínimo 7 caracteres\n';
             }
             if ($oiCliente.length === 0) {
                 handleError += 'Se debe ingresar información del cliente\n';
@@ -1355,7 +1343,6 @@ $(document).ready(function () {
         // creamos un format data
         const formatData = {
             odt_numero: $otInput,
-            oic_numero: $oiInput,
             cli_id: $oiCliente,
             are_codigo: $oiCodigoArea,
             oic_fecha: transformarFecha($oiFecha),
@@ -1413,7 +1400,6 @@ $(document).ready(function () {
     $("#btn-previsualizar-orden-interna").on('click', async function () {
         const $oiCliente = $('#clienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
-        const $oiInput = $('#oiInput').val().trim()
         const $oiValorEquipo = $('#equipoInput').val().trim()
         const $oiValorComponente = $('#componenteInput').val().trim()
         const $oiCodigoArea = $('#areaSelect option:selected').text()
@@ -1424,7 +1410,6 @@ $(document).ready(function () {
 
         const formatData = {
             odt_numero: $otInput,
-            oic_numero: $oiInput,
             cli_id: $oiCliente,
             are_codigo: $oiCodigoArea,
             oic_fecha: $oiFecha,
