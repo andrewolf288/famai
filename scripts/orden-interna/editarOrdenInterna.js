@@ -5,19 +5,28 @@ $(document).ready(async function () {
     const id = segments.pop()
     const tiempoAutoguardado = 5 * 60 * 1000
     let estadoOI = ""
+    let isRequestInProgress = false;
 
     let detalleOrdenInterna = []
     let currentDetalleParte = 0
 
     function intentarEjecutarFuncion() {
+        // deshabilitamos los botones
+        deshabilitarBotonesGuardadoModal()
+
         guardadoAutomatico()
             .then(() => {
-                console.log("Se resolvio")
+                // habilitamos los botones
+                habilitarBotonesGuardadoModal()
+
                 setTimeout(() => {
                     intentarEjecutarFuncion();
                 }, tiempoAutoguardado);
             })
             .catch((error) => {
+                // habilitamos los botones
+                habilitarBotonesGuardadoModal()
+
                 toastr.options = {
                     "closeButton": false,
                     "debug": false,
@@ -133,11 +142,12 @@ $(document).ready(async function () {
 
     await cargarDetalleOrdenInterna()
 
+    // ejecucion de la funcion de guardado automático
     setTimeout(() => {
         intentarEjecutarFuncion();
     }, tiempoAutoguardado);
 
-    // evento de multiselect
+    // declaracion de multiselect
     $('select[multiple]').multiselect(
         {
             onOptionClick: function (element, option) {
@@ -210,6 +220,7 @@ $(document).ready(async function () {
         }
     }
 
+    // cargamos los procesos de detalle en modal
     function cargarProcesosDetalle(id_parte) {
         $('#tbl-orden-interna-procesos tbody').empty()
         // buscamos el detalle de la parte correspondiente
@@ -219,9 +230,6 @@ $(document).ready(async function () {
 
         procesos.sort((a, b) => a.opp_codigo - b.opp_codigo)
 
-        console.log(procesos)
-        
-        // <input type="text" class="form-control observacion-input" value='${element.odp_observacion.replace(/'/g, "&#39;") || ''}' readonly/>
         procesos.forEach(element => {
             const claseCondicional = element.proceso.opp_descripcion.toLowerCase().includes(palabraClave) ? true : false
             const row = `
@@ -278,6 +286,7 @@ $(document).ready(async function () {
         $('#procesosModal').modal('show')
     })
 
+    // funcion para agregar detalle de proceso (recive el id del proceso y el nombre correspondiente)
     function agregarDetalleProceso(valueId, valueName){
         const palabraClave = 'otro'
         const selectedProcesoId = valueId
@@ -285,6 +294,7 @@ $(document).ready(async function () {
         const selectedProcesoCode = valueName.split(" - ")[0].trim()
         const claseCondicional = selectedProcesoName.toLowerCase().includes(palabraClave) ? true : false
 
+        // debemos verificar que no se ingrese el mismo proceso
         let idProcesosArray = []
         $('#tbl-orden-interna-procesos tbody tr').each(function () {
             let idProceso = $(this).data('id-proceso')
@@ -416,7 +426,7 @@ $(document).ready(async function () {
                 </svg>`)
     })
 
-    // funcion de guarda detalle de proceso (gestionar caso de uso)
+    // funcion de guardar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-guardar', async function () {
         const $row = $(this).closest('tr')
         const $inputDescripcion = $row.find('.descripcion-input')
@@ -435,6 +445,9 @@ $(document).ready(async function () {
                 odp_ccalidad
             }
             try {
+                // indicamos request realizado
+                isRequestInProgress = true
+
                 const { data } = await client.put(`/ordeninternaprocesos/${odp_id}`, formatData)
                 const { procesos } = buscarDetalleParte(currentDetalleParte)
                 const findProceso = procesos.find(element => element.odp_id == odp_id)
@@ -448,6 +461,8 @@ $(document).ready(async function () {
                 $row.find('td').eq(5).text(data.odp_fecmodificacion ? parseDate(data.odp_fecmodificacion) : 'No aplica')
             } catch (error) {
                 alert('Error al actualizar el detalle de proceso')
+            } finally {
+                isRequestInProgress = false
             }
         }
 
@@ -463,15 +478,16 @@ $(document).ready(async function () {
                     </svg>`)
     })
 
+    // funcion de eliminacion de detalle de proceso
     async function eliminarDetalleProceso(id_proceso){
         const $element = $(`button[data-proceso="${id_proceso}"]`)
         const $row = $element.closest('tr')
 
         // si se trata de un registro existente
         if (!$row.hasClass('row-editable')) {
-            // debemos extraer la informacion dl tr
             const odp_id = $row.data('id-detalle')
             try {
+                isRequestInProgress = true
                 await client.delete(`/ordeninternaprocesos/${odp_id}`)
                 const { procesos } = buscarDetalleParte(currentDetalleParte)
                 const findProcesoIndex = procesos.findIndex(element => element.odp_id == odp_id)
@@ -481,6 +497,8 @@ $(document).ready(async function () {
                 $row.remove()
             } catch (error) {
                 alert('Error al eliminar el detalle de proceso')
+            } finally {
+                isRequestInProgress = false
             }
         } else {
             // removemos el DOM
@@ -554,13 +572,15 @@ $(document).ready(async function () {
         })
 
         if (dataArray.length === 0) {
+            isRequestInProgress = false
             alert('No hay procesos para guardar')
             return
         }
         try {
-            const { data } = await client.put(`/ordeninterna/guardar-procesos/${currentDetalleParte}`, { procesos: dataArray })
+            isRequestInProgress = true
+            deshabilitarBotonesGuardadoModal()
 
-            // actualizamos la data
+            const { data } = await client.put(`/ordeninterna/guardar-procesos/${currentDetalleParte}`, { procesos: dataArray })
             const findElement = buscarDetalleParte(currentDetalleParte)
             const { procesos } = findElement
 
@@ -575,11 +595,12 @@ $(document).ready(async function () {
 
             // borramos los datos temporales
             $('#tbl-orden-interna-procesos tbody .row-editable').remove()
-
-            // cerramos el modal
             $('#procesosModal').modal('hide')
         } catch (error) {
             alert('Errror al guardar los procesos')
+        } finally {
+            habilitarBotonesGuardadoModal()
+            isRequestInProgress = false
         }
     }
 
@@ -608,7 +629,6 @@ $(document).ready(async function () {
             // Si no está marcado, vuelve al placeholder original
             $('#productosInput').attr('placeholder', 'Buscar material...');
         }
-        // $('#productosInput').val('')
         limpiarLista()
     });
 
@@ -703,6 +723,7 @@ $(document).ready(async function () {
         }
     });
 
+    // buscar materiales con materiales de SAP
     async function buscarMateriales(query) {
         if (abortController) {
             abortController.abort();
@@ -728,20 +749,20 @@ $(document).ready(async function () {
             })
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.log('Petición abortada'); // Maneja el error de la petición abortada
+                console.log('Petición abortada');
             } else {
                 console.error('Error al buscar materiales:', error);
-                // alert('Error al buscar materiales. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
             }
         }
     }
 
+    // limpiar items de la lista de busqueda
     function limpiarLista() {
         $('#resultadosLista').empty()
     }
 
+    // funcion que permite ingresar productos sin codigos
     function ingresarProductoSinCodigo() {
-        // obtenemos el valor de checked
         const checked = false
         const pro_id = obtenerIdUnico()
         const pro_codigo = ""
@@ -807,7 +828,7 @@ $(document).ready(async function () {
 
         const findProducto = idProductosArray.find(element => element == pro_id)
 
-        // no validar si el codigo es SU500706
+        // Si se trata del producto SU500706, si se acepta varias ingresos de estos en la OI
         if (findProducto && pro_codigo != 'SU500706') {
             alert('Este producto ya fué agregado')
         } else {
@@ -880,7 +901,9 @@ $(document).ready(async function () {
                 odm_tipo,
                 odm_observacion: textNota
             }
+
             try {
+                isRequestInProgress = true
                 const { data } = await client.put(`/ordeninternamateriales/tipo/${odm_id}`, formatData)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterial = materiales.find(element => element.odm_id == odm_id)
@@ -912,6 +935,8 @@ $(document).ready(async function () {
 
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
+            } finally {
+                isRequestInProgress = false
             }
 
         }
@@ -952,7 +977,9 @@ $(document).ready(async function () {
                 odm_tipo,
                 odm_observacion: textNota
             }
+
             try {
+                isRequestInProgress = true
                 const { data } = await client.put(`/ordeninternamateriales/tipo/${odm_id}`, formatData)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterial = materiales.find(element => element.odm_id == odm_id)
@@ -984,6 +1011,8 @@ $(document).ready(async function () {
 
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
+            } finally {
+                isRequestInProgress = false
             }
         }
 
@@ -1024,6 +1053,8 @@ $(document).ready(async function () {
                 odm_observacion: textNota
             }
             try {
+                isRequestInProgress = true
+
                 const { data } = await client.put(`/ordeninternamateriales/tipo/${odm_id}`, formatData)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterial = materiales.find(element => element.odm_id == odm_id)
@@ -1054,6 +1085,8 @@ $(document).ready(async function () {
                 $(idCantidad).text(parseInt($(idCantidad).text()) - 1)
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
+            } finally {
+                isRequestInProgress = false
             }
         }
 
@@ -1114,7 +1147,9 @@ $(document).ready(async function () {
                 odm_cantidad,
                 odm_observacion
             }
+
             try {
+                isRequestInProgress = true
                 const { data } = await client.put(`/ordeninternamateriales/${odm_id}`, formatData)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterial = materiales.find(element => element.odm_id == odm_id)
@@ -1128,6 +1163,8 @@ $(document).ready(async function () {
                 $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
+            } finally {
+                isRequestInProgress = false
             }
         }
 
@@ -1151,6 +1188,7 @@ $(document).ready(async function () {
             // debemos extraer la informacion dl tr
             const odm_id = $row.data('id-detalle')
             try {
+                isRequestInProgress = true
                 await client.delete(`/ordeninternamateriales/${odm_id}`)
                 const { materiales } = buscarDetalleParte(currentDetalleParte)
                 const findMaterialIndex = materiales.findIndex(element => element.odm_id == odm_id)
@@ -1176,6 +1214,8 @@ $(document).ready(async function () {
                 $row.remove()
             } catch (error) {
                 alert('Error al eliminar el detalle de material')
+            } finally {
+                isRequestInProgress = false
             }
         } else {
             // removemos el DOM
@@ -1252,6 +1292,8 @@ $(document).ready(async function () {
             return
         }
         try {
+            isRequestInProgress = true
+            deshabilitarBotonesGuardadoModal()
             const { data } = await client.put(`/ordeninterna/guardar-materiales/${currentDetalleParte}`, { materiales: dataArray })
             // actualizamos la data
             data.data.forEach(element => {
@@ -1288,6 +1330,9 @@ $(document).ready(async function () {
         } catch (error) {
             console.log(error)
             alert('Error al guardar los materiales')
+        } finally {
+            habilitarBotonesGuardadoModal()
+            isRequestInProgress = false
         }
     }
 
@@ -1315,6 +1360,9 @@ $(document).ready(async function () {
 
     // funcion guardado automatico de procesos
     async function guardadoAutomaticoProcesos() {
+        // si se esta haciendo una solicitud en ese momento, cancelamos el guardado automático
+        if (isRequestInProgress) return Promise.reject("Se esta ejecutando una consulta en estos momentos")
+
         toastr.options = {
             "closeButton": false,
             "debug": false,
@@ -1345,6 +1393,7 @@ $(document).ready(async function () {
             dataArray.push(dataObject)
         })
 
+        // si no hay detalles de procesos por guardar, no aplicamos el autoguardado
         if (dataArray.length === 0) {
             toastr.remove()
             return Promise.resolve()
@@ -1377,6 +1426,9 @@ $(document).ready(async function () {
     }
 
     async function guardadoAutomaticoProductos() {
+        // si se esta haciendo una solicitud en ese momento, cancelamos el guardado automático
+        if (isRequestInProgress) return Promise.reject("Se esta ejecutando una consulta en estos momentos");
+
         toastr.options = {
             "closeButton": false,
             "debug": false,
@@ -1477,20 +1529,32 @@ $(document).ready(async function () {
     // funcion guardado automatico de productos
 
     async function guardadoAutomatico() {
+        console.log("Se ejecuto")
         // comprobar si el modal de procesos esta abierto
         const modalProcesos = document.getElementById('procesosModal')
         const modalProductos = document.getElementById('productosModal')
 
         if (modalProcesos.classList.contains('show')) {
-            console.log("Procesos abierto")
             await guardadoAutomaticoProcesos()
         } else if (modalProductos.classList.contains('show')) {
-            console.log("Productos abierto")
             await guardadoAutomaticoProductos()
         }
 
         // si no esta abierto ningun modal, pues simplemente no hacemos nada
         return Promise.resolve()
+    }
+
+    // deshabilitar botones de guardado de los modales
+    function deshabilitarBotonesGuardadoModal()
+    {
+        $("#btn-guardar-proceso").prop("disabled", true)
+        $("#btn-guardar-producto").prop("disabled", true)
+    }
+    // habilitar botones de guardado de los modales
+    function habilitarBotonesGuardadoModal()
+    {
+        $("#btn-guardar-proceso").prop("disabled", false)
+        $("#btn-guardar-producto").prop("disabled", false)
     }
 
     // enviar orden interna
@@ -1500,7 +1564,6 @@ $(document).ready(async function () {
             await client.put(`/ordeninterna/${id}`, { oic_estado: estado })
             window.location.href = 'orden-interna';
         } catch (error) {
-            console.log(error)
             alert('Error al cambiar el estado')
         }
     })
