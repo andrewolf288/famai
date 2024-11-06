@@ -5,23 +5,10 @@
     <meta charset="UTF-8">
     <title>Reporte Orden Interna</title>
     <style>
-        /* * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        } */
-        @page {
-            /* margin: 5px 5px 15px 5px; */
-            /* margin: 5px 5px 5px 5px; */
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
+        * {
             font-family: sans-serif;
             font-size: 8pt;
-            margin: 0;
-            padding: 0;
+            box-sizing: border-box;
         }
 
         .table-container-encabezado {
@@ -99,16 +86,6 @@
             border-collapse: collapse;
             font-size: 7.5pt;
             border-top: 0.5mm solid #888888;
-        }
-
-        footer {
-            position: fixed;
-            bottom: 0cm;
-            left: 0cm;
-            right: 0cm;
-            height: 27px;
-            padding-left: 5px;
-            padding-right: 5px;
         }
     </style>
 </head>
@@ -207,7 +184,7 @@
         </tbody>
     </table>
 
-    {{-- FOOTER --}}
+    {{-- FOOTER
     <footer>
         <table class="table-container-footer">
             <tbody>
@@ -230,18 +207,18 @@
                 </tr>
             </tbody>
         </table>
-    </footer>
+    </footer> --}}
 
     {{-- TABLE DE DETALLE DE ORDEN INTERNA --}}
     <table class="table-container-detalle" style="margin-top: 10px;">
         <thead>
             <tr>
-                <td rowspan="2" width="2%"></td>
+                <td rowspan="2" width="3%"></td>
                 <td colspan="3">ACTIVIDADES A REALIZAR</td>
                 <td colspan="4">PEDIDO DE MATERIALES</td>
             </tr>
             <tr>
-                <td width="2%">COD.</td>
+                <td width="3%">COD.</td>
                 <td width="13%">DESCRIPCIÓN</td>
                 <td>OBSERVACIONES</td>
                 <td width="5%">COD.</td>

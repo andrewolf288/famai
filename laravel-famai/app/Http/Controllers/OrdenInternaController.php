@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use App\Reporte;
 use App\Trabajador;
+use DateTime;
+
 // use PDF;
 
 class OrdenInternaController extends Controller
@@ -715,57 +717,57 @@ class OrdenInternaController extends Controller
     }
 
     // exportar orden interna
-    public function exportOrdenInternaPDF(Request $request)
-    {
-        $reporte = new Reporte();
-        $idOIC = $request->input('oic_id');
-        $datosCabecera = $reporte->metobtenerCabecera($idOIC);
-        $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
-        $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
+    // public function exportOrdenInternaPDF2(Request $request)
+    // {
+    //     $reporte = new Reporte();
+    //     $idOIC = $request->input('oic_id');
+    //     $datosCabecera = $reporte->metobtenerCabecera($idOIC);
+    //     $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
+    //     $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
 
-        $datosPartes = $reporte->metobtenerPartes($idOIC);
-        foreach ($datosPartes as &$parte) {
-            $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
-            $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
-            $parte['detalle_procesos'] = $procesos;
-            $parte['detalle_materiales'] = $materiales;
-        }
+    //     $datosPartes = $reporte->metobtenerPartes($idOIC);
+    //     foreach ($datosPartes as &$parte) {
+    //         $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
+    //         $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
+    //         $parte['detalle_procesos'] = $procesos;
+    //         $parte['detalle_materiales'] = $materiales;
+    //     }
 
-        // Configurar opciones de DOMPDF
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
-        $options->set('isPhpEnabled', true);
-        $options->set('isJavascriptEnabled', true);
+    //     // Configurar opciones de DOMPDF
+    //     $options = new Options();
+    //     $options->set('isHtml5ParserEnabled', true);
+    //     $options->set('isRemoteEnabled', true);
+    //     $options->set('isPhpEnabled', true);
+    //     $options->set('isJavascriptEnabled', true);
 
-        // Crear instancia de DOMPDF
-        $dompdf = new Dompdf($options);
+    //     // Crear instancia de DOMPDF
+    //     $dompdf = new Dompdf($options);
 
-        // Cargar la vista Blade y pasar datos si es necesario
-        $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
-        $dompdf->loadHtml($html);
+    //     // Cargar la vista Blade y pasar datos si es necesario
+    //     $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
+    //     $dompdf->loadHtml($html);
 
-        // Configurar el tamaño de papel y orientación
-        $dompdf->setPaper('A4', 'landscape');
+    //     // Configurar el tamaño de papel y orientación
+    //     $dompdf->setPaper('A4', 'landscape');
 
-        // Renderizar el PDF
-        $dompdf->render();
+    //     // Renderizar el PDF
+    //     $dompdf->render();
 
-        // Mostrar el PDF en el navegador o descargar
-        return response()->streamDownload(
-            function () use ($dompdf) {
-                echo $dompdf->output();
-            },
-            'reporte.pdf',
-            [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="reporte.pdf"'
-            ]
-        );
-    }
+    //     // Mostrar el PDF en el navegador o descargar
+    //     return response()->streamDownload(
+    //         function () use ($dompdf) {
+    //             echo $dompdf->output();
+    //         },
+    //         'reporte.pdf',
+    //         [
+    //             'Content-Type' => 'application/pdf',
+    //             'Content-Disposition' => 'attachment; filename="reporte.pdf"'
+    //         ]
+    //     );
+    // }
 
     // --------- GENERAR PDF CON MPDF -----------------------
-    public function exportOrdenInternaPDF2(Request $request)
+    public function exportOrdenInternaPDF(Request $request)
     {
         $reporte = new Reporte();
         $idOIC = $request->input('oic_id');
@@ -788,11 +790,39 @@ class OrdenInternaController extends Controller
             'mode' => 'utf-8',
             'format' => 'A4',
             'orientation' => 'L',
+            'setAutoBottomMargin' => 'pad',
             'margin_left' => 1,
             'margin_right' => 1,
             'margin_top' => 1,
-            'margin_bottom' => 1,
+            'margin-footer' => 1,
+            'margin_bottom' => 0,
         ]);
+
+        $footer = '
+        <table class="table-container-footer" width="100%">
+            <tbody>
+                <tr>
+                    <td width="33%">Usuario Creación:
+                        ' . ($datosCabecera[0]['oic_usucreacion'] ?? '') . ' Fecha:
+                        ' . ($datosCabecera[0]['oic_feccreacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_feccreacion'])->format('d/m/Y H:i:s') : '') . '
+                    </td>
+                    <td width="33%" style="text-align: center;vertical-align: middle;">Pag. {PAGENO}/{nbpg}</td>
+                    <td width="33%" style="text-align: right;">
+                        ' . ($datosCabecera[0]['odt_numero'] ?? '') . ' - ' . date('d/m/Y H:i:s') . '
+                    </td>
+                </tr>
+                <tr>
+                    <td>Usuario Modifica:
+                        ' . ($datosCabecera[0]['oic_usumodificacion'] ?? '') . ' Fecha:
+                        ' . ($datosCabecera[0]['oic_fecmodificacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_fecmodificacion'])->format('d/m/Y H:i:s') : '') . '
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ';
+
+        // Establecemos el footer
+        $mpdf->SetHTMLFooter($footer);
 
         // Escribir el HTML renderizado en el PDF
         $mpdf->WriteHTML($html);
