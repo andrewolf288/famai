@@ -12,7 +12,7 @@
         } */
         @page {
             /* margin: 5px 5px 15px 5px; */
-            /* margin: 5px 5px 5px 5px; */
+            margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
@@ -20,8 +20,7 @@
         body {
             font-family: sans-serif;
             font-size: 8pt;
-            margin: 0;
-            padding: 0;
+            /* margin: 5px 5px 15px 5px; */
         }
 
         .table-container-encabezado {
@@ -114,6 +113,9 @@
 </head>
 
 <body>
+    <div class="container">
+
+    </div>
     {{-- TABLA DE CABECERA --}}
     <table class="table-container-encabezado">
         <tbody>
@@ -348,6 +350,21 @@
             @endforeach
         </tbody>
     </table>
+
+    <script type="text/php">
+        if ( isset($pdf) ) {
+            $x = 430;
+            $y = $pdf->get_height() - 15;
+            $text = "{PAGE_NUM}/{PAGE_COUNT}";
+            $font = $fontMetrics->get_font("sans-serif");
+            $size = 9;
+            $color = array(0,0,0);
+            $word_space = 0.0;  //  default
+            $char_space = 0.0;  //  default
+            $angle = 0.0;   //  default
+            $pdf->page_text($x, $y, $text, $font, $size, $color, $word_space, $char_space, $angle);
+        }
+    </script>
 </body>
 
 </html>

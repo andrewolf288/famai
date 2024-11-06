@@ -162,7 +162,6 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-        
         /*
         * Package Service Providers...
         */
@@ -176,7 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
-
+        Barryvdh\Snappy\ServiceProvider::class,
     ],
 
     /*
@@ -230,5 +229,6 @@ return [
         'Jwt' => Tymon\JWTAuth\Providers\LaravelServiceProvider::class, 
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class, 
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class
     ],
 ];

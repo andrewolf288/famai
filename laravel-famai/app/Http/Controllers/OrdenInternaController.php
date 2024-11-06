@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use App\Reporte;
 use App\Trabajador;
+// use PDF;
 
 class OrdenInternaController extends Controller
 {
@@ -41,7 +42,7 @@ class OrdenInternaController extends Controller
         $fecha_hasta = $request->input('fecha_hasta', null);
 
         $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'ordenTrabajo'])
-                                ->where('oic_tipo', 'OI');
+            ->where('oic_tipo', 'OI');
 
         if ($odtNumero !== null) {
             $query->where('odt_numero', $odtNumero);
@@ -595,7 +596,7 @@ class OrdenInternaController extends Controller
             ]);
 
             // si el estado cambiado es "ENVIADO"
-            if($request->input('oic_estado') == 'ENVIADO'){
+            if ($request->input('oic_estado') == 'ENVIADO') {
                 // buscamos todos los trabajadores pertenecientes al área de logistica
                 $trabajadores = Trabajador::where('are_codigo', 'LOG')->get();
                 foreach ($trabajadores as $trabajador) {
@@ -655,26 +656,28 @@ class OrdenInternaController extends Controller
     {
         $reporte = new Reporte();
         $datosCabecera = array(
-            ['nombre_del_cliente' => $request->input('cli_id'),
-            'descripcion_equipo' => $request->input('oic_equipo_descripcion'),
-            'oic_componente' => $request->input('oic_componente'),
-            'oic_fecha' => $request->input('oic_fecha'),
-            'odt_numero' => $request->input('odt_numero'),
-            'are_descripcion' => $request->input('are_codigo'),
-            'tra_idorigen' => $request->input('tra_idorigen'),
-            'tra_nombreorigen' => $request->input('tra_idorigen'),
-            'tra_idmaestro' => null,
-            'tra_nombremaestro' => $request->input('tra_idmaestro'),
-            'tra_idalmacen' => null,
-            'tra_nombrealmacen' => $request->input('tra_idalmacen'),
-            'oic_fechaevaluacion' => null,
-            'oic_fechaaprobacion' => null,
-            'oic_fechaentregaproduccion' => null,
-            'oic_fechaentregaestimada' => null,
-            'oic_usucreacion' => null,
-            'oic_feccreacion' => null,
-            'oic_usumodificacion' => null,
-            'oic_fecmodificacion' => null]
+            [
+                'nombre_del_cliente' => $request->input('cli_id'),
+                'descripcion_equipo' => $request->input('oic_equipo_descripcion'),
+                'oic_componente' => $request->input('oic_componente'),
+                'oic_fecha' => $request->input('oic_fecha'),
+                'odt_numero' => $request->input('odt_numero'),
+                'are_descripcion' => $request->input('are_codigo'),
+                'tra_idorigen' => $request->input('tra_idorigen'),
+                'tra_nombreorigen' => $request->input('tra_idorigen'),
+                'tra_idmaestro' => null,
+                'tra_nombremaestro' => $request->input('tra_idmaestro'),
+                'tra_idalmacen' => null,
+                'tra_nombrealmacen' => $request->input('tra_idalmacen'),
+                'oic_fechaevaluacion' => null,
+                'oic_fechaaprobacion' => null,
+                'oic_fechaentregaproduccion' => null,
+                'oic_fechaentregaestimada' => null,
+                'oic_usucreacion' => null,
+                'oic_feccreacion' => null,
+                'oic_usumodificacion' => null,
+                'oic_fecmodificacion' => null
+            ]
         );
         $datosPartes = $request->input('detalle_partes', []);
 
@@ -712,6 +715,56 @@ class OrdenInternaController extends Controller
     }
 
     // exportar orden interna
+    // public function exportOrdenInternaPDF(Request $request)
+    // {
+    //     $reporte = new Reporte();
+    //     $idOIC = $request->input('oic_id');
+    //     $datosCabecera = $reporte->metobtenerCabecera($idOIC);
+    //     $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
+    //     $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
+
+    //     $datosPartes = $reporte->metobtenerPartes($idOIC);
+    //     foreach ($datosPartes as &$parte) {
+    //         $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
+    //         $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
+    //         $parte['detalle_procesos'] = $procesos;
+    //         $parte['detalle_materiales'] = $materiales;
+    //     }
+
+    //     // Configurar opciones de DOMPDF
+    //     $options = new Options();
+    //     $options->set('isHtml5ParserEnabled', true);
+    //     $options->set('isRemoteEnabled', true);
+    //     $options->set('isPhpEnabled', true);
+    //     $options->set('isJavascriptEnabled', true);
+
+    //     // Crear instancia de DOMPDF
+    //     $dompdf = new Dompdf($options);
+
+    //     // Cargar la vista Blade y pasar datos si es necesario
+    //     $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
+    //     $dompdf->loadHtml($html);
+
+    //     // Configurar el tamaño de papel y orientación
+    //     $dompdf->setPaper('A4', 'landscape');
+
+    //     // Renderizar el PDF
+    //     $dompdf->render();
+
+    //     // Mostrar el PDF en el navegador o descargar
+    //     return response()->streamDownload(
+    //         function () use ($dompdf) {
+    //             echo $dompdf->output();
+    //         },
+    //         'reporte.pdf',
+    //         [
+    //             'Content-Type' => 'application/pdf',
+    //             'Content-Disposition' => 'attachment; filename="reporte.pdf"'
+    //         ]
+    //     );
+    // }
+
+    // --------- GENERAR PDF CON MPDF -----------------------
     public function exportOrdenInternaPDF(Request $request)
     {
         $reporte = new Reporte();
@@ -728,30 +781,27 @@ class OrdenInternaController extends Controller
             $parte['detalle_materiales'] = $materiales;
         }
 
-        // Configurar opciones de DOMPDF
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
-        $options->set('isPhpEnabled', true);
-        $options->set('isJavascriptEnabled', true);
-
-        // Crear instancia de DOMPDF
-        $dompdf = new Dompdf($options);
-
         // Cargar la vista Blade y pasar datos si es necesario
         $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
-        $dompdf->loadHtml($html);
+        // Crear una instancia de mPDF
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'L',
+            'margin_left' => 1,
+            'margin_right' => 1,
+            'margin_top' => 1,
+            'margin_bottom' => 1,
+        ]);
 
-        // Configurar el tamaño de papel y orientación
-        $dompdf->setPaper('A4', 'landscape');
+        // Escribir el HTML renderizado en el PDF
+        $mpdf->WriteHTML($html);
 
-        // Renderizar el PDF
-        $dompdf->render();
-
-        // Mostrar el PDF en el navegador o descargar
+        // Generar el PDF y enviarlo al navegador
+        // return $mpdf->Output('voucher.pdf', 'I');
         return response()->streamDownload(
-            function () use ($dompdf) {
-                echo $dompdf->output();
+            function () use ($mpdf) {
+                echo $mpdf->Output('voucher.pdf', 'I');
             },
             'reporte.pdf',
             [
@@ -760,4 +810,30 @@ class OrdenInternaController extends Controller
             ]
         );
     }
+
+    // --------- GENERAR PDF CON XKHTMLTOPDF -----------------
+    // public function exportOrdenInternaPDF(Request $request)
+    // {
+    //     $reporte = new Reporte();
+    //     $idOIC = $request->input('oic_id');
+    //     $datosCabecera = $reporte->metobtenerCabecera($idOIC);
+    //     $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
+    //     $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
+
+    //     $datosPartes = $reporte->metobtenerPartes($idOIC);
+    //     foreach ($datosPartes as &$parte) {
+    //         $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
+    //         $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
+    //         $parte['detalle_procesos'] = $procesos;
+    //         $parte['detalle_materiales'] = $materiales;
+    //     }
+
+    //     // Generar el PDF con Snappy usando la vista Blade
+    //     $pdf = PDF::loadView('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))
+    //         ->setPaper('a4')
+    //         ->setOrientation('landscape');
+
+    //     // Retornar el PDF para que se descargue
+    //     return $pdf->download('orden_interna_' . $idOIC . '.pdf');
+    // }
 }
