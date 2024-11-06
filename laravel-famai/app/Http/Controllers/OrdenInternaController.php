@@ -682,31 +682,55 @@ class OrdenInternaController extends Controller
             ]
         );
         $datosPartes = $request->input('detalle_partes', []);
-
-        // Configurar opciones de DOMPDF
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
-        $options->set('isPhpEnabled', true);
-        $options->set('isJavascriptEnabled', true);
-
-        // Crear instancia de DOMPDF
-        $dompdf = new Dompdf($options);
-
         // Cargar la vista Blade y pasar datos si es necesario
         $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
-        $dompdf->loadHtml($html);
+        // Crear una instancia de mPDF
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'L',
+            'setAutoBottomMargin' => 'pad',
+            'margin_left' => 1,
+            'margin_right' => 1,
+            'margin_top' => 1,
+            'margin-footer' => 1,
+            'margin_bottom' => 0,
+        ]);
 
-        // Configurar el tamaño de papel y orientación
-        $dompdf->setPaper('A4', 'landscape');
+        $footer = '
+        <table class="table-container-footer" width="100%">
+            <tbody>
+                <tr>
+                    <td width="33%">Usuario Creación:
+                        ' . ($datosCabecera[0]['oic_usucreacion'] ?? '') . ' Fecha:
+                        ' . ($datosCabecera[0]['oic_feccreacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_feccreacion'])->format('d/m/Y H:i:s') : '') . '
+                    </td>
+                    <td width="33%" style="text-align: center;vertical-align: middle;">Pag. {PAGENO}/{nbpg}</td>
+                    <td width="33%" style="text-align: right;">
+                        ' . ($datosCabecera[0]['odt_numero'] ?? '') . ' - ' . date('d/m/Y H:i:s') . '
+                    </td>
+                </tr>
+                <tr>
+                    <td>Usuario Modifica:
+                        ' . ($datosCabecera[0]['oic_usumodificacion'] ?? '') . ' Fecha:
+                        ' . ($datosCabecera[0]['oic_fecmodificacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_fecmodificacion'])->format('d/m/Y H:i:s') : '') . '
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ';
 
-        // Renderizar el PDF
-        $dompdf->render();
+        // Establecemos el footer
+        $mpdf->SetHTMLFooter($footer);
 
-        // Mostrar el PDF en el navegador o descargar
+        // Escribir el HTML renderizado en el PDF
+        $mpdf->WriteHTML($html);
+
+        // Generar el PDF y enviarlo al navegador
+        // return $mpdf->Output('voucher.pdf', 'I');
         return response()->streamDownload(
-            function () use ($dompdf) {
-                echo $dompdf->output();
+            function () use ($mpdf) {
+                echo $mpdf->Output('voucher.pdf', 'I');
             },
             'reporte.pdf',
             [
