@@ -221,9 +221,9 @@
                 <td width="3%">COD.</td>
                 <td width="13%">DESCRIPCIÓN</td>
                 <td>OBSERVACIONES</td>
-                <td width="5%">COD.</td>
+                <td width="6%">COD.</td>
                 <td width="21%">DESCRIPCIÓN</td>
-                <td width="3%">CANT</td>
+                <td width="4%">CANT</td>
                 <td>OBSERVACIÓN</td>
             </tr>
         </thead>
