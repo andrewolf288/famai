@@ -715,57 +715,57 @@ class OrdenInternaController extends Controller
     }
 
     // exportar orden interna
-    // public function exportOrdenInternaPDF(Request $request)
-    // {
-    //     $reporte = new Reporte();
-    //     $idOIC = $request->input('oic_id');
-    //     $datosCabecera = $reporte->metobtenerCabecera($idOIC);
-    //     $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
-    //     $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
+    public function exportOrdenInternaPDF(Request $request)
+    {
+        $reporte = new Reporte();
+        $idOIC = $request->input('oic_id');
+        $datosCabecera = $reporte->metobtenerCabecera($idOIC);
+        $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
+        $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
 
-    //     $datosPartes = $reporte->metobtenerPartes($idOIC);
-    //     foreach ($datosPartes as &$parte) {
-    //         $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
-    //         $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
-    //         $parte['detalle_procesos'] = $procesos;
-    //         $parte['detalle_materiales'] = $materiales;
-    //     }
+        $datosPartes = $reporte->metobtenerPartes($idOIC);
+        foreach ($datosPartes as &$parte) {
+            $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
+            $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
+            $parte['detalle_procesos'] = $procesos;
+            $parte['detalle_materiales'] = $materiales;
+        }
 
-    //     // Configurar opciones de DOMPDF
-    //     $options = new Options();
-    //     $options->set('isHtml5ParserEnabled', true);
-    //     $options->set('isRemoteEnabled', true);
-    //     $options->set('isPhpEnabled', true);
-    //     $options->set('isJavascriptEnabled', true);
+        // Configurar opciones de DOMPDF
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $options->set('isJavascriptEnabled', true);
 
-    //     // Crear instancia de DOMPDF
-    //     $dompdf = new Dompdf($options);
+        // Crear instancia de DOMPDF
+        $dompdf = new Dompdf($options);
 
-    //     // Cargar la vista Blade y pasar datos si es necesario
-    //     $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
-    //     $dompdf->loadHtml($html);
+        // Cargar la vista Blade y pasar datos si es necesario
+        $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
+        $dompdf->loadHtml($html);
 
-    //     // Configurar el tamaño de papel y orientación
-    //     $dompdf->setPaper('A4', 'landscape');
+        // Configurar el tamaño de papel y orientación
+        $dompdf->setPaper('A4', 'landscape');
 
-    //     // Renderizar el PDF
-    //     $dompdf->render();
+        // Renderizar el PDF
+        $dompdf->render();
 
-    //     // Mostrar el PDF en el navegador o descargar
-    //     return response()->streamDownload(
-    //         function () use ($dompdf) {
-    //             echo $dompdf->output();
-    //         },
-    //         'reporte.pdf',
-    //         [
-    //             'Content-Type' => 'application/pdf',
-    //             'Content-Disposition' => 'attachment; filename="reporte.pdf"'
-    //         ]
-    //     );
-    // }
+        // Mostrar el PDF en el navegador o descargar
+        return response()->streamDownload(
+            function () use ($dompdf) {
+                echo $dompdf->output();
+            },
+            'reporte.pdf',
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="reporte.pdf"'
+            ]
+        );
+    }
 
     // --------- GENERAR PDF CON MPDF -----------------------
-    public function exportOrdenInternaPDF(Request $request)
+    public function exportOrdenInternaPDF2(Request $request)
     {
         $reporte = new Reporte();
         $idOIC = $request->input('oic_id');

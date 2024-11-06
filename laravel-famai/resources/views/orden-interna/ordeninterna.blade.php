@@ -216,7 +216,7 @@
                         {{ $datosCabecera[0]['oic_usucreacion'] ? $datosCabecera[0]['oic_usucreacion'] : '' }} Fecha:
                         {{ $datosCabecera[0]['oic_feccreacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_feccreacion'])->format('d/m/Y H:i:s') : '' }}
                     </td>
-                    <td width="33%" rowspan="2" style="text-align: center;vertical-align: middle;">Pag. </td>
+                    <td width="33%" rowspan="2" style="text-align: center;vertical-align: middle;">Pag. {}</td>
                     <td width="33%" rowspan="2" style="text-align: right;">
                         {{ $datosCabecera[0]['odt_numero'] ? $datosCabecera[0]['odt_numero'] : '' }} -
                         {{ date('d/m/Y H:i:s') }}</td>
