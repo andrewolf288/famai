@@ -110,35 +110,28 @@
             padding: 5px;
         }
 
-        /* Ajuste de las proporciones según la base de 12 */
         .col-item {
-            width: 5%;
-            /* 1/12 */
+            width: 4%;
         }
 
         .col-descripcion {
-            width: 53.60%;
-            /* 4/12 */
+            width: 58.60%;
         }
 
         .col-cantidad {
-            width: 7%;
-            /* 2/12 */
+            width: 6%;
         }
 
         .col-und {
             width: 5%;
-            /* 1/12 */
         }
 
         .col-precio {
             width: 10.20%;
-            /* 2/12 */
         }
 
         .col-total {
             width: 10.20%;
-            /* 2/12 */
         }
     </style>
 </head>
@@ -228,6 +221,7 @@
             <tr>
                 <th class="col-item">ITEM</th>
                 <th class="col-descripcion">DESCRIPCIÓN</th>
+                <th class="col-tiempoentrega">TIEMP</th>
                 <th class="col-cantidad">CANTID</th>
                 <th class="col-und">UND</th>
                 <th class="col-precio">PRECIO s/IGV</th>
@@ -239,6 +233,7 @@
                 <tr>
                     <td class="col-item">{{ $loop->iteration }}</td>
                     <td class="col-descripcion">{{ $material['cod_descripcion'] }}</td>
+                    <th class="col-tiempoentrega">{{ $material['cod_tiempoentrega'] }}</th>
                     <td class="col-cantidad">{{ $material['cod_cantidad'] }}</td>
                     <td class="col-und">{{ $material['detalle_material']['producto'] ? $material['detalle_material']['producto']['unidad']['uni_codigo'] : ''}}</td>
                     <td class="col-precio">{{ $material['cod_preciounitario']}} </td>
@@ -250,6 +245,7 @@
                 <tr>
                     <td class="col-item">&nbsp;</td>
                     <td class="col-descripcion">&nbsp;</td>
+                    <th class="col-tiempoentrega">&nbsp;</th>
                     <td class="col-cantidad">&nbsp;</td>
                     <td class="col-und">&nbsp;</td>
                     <td class="col-precio">&nbsp;</td>

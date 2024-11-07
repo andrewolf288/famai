@@ -184,43 +184,19 @@
         </tbody>
     </table>
 
-    {{-- FOOTER
-    <footer>
-        <table class="table-container-footer">
-            <tbody>
-                <tr>
-                    <td width="33%">Usuario Creación:
-                        {{ $datosCabecera[0]['oic_usucreacion'] ? $datosCabecera[0]['oic_usucreacion'] : '' }} Fecha:
-                        {{ $datosCabecera[0]['oic_feccreacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_feccreacion'])->format('d/m/Y H:i:s') : '' }}
-                    </td>
-                    <td width="33%" rowspan="2" style="text-align: center;vertical-align: middle;">Pag. {}</td>
-                    <td width="33%" rowspan="2" style="text-align: right;">
-                        {{ $datosCabecera[0]['odt_numero'] ? $datosCabecera[0]['odt_numero'] : '' }} -
-                        {{ date('d/m/Y H:i:s') }}</td>
-                </tr>
-                <tr>
-                    <td>Usuario Modifica:
-                        {{ $datosCabecera[0]['oic_usumodificacion'] ? $datosCabecera[0]['oic_usumodificacion'] : '' }}
-                        Fecha:
-                        {{ $datosCabecera[0]['oic_fecmodificacion'] ? DateTime::createFromFormat('Y-m-d H:i:s.u', $datosCabecera[0]['oic_fecmodificacion'])->format('d/m/Y H:i:s') : '' }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </footer> --}}
-
     {{-- TABLE DE DETALLE DE ORDEN INTERNA --}}
     <table class="table-container-detalle" style="margin-top: 10px;">
         <thead>
             <tr>
                 <td rowspan="2" width="3%"></td>
-                <td colspan="3">ACTIVIDADES A REALIZAR</td>
+                <td colspan="4">ACTIVIDADES A REALIZAR</td>
                 <td colspan="4">PEDIDO DE MATERIALES</td>
             </tr>
             <tr>
                 <td width="3%">COD.</td>
                 <td width="13%">DESCRIPCIÓN</td>
-                <td>OBSERVACIONES</td>
+                <td width="2%">CC</td>
+                <td width="20%">OBSERVACIONES</td>
                 <td width="6%">COD.</td>
                 <td width="21%">DESCRIPCIÓN</td>
                 <td width="4%">CANT</td>
@@ -291,9 +267,13 @@
                                     style="text-align: center;">{{ $parte['detalle_procesos'][$i]['opp_codigo'] }}</td>
                                 <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}">
                                     {{ $parte['detalle_procesos'][$i]['odp_descripcion'] }}</td>
+                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="text-align: center;">
+                                    <input type="checkbox" {{ $parte['detalle_procesos'][$i]['odp_ccalidad'] == 1 ? 'checked="checked"' : '' }} />
+                                </td>
                                 <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}">
                                     {{ $parte['detalle_procesos'][$i]['odp_observacion'] }}</td>
                             @elseif ($i == 0 && $countProcesos == 0)
+                                <td rowspan="{{ $maximoCount }}"></td>
                                 <td rowspan="{{ $maximoCount }}"></td>
                                 <td rowspan="{{ $maximoCount }}"></td>
                                 <td rowspan="{{ $maximoCount }}"></td>

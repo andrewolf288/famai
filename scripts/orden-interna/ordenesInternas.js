@@ -110,7 +110,6 @@ $(document).ready(() => {
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
     $('#data-container').on('click', '.btn-orden-interna-editar', function () {
         const id = $(this).data('orden-interna')
-        // localStorage.setItem('ordenInternaId', id)
         window.location.href = `orden-interna/editar/${id}`
     })
 

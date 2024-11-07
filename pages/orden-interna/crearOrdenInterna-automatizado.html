@@ -126,11 +126,104 @@
         </div>
     </div>
 
+    <!-- TABLA PARA MOSTRAR EL DETALLE DE CREACION -->
+    <table id="tbl-orden-interna" class="table table-striped nowrap w-100" style="width:100%">
+        <thead>
+            <tr>
+                <th>Partes</th>
+                <th>Actividades</th>
+                <th class="text-center">Cantidad</th>
+                <th>Materiales</th>
+                <th class="text-center">Cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
     <!-- BOTONES -->
     <div class="d-flex flex-row justify-content-end">
         <button class="btn btn-secondary me-2" id="btn-cancelar-orden-interna">Cancelar</button>
         <button class="btn btn-danger me-2" id="btn-previsualizar-orden-interna">Previsualizar</button>
         <button class="btn btn-primary" id="btn-guardar-orden-interna">Guardar</button>
+    </div>
+</div>
+<!-- MODALES DE PROCESOS Y PRODUCTOS -->
+<!-- Modal de Procesos -->
+<div class="modal fade" id="procesosModal" tabindex="-1" aria-labelledby="procesosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="procesosModalLabel">Procesos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- SECCION DE FORM -->
+                <div>
+                    <!-- SELECT PROCESO -->
+                    <select id="procesosSelect" class="form-control" multiple>
+                    </select>
+                </div>
+                <!-- SECCION DE DATA -->
+                <table id="tbl-orden-interna-procesos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-2">Código</th>
+                            <th class="col-4">Proceso</th>
+                            <th class="col-1">C.Calidad</th>
+                            <th class="col-4">Observación</th>
+                            <th class="col-1">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de productos -->
+<div class="modal fade" id="productosModal" tabindex="-1" aria-labelledby="productosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productosModalLabel">Materiales</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- SECCION DE FORM -->
+                <div>
+                    <div class="mb-2">
+                        <input type="checkbox" class="form-check-input me-2" id="checkAsociarProducto">
+                        <label class="form-check-label" for="generaStockProductoEdit">Sin código</label>
+                    </div>
+                    <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
+                    <ul id="resultadosLista" class="list-group mt-2"></ul>
+                </div>
+                <!-- SECCION DE DATA -->
+                <table id="tbl-orden-interna-productos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-1">Código</th>
+                            <th class="col-4">Material</th>
+                            <th class="col-2">Cantidad</th>
+                            <th class="col-4">Observación</th>
+                            <th class="col-1">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>
 

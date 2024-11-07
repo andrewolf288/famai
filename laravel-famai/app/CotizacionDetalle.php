@@ -14,6 +14,7 @@ class CotizacionDetalle extends Model
         'coc_id',
         'odm_id',
         'cod_orden',
+        'cod_tiempoentrega',
         'cod_descripcion',
         'cod_observacion',
         'cod_cantidad',

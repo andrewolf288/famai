@@ -35,9 +35,9 @@ class OrdenInternaMaterialesController extends Controller
                 'producto.unidad',
                 'ordenInternaParte.ordenInterna'
             ]
-        )->where('odm_tipo', "!=" , 3)
-        ->where("odm_tipo", "!=" , 4)
-        ->where("odm_tipo", "!=" , 5);
+        )->where('odm_tipo', "!=", 3)
+            ->where("odm_tipo", "!=", 4)
+            ->where("odm_tipo", "!=", 5);
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -62,12 +62,61 @@ class OrdenInternaMaterialesController extends Controller
         ]);
     }
 
+    public function indexValidacionCodigo(Request $request)
+    {
+        $pageSize = $request->input('page_size', 10);
+        $page = $request->input('page', 1);
+        $ordenTrabajo = $request->input('odt_numero', null);
+        $fecha_desde = $request->input('fecha_desde', null);
+        $fecha_hasta = $request->input('fecha_hasta', null);
+
+        $flagIsNull = $request->input('flag_is_null', 'true');
+
+        $query = OrdenInternaMateriales::with(
+            [
+                'responsable',
+                'producto.unidad',
+                'ordenInternaParte.ordenInterna'
+            ]
+        )->whereHas('ordenInternaParte.ordenInterna', function ($query) {
+            $query->where('oic_estado', 'ENVIADO')
+                ->orWhere('oic_estado', 'EVALUADO');
+        });
+
+        // flag NULL
+        if ($flagIsNull === 'true') {
+            $query->whereNull('pro_id');
+        }
+
+        // filtro por orden de trabajo
+        if ($ordenTrabajo !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                $q->where('odt_numero', $ordenTrabajo);
+            });
+        }
+
+        // filtro de fecha
+        if ($fecha_desde !== null && $fecha_hasta !== null) {
+            $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+        }
+
+        // ordenar de formar descendiente
+        $query->orderBy('odm_feccreacion', 'desc');
+
+        $detalleMateriales = $query->paginate($pageSize, ['*'], 'page', $page);
+        return response()->json([
+            'message' => 'Se listan los materiales de la orden interna para validacion de codigo',
+            'data' => $detalleMateriales->items(),
+            'count' => $detalleMateriales->total()
+        ]);
+    }
+
     public function findByNumeroOrdenInterna(Request $request)
     {
         $numero = $request->input('odt_numero', null);
         $ordeninterna = OrdenInterna::with('partes.materiales')
-                                    ->where('odt_numero', $numero)
-                                    ->first();
+            ->where('odt_numero', $numero)
+            ->first();
 
         $materiales = [];
         foreach ($ordeninterna->partes as $parte) {
@@ -165,7 +214,7 @@ class OrdenInternaMaterialesController extends Controller
 
             if ($request->hasFile('adjuntopresupuesto')) {
                 // primero debemos eliminar el recurso anteriormente guardado
-                if(file_exists($ordenInternaMaterial->odm_adjuntopresupuesto)) {
+                if (file_exists($ordenInternaMaterial->odm_adjuntopresupuesto)) {
                     Storage::disk('public')->delete($ordenInternaMaterial->odm_adjuntopresupuesto);
                 }
 
@@ -180,7 +229,7 @@ class OrdenInternaMaterialesController extends Controller
             $ordenInternaMaterial->save();
             DB::commit();
             return response()->json($ordenInternaMaterial, 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
@@ -360,7 +409,6 @@ class OrdenInternaMaterialesController extends Controller
                 $writer = new Xlsx($spreadsheet);
                 $writer->save('php://output');
             }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
-
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -399,7 +447,7 @@ class OrdenInternaMaterialesController extends Controller
             // Obtener los resultados de la primera base de datos
             $ordenesMateriales = $query->get();
 
-            $productoConInformacionCompras = $ordenesMateriales->map(function ($material){
+            $productoConInformacionCompras = $ordenesMateriales->map(function ($material) {
                 return [
                     'material' => $material,
                     'ultimoPrecioCompras' => null,
@@ -461,9 +509,9 @@ class OrdenInternaMaterialesController extends Controller
             //     }
             // });
 
-            $headers = ['OT', 'Fec. Det OI', 'Tipo', 'Actividad', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock' ,'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
+            $headers = ['OT', 'Fec. Det OI', 'Tipo', 'Actividad', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock', 'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
             $columnWidths = [15, 19, 5, 18, 10, 50, 40, 10, 15, 10, 10, 7, 10, 10, 10];
-            $tipoDato = ['texto', 'texto' ,'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'text', 'numero', 'numero', 'texto', 'numero', 'numero', 'numero'];
+            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'text', 'numero', 'numero', 'texto', 'numero', 'numero', 'numero'];
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -506,7 +554,7 @@ class OrdenInternaMaterialesController extends Controller
                 $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_tipo == 1 ? 'R' : 'A'));
                 $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData['material']->ordenInternaParte->parte->oip_descripcion));
                 $sheet->setCellValue("E{$row}", UtilHelper::getValueFormatExcel($rowData['material']->producto ? $rowData['material']->producto->pro_codigo : null));
-                $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel( UtilHelper::limpiarNombreProducto($rowData['material']->odm_descripcion)));
+                $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel(UtilHelper::limpiarNombreProducto($rowData['material']->odm_descripcion)));
                 $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_observacion));
                 $sheet->setCellValue("H{$row}", UtilHelper::getValueFormatExcel($rowData['ultimoPrecioCompras']));
                 $sheet->setCellValue("I{$row}", UtilHelper::getValueFormatExcel($rowData['ultimaFechaCompras']));
@@ -523,7 +571,6 @@ class OrdenInternaMaterialesController extends Controller
                 $writer = new Xlsx($spreadsheet);
                 $writer->save('php://output');
             }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
-
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -677,7 +724,7 @@ class OrdenInternaMaterialesController extends Controller
         $txt_content .= "======\n";
         $txt_content .= "Contacto: " . ($proveedor['prv_contacto'] ?? '') . "\n";
         $txt_content .= "Nombre: " . ($proveedor['prv_nombre'] ?? '') . "\n";
-        $txt_content .= "Correo: " . ($proveedor->correo ?? '') . "\n";
+        $txt_content .= "Correo: " . ($proveedor['prv_correo'] ?? '') . "\n";
         $txt_content .= "Celular/Whatsapp: " . ($proveedor['prv_telefono'] ?? '') . "/" . ($proveedor['prv_whatsapp'] ?? '') . "\n\n";
         $txt_content .= "Arequipa, $fecha\n";
 
@@ -692,5 +739,13 @@ class OrdenInternaMaterialesController extends Controller
     {
         $detalleCotizacion = CotizacionDetalle::with('cotizacion.proveedor')->where('odm_id', $id)->get();
         return response()->json($detalleCotizacion);
+    }
+
+    // funcion para asignar nuevo codigo de producto
+    public function asignarCodigoProducto(Request $request)
+    {
+        // primero buscamos en nuestra tabla si existe el producto
+        // si no existe, hacemos una consulta a la base de datos de SAP
+        // asignamos codigo y actualizamos fecha actualizacion y usuario actualizacion
     }
 }

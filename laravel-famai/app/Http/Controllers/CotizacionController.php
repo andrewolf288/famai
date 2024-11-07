@@ -157,6 +157,7 @@ class CotizacionController extends Controller
         }
     }
 
+    // guardar cotizacion desde despliegue de materiales
     public function storeDespliegueMateriales(Request $request)
     {
         $user = auth()->user();
@@ -394,11 +395,13 @@ class CotizacionController extends Controller
             DB::beginTransaction();
             $validatedData = validator($request->all(), [
                 'coc_cotizacionproveedor' => 'required|string',
-                'coc_correcontacto' => 'required|string',
+                'coc_correocontacto' => 'required|email',
                 'coc_fechaentrega' => 'required|date',
                 'coc_fechavalidez' => 'required|date',
                 'coc_notas' => 'nullable|string',
                 'coc_total' => 'required|numeric|min:1',
+                'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
+                'coc_formapago' => 'required|string',
                 'detalle_cotizacion' => 'required|array|min:1',
             ])->validate();
 
@@ -407,7 +410,9 @@ class CotizacionController extends Controller
 
             $cotizacion->update([
                 'coc_cotizacionproveedor' => $validatedData['coc_cotizacionproveedor'],
-                'coc_correcontacto' => $validatedData['coc_correcontacto'],
+                'coc_correocontacto' => $validatedData['coc_correocontacto'],
+                'coc_formapago' => $validatedData['coc_formapago'],
+                'mon_codigo' => $validatedData['mon_codigo'],
                 'coc_fechaentrega' => $validatedData['coc_fechaentrega'],
                 'coc_fechavalidez' => $validatedData['coc_fechavalidez'],
                 'coc_notas' => $validatedData['coc_notas'],
@@ -423,6 +428,7 @@ class CotizacionController extends Controller
                 // actualizamos
                 $detalleCotizacion->update([
                     'cod_observacion' => $detalle['cod_observacion'],
+                    'cod_tiempoentrega' => $detalle['cod_tiempoentrega'],
                     'cod_cantidad' => $detalle['cod_cantidad'],
                     'cod_preciounitario' => $detalle['cod_preciounitario'],
                     'cod_total' => $detalle['cod_total'],

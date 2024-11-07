@@ -172,6 +172,34 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta de validacion de codigo de orden interna
+    router.on('/validacion-codigo-orden', () => {
+        privateRoute(() => {
+            loadContent('pages/validacion-codigo-orden/validacionCodigoOrdenInterna.html', 'scripts/validacion-codigo-orden/validacionCodigoOrdenInterna.js')
+        })
+    })
+
+    // Ruta de lista de requerimientos
+    router.on('/requerimiento', () => {
+        privateRoute(() => {
+            loadContent('pages/requerimiento/requerimiento.html', 'scripts/requerimiento/requerimientos.js')
+        })
+    })
+
+    // Ruta de creacion de requerimientos
+    router.on('/requerimiento/crear', () => {
+        privateRoute(() => {
+            loadContent('pages/requerimiento/crearRequerimiento.html', 'scripts/requerimiento/crearRequerimiento.js')
+        })
+    })
+
+    // Ruta de edicion de requerimientos
+    router.on('/requerimiento/editar/:id', () => {
+        privateRoute(() => {
+            loadContent('pages/requerimiento/editarRequerimiento.html', 'scripts/requerimiento/editarRequerimiento.js')
+        })
+    })
+
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {

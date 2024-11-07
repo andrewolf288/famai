@@ -205,6 +205,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordeninternamateriales/export-cotizacion-text', [OrdenInternaMaterialesController::class, 'exportTXTCotizacion']);
     Route::get('detalleMaterialesByNumero', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenInterna']);
     Route::get('ordeninternamateriales/cotizacion/{id}', [OrdenInternaMaterialesController::class, 'findCotizacionByMaterial']);
+    Route::get('detalleMaterialesOrdenInterna/validacion', [OrdenInternaMaterialesController::class, 'indexValidacionCodigo']);
 });
 
 // rutas detalle procesos orden interna

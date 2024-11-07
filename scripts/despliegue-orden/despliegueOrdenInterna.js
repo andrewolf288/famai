@@ -38,7 +38,6 @@ $(document).ready(() => {
 
     // Inicializacion de data table
     function initDataTable(data) {
-        console.log(data)
         let content = ''
         // vaciamos la lista
         $('#data-container-body').empty()
@@ -110,13 +109,14 @@ $(document).ready(() => {
             const { cotizacion } = detalle
             const { proveedor } = cotizacion
             const rowItem = document.createElement('tr')
+            rowItem.classList.add(`${cotizacion.coc_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
 
             rowItem.innerHTML = `
             <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
-            <td>${cotizacion.coc_total}</td>
+            <td>${cotizacion.coc_total || 'No aplica'}</td>
             <td>
                 <span class="badge bg-primary">
                     ${cotizacion.coc_estado}
@@ -304,11 +304,11 @@ $(document).ready(() => {
         // primero aplicamos el filtro de fechas
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
-        filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
 
         // debemos adjuntar el filtro de busqueda por criterio
         if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
         }
 
         initPagination(filteredURL, initDataTable, dataTableOptions, 50)
@@ -423,6 +423,7 @@ $(document).ready(() => {
         selectedRows.forEach((value, key) => {
             content = `
                 <tr data-id="${value.odm_id}">
+                    <td>${value.orden_interna_parte?.orden_interna?.odt_numero}</td>
                     <td>${value.producto?.pro_codigo ?? ''}</td>
                     <td class="unidad-detalle">${value.producto?.unidad?.uni_codigo ?? ''}</td>
                     <td>
@@ -538,10 +539,12 @@ $(document).ready(() => {
         const row = `
         <tr data-id-proveedor="${prv_id}">
             <input class="direccion-proveedor" type="hidden" value="${prv_direccion || ''}"/>
-            <input class="correo-proveedor" type="hidden" value="${prv_correo || ''}"/>
             <td class="nombre-proveedor">${prv_nombre}</td>
-            <td class="tipodocumento-proveedor">${tdo_codigo}</td>
+            <td class="tipodocumento-proveedor text-center">${tdo_codigo}</td>
             <td class="nrodocumento-proveedor">${prv_nrodocumento}</td>
+            <td>
+                <input type="text" class="form-control correo-proveedor" value="${prv_correo || ''}" />
+            </td>
             <td>
                 <input type="text" class="form-control contacto-proveedor" value="${prv_contacto || ''}" />
             </td>
@@ -608,7 +611,6 @@ $(document).ready(() => {
             }
 
             try {
-                console.log(formatData)
                 const response = await client.post('/cotizacionesByDespliegue', formatData, {
                     headers: {
                         'Accept': 'application/pdf'
@@ -618,11 +620,12 @@ $(document).ready(() => {
 
                 const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
                 const pdfUrl = URL.createObjectURL(pdfBlob);
+                row.addClass('table-success')
                 showModalPreview(pdfUrl)
             } catch (error) {
                 console.log(error)
+                alert('Ocurrió un error al momento de generar la cotización')
             }
-
         } else {
             const rows = $('#tbl-cotizaciones-materiales tbody tr')
             rows.each(function () {
@@ -654,6 +657,7 @@ $(document).ready(() => {
                 showModalPreview(pdfUrl)
             } catch (error) {
                 console.log(error)
+                alert("Hubo un error al generar el pdf de la cotización")
             }
         }
     })

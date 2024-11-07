@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\OrdenInterna;
 use App\OrdenTrabajo;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class OrdenTrabajoController extends Controller

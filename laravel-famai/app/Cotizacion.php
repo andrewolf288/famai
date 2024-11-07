@@ -22,7 +22,7 @@ class Cotizacion extends Model
         'coc_total',
         'coc_fechaentrega',
         'coc_fechavalidez',
-        'coc_correcontacto',
+        'coc_correocontacto',
         'coc_usucreacion',
         'coc_feccreacion',
         'coc_usumodificacion',
