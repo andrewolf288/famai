@@ -171,7 +171,9 @@ $(document).ready(() => {
 
         // borramos el detalle actual de la asignacion de codigos
         $("#tbl-asignar-codigos tbody").empty()
-
+        // limpiamos la lista
+        limpiarLista()
+        $('#productosInput').val('')
         // deshabilitamos el boton de asignación
         $("#btn-asignar-codigos").prop('disabled', true)
 
@@ -189,11 +191,24 @@ $(document).ready(() => {
 
     // hacer click en el boton de asginacion
     $("#btn-asignar-codigos").on('click', async function () {
-        console.log("Entro")
+        var pro_codigo = $('#tbl-asignar-codigos tbody tr:first').data('id');
+        // buscamos el codigo 
+        const formatData = {
+            odm_id: idOrdenInternaMaterial,
+            pro_codigo: pro_codigo
+        }
+
         try {
+            await client.post('/ordeninternamateriales/validar-codigo', formatData)
+            // cerramos el modal
+            const modalAsignacionCodigo = bootstrap.Modal.getInstance(document.getElementById('asignacionCodigosModal'))
+            modalAsignacionCodigo.hide()
 
+            // cargamos la informacion
+            initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}&flag_is_null=true`, initDataTable, dataTableOptions, 50)
         } catch(error) {
-
+            console.log(error)
+            alert('Error al asignar el codigo')
         }
     })
 

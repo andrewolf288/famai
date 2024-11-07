@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
+use App\Producto;
+use App\Unidad;
 use Illuminate\Support\Facades\Storage;
 
 class OrdenInternaMaterialesController extends Controller
@@ -744,8 +746,94 @@ class OrdenInternaMaterialesController extends Controller
     // funcion para asignar nuevo codigo de producto
     public function asignarCodigoProducto(Request $request)
     {
-        // primero buscamos en nuestra tabla si existe el producto
-        // si no existe, hacemos una consulta a la base de datos de SAP
-        // asignamos codigo y actualizamos fecha actualizacion y usuario actualizacion
+        $user = auth()->user();
+
+        $validatedData = validator($request->all(), [
+            "odm_id" => "required|exists:tblordenesinternasdetmateriales_odm,odm_id",
+            "pro_codigo" => "required|string"
+        ])->validate();
+
+        try {
+            DB::beginTransaction();
+
+            $pro_id = null;
+            // buscamos el material en la base de datos
+            $findMaterial = Producto::where('pro_codigo', $request['pro_codigo'])->first();
+            // en caso no se encuentre, se crea el registro
+            if (!$findMaterial) {
+                // hacemos una busqueda de los datos en la base de datos secundaria
+                $productoSecondary = DB::connection('sqlsrv_secondary')
+                    ->table('OITM as T0')
+                    ->select([
+                        'T0.ItemCode as pro_codigo',
+                        'T0.ItemName as pro_descripcion',
+                        'T0.BuyUnitMsr as uni_codigo',
+                    ])
+                    ->where('T0.ItemCode', $request['pro_codigo'])
+                    ->first();
+
+                if ($productoSecondary) {
+                    // debemos hacer validaciones de la unidad
+                    $uni_codigo = 'SIN';
+                    $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
+                    if (!empty($uni_codigo)) {
+                        $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
+                        if ($unidadFound) {
+                            $uni_codigo = $unidadFound->uni_codigo;
+                        } else {
+                            $unidadCreated = Unidad::create([
+                                'uni_codigo' => $uni_codigo_secondary,
+                                'uni_descripcion' => $uni_codigo_secondary,
+                                'uni_activo' => 1,
+                                'uni_usucreacion' => $user->usu_codigo,
+                                'uni_fecmodificacion' => null
+                            ]);
+                            $uni_codigo = $unidadCreated->uni_codigo;
+                        }
+                    }
+                    // creamos el producto con los valores correspondientes
+                    $productoCreado = Producto::create([
+                        'pro_codigo' => $productoSecondary->pro_codigo,
+                        'pro_descripcion' => $productoSecondary->pro_descripcion,
+                        'uni_codigo' => $uni_codigo,
+                        'pgi_codigo' => 'SIN',
+                        'pfa_codigo' => 'SIN',
+                        'psf_codigo' => 'SIN',
+                        'pma_codigo' => 'SIN',
+                        'pro_usucreacion' => $user->usu_codigo,
+                        'pro_fecmodificacion' => null
+                    ]);
+                    // se establece el ID correspondiente
+                    $pro_id = $productoCreado->pro_id;
+                } else {
+                    throw new Exception('Material no encontrado en la base de datos secundaria');
+                }
+            } else {
+                // en el caso que se encuentre el producto en base de datos dbfamai
+                $pro_id = $findMaterial->pro_id;
+            }
+
+            // buscamos el material en la base de datos
+            $ordenInternaMaterial = OrdenInternaMateriales::with('producto')
+                                                            ->where('odm_id', $request['odm_id'])->first();
+    
+            if(!$ordenInternaMaterial){
+                throw new Exception('Material no encontrado');
+            }
+
+            $codigoIncrustado = $ordenInternaMaterial->pro_id !== null ? $ordenInternaMaterial->producto->pro_codigo . ' - ' : '';
+            // actualizamos el material
+            $ordenInternaMaterial->update([
+                'pro_id' => $pro_id,
+                'odm_observacion' => $codigoIncrustado . $ordenInternaMaterial->odm_descripcion . ' - ' . $ordenInternaMaterial->odm_observacion,
+                'odm_usumodificacion' => $user->usu_codigo
+            ]);
+
+            DB::commit();
+            return response()->json("Material actualizado exitosamente", 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
