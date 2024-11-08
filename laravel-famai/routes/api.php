@@ -32,6 +32,7 @@ use App\Http\Controllers\UnidadController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ProveedorCuentaBancoController;
+use App\Http\Controllers\RequerimientoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
@@ -115,7 +116,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas de partes
 Route::group(['middleware' => ['auth.jwt']], function () {
-    Route::get('partes', [ParteController::class, 'index']);
+    // Route::get('partes', [ParteController::class, 'index']);
     Route::get('partesSimple', [ParteController::class, 'indexSimple']);
 });
 
@@ -221,6 +222,12 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordeninternaprocesos/{id}', [OrdenInternaProcesosController::class, 'update']);
     Route::delete('ordeninternaprocesos/{id}', [OrdenInternaProcesosController::class, 'destroy']);
+});
+
+// rutas de requermientos
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('requerimientos', [RequerimientoController::class, 'index']);
+    Route::post('requerimientos', [RequerimientoController::class, 'store']);
 });
 
 // rutas de reportes
@@ -341,6 +348,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
 });
 
+// rutas de notificaciones
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('notificaciones', [NotificacionController::class, 'index']);
     Route::get('notificacionesByUsuarioNoVisto', [NotificacionController::class, 'findByUsuarioNoVisto']);
@@ -349,10 +357,9 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('notificacion/{id}', [NotificacionController::class, 'update']);
 });
 
-// RUTAS ABIERTAS
+// rutas publicas sin autenticación
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
-// Route::get('test-orden-interna', [OrdenInternaController::class, 'exportPDF']);
 
 Route::get('script-update', function () {
 

@@ -38,10 +38,11 @@ class OrdenInternaMaterialesAdjuntosController extends Controller
 
             // Guardar en la base de datos
             $adjunto = OrdenInternaMaterialesAdjuntos::create([
+                'odm_id' => $odm_id,
                 'oma_descripcion' => $description,
                 'oma_url' => $path,
                 'oma_usucreacion' => $user->usu_codigo,
-                'odm_id' => $odm_id
+                'oma_fecmodificacion' => null
             ]);
 
             return response()->json($adjunto, 200);

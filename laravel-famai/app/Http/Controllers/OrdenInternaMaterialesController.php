@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
+use App\OrdenInternaMaterialesAdjuntos;
 use App\Producto;
 use App\Unidad;
 use Illuminate\Support\Facades\Storage;
@@ -301,7 +302,17 @@ class OrdenInternaMaterialesController extends Controller
         $user = auth()->user();
         try {
             DB::beginTransaction();
-            $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($id);
+            $ordenInternaMaterial = OrdenInternaMateriales::with('detalleAdjuntos')
+                                                            ->findOrFail($id);
+            
+            // eliminamos el detalle de adjuntos
+            foreach($ordenInternaMaterial->detalleAdjuntos as $archivo) {
+                $urlArchivo = $archivo->oma_url;
+                // Eliminar archivo físico del disco
+                Storage::disk('public')->delete($urlArchivo);
+                // Eliminar el registro de detalleCotizacionArchivos
+                $archivo->delete();
+            }
 
             // buscamos el detalle de parte
             $ordenInternaParte = OrdenInternaPartes::findOrFail($ordenInternaMaterial->opd_id);

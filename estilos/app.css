@@ -105,3 +105,10 @@
     background-color: #ff4f00;
     border-color: #ff4f00;
 }
+
+.nota-input {
+    background-color: white;
+    color: #001c58;
+    border: 1px solid #ff4f00;
+    border-radius: 5px;
+}
