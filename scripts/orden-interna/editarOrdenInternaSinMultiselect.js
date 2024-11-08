@@ -180,6 +180,23 @@ $(document).ready(async function () {
     })
 
     // ------------ JAVASCRIPT PARA GESTION DE PROCESOS -------------
+    // carga de selector de procesos
+    // const cargarProcesosSelect = async (id_parte) => {
+    //     try {
+    //         const { data } = await client.get(`/procesosByParte/${id_parte}`)
+    //         // ordenamos la data
+    //         const dataOrdenada = data.sort((a, b) => a.opp_orden - b.opp_orden)
+
+    //         const $procesosSelect = $('#procesosSelect')
+    //         $procesosSelect.empty().append(`<option value="0">Seleccione un proceso</option>`)
+    //         dataOrdenada.forEach(function (proceso) {
+    //             const option = $('<option>').val(proceso["opp_id"]).text(`${proceso["opp_codigo"]} - ${proceso["opp_descripcion"]}`).attr('data-codigo', proceso["opp_codigo"])
+    //             $procesosSelect.append(option)
+    //         })
+    //     } catch (error) {
+    //         alert('Error al cargar el listado de procesos')
+    //     }
+    // }
     const cargarProcesosSelect = async (id__detalle_parte, id_parte) => {
         const findElement = buscarDetalleParte(id__detalle_parte)
         const { procesos } = findElement
@@ -270,7 +287,7 @@ $(document).ready(async function () {
     })
 
     // funcion para agregar detalle de proceso (recive el id del proceso y el nombre correspondiente)
-    function agregarDetalleProceso(valueId, valueName) {
+    function agregarDetalleProceso(valueId, valueName){
         const palabraClave = 'otro'
         const selectedProcesoId = valueId
         const selectedProcesoName = valueName.split(" - ")[1].trim()
@@ -321,6 +338,69 @@ $(document).ready(async function () {
             $('#tbl-orden-interna-procesos tbody').append(row)
         }
     }
+
+    // funcion de agregar detalle de proceso a parte de orden interna
+    // $('#procesosSelect').on('change', function () {
+    //     const palabraClave = 'otro'
+    //     const selectedProcesoId = $(this).val()
+    //     if (selectedProcesoId == "0") {
+    //         alert('Debes seleccionar un proceso')
+    //         return
+    //     }
+    //     const selectedProcesoName = $(this).find('option:selected').text().split(" - ")[1].trim()
+    //     const selectedProcesoCode = $(this).find('option:selected').data('codigo')
+    //     const claseCondicional = selectedProcesoName.toLowerCase().includes(palabraClave) ? true : false
+
+    //     let idProcesosArray = []
+    //     $('#tbl-orden-interna-procesos tbody tr').each(function () {
+    //         let idProceso = $(this).data('id-proceso')
+    //         idProcesosArray.push(idProceso)
+    //     })
+
+    //     const findProceso = idProcesosArray.find(element => element == selectedProcesoId)
+
+    //     if (findProceso) {
+    //         alert('Este proceso ya fué agregado')
+    //         return
+    //     } else {
+    //         // primero añadimos al DOM
+    //         const row = `
+    //         <tr class="row-editable table-warning ${claseCondicional ? 'editable-descripcion' : ''}" data-id-proceso="${selectedProcesoId}">
+    //             <td>${selectedProcesoCode}</td>
+    //             <td>
+    //                 <input type="text" class="form-control descripcion-input" value='${selectedProcesoName.replace(/'/g, "&#39;")}' readonly/>
+    //             </td>
+    //             <td class="text-center">
+    //                 <input type="checkbox" disabled/>
+    //             </td>
+    //             <td>
+    //                 <textarea type="text" class="form-control observacion-input" readonly></textarea>
+    //             </td>
+    //             <td>No aplica</td>
+    //             <td>No aplica</td>
+    //             <td>No aplica</td>
+    //             <td>No aplica</td>
+    //             <td>
+    //                 <div class="d-flex justify-content-around">
+    //                     <button class="btn btn-sm btn-warning btn-detalle-proceso-editar me-1">
+    //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+    //                             <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+    //                         </svg>
+    //                     </button>
+    //                     <button class="btn btn-sm btn-danger btn-detalle-proceso-eliminar">
+    //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+    //                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+    //                         </svg>
+    //                     </button>
+    //                 </div>
+    //             </td>
+    //         </tr>`
+
+    //         $('#tbl-orden-interna-procesos tbody').append(row)
+    //     }
+    //     // seleccionamos el valor por defecto
+    //     $('#procesosSelect').val(0)
+    // })
 
     // funcion de editar detalle de proceso
     $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-editar', function () {
@@ -399,7 +479,7 @@ $(document).ready(async function () {
     })
 
     // funcion de eliminacion de detalle de proceso
-    async function eliminarDetalleProceso(id_proceso) {
+    async function eliminarDetalleProceso(id_proceso){
         const $element = $(`button[data-proceso="${id_proceso}"]`)
         const $row = $element.closest('tr')
 
@@ -425,6 +505,30 @@ $(document).ready(async function () {
             $row.remove()
         }
     }
+
+    // funcion de eliminacion de detalle de proceso (gestionar condicional)
+    // $('#tbl-orden-interna-procesos').on('click', '.btn-detalle-proceso-eliminar', async function () {
+    //     const $row = $(this).closest('tr')
+    //     // si se trata de un registro existente
+    //     if (!$row.hasClass('row-editable')) {
+    //         // debemos extraer la informacion dl tr
+    //         const odp_id = $row.data('id-detalle')
+    //         try {
+    //             await client.delete(`/ordeninternaprocesos/${odp_id}`)
+    //             const { procesos } = buscarDetalleParte(currentDetalleParte)
+    //             const findProcesoIndex = procesos.findIndex(element => element.odp_id == odp_id)
+    //             procesos.splice(findProcesoIndex, 1)
+    //             // actualizamos el total de procesos
+    //             $(`#cantidad-procesos-${currentDetalleParte}`).text(procesos.length)
+    //             $row.remove()
+    //         } catch (error) {
+    //             alert('Error al eliminar el detalle de proceso')
+    //         }
+    //     } else {
+    //         // removemos el DOM
+    //         $row.remove()
+    //     }
+    // })
 
     // Gestionamos el cierre del modal
     $('#procesosModal').on('hide.bs.modal', function (e) {
@@ -558,20 +662,15 @@ $(document).ready(async function () {
                                 <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-primary btn-detalle-adjuntos me-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
-                                <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
-                            </svg>
-                        </button>
                         <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-1" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-2" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
                             C
                         </button>
-                        <button class="btn btn-sm ${element["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-1" ${element["odm_tipo"] == 4 ? 'disabled' : ''}>
+                        <button class="btn btn-sm ${element["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-2" ${element["odm_tipo"] == 4 ? 'disabled' : ''}>
                             X
                         </button>
                         <button class="btn btn-sm ${element["odm_tipo"] == 5 ? 'btn-secondary' : 'btn-success'} btn-detalle-recuperado-cliente" ${element["odm_tipo"] == 5 ? 'disabled' : ''}>
@@ -822,15 +921,15 @@ $(document).ready(async function () {
                 const idCantidadClientes = `#cantidad-clientes-${currentDetalleParte}`
                 $(idCantidadClientes).text(parseInt($(idCantidadClientes).text()) + 1)
 
-                const idCantidad = tipo_anterior == 1 ?
-                    `#cantidad-regulares-${currentDetalleParte}` :
-                    tipo_anterior == 2 ?
-                        `#cantidad-adicionales-${currentDetalleParte}` :
-                        tipo_anterior == 3 ?
-                            `#cantidad-clientes-${currentDetalleParte}` :
-                            tipo_anterior == 4 ?
-                                `#cantidad-nopedir-${currentDetalleParte}` :
-                                `#cantidad-recuperado-${currentDetalleParte}`
+                const idCantidad = tipo_anterior == 1 ? 
+                                   `#cantidad-regulares-${currentDetalleParte}` : 
+                                   tipo_anterior == 2 ? 
+                                   `#cantidad-adicionales-${currentDetalleParte}` :
+                                   tipo_anterior == 3 ?
+                                   `#cantidad-clientes-${currentDetalleParte}` :
+                                   tipo_anterior == 4 ?
+                                   `#cantidad-nopedir-${currentDetalleParte}` :
+                                   `#cantidad-recuperados-${currentDetalleParte}`
 
                 $(idCantidad).text(parseInt($(idCantidad).text()) - 1)
 
@@ -848,7 +947,7 @@ $(document).ready(async function () {
         // cambiamos los estilos del boton
         $(this).removeClass('btn-primary btn-detalle-proporcionado-cliente')
             .addClass('btn-secondary btn-detalle-proporcionado-cliente')
-
+        
         // tenemos que configurar los estilos
         $btnNopedir.removeClass('btn-secondary btn-danger btn-detalle-nopedir-cliente')
         $btnNopedir.addClass('btn-danger btn-detalle-nopedir-cliente')
@@ -898,15 +997,15 @@ $(document).ready(async function () {
                 const idCantidadClientes = `#cantidad-nopedir-${currentDetalleParte}`
                 $(idCantidadClientes).text(parseInt($(idCantidadClientes).text()) + 1)
 
-                const idCantidad = tipo_anterior == 1 ?
-                    `#cantidad-regulares-${currentDetalleParte}` :
-                    tipo_anterior == 2 ?
-                        `#cantidad-adicionales-${currentDetalleParte}` :
-                        tipo_anterior == 3 ?
-                            `#cantidad-clientes-${currentDetalleParte}` :
-                            tipo_anterior == 4 ?
-                                `#cantidad-nopedir-${currentDetalleParte}` :
-                                `#cantidad-recuperado-${currentDetalleParte}`
+                const idCantidad = tipo_anterior == 1 ? 
+                                   `#cantidad-regulares-${currentDetalleParte}` : 
+                                   tipo_anterior == 2 ? 
+                                   `#cantidad-adicionales-${currentDetalleParte}` :
+                                   tipo_anterior == 3 ?
+                                   `#cantidad-clientes-${currentDetalleParte}` :
+                                   tipo_anterior == 4 ?
+                                   `#cantidad-nopedir-${currentDetalleParte}` :
+                                   `#cantidad-recuperados-${currentDetalleParte}`
 
                 $(idCantidad).text(parseInt($(idCantidad).text()) - 1)
 
@@ -923,7 +1022,7 @@ $(document).ready(async function () {
         // cambiamos los estilos del boton
         $(this).removeClass('btn-danger btn-detalle-nopedir-cliente')
             .addClass('btn-secondary btn-detalle-nopedir-cliente')
-
+        
         // tenemos que configurar los estilos
         $btnProporcionado.removeClass('btn-secondary btn-primary btn-detalle-proporcionado-cliente')
         $btnProporcionado.addClass('btn-primary btn-detalle-proporcionado-cliente')
@@ -970,18 +1069,18 @@ $(document).ready(async function () {
                 $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
 
                 // se actualiza las cantidades
-                const idCantidadClientes = `#cantidad-recuperado-${currentDetalleParte}`
+                const idCantidadClientes = `#cantidad-recuperados-${currentDetalleParte}`
                 $(idCantidadClientes).text(parseInt($(idCantidadClientes).text()) + 1)
 
-                const idCantidad = tipo_anterior == 1 ?
-                    `#cantidad-regulares-${currentDetalleParte}` :
-                    tipo_anterior == 2 ?
-                        `#cantidad-adicionales-${currentDetalleParte}` :
-                        tipo_anterior == 3 ?
-                            `#cantidad-clientes-${currentDetalleParte}` :
-                            tipo_anterior == 4 ?
-                                `#cantidad-nopedir-${currentDetalleParte}` :
-                                `#cantidad-recuperado-${currentDetalleParte}`
+                const idCantidad = tipo_anterior == 1 ? 
+                                   `#cantidad-regulares-${currentDetalleParte}` : 
+                                   tipo_anterior == 2 ? 
+                                   `#cantidad-adicionales-${currentDetalleParte}` :
+                                   tipo_anterior == 3 ?
+                                   `#cantidad-clientes-${currentDetalleParte}` :
+                                   tipo_anterior == 4 ?
+                                   `#cantidad-nopedir-${currentDetalleParte}` :
+                                   `#cantidad-recuperados-${currentDetalleParte}`
 
                 $(idCantidad).text(parseInt($(idCantidad).text()) - 1)
             } catch (error) {
@@ -997,7 +1096,7 @@ $(document).ready(async function () {
         // cambiamos los estilos del boton
         $(this).removeClass('btn-success btn-detalle-recuperado-cliente')
             .addClass('btn-secondary btn-detalle-recuperado-cliente')
-
+        
         // tenemos que configurar los estilos
         $btnProporcionado.removeClass('btn-secondary btn-primary btn-detalle-proporcionado-cliente')
         $btnProporcionado.addClass('btn-primary btn-detalle-proporcionado-cliente')
@@ -1112,17 +1211,8 @@ $(document).ready(async function () {
                     console.log(cantidadTotal)
                     $(`#cantidad-clientes-${currentDetalleParte}`).text(cantidadTotal)
                 }
-                if (tipo == '4') {
-                    cantidadTotal = parseInt($(`#cantidad-nopedir-${currentDetalleParte}`).text()) - 1
-                    $(`#cantidad-nopedir-${currentDetalleParte}`).text(cantidadTotal)
-                }
-                if (tipo == '5') {
-                    cantidadTotal = parseInt($(`#cantidad-recuperado-${currentDetalleParte}`).text()) - 1
-                    $(`#cantidad-recuperado-${currentDetalleParte}`).text(cantidadTotal)
-                }
                 $row.remove()
             } catch (error) {
-                console.log(error)
                 alert('Error al eliminar el detalle de material')
             } finally {
                 isRequestInProgress = false
@@ -1132,118 +1222,6 @@ $(document).ready(async function () {
             $row.remove()
         }
     })
-
-    // Gestionamos el detalle de archivos
-    $("#tbl-orden-interna-productos").on("click", ".btn-detalle-adjuntos", async function () {
-        const $row = $(this).closest('tr')
-        const odm_id = $row.data('id-detalle')
-
-        // guardamos el valor de odm_id para proximas operaciones
-        $("#id-detalle-material").val(odm_id)
-
-        // vaceamos informacion de la tabla
-        $('#tabla-archivos-adjuntos').empty()
-
-        // llamamos a la informacion del detalle
-        try {
-            const {data} = await client.get(`/ordeninternamaterialesadjuntos/${odm_id}`)
-
-            data.forEach(element => {
-                const {oma_id, oma_descripcion, oma_url} = element
-                const row = `
-                    <tr data-id-adjunto="${oma_id}">
-                        <td>
-                            <a target="_blank" href="${BASE_URL_SOTRAGE}${oma_url}">Ver recurso</a>
-                        </td>
-                        <td class="descripcion-file">${oma_descripcion}</td>
-                        <td>
-                            <button type="button" class="btn btn-danger btn-sm btn-eliminar-archivo">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                `
-                $('#tabla-archivos-adjuntos').append(row)
-            })
-
-        } catch(error){
-            console.log(error)
-            alert("Error al cargar los archivos")
-        }
-
-        // finalmente mostramos el modal
-        const modalAdjuntos = new bootstrap.Modal(document.getElementById('adjuntosMaterialModal'))
-        modalAdjuntos.show()
-    })
-
-    $('#btn-agregar-archivo').click(async function () {
-        const fileInput = $('#fileUpload')[0];
-        const descriptionInput = $('#fileDescription');
-
-        // Verificar que se haya seleccionado un archivo y que haya una descripción
-        if (fileInput.files.length > 0 && descriptionInput.val().trim() !== "") {
-            const file = fileInput.files[0];
-            const description = descriptionInput.val().trim();
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('descripcion', description);
-            formData.append('odm_id', $("#id-detalle-material").val());
-
-            try {
-                const {data} = await client.post('/ordeninternamaterialesadjuntos', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
-
-                const {oma_id, oma_descripcion, oma_url} = data
-                // Crear una nueva fila en la tabla con un índice del array
-                const row = `
-                    <tr data-id-adjunto="${oma_id}">
-                        <td>
-                            <a target="_blank" href="${BASE_URL_SOTRAGE}${oma_url}">Ver recurso</a>
-                        </td>
-                        <td class="descripcion-file">${oma_descripcion}</td>
-                        <td>
-                            <button type="button" class="btn btn-danger btn-sm btn-eliminar-archivo">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                `
-                $('#tabla-archivos-adjuntos').append(row)
-            } catch(error) {
-                console.log(error)
-                alert("Error al subir el archivo")
-            }
-
-            // Limpiar los campos después de agregar el archivo
-            fileInput.value = '';
-            descriptionInput.val('');
-        } else {
-            alert('Por favor, seleccione un archivo y agregue una descripción.');
-        }
-    });
-
-    // Evento para eliminar archivos de la tabla
-    $('#tabla-archivos-adjuntos').on('click', '.btn-eliminar-archivo', async function () {
-        const row = $(this).closest('tr');
-        const oma_id = row.data('id-adjunto');
-
-        try {
-            await client.delete(`/ordeninternamaterialesadjuntos/${oma_id}`)
-            // Remover la fila de la tabla
-            row.remove();
-        } catch(error){
-            console.log(error)
-            alert("Error al eliminar el archivo")
-        }
-    });
 
     // Gestionamos el cierre del modal
     $('#productosModal').on('hide.bs.modal', function (e) {
@@ -1286,9 +1264,9 @@ $(document).ready(async function () {
             const tipoProducto = estadoOI === "INGRESO" ? 1 : 2
 
             const tipoFind = $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-secondary') ? 3 :
-                $(this).find('.btn-detalle-nopedir-cliente').hasClass('btn-secondary') ? 4 :
-                    $(this).find('.btn-detalle-recuperado-cliente').hasClass('btn-secondary') ? 5 :
-                        tipoProducto
+                             $(this).find('.btn-detalle-nopedir-cliente').hasClass('btn-secondary') ? 4 : 
+                             $(this).find('.btn-detalle-recuperado-cliente').hasClass('btn-secondary') ? 5 :
+                             tipoProducto
 
             let dataObject = {
                 pro_id: $(this).data('id-producto'),
@@ -1481,9 +1459,9 @@ $(document).ready(async function () {
             const tipoProducto = estadoOI === "INGRESO" ? 1 : 2
 
             const tipoFind = $(this).find('.btn-detalle-proporcionado-cliente').hasClass('btn-secondary') ? 3 :
-                $(this).find('.btn-detalle-nopedir-cliente').hasClass('btn-secondary') ? 4 :
-                    $(this).find('.btn-detalle-recuperado-cliente').hasClass('btn-secondary') ? 5 :
-                        tipoProducto
+                             $(this).find('.btn-detalle-nopedir-cliente').hasClass('btn-secondary') ? 4 : 
+                             $(this).find('.btn-detalle-recuperado-cliente').hasClass('btn-secondary') ? 5 :
+                             tipoProducto
 
             let dataObject = {
                 pro_id: $(this).data('id-producto'),
@@ -1567,12 +1545,14 @@ $(document).ready(async function () {
     }
 
     // deshabilitar botones de guardado de los modales
-    function deshabilitarBotonesGuardadoModal() {
+    function deshabilitarBotonesGuardadoModal()
+    {
         $("#btn-guardar-proceso").prop("disabled", true)
         $("#btn-guardar-producto").prop("disabled", true)
     }
     // habilitar botones de guardado de los modales
-    function habilitarBotonesGuardadoModal() {
+    function habilitarBotonesGuardadoModal()
+    {
         $("#btn-guardar-proceso").prop("disabled", false)
         $("#btn-guardar-producto").prop("disabled", false)
     }

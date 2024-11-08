@@ -77,14 +77,14 @@ class OrdenInternaController extends Controller
 
     public function show($id)
     {
-        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
+        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso', 'partes.materiales.detalleAdjuntos'])
             ->findOrFail($id);
         return response()->json($ordenInterna);
     }
 
     public function findByNumero($numero)
     {
-        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso'])
+        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso', 'partes.materiales.detalleAdjuntos'])
             ->where('odt_numero', $numero)
             ->first();
         if (!$ordenInterna) {

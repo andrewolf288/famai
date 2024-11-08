@@ -60,4 +60,10 @@ class OrdenInternaMateriales extends Model
     {
         return $this->belongsTo(User::class, 'odm_usucreacion');
     }
+
+    // detalle de adjuntos
+    public function detalleAdjuntos()
+    {
+        return $this->hasMany(OrdenInternaMaterialesAdjuntos::class, 'odm_id');
+    }
 }

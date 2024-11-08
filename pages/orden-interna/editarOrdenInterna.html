@@ -6,7 +6,7 @@
         <button class="btn btn-secondary me-2" onclick="location.href='orden-interna'">
             Volver
         </button>
-     </div>
+    </div>
     <div class="row mb-3 orange-form">
         <!-- SELECCION DE ORDEN DE TRABAJO -->
         <div class="col-12 col-md-3 mb-3 mb-md-0">
@@ -208,14 +208,14 @@
                     <thead>
                         <tr>
                             <th class="col-1">Código</th>
-                            <th class="col-3">Material</th>
+                            <th class="col-2">Material</th>
                             <th class="col-1">Cantidad</th>
                             <th class="col-2">Observación</th>
                             <th class="col-1">Usu. Act.</th>
                             <th class="col-1">Fec. Act.</th>
                             <th class="col-1">Usu. Cre.</th>
                             <th class="col-1">Fec. Cre.</th>
-                            <th class="col-1">Acciones</th>
+                            <th class="col-2 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -255,6 +255,63 @@
             <div class="modal-body">
                 <div style="height: 80vh;">
                     <iframe id="pdf-frame" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ARCHIVOS ADJUNTOS -->
+<div class="modal fade" id="adjuntosMaterialModal" tabindex="-1" aria-labelledby="adjuntosMaterialModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adjuntosMaterialModalLabel">Archivos adjuntos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- ingreso de archivo con su descripcion -->
+                <div class="row mb-3 d-flex align-items-center">
+                    <!-- Subir archivo -->
+                    <div class="col-md-4">
+                        <label for="fileUpload" class="form-label">Subir archivo</label>
+                        <input class="form-control" type="file" id="fileUpload">
+                    </div>
+
+                    <!-- Descripción del archivo -->
+                    <div class="col-md-7">
+                        <label for="fileDescription" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="fileDescription" rows="1"></textarea>
+                    </div>
+
+                    <!-- Botón Agregar archivo -->
+                    <div class="col-md-1 d-flex justify-content-center mt-4">
+                        <button type="button" class="btn btn-success" id="btn-agregar-archivo">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                              </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- tabla para mostrar archivos adjuntos -->
+                <div>
+                    <input type="text" hidden id="id-detalle-material" value="">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="col-3">Enlace</th>
+                                <th class="col-6">Descripción</th>
+                                <th class="col-1 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-archivos-adjuntos">
+                            <!-- Aquí se agregarán las filas de archivos adjuntos dinámicamente -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer">

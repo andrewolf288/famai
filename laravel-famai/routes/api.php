@@ -21,6 +21,7 @@ use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\OrdenCompraDetalleController;
+use App\Http\Controllers\OrdenInternaMaterialesAdjuntosController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
 use App\Http\Controllers\ReporteController;
@@ -207,6 +208,13 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordeninternamateriales/cotizacion/{id}', [OrdenInternaMaterialesController::class, 'findCotizacionByMaterial']);
     Route::get('detalleMaterialesOrdenInterna/validacion', [OrdenInternaMaterialesController::class, 'indexValidacionCodigo']);
     Route::post('ordeninternamateriales/validar-codigo', [OrdenInternaMaterialesController::class, 'asignarCodigoProducto']);
+});
+
+// rutas detalle de adjuntos detalle materiales
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::post('ordeninternamaterialesadjuntos', [OrdenInternaMaterialesAdjuntosController::class, 'store']);
+    Route::get('ordeninternamaterialesadjuntos/{id}', [OrdenInternaMaterialesAdjuntosController::class, 'findByDetalleMaterial']);
+    Route::delete('ordeninternamaterialesadjuntos/{id}', [OrdenInternaMaterialesAdjuntosController::class, 'destroy']);
 });
 
 // rutas detalle procesos orden interna
