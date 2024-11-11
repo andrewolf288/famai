@@ -9,7 +9,7 @@ async function handleLogout() {
         localStorage.removeItem('authToken');
         localStorage.removeItem('modulos');
         // Navegamos al login
-        window.location.href = '/famai/login.html';
+        window.location.href = '/logistica/login.html';
     } catch (error) {
         console.log(error);
     }

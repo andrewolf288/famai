@@ -9,7 +9,7 @@ function getCurrentAccessToken(){
 function logoutUnauthorized(){
     localStorage.removeItem('authToken')
     localStorage.removeItem('modulos')
-    window.location.href = '/famai/login.html'
+    window.location.href = '/logistica/login.html'
 }
 
 const options = {
