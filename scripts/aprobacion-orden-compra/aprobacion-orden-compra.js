@@ -136,7 +136,7 @@ $(document).ready(() => {
             rowItem.setAttribute('data-id', ocd_id)
 
             rowItem.innerHTML = `
-            <td>${detalle_material.orden_interna_parte.orden_interna.oic_numero}</td>
+            <td>${detalle_material.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
             <td>${ocd_orden}</td>
             <td>${ocd_descripcion}</td>
             <td>${ocd_cantidad}</td>

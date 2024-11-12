@@ -42,7 +42,7 @@ $(document).ready(() => {
 
             const rowItem = document.createElement('tr')
             rowItem.innerHTML = `
-                <td>${odt_numero}</td>
+                <td>${odt_numero || 'N/A'}</td>
                 <td>${parseDate(material.odm_feccreacion)}</td>
                 <td>${material.odm_usucreacion}</td>
                 <td>${producto?.pro_codigo || 'N/A'}</td>

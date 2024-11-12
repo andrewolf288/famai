@@ -32,6 +32,7 @@ $(document).ready(() => {
             content += `
                 <tr>
                     <td>${cotizacion.coc_fechacotizacion !== null ? parseDateSimple(cotizacion.coc_fechacotizacion) : 'No aplica'}</td>
+                    <td>${cotizacion.coc_numero || 'No aplica'}</td>
                     <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
                     <td>${cotizacion.proveedor?.prv_nombre || 'No aplica'}</td>
                     <td class="text-left">${cotizacion.proveedor?.prv_nrodocumento || 'No aplica'}</td>
@@ -124,9 +125,11 @@ $(document).ready(() => {
                     <tr>
                         <td>${detalle.cod_orden}</td>
                         <td>${detalle.cod_descripcion}</td>
-                        <td>${detalle.cod_cantidad}</td>
-                        <td>${detalle.cod_preciounitario}</td>
-                        <td>${detalle.cod_total}</td>
+                        <td>${detalle.cod_observacion || 'N/A'}</td>
+                        <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
+                        <td class="text-center">${detalle.cod_preciounitario || 'N/A'}</td>
+                        <td class="text-center">${detalle.cod_total || 'N/A'}</td>
+                        <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
                     </tr>
                 `)
             })

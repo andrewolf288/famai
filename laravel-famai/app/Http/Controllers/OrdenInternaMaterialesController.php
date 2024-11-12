@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
+use App\OrdenCompraDetalle;
 use App\OrdenInternaMaterialesAdjuntos;
 use App\Producto;
 use App\Unidad;
@@ -27,9 +28,12 @@ class OrdenInternaMaterialesController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $ordenTrabajo = $request->input('odt_numero', null);
-        $almID = $request->input('alm_id', 1);
+        $tipoProceso = $request->input('oic_tipo', null);
+        $almID = $request->input('alm_id', '01_AQPAG');
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+        // multifilters
+        $multifilter = $request->input('multifilter', null);
 
         // se necesita agregar informacion de procedimiento almacenado
         $query = OrdenInternaMateriales::with(
@@ -49,9 +53,83 @@ class OrdenInternaMaterialesController extends Controller
             });
         }
 
+        // filtro de tipo de proceso
+        if ($tipoProceso !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($tipoProceso) {
+                $q->where('oic_tipo', $tipoProceso);
+            });
+        }
+
         // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
             $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+        }
+
+        // Procesar el parámetro multiselect
+        if ($multifilter !== null) {
+            // Separar el string por "OR" y crear un array con cada palabra
+            $palabras = explode('OR', $request->input('multifilter'));
+
+            // Agregar el grupo de condiciones OR
+            $query->where(function ($q) use ($palabras, $almID) {
+                foreach ($palabras as $palabra) {
+                    // pendiente de emision de orden de compra
+                    if ($palabra === 'pendiente_emitir_orden_compra') {
+                        $q->orWhere('odm_estado', 'COT');
+                    }
+                    // pendiente de emision de cotizacion
+                    if ($palabra === 'pendiente_emitir_cotizacion') {
+                        $q->orWhere('odm_estado', 'CRD');
+                    }
+                    // material sin codigo
+                    if ($palabra === 'material_sin_codigo') {
+                        $q->orWhere('pro_id', null);
+                    }
+                    // material sin compra
+                    if ($palabra === 'material_sin_compra') {
+                        $q->orWhere(function ($subQuery) use ($almID) {
+                            $subQuery->whereNotNull('pro_id')
+                                ->whereDoesntExist(function ($subquery) use ($almID) {
+                                    // Agrega prefijo a tablas para conexión secundaria
+                                    $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
+                                    $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
+                                    $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
+
+                                    $subquery->select(DB::raw(1))
+                                        ->from($oitmTable)
+                                        ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
+                                        ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
+                                        ->whereColumn('T0.ItemCode', 'OrdenInternaMateriales.pro_id')
+                                        ->where('T1.WhsCode', '=', $almID)
+                                        ->where('T2.LocCode', '=', $almID)
+                                        ->where('T0.validFor', '=', 'Y')
+                                        ->whereNull(DB::raw(
+                                            "(CASE 
+                                                WHEN (
+                                                    SELECT MAX(OPDN.DocDate) 
+                                                    FROM OPDN 
+                                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                                    WHERE PDN1.ItemCode = T0.ItemCode
+                                                ) IS NULL 
+                                                THEN (
+                                                    SELECT MAX(OIGN.DocDate) 
+                                                    FROM OIGN 
+                                                    JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                                                    WHERE IGN1.ItemCode = T0.ItemCode
+                                                )
+                                                ELSE (
+                                                    SELECT MAX(OPDN.DocDate) 
+                                                    FROM OPDN 
+                                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                                    WHERE PDN1.ItemCode = T0.ItemCode
+                                                )
+                                            END)"
+                                        ));
+                                });
+                        });
+                    }
+                }
+            });
         }
 
         // ordenar de formar descendiente
@@ -303,10 +381,10 @@ class OrdenInternaMaterialesController extends Controller
         try {
             DB::beginTransaction();
             $ordenInternaMaterial = OrdenInternaMateriales::with('detalleAdjuntos')
-                                                            ->findOrFail($id);
-            
+                ->findOrFail($id);
+
             // eliminamos el detalle de adjuntos
-            foreach($ordenInternaMaterial->detalleAdjuntos as $archivo) {
+            foreach ($ordenInternaMaterial->detalleAdjuntos as $archivo) {
                 $urlArchivo = $archivo->oma_url;
                 // Eliminar archivo físico del disco
                 Storage::disk('public')->delete($urlArchivo);
@@ -754,6 +832,13 @@ class OrdenInternaMaterialesController extends Controller
         return response()->json($detalleCotizacion);
     }
 
+    // detalle material - orden compra
+    public function findOrdenCompraByMaterial($id)
+    {
+        $detalleOrdenCompra = OrdenCompraDetalle::with('ordenCompra.proveedor')->where('odm_id', $id)->get();
+        return response()->json($detalleOrdenCompra);
+    }
+
     // funcion para asignar nuevo codigo de producto
     public function asignarCodigoProducto(Request $request)
     {
@@ -826,9 +911,9 @@ class OrdenInternaMaterialesController extends Controller
 
             // buscamos el material en la base de datos
             $ordenInternaMaterial = OrdenInternaMateriales::with('producto')
-                                                            ->where('odm_id', $request['odm_id'])->first();
-    
-            if(!$ordenInternaMaterial){
+                ->where('odm_id', $request['odm_id'])->first();
+
+            if (!$ordenInternaMaterial) {
                 throw new Exception('Material no encontrado');
             }
 

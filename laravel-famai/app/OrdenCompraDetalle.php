@@ -33,4 +33,10 @@ class OrdenCompraDetalle extends Model
     {
         return $this->belongsTo(OrdenInternaMateriales::class, 'odm_id', 'odm_id');
     }
+
+    // detalle orden de compra
+    public function ordenCompra()
+    {
+        return $this->belongsTo(OrdenCompra::class, 'occ_id', 'occ_id');
+    }
 }

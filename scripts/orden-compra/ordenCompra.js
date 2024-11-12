@@ -38,7 +38,9 @@ $(document).ready(() => {
                     <td class="text-center">${ordenCompra.occ_impuesto}</td>
                     <td class="text-center">${ordenCompra.occ_total}</td>
                     <td>${ordenCompra.occ_fecha !== null ? parseDateSimple(ordenCompra.occ_fecha) : 'No aplica'}</td>
-                    <td>${ordenCompra.occ_estado == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
+                    <td>
+                        <span class="badge bg-primary">${ordenCompra.occ_estado}</span>
+                    </td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-orden-compra-editar" data-ordencompra="${ordenCompra.occ_id}">

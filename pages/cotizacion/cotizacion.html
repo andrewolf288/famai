@@ -53,6 +53,7 @@
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
   <thead>
     <th class="text-start">Fecha Cot.</th>
+    <th>Nro Cotizacion</th>
     <th>Nro Cot proveedor</th>
     <th>Doc. proveedor</th>
     <th>Raz. social proveedor</th>
@@ -72,7 +73,7 @@
 <!-- DETALLE DE COTIZACION -->
 <div class="modal fade" id="detalleCotizacionModal" tabindex="-1" aria-labelledby="detalleCotizacionModalLabel"
   aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-fullscreen">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="detalleCotizacionModalLabel">Detalle Cotización</h5>
@@ -84,9 +85,11 @@
             <tr>
               <th>Item</th>
               <th>Descripción</th>
-              <th>Cantidad</th>
-              <th>Precio Unitario</th>
-              <th>Total</th>
+              <th>Observación</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-center">Precio Unitario</th>
+              <th class="text-center">Total</th>
+              <th class="text-center">Tmp. Entrega</th>
             </tr>
           </thead>
           <tbody>

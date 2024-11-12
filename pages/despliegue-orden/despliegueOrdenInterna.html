@@ -10,7 +10,7 @@
     <button class="btn btn-success ms-2" id="btn-export-data-presupuesto">Excel Presupuesto</button>
     <button class="btn btn-success ms-2" id="btn-export-data-almacen">Excel Almacen</button>
 </div>
-<div class="row mb-3">
+<div class="row mb-3 mt-2">
     <!-- Filtros de fechas -->
     <div class="col-12 col-md-3 mb-3 mb-md-0">
         <div class="d-flex flex-column flex-md-row align-items-end">
@@ -32,18 +32,30 @@
         </div>
     </div>
 
-    <!-- Filtros a la izquierda -->
+    <!-- Filtros  -->
     <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
         <div class="d-flex flex-column flex-md-row">
             <select id="filter-selector" class="form-select w-100 w-md-auto">
                 <option value="">Seleccione un filtro</option>
                 <option value="odt_numero">Orden trabajo</option>
+                <option value="oic_tipo">Tipo proceso</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
                 placeholder="Buscar...">
 
             <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
+        </div>
+        <div class="d-flex flex-column flex-md-row mt-3 w-75">
+            <div class="col-10">
+                <select id="filterMultipleSelector" class="form-select" multiple>
+                    <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
+                    <option value="pendiente_emitir_cotizacion">Pendiente de emitir cotización</option>
+                    <option value="material_sin_codigo">Material sin codigo</option>
+                    <option value="material_sin_compra">Material sin compra</option>
+                </select>
+            </div>
+            <button class="col-2 btn btn-primary mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
         </div>
     </div>
 
@@ -64,8 +76,10 @@
         <th class="text-center">
             Check
         </th>
-        <th>OT</th>
+        <th class="text-center">Proceso</th>
+        <th class="text-center">OT</th>
         <th>Fec. Det OI</th>
+        <th class="text-center">Estado</th>
         <th class="text-center">Tipo</th>
         <th>Cod Producto</th>
         <th>Producto</th>
@@ -74,8 +88,8 @@
         <th class="text-center">Und.</th>
         <th class="text-center">Stock Alm</th>
         <th class="text-center">Cotizado</th>
+        <th class="text-center">Orden compra</th>
         <th class="text-center">Reservado</th>
-        <th class="text-center">Ordenado</th>
         <th class="text-center">Atendido</th>
         <th>Responsable</th>
         <th>Presupuesto</th>
@@ -244,7 +258,7 @@
 <!-- DIALOG COTIZADO -->
 <div>
     <div class="modal fade" id="cotizadoModal" tabindex="-1" aria-labelledby="cotizadoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="cotizadoModalLabel">Cotizaciones relacionadas</h5>
@@ -256,19 +270,19 @@
                             <thead>
                                 <tr>
                                     <th class="text-start">Fecha Cot.</th>
+                                    <th>Nro cotización</th>
                                     <th>Nro Cot proveedor</th>
+                                    <th>Estado</th>
                                     <th>Doc. proveedor</th>
                                     <th>Raz. social proveedor</th>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Precio unitario</th>
                                     <th class="text-center">Total</th>
-                                    <th>Estado</th>
-                                    <th>Fec. Creación</th>
-                                    <th>Usu. Creador</th>
-                                    <th>Fec. Actualización</th>
-                                    <th>Usu. Actualizador</th>
+                                    <th>Tmp. entrega</th>
                                 </tr>
                             </thead>
                             <tbody>
-
                             </tbody>
                         </table>
                     </div>
@@ -283,7 +297,7 @@
 
 <!-- DIALOG ORDENADO -->
 <div class="modal fade" id="ordenadoModal" tabindex="-1" aria-labelledby="ordenadoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="ordenadoModalLabel">Nota de orden de compra</h5>
@@ -291,24 +305,21 @@
             </div>
             <div class="modal-body">
                 <div>
-                    <table class="table mt-3">
+                    <table id="data-container-ordencompra" class="table mt-3" style="width:100%">
                         <thead>
                             <tr>
+                                <th class="text-start">Fecha Ord. Compra</th>
                                 <th>Num. Ord. Compra</th>
-                                <th>Fecha Ord. Compra</th>
-                                <th>Cantidad</th>
-                                <th>Pre. Unitario</th>
-                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Doc. proveedor</th>
+                                <th>Raz. social proveedor</th>
+                                <th>Descripción</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Precio unitario</th>
+                                <th class="text-center">Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>0000001</td>
-                                <td>24/10/2024 17:45:23</td>
-                                <td>6.00</td>
-                                <td>45.50</td>
-                                <td>S/ 273.00</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
