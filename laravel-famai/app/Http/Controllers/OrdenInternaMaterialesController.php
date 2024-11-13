@@ -940,4 +940,20 @@ class OrdenInternaMaterialesController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    // Información materiales a cotizar
+    public function informacionMaterialesCotizar(Request $request)
+    {
+        $materiales = $request->input('materiales', []);
+
+        $detalleMaterialesCotizar = [];
+
+        foreach ($materiales as $material) {
+            $detalle = OrdenInternaMateriales::with(['producto.unidad','ordenInternaParte.ordenInterna'])
+                                            ->find($material);
+            $detalleMaterialesCotizar[] = $detalle;
+        }
+
+        return response()->json($detalleMaterialesCotizar);
+    }
 }

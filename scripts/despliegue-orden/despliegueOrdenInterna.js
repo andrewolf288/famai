@@ -92,7 +92,7 @@ $(document).ready(() => {
                     <td class="text-center">${material.odm_cantidad}</td>
                     <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                     <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
-                    <td>
+                    <td class="text-center">
                         <button class="btn btn-primary btn-historico" data-historico="${material.odm_id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                 <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
@@ -132,7 +132,7 @@ $(document).ready(() => {
     }
 
     // ------------ INCIIALIZAMOS EL DATATABLE ------------
-    initDataTable()
+    initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`)
 
     // ------------ ADMINISTRACION DE FILTROS ---------------
     // filter fechas
@@ -208,10 +208,10 @@ $(document).ready(() => {
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.cod_descripcion}</td>
-            <td>${detalle.cod_cantidad || 'N/A'}</td>
-            <td>${detalle.cod_preciounitario || 'N/A'}</td>
-            <td>${detalle.cod_total || 'N/A'}</td>
-            <td>${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
+            <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
+            <td class="text-center">${detalle.cod_preciounitario || 'N/A'}</td>
+            <td class="text-center">${detalle.cod_total || 'N/A'}</td>
+            <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
             `
             $('#data-container-cotizacion tbody').append(rowItem)
         })
@@ -246,9 +246,9 @@ $(document).ready(() => {
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.ocd_descripcion}</td>
-            <td>${detalle.ocd_cantidad || 'N/A'}</td>
-            <td>${detalle.ocd_preciounitario || 'N/A'}</td>
-            <td>${detalle.ocd_total || 'N/A'}</td>
+            <td class="text-center">${detalle.ocd_cantidad || 'N/A'}</td>
+            <td class="text-center">${detalle.ocd_preciounitario || 'N/A'}</td>
+            <td class="text-center">${detalle.ocd_total || 'N/A'}</td>
             `
             $('#data-container-ordencompra tbody').append(rowItem)
         })
@@ -491,46 +491,68 @@ $(document).ready(() => {
             const valor = $(node).find('input[type="hidden"]').val(); // Extrae el valor del checkbox
             valoresSeleccionados.push(valor);
         });
-        console.log(valoresSeleccionados);
-        // let content = ''
-        // // reset de los valores de ingreso
-        // limpiarLista()
-        // $('#proveedoresInput').val('')
-        // $('#tipo-proveedor').val('')
-        // $('#tbl-cotizaciones-proveedores tbody').empty()
-        // $('#tbl-cotizaciones-materiales tbody').empty()
-        // // debemos formar los materiales seleccionados
-        // selectedRows.forEach((value, key) => {
-        //     content = `
-        //         <tr data-id="${value.odm_id}">
-        //             <td>${value.orden_interna_parte?.orden_interna?.odt_numero}</td>
-        //             <td>${value.producto?.pro_codigo ?? ''}</td>
-        //             <td class="unidad-detalle">${value.producto?.unidad?.uni_codigo ?? ''}</td>
-        //             <td>
-        //                 <input type="text" class="form-control descripcion-detalle" value="${value.odm_descripcion ?? ''}"/>
-        //             </td>
-        //             <td>
-        //                 <input type="text" class="form-control observacion-detalle" value="${value.odm_observacion ?? ''}"/>
-        //             </td>
-        //             <td>
-        //                 <input type="number" class="form-control cantidad-detalle" value="${value.odm_cantidad}"/>
-        //             </td>
-        //             <td>
-        //                 <div class="d-flex justify-content-around">
-        //                     <button class="btn btn-sm btn-danger btn-delete-detalle-material">
-        //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-        //                             <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-        //                         </svg>
-        //                     </button>
-        //                 </div>
-        //             </td>
-        //         </tr>
-        //     `
-        //     $('#tbl-cotizaciones-materiales tbody').append(content)
-        // })
-        // // abrimos el modal
-        // const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
-        // dialogCotizacion.show()
+
+        if(valoresSeleccionados.length === 0){
+            alert('Debe seleccionar al menos un material')
+            return
+        }
+
+        const formatData = {
+            materiales: valoresSeleccionados
+        }
+
+        try {
+            const {data} = await client.post('/detalleMaterialesOrdenInterna/materiales-cotizar',formatData)
+            let content = ''
+            // reset de los valores de ingreso
+            limpiarLista()
+            $('#proveedoresInput').val('')
+            $('#tipo-proveedor').val('')
+            $('#tbl-cotizaciones-proveedores tbody').empty()
+            $('#tbl-cotizaciones-materiales tbody').empty()
+            // debemos formar los materiales seleccionados
+            data.forEach((material, key) => {
+                content = `
+                    <tr data-id="${material.odm_id}">
+                        <td>${material.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                        <td>${material.producto?.pro_codigo || 'N/A'}</td>
+                        <td class="unidad-detalle">${material.producto?.unidad?.uni_codigo || 'N/A'}</td>
+                        <td>
+                            <input type="text" class="form-control descripcion-detalle" value="${escapeHTML(material.odm_descripcion)}"/>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control observacion-detalle" value="${escapeHTML(material.odm_observacion)}"/>
+                        </td>
+                        <td>
+                            <input type="number" class="form-control cantidad-detalle" value="${material.odm_cantidad}"/>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-around">
+                                <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                                        <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                                    </svg>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-delete-detalle-material">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `
+                $('#tbl-cotizaciones-materiales tbody').append(content)
+            })
+            // abrimos el modal
+            const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
+            dialogCotizacion.show()
+        } catch(error) {
+            console.log(error)
+            alert('Error al obtener información de cotización')
+        }
     })
 
     $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-delete-detalle-material', (event) => {
@@ -647,6 +669,11 @@ $(document).ready(() => {
                             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
                         </svg>
                     </button>
+                    <button class="btn btn-sm btn-outline-danger btn-proveedor-eliminar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                        </svg>
+                    </button>
                 </div>
             </td>
         </tr>
@@ -654,6 +681,13 @@ $(document).ready(() => {
         $('#tbl-cotizaciones-proveedores tbody').append(row)
     }
 
+    // eliminar detalle de proveedor
+    $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-proveedor-eliminar', (event) => {
+        const row = $(event.currentTarget).closest('tr')
+        row.remove()
+    })
+
+    // exportar en pdf la cotizacion
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-pdf', async (event) => {
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')

@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <!-- Filtros  -->
+    <!-- Filtro input  -->
     <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
         <div class="d-flex flex-column flex-md-row">
             <select id="filter-selector" class="form-select w-100 w-md-auto">
@@ -46,7 +46,11 @@
 
             <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
         </div>
-        <div class="d-flex flex-column flex-md-row mt-3 w-75">
+    </div>
+
+    <!-- Filtro multiselect -->
+    <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
+        <div class="d-flex flex-column flex-md-row mt-3 w-100">
             <div class="col-10">
                 <select id="filterMultipleSelector" class="form-select" multiple>
                     <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
@@ -55,13 +59,8 @@
                     <option value="material_sin_compra">Material sin compra</option>
                 </select>
             </div>
-            <button class="col-2 btn btn-primary mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
+            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
         </div>
-    </div>
-
-    <!-- Paginación a la derecha -->
-    <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-        <div class="pagination-container" id="pagination-container"></div>
     </div>
 </div>
 
