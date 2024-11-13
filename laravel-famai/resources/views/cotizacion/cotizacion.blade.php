@@ -221,6 +221,41 @@
             </td>
         </tr>
     </table>
+    {{-- table de cabecera de factura --}}
+    <table class="table-factura-cabecera">
+        <tr>
+            <td>
+                <div class="info-row">
+                    <span class="label">FECH. ENTREGA:</span>
+                    <span class="value"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">FECH. VALIDEZ:</span>
+                    <span class="value"></span>
+                </div>
+            </td>
+            <td>
+                <div class="info-row">
+                    <span class="label">MONEDA:</span>
+                    <span class="value"></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">FORMA DE PAGO:</span>
+                    <span class="value"></span>
+                </div>
+            </td>
+            <td>
+                <div class="info-row">
+                    <span class="label">Elaborado por:</span>
+                    <span class="value">{{$trabajador ? $trabajador['tra_nombre']: ''}}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">ACTIVO:</span>
+                    <span class="value">Activo</span>
+                </div>
+            </td>
+        </tr>
+    </table>
     {{-- Detalle de factura --}}
     <table class="table-detalle-factura">
         <thead>

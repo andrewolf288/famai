@@ -17,6 +17,7 @@ use App\Helpers\DateHelper;
 use App\OrdenCompraDetalle;
 use App\OrdenInternaMaterialesAdjuntos;
 use App\Producto;
+use App\Trabajador;
 use App\Unidad;
 use Illuminate\Support\Facades\Storage;
 
@@ -25,8 +26,8 @@ class OrdenInternaMaterialesController extends Controller
 
     public function index(Request $request)
     {
-        $pageSize = $request->input('page_size', 10);
-        $page = $request->input('page', 1);
+        // $pageSize = $request->input('page_size', 10);
+        // $page = $request->input('page', 1);
         $ordenTrabajo = $request->input('odt_numero', null);
         $tipoProceso = $request->input('oic_tipo', null);
         $almID = $request->input('alm_id', '01_AQPAG');
@@ -135,12 +136,14 @@ class OrdenInternaMaterialesController extends Controller
         // ordenar de formar descendiente
         $query->orderBy('odm_feccreacion', 'desc');
 
-        $detalleMateriales = $query->paginate($pageSize, ['*'], 'page', $page);
-        return response()->json([
-            'message' => 'Se listan los materiales de la orden interna',
-            'data' => $detalleMateriales->items(),
-            'count' => $detalleMateriales->total()
-        ]);
+        return response($query->get());
+
+        // $detalleMateriales = $query->paginate($pageSize, ['*'], 'page', $page);
+        // return response()->json([
+        //     'message' => 'Se listan los materiales de la orden interna',
+        //     'data' => $detalleMateriales->items(),
+        //     'count' => $detalleMateriales->total()
+        // ]);
     }
 
     public function indexValidacionCodigo(Request $request)
@@ -776,11 +779,16 @@ class OrdenInternaMaterialesController extends Controller
     // EXPORTAR EN PDF COTIZACION
     public function exportPDFCotizacion(Request $request)
     {
+        $user = auth()->user();
         $proveedor = $request->input('proveedor', null);
         $detalleMateriales = $request->input('detalle_materiales', []);
 
+        // buscamos informacion de trabajador
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
         $data = [
             'proveedor' => $proveedor,
+            'trabajador' => $trabajador,
             'detalleMateriales' => $detalleMateriales,
             'fechaActual' => DateHelper::parserFechaActual(),
             'url_cotizacion' => null

@@ -44,12 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Realizar la solicitud de login
-            const {data} = await axios.post('http://localhost:8080/api/auth/login', formatData)
+            const {data} = await axios.post(`${config.BACK_URL}/auth/login`, formatData)
             const {access_token} = data
             const payload = parseJwt(access_token)
             localStorage.setItem('authToken', access_token)
             // realizamos una peticion para traer la informacion de modulos admitidos
-            const {data: modulos} = await axios.get(`http://localhost:8080/api/findModulosByRol/${payload.rol}`)
+            const {data: modulos} = await axios.get(`${config.BACK_URL}/findModulosByRol/${payload.rol}`)
 
             const result = {
                 maestros: [],
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             localStorage.setItem('modulos', JSON.stringify(result))
 
-            window.location.href = '/logistica'
+            window.location.href = `/${config.XAMPP_CARPET}`
         } catch (error) {
             console.log(error) // Manejar errores de la solicitud
             const {data} = error.response
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Funcion para regresar a la pagina de inicio en caso este logeado
     const returnNoAccess = () => {
         if (isAuthenticated()) {
-            window.location.href = '/logistica'
+            window.location.href = `/${config.XAMPP_CARPET}`
         }
     }
 

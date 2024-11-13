@@ -215,6 +215,41 @@
             </td>
         </tr>
     </table>
+    {{-- table de cabecera de factura --}}
+    <table class="table-factura-cabecera">
+        <tr>
+            <td>
+                <div class="info-row">
+                    <span class="label">FECH. ENTREGA:</span>
+                    <span class="value">{{ $coc_fechaentrega ? DateTime::createFromFormat('Y-m-d', $coc_fechaentrega)->format('d/m/Y'): '' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">FECH. VALIDEZ:</span>
+                    <span class="value">{{ $coc_fechavalidez ? DateTime::createFromFormat('Y-m-d', $coc_fechavalidez)->format('d/m/Y'): '' }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="info-row">
+                    <span class="label">MONEDA:</span>
+                    <span class="value">{{ $moneda['mon_descripcion'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">FORMA DE PAGO:</span>
+                    <span class="value">{{ $coc_formapago }}</span>
+                </div>
+            </td>
+            <td>
+                <div class="info-row">
+                    <span class="label">Elaborado por:</span>
+                    <span class="value">{{$solicitante ? $solicitante['tra_nombre']: ''}}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">ACTIVO:</span>
+                    <span class="value">Activo</span>
+                </div>
+            </td>
+        </tr>
+    </table>
     {{-- Detalle de factura --}}
     <table class="table-detalle-factura">
         <thead>

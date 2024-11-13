@@ -1,13 +1,8 @@
 $(document).ready(() => {
-    // abort controller
     let abortController
-
-    // variables para el manejo de datatable
-    let dataTable;
-    const dataContainer = $('#data-container')
-
     // URL ENDPOINT
     const apiURL = '/detalleMaterialesOrdenInterna'
+    const apiRecursosURL = 'http://localhost:8080/storage/'
 
     // referencias de filtros
     const filterSelector = $('#filter-selector')
@@ -15,6 +10,9 @@ $(document).ready(() => {
     const filterButton = $('#filter-button')
     const filterFechas = $('#filter-dates')
     const filterMultiselect = $('#filtermultiselect-button')
+
+    // manejador de datos seleccionado
+    const selectedRows = new Map()
 
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
@@ -30,146 +28,80 @@ $(document).ready(() => {
         responsive: true,
         paging: false,
         searching: false,
-        info: true,
+        info: false,
         columnDefs: [
             {
-                targets: 0,
+                targets: [0, 1],
                 orderable: false,
-            },
-            {
-                orderable: false,
-                render: DataTable.render.select(),
-                targets: 1,
-                className: 'form-check-input'
             }
-        ],
-        select: {
-            style: 'multi',
-            selector: 'td.form-check-input'
-        },
-        order: [[2, 'asc']],
+        ]
     }
 
     // gestion de multiselect
+    // declaracion de multiselect
     $('select[multiple]').multiselect()
 
     // Inicializacion de data table
-    async function initDataTable(URL = apiURL) {
-        // verificamos que no se haya inicializado el datatable
-        if ($.fn.DataTable.isDataTable(dataContainer)) {
-            dataContainer.DataTable().destroy();
-        }
-
+    function initDataTable(data) {
         // vaciamos la lista
         $('#data-container-body').empty()
+        // recorremos la lista
+        data.forEach((material, index) => {
+            // obtenemos los datos
+            const { producto, orden_interna_parte } = material
+            const { orden_interna } = orden_interna_parte
+            const { odt_numero, oic_tipo } = orden_interna
 
-        try {
-            const { data } = await client.get(URL)
-            data.forEach((material, index) => {
-                // obtenemos los datos
-                const { producto, orden_interna_parte } = material
-                const { orden_interna } = orden_interna_parte
-                const { odt_numero, oic_tipo } = orden_interna
+            const rowItem = document.createElement('tr')
+            rowItem.innerHTML = `
+                <td></td>
+                <td class="text-center">
+                <input type="checkbox" style="width: 25px; height: 25px; border: 2px solid black;" class="form-check-input row-select" ${selectedRows.has(material.odm_id) ? 'checked' : ''}/>
+                </td>
+                <td class="text-center">
+                    ${oic_tipo}
+                </td>
+                <td>${odt_numero || 'N/A'}</td>
+                <td>${parseDate(material.odm_feccreacion)}</td>
+                <td>${material.odm_estado}</td>
+                <td class="text-center">
+                    ${material.odm_tipo == 1 ? 'R' : 'A'}
+                </td>
+                <td>${producto?.pro_codigo || 'N/A'}</td>
+                <td>${material.odm_descripcion}</td>
+                <td>${material.odm_observacion || 'N/A'}</td>
+                <td class="text-center">${material.odm_cantidad}</td>
+                <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
+                <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-cotizado" data-detalle="${material.odm_id}">Cotizaciones</button>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-ordenado" data-detalle="${material.odm_id}">Ordenes de compra</button>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-reservado">0.00</button>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-atendido">0.00</button>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-presupuesto" data-notapresupuesto="${material.odm_notapresupuesto}" data-adjuntopresupuesto="${material.odm_adjuntopresupuesto}" data-detalle="${material.odm_id}">Presupuesto</button>
+                </td>
+            `
+            // Añadimos el evento `change` al checkbox
+            const checkbox = rowItem.querySelector('.row-select');
+            checkbox.addEventListener('change', function () {
+                const isChecked = this.checked; // Verificamos si está marcado o no
+                seleccionarRowDetalle(material, isChecked); // Pasamos `material` y si está seleccionado
+            });
 
-                const rowItem = document.createElement('tr')
-                rowItem.innerHTML = `
-                    <td>
-                        <input type="hidden" value="${material.odm_id}"/>
-                    </td>
-                    <td></td>
-                    <td class="text-center">
-                        ${oic_tipo}
-                    </td>
-                    <td>${odt_numero || 'N/A'}</td>
-                    <td>${parseDate(material.odm_feccreacion)}</td>
-                    <td>${material.odm_estado}</td>
-                    <td class="text-center">
-                        ${material.odm_tipo == 1 ? 'R' : 'A'}
-                    </td>
-                    <td>${producto?.pro_codigo || 'N/A'}</td>
-                    <td>${material.odm_descripcion}</td>
-                    <td>${material.odm_observacion || 'N/A'}</td>
-                    <td class="text-center">${material.odm_cantidad}</td>
-                    <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
-                    <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
-                    <td>
-                        <button class="btn btn-primary btn-historico" data-historico="${material.odm_id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                                <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                                <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                            </svg>
-                        </button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-cotizado" data-detalle="${material.odm_id}">Cotizaciones</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-ordenado" data-detalle="${material.odm_id}">Ordenes de compra</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-reservado">0.00</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-atendido">0.00</button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-presupuesto" data-notapresupuesto="${material.odm_notapresupuesto}" data-adjuntopresupuesto="${material.odm_adjuntopresupuesto}" data-detalle="${material.odm_id}">Presupuesto</button>
-                    </td>
-                `
-                $('#data-container-body').append(rowItem)
-            })
-
-            // inicializamos el datatable
-            dataTable = dataContainer.DataTable(dataTableOptions)
-        } catch (error) {
-            console.log(error)
-            alert('Error al cargar la data')
-        }
+            $('#data-container-body').append(rowItem)
+        })
     }
-
-    // ------------ INCIIALIZAMOS EL DATATABLE ------------
-    initDataTable()
-
-    // ------------ ADMINISTRACION DE FILTROS ---------------
-    // filter fechas
-    filterFechas.on('click', () => {
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        initDataTable(filteredURL)
-    })
-
-    // filter input
-    filterButton.on('click', () => {
-        const filterField = filterSelector.val().trim()
-        const filterValue = filterInput.val().trim()
-        let filteredURL = apiURL
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
-        }
-        initDataTable(filteredURL)
-    })
-
-    // filtro multi select
-    filterMultiselect.on('click', async () => {
-        const filters = $('select[multiple]').val()
-        if (filters.length === 0) {
-            alert('No se ha seleccionado ningun filtro')
-            return
-        }
-        const fecha_desde = transformarFecha($('#fechaDesde').val())
-        const fecha_hasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}`
-
-        initDataTable(filteredURL)
-    })
 
     // ------------- GESTION DE RESERVACION -------------
     $("#data-container-body").on('click', '.btn-reservado', function () {
@@ -272,7 +204,7 @@ $(document).ready(() => {
 
         if (adjuntopresupuesto) {
             $("#linkPresupuestoAdjunto")
-                .attr('href', `${config.BACK_STORAGE_URL}${adjuntopresupuesto}`)
+                .attr('href', `${apiRecursosURL}${adjuntopresupuesto}`)
                 .text('Ver archivo adjunto')
                 .off('click')
                 .on('click', function (e) {
@@ -325,7 +257,7 @@ $(document).ready(() => {
             // cerramos el modal
             const loadModalPresupuesto = bootstrap.Modal.getInstance(document.getElementById('presupuestoModal'))
             loadModalPresupuesto.hide()
-            // initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
+            initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
         } catch (error) {
             console.log(error)
             alert('Error al cambiar presupuesto')
@@ -333,6 +265,7 @@ $(document).ready(() => {
     })
 
     // ------------------ GESTION DE RESPONSABLE -------------------
+
     $("#data-container-body").on('click', '.btn-responsable', async function () {
         // obtenemos el valor del id del detalle de material
         const idDetalleMaterial = $(this).data('detalle')
@@ -382,15 +315,72 @@ $(document).ready(() => {
             await client.put(`/ordeninternamateriales/responsable/${idDetalleMaterial}`, formatData)
             const loadModalResponsable = bootstrap.Modal.getInstance(document.getElementById('responsableModal'))
             loadModalResponsable.hide()
-            // initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
+            initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
         } catch (error) {
             console.log(error)
             alert('Error al cambiar responsable')
         }
     })
 
-    // -------------- GESTION DE EXPORTACIONES -----------------
-    // exportacion de excel de datos
+    // -------------- ACCIONES MASIVAS ----------------
+    function seleccionarRowDetalle(material, isChecked) {
+        if (isChecked) {
+            selectedRows.set(material.odm_id, material)
+        } else {
+            selectedRows.delete(material.odm_id)
+        }
+        console.log(selectedRows)
+    }
+
+    filterFechas.on('click', () => {
+        const fechaDesde = transformarFecha($('#fechaDesde').val())
+        const fechaHasta = transformarFecha($('#fechaHasta').val())
+        let filteredURL = `${apiURL}?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+    })
+
+    filterButton.on('click', () => {
+        // seleccionamos el valor del selector
+        const filterField = filterSelector.val().trim()
+        // seleccionamos el valor del criterio de busqueda
+        const filterValue = filterInput.val().trim()
+
+        let filteredURL = apiURL
+
+        // primero aplicamos el filtro de fechas
+        const fechaDesde = transformarFecha($('#fechaDesde').val())
+        const fechaHasta = transformarFecha($('#fechaHasta').val())
+        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+
+        // debemos adjuntar el filtro de busqueda por criterio
+        if (filterField.length !== 0 && filterValue.length !== 0) {
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+        }
+
+        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+    })
+
+    // filtro multi select
+    filterMultiselect.on('click', async () => {
+        const filters = $('select[multiple]').val()
+
+        if(filters.length === 0) {
+            alert('No se ha seleccionado ningun filtro')
+            return
+        }
+
+        const fecha_desde = transformarFecha($('#fechaDesde').val())
+        const fecha_hasta = transformarFecha($('#fechaHasta').val())
+        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}`
+
+        console.log(filteredURL)
+        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+    })
+
+    // inicializamos la paginacion con datatable
+    initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions, 50)
+
+    // exportamos a excel
     $('#btn-export-data').click(async function () {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
@@ -485,52 +475,45 @@ $(document).ready(() => {
 
     // --------------- MANEJO DE COTIZACIONES --------------
     $('#btn-cotizar-materiales').on('click', async (event) => {
-        const filasSeleccionadas = dataTable.rows({ selected: true }).nodes();
-        const valoresSeleccionados = [];
-        $(filasSeleccionadas).each(function (index, node) {
-            const valor = $(node).find('input[type="hidden"]').val(); // Extrae el valor del checkbox
-            valoresSeleccionados.push(valor);
-        });
-        console.log(valoresSeleccionados);
-        // let content = ''
-        // // reset de los valores de ingreso
-        // limpiarLista()
-        // $('#proveedoresInput').val('')
-        // $('#tipo-proveedor').val('')
-        // $('#tbl-cotizaciones-proveedores tbody').empty()
-        // $('#tbl-cotizaciones-materiales tbody').empty()
-        // // debemos formar los materiales seleccionados
-        // selectedRows.forEach((value, key) => {
-        //     content = `
-        //         <tr data-id="${value.odm_id}">
-        //             <td>${value.orden_interna_parte?.orden_interna?.odt_numero}</td>
-        //             <td>${value.producto?.pro_codigo ?? ''}</td>
-        //             <td class="unidad-detalle">${value.producto?.unidad?.uni_codigo ?? ''}</td>
-        //             <td>
-        //                 <input type="text" class="form-control descripcion-detalle" value="${value.odm_descripcion ?? ''}"/>
-        //             </td>
-        //             <td>
-        //                 <input type="text" class="form-control observacion-detalle" value="${value.odm_observacion ?? ''}"/>
-        //             </td>
-        //             <td>
-        //                 <input type="number" class="form-control cantidad-detalle" value="${value.odm_cantidad}"/>
-        //             </td>
-        //             <td>
-        //                 <div class="d-flex justify-content-around">
-        //                     <button class="btn btn-sm btn-danger btn-delete-detalle-material">
-        //                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-        //                             <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-        //                         </svg>
-        //                     </button>
-        //                 </div>
-        //             </td>
-        //         </tr>
-        //     `
-        //     $('#tbl-cotizaciones-materiales tbody').append(content)
-        // })
-        // // abrimos el modal
-        // const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
-        // dialogCotizacion.show()
+        let content = ''
+        // reset de los valores de ingreso
+        limpiarLista()
+        $('#proveedoresInput').val('')
+        $('#tipo-proveedor').val('')
+        $('#tbl-cotizaciones-proveedores tbody').empty()
+        $('#tbl-cotizaciones-materiales tbody').empty()
+        // debemos formar los materiales seleccionados
+        selectedRows.forEach((value, key) => {
+            content = `
+                <tr data-id="${value.odm_id}">
+                    <td>${value.orden_interna_parte?.orden_interna?.odt_numero}</td>
+                    <td>${value.producto?.pro_codigo ?? ''}</td>
+                    <td class="unidad-detalle">${value.producto?.unidad?.uni_codigo ?? ''}</td>
+                    <td>
+                        <input type="text" class="form-control descripcion-detalle" value="${value.odm_descripcion ?? ''}"/>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control observacion-detalle" value="${value.odm_observacion ?? ''}"/>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control cantidad-detalle" value="${value.odm_cantidad}"/>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-around">
+                            <button class="btn btn-sm btn-danger btn-delete-detalle-material">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `
+            $('#tbl-cotizaciones-materiales tbody').append(content)
+        })
+        // abrimos el modal
+        const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
+        dialogCotizacion.show()
     })
 
     $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-delete-detalle-material', (event) => {

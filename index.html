@@ -8,12 +8,12 @@
     <base href="/logistica/" />
     <link href="assets/css/all.min.css" rel="stylesheet">
     <link href="estilos/nav-bar.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/v/dt/dt-2.0.8/datatables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <!-- DataTable CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.bootstrap5.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.2/css/buttons.dataTables.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
     <!-- ESTILOS GENERALES -->
@@ -24,6 +24,11 @@
     <link rel="stylesheet" href="assets/css/jquery.multiselect.css">
     <!-- ESTILOS DE ALERTAS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <!-- CHECKBOXES DATA TABLE -->
+    <!-- <link type="text/css" href="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/css/dataTables.checkboxes.css" rel="stylesheet" /> -->
+    <script rel="stylesheet" href="https://cdn.datatables.net/select/2.1.0/css/select.dataTables.css"></script>
+    <script rel="stylesheet"
+        href="https://cdn.datatables.net/fixedcolumns/5.0.4/css/fixedColumns.dataTables.css"></script>
     <!-- ICON -->
     <link rel="icon" href="assets/images/cropped-famai-icon-32x32.png" type="image/png">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -115,7 +120,8 @@
                 <div class="modal-body">
                     <div class="mb-3 d-flex justify-content-start">
                         <button class="btn btn-sm btn-primary me-2" id="btn-mostrar-todas-notificaciones">Todos</button>
-                        <button class="btn btn-sm btn-primary" id="btn-mostrar-no-leidas-notificaciones">No leidos</button>
+                        <button class="btn btn-sm btn-primary" id="btn-mostrar-no-leidas-notificaciones">No
+                            leidos</button>
                     </div>
                     <!-- Lista donde se cargarán las notificaciones -->
                     <ul class="list-group" id="data-notificaciones">
@@ -129,6 +135,8 @@
     </div>
 
     <!-- SECCION DE SCRIPTS -->
+    <!-- Variables de configuracion -->
+    <script src="scripts/config.js"></script>
     <!-- JQUERY -->
     <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/jquery-3.7.1.min.js"></script>
@@ -146,9 +154,9 @@
     <script src="assets/js/navigo.min.js"></script>
     <script src="scripts/app.js"></script>
     <!-- DataTable JS -->
-    <script src="https://cdn.datatables.net/v/dt/dt-2.0.8/datatables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+    <!-- <script src="https://cdn.datatables.net/v/dt/dt-2.1.8/datatables.min.js"></script> -->
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
     <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js"></script>
     <script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.bootstrap5.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.js"></script>
@@ -165,11 +173,16 @@
     <!-- script de notificaciones -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="scripts/notificaciones/notificaciones.js"></script>
+    <!-- Checkboxes Data Table -->
+    <script src="https://cdn.datatables.net/fixedcolumns/5.0.4/js/dataTables.fixedColumns.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/5.0.4/js/fixedColumns.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/select/2.1.0/js/dataTables.select.js"></script>
+    <script src="https://cdn.datatables.net/select/2.1.0/js/select.dataTables.js"></script>
+    <!-- <script type="text/javascript" src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/dahttps://gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/taTables.checkboxes.min.js"></script> -->
 </body>
 <script>
     let version = '241107.03';
     document.getElementById('app-version').textContent = version;
-
 </script>
 
 </html>

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Crear instancia de Navigo
-    const router = new Navigo('/logistica', {hash: false})
+    const router = new Navigo(`/${config.XAMPP_CARPET}`, {hash: false})
 
     // Función para cargar contenido en el elemento #content
     const loadContent = (path, scriptURL) => {

@@ -2,7 +2,6 @@ $(document).ready(function () {
     const url = window.location.href;
     const urlParams = new URLSearchParams(new URL(url).search);
     const coc_id = urlParams.get('coc_id');
-    const API_URL = 'http://localhost:8080/api'
 
     $("#fechaEntregaPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -24,7 +23,7 @@ $(document).ready(function () {
 
     async function traerInformacionCotizacion() {
         try {
-            const { data } = await axios.get(`${API_URL}/cotizacion-proveedor/${coc_id}`)
+            const { data } = await axios.get(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`)
             const { proveedor, detalle_cotizacion, coc_estado, coc_total, coc_cotizacionproveedor, coc_notas, coc_correocontacto, coc_fechaentrega, coc_fechavalidez, mon_codigo, coc_formapago } = data
             console.log(data)
             $("#documentoProveedorInput").val(`${proveedor.tdo_codigo}-${proveedor.prv_nrodocumento}`)
@@ -315,7 +314,7 @@ $(document).ready(function () {
                 detalle_cotizacion: formatDetalleProductos
             }
             console.log(formatData)
-            const response = await axios.put(`${API_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
+            const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'
                 },

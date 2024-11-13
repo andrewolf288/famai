@@ -7,6 +7,7 @@ use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
 use App\Helpers\DateHelper;
 use App\OrdenInternaMateriales;
+use App\Trabajador;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -175,9 +176,18 @@ class CotizacionController extends Controller
                 $numero = intval($lastCotizacion->coc_numero) + 1;
             }
 
+            // buscamos informacion de trabajador
+            $tra_solicitante = null;
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+            if($trabajador){
+                $tra_solicitante = $trabajador->tra_id;
+            }
+
             $cotizacion = Cotizacion::create([
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $proveedor['prv_id'],
+                'tra_solicitante' => $tra_solicitante,
                 'coc_fechacotizacion' => Carbon::now()->format('Y-m-d'),
                 'coc_usucreacion' => $user->usu_codigo,
                 'coc_fecmodificacion' => null,
@@ -208,7 +218,7 @@ class CotizacionController extends Controller
             DB::commit();
 
             // retorna la generacion de un PDF
-            $API_URL = "http://localhost/famai";
+            $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
             $data = [
                 'proveedor' => $proveedor,
                 'detalleMateriales' => $detalleMateriales,

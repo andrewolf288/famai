@@ -1,5 +1,4 @@
-const BASE_URL = 'http://localhost:8080/api'
-const BASE_URL_SOTRAGE = 'http://localhost:8080/storage/'
+const BASE_URL = config.BACK_URL
 
 // funcion para obtener token de acceso
 function getCurrentAccessToken(){
