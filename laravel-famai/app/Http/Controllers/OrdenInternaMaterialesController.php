@@ -42,9 +42,7 @@ class OrdenInternaMaterialesController extends Controller
                 'producto.unidad',
                 'ordenInternaParte.ordenInterna'
             ]
-        )->where('odm_tipo', "!=", 3)
-            ->where("odm_tipo", "!=", 4)
-            ->where("odm_tipo", "!=", 5);
+        )->whereNotIn('odm_tipo', [3, 4, 5]);
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -89,25 +87,28 @@ class OrdenInternaMaterialesController extends Controller
                     // material sin compra
                     if ($palabra === 'material_sin_compra') {
                         $q->whereNotNull('pro_id');
-                        $q->whereDoesntHave('producto', function ($subquery) use ($almID) {
+                        $q->whereDoesntHave('producto', function ($subquery) {
+                            // Subconsulta para la última fecha de compra en OPDN
                             $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
                                 ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
                                 ->select(DB::raw('MAX(OPDN.DocDate)'))
                                 ->whereColumn('PDN1.ItemCode', '=', 'producto.pro_codigo');
-
+    
+                            // Subconsulta para la última fecha de ingreso en OIGN
                             $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
                                 ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
                                 ->select(DB::raw('MAX(OIGN.DocDate)'))
                                 ->whereColumn('IGN1.ItemCode', '=', 'producto.pro_codigo');
-
+    
+                            // Agregar la lógica de CASE WHEN en la subconsulta
                             $subquery->whereRaw("
                                 CASE
                                     WHEN ({$subconsultaOPDN->toSql()}) IS NULL
                                     THEN ({$subconsultaOIGN->toSql()})
                                     ELSE ({$subconsultaOPDN->toSql()})
                                 END IS NULL")
-                                ->mergeBindings($subconsultaOPDN)
-                                ->mergeBindings($subconsultaOIGN);
+                                ->mergeBindings($subconsultaOPDN)  // Asegura que las uniones se resuelvan
+                                ->mergeBindings($subconsultaOIGN); // Mantiene las uniones para la subconsulta secundaria
                         });
                     }
                 }
