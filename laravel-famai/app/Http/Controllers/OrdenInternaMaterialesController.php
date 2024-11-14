@@ -87,29 +87,36 @@ class OrdenInternaMaterialesController extends Controller
                     // material sin compra
                     if ($palabra === 'material_sin_compra') {
                         $q->whereNotNull('pro_id');
-                        $q->whereDoesntHave('producto', function ($subquery) {
-                            // Subconsulta para la última fecha de compra en OPDN
+                        $q->orderBy('odm_feccreacion', 'desc');
+
+                        $data = $q->get();
+                        $dataFiltrada = [];
+
+                        foreach ($data as $item) {
+                            $productoCodigo = $item->producto->pro_codigo;
+
                             $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
                                 ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
-                                ->select(DB::raw('MAX(OPDN.DocDate)'))
-                                ->whereColumn('PDN1.ItemCode', '=', 'producto.pro_codigo');
-    
-                            // Subconsulta para la última fecha de ingreso en OIGN
-                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
-                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
-                                ->select(DB::raw('MAX(OIGN.DocDate)'))
-                                ->whereColumn('IGN1.ItemCode', '=', 'producto.pro_codigo');
-    
-                            // Agregar la lógica de CASE WHEN en la subconsulta
-                            $subquery->whereRaw("
-                                CASE
-                                    WHEN ({$subconsultaOPDN->toSql()}) IS NULL
-                                    THEN ({$subconsultaOIGN->toSql()})
-                                    ELSE ({$subconsultaOPDN->toSql()})
-                                END IS NULL")
-                                ->mergeBindings($subconsultaOPDN)  // Asegura que las uniones se resuelvan
-                                ->mergeBindings($subconsultaOIGN); // Mantiene las uniones para la subconsulta secundaria
-                        });
+                                ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
+                                ->where('PDN1.ItemCode', '=', $productoCodigo)
+                                ->first();
+
+                            // Comprobar si ultima_fecha_compra es null
+                            if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
+                                $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
+                                    ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
+                                    ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
+                                    ->where('IGN1.ItemCode', '=', $productoCodigo)
+                                    ->first();
+
+                                if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
+                                    // Si no hay fecha de compra en ninguna de las dos tablas, agregar a la lista filtrada
+                                    $dataFiltrada[] = $item;
+                                }
+                            }
+                        }
+
+                        return response($dataFiltrada);
                     }
                 }
             });
