@@ -587,7 +587,15 @@ class OrdenInternaMaterialesController extends Controller
                     ->where('T1.WhsCode', '=', '01_AQPAG')
                     ->where('T0.validFor', '=', 'Y')
                     ->groupBy(
-                        'T1.AvgPrice'
+                        'T0.ItemCode',
+                        'T0.ItemName',
+                        'T1.WhsCode',
+                        'T0.CntUnitMsr',
+                        'T1.AvgPrice',
+                        'T0.validFor',
+                        'T0.InvntItem',
+                        'T0.frozenFor',
+                        'T1.ItemCode '
                     )
                     ->first();
 
