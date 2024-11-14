@@ -260,4 +260,31 @@ class OrdenCompraController extends Controller
 
         return response()->json('Se aprobaron las ordenes de compra', 200);
     }
+
+    // funcion para traer orden de compra by producto
+    public function findOrdenCompraByProducto(Request $request)
+    {
+        $pageSize = $request->input('page_size', 10);
+        $page = $request->input('page', 1);
+        $producto = $request->input('pro_id');
+
+        $query =OrdenCompraDetalle::with(['detalleMaterial.producto', 'ordenCompra']);
+
+        if($producto !== null) {
+            $producto = (int) $producto;
+            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
+                $q->where('pro_id', $producto);
+            });
+        }
+
+        $query->orderBy('occ_fecha', 'desc');
+
+        $ordencompraDetalle = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        return response()->json([
+            'message' => 'Se listan las ordenes de compra',
+            'data' => $ordencompraDetalle->items(),
+            'count' => $ordencompraDetalle->total()
+        ]);
+    }
 }

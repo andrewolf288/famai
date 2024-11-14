@@ -93,7 +93,7 @@ $(document).ready(() => {
                     <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                     <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>
                     <td class="text-center">
-                        <button class="btn btn-primary btn-historico" data-historico="${material.odm_id}">
+                        <button class="btn btn-primary btn-historico" data-historico="${producto?.pro_id || null}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                 <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
                                 <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
@@ -169,6 +169,105 @@ $(document).ready(() => {
         let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}`
 
         initDataTable(filteredURL)
+    })
+
+    // ------------- GESTION DE HISTORICO --------------
+
+    function initHistoricoCotizaciones(data) {
+        $('#historico-cotizaciones-container tbody').empty()
+        data.forEach(detalle => {
+            const { cotizacion } = detalle
+            const { proveedor } = cotizacion
+            const rowItem = document.createElement('tr')
+            rowItem.classList.add(`${cotizacion.coc_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
+
+            rowItem.innerHTML = `
+            <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
+            <td>${cotizacion.coc_numero}</td>
+            <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
+            <td>
+                <span class="badge bg-primary">
+                    ${cotizacion.coc_estado}
+                </span>
+            </td>
+            <td>${proveedor.prv_nrodocumento}</td>
+            <td>${proveedor.prv_nombre}</td>
+            <td>${detalle.cod_descripcion}</td>
+            <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
+            <td class="text-center">${detalle.cod_preciounitario || 'N/A'}</td>
+            <td class="text-center">${detalle.cod_total || 'N/A'}</td>
+            <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
+            `
+            $('#historico-cotizaciones-container tbody').append(rowItem)
+        })
+    }
+
+    function initHistoricoOrdenCompra(data) {
+        $('#historico-ordenescompra-container tbody').empty()
+        data.forEach(detalle => {
+            const { orden_compra } = detalle
+            const { proveedor } = orden_compra
+            const rowItem = document.createElement('tr')
+            rowItem.classList.add(`${orden_compra.occ_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
+
+            rowItem.innerHTML = `
+            <td>${parseDateSimple(orden_compra.occ_fecha)}</td>
+            <td>${orden_compra.occ_numero}</td>
+            <td>
+                <span class="badge bg-primary">
+                    ${orden_compra.occ_estado}
+                </span>
+            </td>
+            <td>${proveedor.prv_nrodocumento}</td>
+            <td>${proveedor.prv_nombre}</td>
+            <td>${detalle.ocd_descripcion}</td>
+            <td class="text-center">${detalle.ocd_cantidad || 'N/A'}</td>
+            <td class="text-center">${detalle.ocd_preciounitario || 'N/A'}</td>
+            <td class="text-center">${detalle.ocd_total || 'N/A'}</td>
+            `
+            $('#historico-ordenescompra-container tbody').append(rowItem)
+        })
+    }
+
+    function initHistoricoByProducto(producto){
+        console.log(producto)
+
+        // debemos verificar que sea un material asignado
+        if (producto === null) {
+            alert("Este material no tiene un código asignado")
+            return
+        }
+
+        try {
+            const urlCotizacion = `/cotizacion-findByProducto?pro_id=${producto}`
+            initPagination(urlCotizacion,
+                initHistoricoCotizaciones,
+                dataTableOptions,
+                10,
+                "#historico-cotizaciones-container",
+                "#historico-cotizaciones-container-body",
+                "#pagination-container-historico-cotizacion")
+
+            const urlOrdenCompra = `/ordencompra-findByProducto?pro_id=${producto}`
+            initPagination(urlOrdenCompra, 
+                initHistoricoOrdenCompra, 
+                dataTableOptions,
+                10,
+                "#historico-ordenescompra-container",
+                "#historico-ordenescompra-container-body",
+                "#pagination-container-historico-ordencompra"
+            )
+        } catch (error) {
+            console.log(error)
+        }
+
+        const loadModalHistorico = new bootstrap.Modal(document.getElementById('historicoModal'))
+        loadModalHistorico.show()
+    }
+
+    $("#data-container-body").on('click', '.btn-historico', async function () {
+        const producto = $(this).data('historico')
+        initHistoricoByProducto(producto)
     })
 
     // ------------- GESTION DE RESERVACION -------------
@@ -492,7 +591,7 @@ $(document).ready(() => {
             valoresSeleccionados.push(valor);
         });
 
-        if(valoresSeleccionados.length === 0){
+        if (valoresSeleccionados.length === 0) {
             alert('Debe seleccionar al menos un material')
             return
         }
@@ -502,7 +601,7 @@ $(document).ready(() => {
         }
 
         try {
-            const {data} = await client.post('/detalleMaterialesOrdenInterna/materiales-cotizar',formatData)
+            const { data } = await client.post('/detalleMaterialesOrdenInterna/materiales-cotizar', formatData)
             let content = ''
             // reset de los valores de ingreso
             limpiarLista()
@@ -528,7 +627,7 @@ $(document).ready(() => {
                         </td>
                         <td>
                             <div class="d-flex justify-content-around">
-                                <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1">
+                                <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1" data-historico="${material.pro_id}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                         <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
                                         <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
@@ -549,7 +648,7 @@ $(document).ready(() => {
             // abrimos el modal
             const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
             dialogCotizacion.show()
-        } catch(error) {
+        } catch (error) {
             console.log(error)
             alert('Error al obtener información de cotización')
         }
@@ -558,6 +657,11 @@ $(document).ready(() => {
     $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-delete-detalle-material', (event) => {
         const $element = $(event.currentTarget).closest('tr')
         $element.remove()
+    })
+
+    $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-historico-detalle-material', async function() {
+        const producto = $(this).data('historico')
+        initHistoricoByProducto(producto)
     })
 
     $('#proveedoresInput').on('input', debounce(async function () {

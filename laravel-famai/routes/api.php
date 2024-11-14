@@ -319,6 +319,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
     Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
+    Route::get('cotizacion-findByProducto', [CotizacionController::class, 'findCotizacionByProducto']);
 });
 
 // rutas de detalle de cotizacion
@@ -340,6 +341,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
     Route::put('ordencompra/{id}', [OrdenCompraController::class, 'update']);
     Route::post('ordencompra/aprobar-masivo', [OrdenCompraController::class, 'aprobarMasivo']);
+    Route::get('ordencompra-findByProducto', [OrdenCompraController::class, 'findOrdenCompraByProducto']);
 });
 
 // rutas de ordendes de compra detalle

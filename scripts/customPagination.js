@@ -1,8 +1,15 @@
-function initPagination(URL, initDataTable, dataTableOptions = {}, pageSize = 10) {
-    const dataContainer = $('#data-container')
-    const dataContainerBody = $('#data-container-body')
+function initPagination(
+    URL,
+    initDataTable,
+    dataTableOptions = {},
+    pageSize = 10,
+    refDataContainer = '#data-container',
+    refDataContainerBody = '#data-container-body',
+    refDataPaginationContainer = '#pagination-container') {
+    const dataContainer = $(refDataContainer)
+    const dataContainerBody = $(refDataContainerBody)
 
-    $('#pagination-container').pagination({
+    $(refDataPaginationContainer).pagination({
         dataSource: URL,
         locator: 'data',
         totalNumberLocator: function (response) {

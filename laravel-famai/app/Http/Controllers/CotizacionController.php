@@ -6,7 +6,9 @@ use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
 use App\Helpers\DateHelper;
+use App\OrdenCompraDetalle;
 use App\OrdenInternaMateriales;
+use App\Producto;
 use App\Trabajador;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -27,10 +29,10 @@ class CotizacionController extends Controller
 
         $query = Cotizacion::with(['proveedor', 'moneda']);
 
-        if($coc_numero !== null){
+        if ($coc_numero !== null) {
             $query->where('coc_numero', $coc_numero);
         }
-        if($coc_estado !== null){
+        if ($coc_estado !== null) {
             $query->where('coc_estado', $coc_estado);
         }
 
@@ -180,7 +182,7 @@ class CotizacionController extends Controller
             $tra_solicitante = null;
             $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-            if($trabajador){
+            if ($trabajador) {
                 $tra_solicitante = $trabajador->tra_id;
             }
 
@@ -375,6 +377,13 @@ class CotizacionController extends Controller
 
             // Eliminamos los detalles de la cotización
             foreach ($cotizacion->detalleCotizacion as $detalle) {
+                $odm_id = $detalle->odm_id;
+                $material = OrdenInternaMateriales::find($odm_id);
+                $material->update([
+                    'odm_estado' => 'REQ',
+                    'odm_fecmodificacion' => Carbon::now()
+                ]);
+
                 $detalle->delete();
             }
 
@@ -461,5 +470,32 @@ class CotizacionController extends Controller
             DB::rollBack();
             return response()->json(['error' => 'Ocurrió un error al enviar la cotización'], 500);
         }
+    }
+
+    // funcion para traer cotizacion by producto
+    public function findCotizacionByProducto(Request $request)
+    {
+        $pageSize = $request->input('page_size', 10);
+        $page = $request->input('page', 1);
+        $producto = $request->input('pro_id');
+
+        $query = CotizacionDetalle::with(['cotizacion', 'detalleMaterial.producto']);
+
+        if($producto !== null) {
+            $producto = (int) $producto;
+            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
+                $q->where('pro_id', $producto);
+            });
+        }
+
+        $query->orderBy('coc_fechacotizacion', 'desc');
+
+        $cotizacionDetalle = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        return response()->json([
+            'message' => 'Se listan las cotizaciones',
+            'data' => $cotizacionDetalle->items(),
+            'count' => $cotizacionDetalle->total()
+        ]);
     }
 }

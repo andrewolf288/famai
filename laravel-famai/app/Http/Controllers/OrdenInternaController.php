@@ -182,7 +182,7 @@ class OrdenInternaController extends Controller
                     'odm_cantidad' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
-                    'odm_estado' => 'CRD',
+                    'odm_estado' => 'REQ',
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
                 ]);
@@ -558,7 +558,7 @@ class OrdenInternaController extends Controller
                         'odm_item' => $material['odm_item'],
                         'odm_observacion' => $material['odm_observacion'],
                         'odm_tipo' => $material['odm_tipo'],
-                        'odm_estado' => 'CRD',
+                        'odm_estado' => 'REQ',
                         'odm_usucreacion' => $user->usu_codigo,
                         'odm_fecmodificacion' => null
                     ]);
