@@ -94,11 +94,9 @@ class OrdenInternaMaterialesController extends Controller
                             $subquery = DB::connection('sqlsrv_secondary')
                                 ->table(DB::raw('OITM as T0'))
                                 ->join(DB::raw('OITW as T1'), 'T0.ItemCode', '=', 'T1.ItemCode')
-                                ->join(DB::raw('OILM as T2'), 'T0.ItemCode', '=', 'T2.ItemCode')
                                 ->select(DB::raw(1))
                                 ->whereColumn('T0.ItemCode', 'producto.pro_codigo')
                                 ->where('T1.WhsCode', '=', $almID)
-                                ->where('T2.LocCode', '=', $almID)
                                 ->where('T0.validFor', '=', 'Y')
                                 ->whereNull(DB::raw(
                                     "(CASE 
