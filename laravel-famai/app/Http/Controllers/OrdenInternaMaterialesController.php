@@ -65,6 +65,7 @@ class OrdenInternaMaterialesController extends Controller
             $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
         }
 
+
         // Procesar el parámetro multiselect
         if ($multifilter !== null) {
             // Separar el string por "OR" y crear un array con cada palabra
@@ -88,13 +89,13 @@ class OrdenInternaMaterialesController extends Controller
                     // material sin compra
                     if ($palabra === 'material_sin_compra') {
                         $q->whereNotNull('pro_id');
-                        $q->where(function ($subquery) use ($almID) {
+                        $q->doesntHave(function ($subquery) use ($almID) {
                             // Agrega prefijo a tablas para conexión secundaria
                             $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
                             $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
                             $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
                     
-                            $subquery->leftJoin(DB::raw(1)) // Solo necesitamos verificar la existencia
+                            $subquery->select(DB::raw(1)) // Solo necesitamos verificar la existencia
                                 ->from($oitmTable)
                                 ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
                                 ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
