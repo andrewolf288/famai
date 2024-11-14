@@ -585,6 +585,10 @@ class OrdenInternaMaterialesController extends Controller
                     ])
                     ->where('T0.ItemCode', '=', $codigoProducto)
                     ->where('T1.WhsCode', '=', '01_AQPAG')
+                    ->where('T0.validFor', '=', 'Y')
+                    ->groupBy(
+                        'T1.AvgPrice'
+                    )
                     ->first();
 
                     return [
