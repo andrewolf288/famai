@@ -366,25 +366,35 @@ Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotiz
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 
 Route::get('script-update', function () {
-
-    // $ordenes = OrdenInterna::all();
-
-    // foreach ($ordenes as $orden) {
-    //     $numero = $orden->oic_numero;
-
-    //     $queryBuilder = DB::connection('sqlsrv_andromeda')
-    //         ->table('OT_OrdenTrabajo as T1')
-    //         ->select('T1.FecAprobacion as oic_fechaaprobacion',
-    //         'T1.FecEntrega as oic_fechaentregaestimada',
-    //         'T1.FecEvaluacion as oic_fechaevaluacion')
-    //         ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $numero)
-    //         ->first();
-
-    //     if ($queryBuilder) {
-    //         $orden->oic_fechaaprobacion = $queryBuilder->oic_fechaaprobacion;
-    //         $orden->oic_fechaentregaestimada = $queryBuilder->oic_fechaentregaestimada;
-    //         $orden->oic_fechaevaluacion = $queryBuilder->oic_fechaevaluacion;
-    //         $orden->save();
-    //     }
-    // }
+    $pro_codigo = 'SU500706';
+    $subquery = DB::connection('sqlsrv_secondary')
+        ->table(DB::raw('OITM as T0'))
+        ->join(DB::raw('OITW as T1'), 'T0.ItemCode', '=', 'T1.ItemCode')
+        ->select(DB::raw(1))
+        ->where('T0.ItemCode', $pro_codigo)
+        ->where('T1.WhsCode', '=', '01_AQPAG')
+        ->where('T0.validFor', '=', 'Y')
+        ->whereNull(DB::raw(
+            "(CASE 
+                WHEN (
+                    SELECT MAX(OPDN.DocDate) 
+                    FROM OPDN 
+                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                    WHERE PDN1.ItemCode = T0.ItemCode
+                ) IS NULL 
+                THEN (
+                    SELECT MAX(OIGN.DocDate) 
+                    FROM OIGN 
+                    JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                    WHERE IGN1.ItemCode = T0.ItemCode
+                )
+                ELSE (
+                    SELECT MAX(OPDN.DocDate) 
+                    FROM OPDN 
+                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                    WHERE PDN1.ItemCode = T0.ItemCode
+                )
+            END)"
+        ));
+    print_r($subquery);
 });
