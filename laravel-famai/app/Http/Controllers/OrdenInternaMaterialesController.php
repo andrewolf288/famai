@@ -90,15 +90,12 @@ class OrdenInternaMaterialesController extends Controller
                     if ($palabra === 'material_sin_compra') {
                         $q->whereNotNull('pro_id');
                         $q->whereDoesntHave('producto', function ($subquery) use ($almID) {
-                            // Agrega prefijo a tablas para conexión secundaria
-                            $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'dbo.OITM as T0';
-                            $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'dbo.OITW as T1';
-                            $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'dbo.OILM as T2';
-                    
-                            $subquery->select(DB::raw(1)) // Solo necesitamos verificar la existencia
-                                ->from($oitmTable)
-                                ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
-                                ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
+                            // Usamos la conexión secundaria desde el principio para la subconsulta
+                            $subquery = DB::connection('sqlsrv_secondary')
+                                ->table(DB::raw('OITM as T0'))
+                                ->join(DB::raw('OITW as T1'), 'T0.ItemCode', '=', 'T1.ItemCode')
+                                ->join(DB::raw('OILM as T2'), 'T0.ItemCode', '=', 'T2.ItemCode')
+                                ->select(DB::raw(1))
                                 ->whereColumn('T0.ItemCode', 'producto.pro_codigo')
                                 ->where('T1.WhsCode', '=', $almID)
                                 ->where('T2.LocCode', '=', $almID)
@@ -125,6 +122,13 @@ class OrdenInternaMaterialesController extends Controller
                                         )
                                     END)"
                                 ));
+                    
+                            // Agregamos la subconsulta en whereExists para verificar existencia
+                            $subquery->whereExists(function ($query) use ($subquery) {
+                                $query->select(DB::raw(1))
+                                    ->from(DB::raw('(' . $subquery->toSql() . ') as Subquery'))
+                                    ->mergeBindings($subquery);
+                            });
                         });
                     }
                 }
