@@ -430,7 +430,9 @@ class OrdenInternaMaterialesController extends Controller
                     'ordenInternaParte.ordenInterna',
                     'usuarioCreador'
                 ]
-            );
+            )->where('odm_tipo', "!=", 3)
+                ->where("odm_tipo", "!=", 4)
+                ->where("odm_tipo", "!=", 5);
 
             // filtro de orden de trabajo
             if ($ordenTrabajo !== null) {
@@ -522,7 +524,9 @@ class OrdenInternaMaterialesController extends Controller
                     'ordenInternaParte.ordenInterna',
                     'ordenInternaParte.parte',
                 ]
-            );
+            )->where('odm_tipo', "!=", 3)
+                ->where("odm_tipo", "!=", 4)
+                ->where("odm_tipo", "!=", 5);
 
             // filtro de orden de trabajo
             if ($ordenTrabajo !== null) {
@@ -550,18 +554,18 @@ class OrdenInternaMaterialesController extends Controller
             //     ];
             // });
 
-            $productoConInformacionCompras = $ordenesMateriales->map(function ($material){
+            $productoConInformacionCompras = $ordenesMateriales->map(function ($material) {
                 $codigoProducto = $material->producto ? $material->producto->pro_codigo : null;
                 // si es un producto diferente de null
-                if($codigoProducto !== null){
+                if ($codigoProducto !== null) {
                     $compraInfo = DB::connection('sqlsrv_secondary')
-                    ->table('OITM as T0')
-                    ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
-                    ->select([
-                        'T1.AvgPrice',
-                        DB::raw('MAX(T1.OnOrder) as stock'),
-                        DB::raw(
-                            "(CASE 
+                        ->table('OITM as T0')
+                        ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
+                        ->select([
+                            'T1.AvgPrice',
+                            DB::raw('MAX(T1.OnOrder) as stock'),
+                            DB::raw(
+                                "(CASE 
                                 WHEN (
                                     SELECT MAX(OPDN.DocDate) 
                                     FROM OPDN 
@@ -581,23 +585,23 @@ class OrdenInternaMaterialesController extends Controller
                                     WHERE PDN1.ItemCode = T0.ItemCode
                                 )
                                 END) as UltimaFechaIngreso"
+                            )
+                        ])
+                        ->where('T0.ItemCode', '=', $codigoProducto)
+                        ->where('T1.WhsCode', '=', '01_AQPAG')
+                        ->where('T0.validFor', '=', 'Y')
+                        ->groupBy(
+                            'T0.ItemCode',
+                            'T0.ItemName',
+                            'T1.WhsCode',
+                            'T0.CntUnitMsr',
+                            'T1.AvgPrice',
+                            'T0.validFor',
+                            'T0.InvntItem',
+                            'T0.frozenFor',
+                            'T1.ItemCode '
                         )
-                    ])
-                    ->where('T0.ItemCode', '=', $codigoProducto)
-                    ->where('T1.WhsCode', '=', '01_AQPAG')
-                    ->where('T0.validFor', '=', 'Y')
-                    ->groupBy(
-                        'T0.ItemCode',
-                        'T0.ItemName',
-                        'T1.WhsCode',
-                        'T0.CntUnitMsr',
-                        'T1.AvgPrice',
-                        'T0.validFor',
-                        'T0.InvntItem',
-                        'T0.frozenFor',
-                        'T1.ItemCode '
-                    )
-                    ->first();
+                        ->first();
 
                     return [
                         'material' => $material,
@@ -704,7 +708,9 @@ class OrdenInternaMaterialesController extends Controller
                     },
                     'ordenInternaParte.ordenInterna'
                 ]
-            );
+            )->where('odm_tipo', "!=", 3)
+                ->where("odm_tipo", "!=", 4)
+                ->where("odm_tipo", "!=", 5);
 
             // filtro de orden de trabajo
             if ($ordenTrabajo !== null) {
@@ -961,8 +967,8 @@ class OrdenInternaMaterialesController extends Controller
         $detalleMaterialesCotizar = [];
 
         foreach ($materiales as $material) {
-            $detalle = OrdenInternaMateriales::with(['producto.unidad','ordenInternaParte.ordenInterna'])
-                                            ->find($material);
+            $detalle = OrdenInternaMateriales::with(['producto.unidad', 'ordenInternaParte.ordenInterna'])
+                ->find($material);
             $detalleMaterialesCotizar[] = $detalle;
         }
 
