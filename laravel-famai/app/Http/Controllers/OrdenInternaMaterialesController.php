@@ -70,56 +70,55 @@ class OrdenInternaMaterialesController extends Controller
             $palabras = explode('OR', $request->input('multifilter'));
 
             // Agregar el grupo de condiciones OR
-            $query->where(function ($q) use ($palabras, $almID) {
-                foreach ($palabras as $palabra) {
-                    // pendiente de emision de orden de compra
-                    if ($palabra === 'pendiente_emitir_orden_compra') {
-                        $q->orWhere('odm_estado', 'COT');
-                    }
-                    // pendiente de emision de cotizacion
-                    if ($palabra === 'pendiente_emitir_cotizacion') {
-                        $q->orWhere('odm_estado', 'CRD');
-                    }
-                    // material sin codigo
-                    if ($palabra === 'material_sin_codigo') {
-                        $q->orWhere('pro_id', null);
-                    }
-                    // material sin compra
-                    if ($palabra === 'material_sin_compra') {
-                        $q->whereNotNull('pro_id');
-                        $q->orderBy('odm_feccreacion', 'desc');
+            // $query->where(function ($q) use ($palabras, $almID) {
+            foreach ($palabras as $palabra) {
+                // pendiente de emision de orden de compra
+                if ($palabra === 'pendiente_emitir_orden_compra') {
+                    $query->where('odm_estado', 'COT');
+                }
+                // pendiente de emision de cotizacion
+                if ($palabra === 'pendiente_emitir_cotizacion') {
+                    $query->where('odm_estado', 'CRD');
+                }
+                // material sin codigo
+                if ($palabra === 'material_sin_codigo') {
+                    $query->where('pro_id', null);
+                }
+                // material sin compra
+                if ($palabra === 'material_sin_compra') {
+                    $query->whereNotNull('pro_id');
+                    $query->orderBy('odm_feccreacion', 'desc');
 
-                        $data = $q->get();
-                        $dataFiltrada = [];
+                    $data = $query->get();
+                    $dataFiltrada = [];
 
-                        foreach ($data as $item) {
-                            $productoCodigo = $item->producto->pro_codigo;
+                    foreach ($data as $item) {
+                        $productoCodigo = $item->producto->pro_codigo;
 
-                            $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
-                                ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
-                                ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
-                                ->where('PDN1.ItemCode', '=', $productoCodigo)
+                        $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
+                            ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
+                            ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
+                            ->where('PDN1.ItemCode', '=', $productoCodigo)
+                            ->first();
+
+                        // Comprobar si ultima_fecha_compra es null
+                        if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
+                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
+                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
+                                ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
+                                ->where('IGN1.ItemCode', '=', $productoCodigo)
                                 ->first();
 
-                            // Comprobar si ultima_fecha_compra es null
-                            if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
-                                $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
-                                    ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
-                                    ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
-                                    ->where('IGN1.ItemCode', '=', $productoCodigo)
-                                    ->first();
-
-                                if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
-                                    // Si no hay fecha de compra en ninguna de las dos tablas, agregar a la lista filtrada
-                                    $dataFiltrada[] = $item;
-                                }
+                            if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
+                                $dataFiltrada[] = $item;
                             }
                         }
-
-                        return response($dataFiltrada);
                     }
+
+                    return response($dataFiltrada);
                 }
-            });
+            }
+            // });
         }
 
         // ordenar de formar descendiente
