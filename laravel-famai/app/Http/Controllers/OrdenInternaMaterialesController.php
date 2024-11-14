@@ -89,13 +89,13 @@ class OrdenInternaMaterialesController extends Controller
                     if ($palabra === 'material_sin_compra') {
                         $q->orWhere(function ($subQuery) use ($almID) {
                             $subQuery->whereNotNull('pro_id')
-                                ->whereDoesntExist(function ($query) use ($almID) {
-                                    // Selecciona las tablas con prefijo para la conexión secundaria
+                                ->whereDoesntExist(function ($subquery) use ($almID) {
+                                    // Agrega prefijo a tablas para conexión secundaria
                                     $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
                                     $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
                                     $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
 
-                                    $query->select(DB::raw(1))
+                                    $subquery->select(DB::raw(1)) // Solo se necesita verificar la existencia
                                         ->from($oitmTable)
                                         ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
                                         ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
