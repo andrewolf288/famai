@@ -490,7 +490,7 @@ class OrdenInternaMaterialesController extends Controller
 
             foreach ($ordenesMateriales as $rowData) {
                 $sheet->setCellValue("A{$row}", UtilHelper::getValueFormatExcel($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->odt_numero : null));
-                $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData->oic_fechaentregaestimada));
+                $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->oic_fechaentregaestimada : null));
                 $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData->usuarioCreador->usu_nombre));
                 $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData->producto ? $rowData->producto->pro_codigo : null));
                 $sheet->setCellValue("E{$row}", UtilHelper::getValueFormatExcel($rowData->odm_descripcion));
@@ -541,67 +541,67 @@ class OrdenInternaMaterialesController extends Controller
             // Obtener los resultados de la primera base de datos
             $ordenesMateriales = $query->get();
 
-            $productoConInformacionCompras = $ordenesMateriales->map(function ($material) {
-                return [
-                    'material' => $material,
-                    'ultimoPrecioCompras' => null,
-                    'ultimaFechaCompras' => null,
-                    'stock' => null
-                ];
-            });
-
-            // $productoConInformacionCompras = $ordenesMateriales->map(function ($material){
-            //     $codigoProducto = $material->producto ? $material->producto->pro_codigo : null;
-            //     // si es un producto diferente de null
-            //     if($codigoProducto !== null){
-            //         $compraInfo = DB::connection('sqlsrv_secondary')
-            //         ->table('OITM as T0')
-            //         ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
-            //         ->select([
-            //             'T1.AvgPrice',
-            //             DB::raw('MAX(T1.OnOrder) as stock'),
-            //             DB::raw(
-            //                 "(CASE 
-            //                     WHEN (
-            //                         SELECT MAX(OPDN.DocDate) 
-            //                         FROM OPDN 
-            //                         JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-            //                         WHERE PDN1.ItemCode = T0.ItemCode
-            //                     ) IS NULL 
-            //                     THEN (
-            //                         SELECT MAX(OIGN.DocDate) 
-            //                         FROM OIGN 
-            //                         JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-            //                         WHERE IGN1.ItemCode = T0.ItemCode
-            //                     )
-            //                     ELSE (
-            //                         SELECT MAX(OPDN.DocDate) 
-            //                         FROM OPDN 
-            //                         JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-            //                         WHERE PDN1.ItemCode = T0.ItemCode
-            //                     )
-            //                     END) as UltimaFechaIngreso"
-            //             )
-            //         ])
-            //         ->where('T0.ItemCode', '=', $codigoProducto)
-            //         ->where('T1.WhsCode', '=', '01_AQPAG')
-            //         ->first();
-
-            //         return [
-            //             'material' => $material,
-            //             'ultimoPrecioCompras' => $compraInfo->value('AvgPrice') ?? null,
-            //             'ultimaFechaCompras' => $compraInfo->value('UltimaFechaIngreso') ?? null,
-            //             'stock' => $compraInfo->value('stock') ?? null
-            //         ];
-            //     } else {
-            //         return [
-            //             'material' => $material,
-            //             'ultimoPrecioCompras' => null,
-            //             'ultimaFechaCompras' => null,
-            //             'stock' => null
-            //         ];
-            //     }
+            // $productoConInformacionCompras = $ordenesMateriales->map(function ($material) {
+            //     return [
+            //         'material' => $material,
+            //         'ultimoPrecioCompras' => null,
+            //         'ultimaFechaCompras' => null,
+            //         'stock' => null
+            //     ];
             // });
+
+            $productoConInformacionCompras = $ordenesMateriales->map(function ($material){
+                $codigoProducto = $material->producto ? $material->producto->pro_codigo : null;
+                // si es un producto diferente de null
+                if($codigoProducto !== null){
+                    $compraInfo = DB::connection('sqlsrv_secondary')
+                    ->table('OITM as T0')
+                    ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
+                    ->select([
+                        'T1.AvgPrice',
+                        DB::raw('MAX(T1.OnOrder) as stock'),
+                        DB::raw(
+                            "(CASE 
+                                WHEN (
+                                    SELECT MAX(OPDN.DocDate) 
+                                    FROM OPDN 
+                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                    WHERE PDN1.ItemCode = T0.ItemCode
+                                ) IS NULL 
+                                THEN (
+                                    SELECT MAX(OIGN.DocDate) 
+                                    FROM OIGN 
+                                    JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                                    WHERE IGN1.ItemCode = T0.ItemCode
+                                )
+                                ELSE (
+                                    SELECT MAX(OPDN.DocDate) 
+                                    FROM OPDN 
+                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                    WHERE PDN1.ItemCode = T0.ItemCode
+                                )
+                                END) as UltimaFechaIngreso"
+                        )
+                    ])
+                    ->where('T0.ItemCode', '=', $codigoProducto)
+                    ->where('T1.WhsCode', '=', '01_AQPAG')
+                    ->first();
+
+                    return [
+                        'material' => $material,
+                        'ultimoPrecioCompras' => $compraInfo->value('AvgPrice') ?? null,
+                        'ultimaFechaCompras' => $compraInfo->value('UltimaFechaIngreso') ?? null,
+                        'stock' => $compraInfo->value('stock') ?? null
+                    ];
+                } else {
+                    return [
+                        'material' => $material,
+                        'ultimoPrecioCompras' => null,
+                        'ultimaFechaCompras' => null,
+                        'stock' => null
+                    ];
+                }
+            });
 
             $headers = ['OT', 'Fec. Det OI', 'Tipo', 'Actividad', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock', 'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
             $columnWidths = [15, 19, 5, 18, 10, 50, 40, 10, 15, 10, 10, 7, 10, 10, 10];
