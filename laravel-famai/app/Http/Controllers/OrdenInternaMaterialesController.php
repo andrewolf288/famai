@@ -91,9 +91,9 @@ class OrdenInternaMaterialesController extends Controller
                         $q->whereNotNull('pro_id');
                         $q->whereDoesntHave('producto', function ($subquery) use ($almID) {
                             // Agrega prefijo a tablas para conexión secundaria
-                            $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
-                            $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
-                            $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
+                            $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'dbo.OITM as T0';
+                            $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'dbo.OITW as T1';
+                            $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'dbo.OILM as T2';
                     
                             $subquery->select(DB::raw(1)) // Solo necesitamos verificar la existencia
                                 ->from($oitmTable)
