@@ -601,9 +601,9 @@ class OrdenInternaMaterialesController extends Controller
 
                     return [
                         'material' => $material,
-                        'ultimoPrecioCompras' => $compraInfo->value('AvgPrice') ?? null,
-                        'ultimaFechaCompras' => $compraInfo->value('UltimaFechaIngreso') ?? null,
-                        'stock' => $compraInfo->value('stock') ?? null
+                        'ultimoPrecioCompras' => $compraInfo->AvgPrice ?? null,
+                        'ultimaFechaCompras' => $compraInfo->UltimaFechaIngreso ?? null,
+                        'stock' => $compraInfo->stock ?? null
                     ];
                 } else {
                     return [
