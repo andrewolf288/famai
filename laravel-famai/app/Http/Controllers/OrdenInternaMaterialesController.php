@@ -89,7 +89,7 @@ class OrdenInternaMaterialesController extends Controller
                     // material sin compra
                     if ($palabra === 'material_sin_compra') {
                         $q->whereNotNull('pro_id');
-                        $q->doesntHave(function ($subquery) use ($almID) {
+                        $q->whereDoesntHave('producto', function ($subquery) use ($almID) {
                             // Agrega prefijo a tablas para conexión secundaria
                             $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
                             $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
