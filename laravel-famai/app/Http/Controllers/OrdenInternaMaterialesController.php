@@ -15,7 +15,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
 use App\OrdenCompraDetalle;
-use App\OrdenInternaMaterialesAdjuntos;
 use App\Producto;
 use App\Trabajador;
 use App\Unidad;
@@ -100,7 +99,7 @@ class OrdenInternaMaterialesController extends Controller
                                         ->from($oitmTable)
                                         ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
                                         ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
-                                        ->whereColumn('T0.ItemCode', 'OrdenInternaMateriales.pro_id')
+                                        ->whereColumn('T0.ItemCode', 'producto.pro_codigo')
                                         ->where('T1.WhsCode', '=', $almID)
                                         ->where('T2.LocCode', '=', $almID)
                                         ->where('T0.validFor', '=', 'Y')
@@ -125,7 +124,17 @@ class OrdenInternaMaterialesController extends Controller
                                                     WHERE PDN1.ItemCode = T0.ItemCode
                                                 )
                                             END)"
-                                        ));
+                                        ))->groupBy(
+                                            'T0.ItemCode',
+                                            'T0.ItemName',
+                                            'T1.WhsCode',
+                                            'T0.CntUnitMsr',
+                                            'T1.AvgPrice',
+                                            'T0.validFor',
+                                            'T0.InvntItem',
+                                            'T0.frozenFor',
+                                            'T1.ItemCode '
+                                        );
                                 });
                         });
                     }
@@ -137,13 +146,6 @@ class OrdenInternaMaterialesController extends Controller
         $query->orderBy('odm_feccreacion', 'desc');
 
         return response($query->get());
-
-        // $detalleMateriales = $query->paginate($pageSize, ['*'], 'page', $page);
-        // return response()->json([
-        //     'message' => 'Se listan los materiales de la orden interna',
-        //     'data' => $detalleMateriales->items(),
-        //     'count' => $detalleMateriales->total()
-        // ]);
     }
 
     public function indexValidacionCodigo(Request $request)
