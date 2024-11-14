@@ -87,45 +87,43 @@ class OrdenInternaMaterialesController extends Controller
                     }
                     // material sin compra
                     if ($palabra === 'material_sin_compra') {
-                        $q->orWhere(function ($subQuery) use ($almID) {
-                            $subQuery->whereNotNull('pro_id')
-                                ->whereDoesntExist(function ($subquery) use ($almID) {
-                                    // Agrega prefijo a tablas para conexión secundaria
-                                    $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
-                                    $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
-                                    $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
+                        $q->whereNotNull('pro_id');
+                        $q->whereDoesntExist(function ($subquery) use ($almID) {
+                            // Agrega prefijo a tablas para conexión secundaria
+                            $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
+                            $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
+                            $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
 
-                                    $subquery->select(DB::raw(1)) // Solo se necesita verificar la existencia
-                                        ->from($oitmTable)
-                                        ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
-                                        ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
-                                        ->whereColumn('T0.ItemCode', 'producto.pro_codigo')
-                                        ->where('T1.WhsCode', '=', $almID)
-                                        ->where('T2.LocCode', '=', $almID)
-                                        ->where('T0.validFor', '=', 'Y')
-                                        ->whereNull(DB::raw(
-                                            "(CASE 
-                                                WHEN (
-                                                    SELECT MAX(OPDN.DocDate) 
-                                                    FROM OPDN 
-                                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                                                    WHERE PDN1.ItemCode = T0.ItemCode
-                                                ) IS NULL 
-                                                THEN (
-                                                    SELECT MAX(OIGN.DocDate) 
-                                                    FROM OIGN 
-                                                    JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-                                                    WHERE IGN1.ItemCode = T0.ItemCode
-                                                )
-                                                ELSE (
-                                                    SELECT MAX(OPDN.DocDate) 
-                                                    FROM OPDN 
-                                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                                                    WHERE PDN1.ItemCode = T0.ItemCode
-                                                )
-                                            END)"
-                                        ));
-                                });
+                            $subquery->select(DB::raw(1)) // Solo se necesita verificar la existencia
+                                ->from($oitmTable)
+                                ->join($oitwTable, 'T0.ItemCode', '=', 'T1.ItemCode')
+                                ->join($oilmTable, 'T0.ItemCode', '=', 'T2.ItemCode')
+                                ->whereColumn('T0.ItemCode', 'producto.pro_codigo')
+                                ->where('T1.WhsCode', '=', $almID)
+                                ->where('T2.LocCode', '=', $almID)
+                                ->where('T0.validFor', '=', 'Y')
+                                ->whereNull(DB::raw(
+                                    "(CASE 
+                                        WHEN (
+                                            SELECT MAX(OPDN.DocDate) 
+                                            FROM OPDN 
+                                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                            WHERE PDN1.ItemCode = T0.ItemCode
+                                        ) IS NULL 
+                                        THEN (
+                                            SELECT MAX(OIGN.DocDate) 
+                                            FROM OIGN 
+                                            JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                                            WHERE IGN1.ItemCode = T0.ItemCode
+                                        )
+                                        ELSE (
+                                            SELECT MAX(OPDN.DocDate) 
+                                            FROM OPDN 
+                                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                            WHERE PDN1.ItemCode = T0.ItemCode
+                                        )
+                                    END)"
+                                ));
                         });
                     }
                 }
