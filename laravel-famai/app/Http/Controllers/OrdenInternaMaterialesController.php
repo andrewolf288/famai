@@ -88,99 +88,26 @@ class OrdenInternaMaterialesController extends Controller
                     }
                     // material sin compra
                     if ($palabra === 'material_sin_compra') {
-                        // $q->whereNotNull('pro_id');
-                        // $q->orderBy('odm_feccreacion', 'desc');
-                        // $data = $q->get();
-                        // $dataFiltrada = [];
-
-                        // // Realizamos la consulta en lote a la base secundaria para todos los productos necesarios
-                        // $productosCodigos = $data->pluck('producto.pro_codigo');  // Extraemos los códigos de los productos
-
-                        // $consulta_SAP = DB::connection('sqlsrv_secondary')
-                        //     ->table('OITM as T0')
-                        //     ->select([
-                        //         DB::raw(
-                        //             "(CASE 
-                        //                 WHEN (
-                        //                     SELECT MAX(OPDN.DocDate) 
-                        //                     FROM OPDN 
-                        //                     JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                        //                     WHERE PDN1.ItemCode = T0.ItemCode
-                        //                 ) IS NULL 
-                        //                 THEN (
-                        //                     SELECT MAX(OIGN.DocDate) 
-                        //                     FROM OIGN 
-                        //                     JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-                        //                     WHERE IGN1.ItemCode = T0.ItemCode
-                        //                 )
-                        //                 ELSE (
-                        //                     SELECT MAX(OPDN.DocDate) 
-                        //                     FROM OPDN 
-                        //                     JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                        //                     WHERE PDN1.ItemCode = T0.ItemCode
-                        //                 )
-                        //             END) as UltimaFechaIngreso"
-                        //         )
-                        //     ])
-                        //     ->whereIn('T0.ItemCode', $productosCodigos)
-                        //     ->where('T0.validFor', '=', 'Y')
-                        //     ->get()
-                        //     ->keyBy('ItemCode');
-
-                        // // Recorremos los datos principales y filtramos
-                        // foreach ($data as $item) {
-                        //     $pro_codigo = $item->producto->pro_codigo;
-
-                        //     // Verificamos si la consulta secundaria devolvió resultados para este producto
-                        //     $consulta = $consulta_SAP->get($pro_codigo);
-
-                        //     if (!$consulta || $consulta->UltimaFechaIngreso === null) {
-                        //         // Si no hay fecha de ingreso o es null, lo agregamos al array filtrado
-                        //         $dataFiltrada[] = $item;
-                        //     }
-                        // }
-
-                        // // Devolvemos los resultados filtrados
-                        // return response()->json($dataFiltrada);
                         $q->whereNotNull('pro_id');
                         $q->whereDoesntHave('producto', function ($subquery) use ($almID) {
-                            // Usamos la conexión secundaria desde el principio para la subconsulta
-                            $subquery = DB::connection('sqlsrv_secondary')
-                                ->table(DB::raw('OITM as T0'))
-                                // ->join(DB::raw('OITW as T1'), 'T0.ItemCode', '=', 'T1.ItemCode')
-                                ->select(DB::raw(1))
-                                ->whereColumn('T0.ItemCode', 'producto.pro_codigo')
-                                // ->where('T1.WhsCode', '=', $almID)
-                                ->where('T0.validFor', '=', 'Y')
-                                ->whereNull(DB::raw(
-                                    "(CASE 
-                                        WHEN (
-                                            SELECT MAX(OPDN.DocDate) 
-                                            FROM OPDN 
-                                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                                            WHERE PDN1.ItemCode = T0.ItemCode
-                                        ) IS NULL 
-                                        THEN (
-                                            SELECT MAX(OIGN.DocDate) 
-                                            FROM OIGN 
-                                            JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-                                            WHERE IGN1.ItemCode = T0.ItemCode
-                                        )
-                                        ELSE (
-                                            SELECT MAX(OPDN.DocDate) 
-                                            FROM OPDN 
-                                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                                            WHERE PDN1.ItemCode = T0.ItemCode
-                                        )
-                                    END)"
-                                ));
+                            $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
+                                ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
+                                ->select(DB::raw('MAX(OPDN.DocDate)'))
+                                ->whereColumn('PDN1.ItemCode', '=', 'producto.pro_codigo');
 
-                            // Agregamos la subconsulta en whereExists para verificar existencia
-                            $subquery->whereExists(function ($query) use ($subquery) {
-                                $query->select(DB::raw(1))
-                                    ->from(DB::raw('(' . $subquery->toSql() . ') as Subquery'))
-                                    ->mergeBindings($subquery);
-                            });
+                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
+                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
+                                ->select(DB::raw('MAX(OIGN.DocDate)'))
+                                ->whereColumn('IGN1.ItemCode', '=', 'producto.pro_codigo');
+
+                            $subquery->whereRaw("
+                                CASE
+                                    WHEN ({$subconsultaOPDN->toSql()}) IS NULL
+                                    THEN ({$subconsultaOIGN->toSql()})
+                                    ELSE ({$subconsultaOPDN->toSql()})
+                                END IS NULL")
+                                ->mergeBindings($subconsultaOPDN)
+                                ->mergeBindings($subconsultaOIGN);
                         });
                     }
                 }
