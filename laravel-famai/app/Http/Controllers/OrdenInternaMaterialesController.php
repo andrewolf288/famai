@@ -90,7 +90,7 @@ class OrdenInternaMaterialesController extends Controller
                         $q->orWhere(function ($subQuery) use ($almID) {
                             $subQuery->whereNotNull('pro_id')
                                 ->whereDoesntExist(function ($subquery) use ($almID) {
-                                    // Agrega prefijo a tablas para conexión secundaria
+                                    // Prefijo para tablas en conexión secundaria
                                     $oitmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITM as T0';
                                     $oitwTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OITW as T1';
                                     $oilmTable = DB::connection('sqlsrv_secondary')->getTablePrefix() . 'OILM as T2';
@@ -103,28 +103,31 @@ class OrdenInternaMaterialesController extends Controller
                                         ->where('T1.WhsCode', '=', $almID)
                                         ->where('T2.LocCode', '=', $almID)
                                         ->where('T0.validFor', '=', 'Y')
-                                        ->whereNull(DB::raw(
-                                            "(CASE 
-                                                WHEN (
-                                                    SELECT MAX(OPDN.DocDate) 
-                                                    FROM OPDN 
-                                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                                                    WHERE PDN1.ItemCode = T0.ItemCode
-                                                ) IS NULL 
-                                                THEN (
-                                                    SELECT MAX(OIGN.DocDate) 
-                                                    FROM OIGN 
-                                                    JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-                                                    WHERE IGN1.ItemCode = T0.ItemCode
-                                                )
-                                                ELSE (
-                                                    SELECT MAX(OPDN.DocDate) 
-                                                    FROM OPDN 
-                                                    JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                                                    WHERE PDN1.ItemCode = T0.ItemCode
-                                                )
-                                            END)"
-                                        ))->groupBy(
+                                        ->whereNull(function ($caseQuery) {
+                                            $caseQuery->select(DB::raw(
+                                                "CASE 
+                                                    WHEN (
+                                                        SELECT MAX(OPDN.DocDate) 
+                                                        FROM OPDN 
+                                                        JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                                        WHERE PDN1.ItemCode = T0.ItemCode
+                                                    ) IS NULL 
+                                                    THEN (
+                                                        SELECT MAX(OIGN.DocDate) 
+                                                        FROM OIGN 
+                                                        JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                                                        WHERE IGN1.ItemCode = T0.ItemCode
+                                                    )
+                                                    ELSE (
+                                                        SELECT MAX(OPDN.DocDate) 
+                                                        FROM OPDN 
+                                                        JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                                                        WHERE PDN1.ItemCode = T0.ItemCode
+                                                    )
+                                                END"
+                                            ));
+                                        })
+                                        ->groupBy(
                                             'T0.ItemCode',
                                             'T0.ItemName',
                                             'T1.WhsCode',
@@ -133,7 +136,7 @@ class OrdenInternaMaterialesController extends Controller
                                             'T0.validFor',
                                             'T0.InvntItem',
                                             'T0.frozenFor',
-                                            'T1.ItemCode '
+                                            'T1.ItemCode'
                                         );
                                 });
                         });
