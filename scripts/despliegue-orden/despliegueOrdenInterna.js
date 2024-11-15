@@ -259,6 +259,7 @@ $(document).ready(() => {
             )
         } catch (error) {
             console.log(error)
+            alert("Ocurrio un error al obtener la información de históricos")
         }
 
         const loadModalHistorico = new bootstrap.Modal(document.getElementById('historicoModal'))

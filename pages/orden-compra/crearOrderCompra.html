@@ -1,18 +1,8 @@
 <div class="row">
     <!-- Columna para jalar de cotizacion -->
-    <div class="col-12 d-flex flex-row justify-content-end mb-2">
-        <div>
-            <label for="">Num. Cotización</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="numeroCotizacionInput">
-                <button class="btn btn-primary" id="btn-buscar-cotizacion">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                      </svg>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- <div class="col-12 d-flex flex-row justify-content-center mb-3">
+        <button class="btn btn-success" id="btn-cotizaciones">Cotizaciones</button>
+    </div> -->
     <!-- Columna para Proveedor -->
     <div class="col-md-6 col-12">
         <div class="card">
@@ -246,22 +236,29 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>
-                    <div class="mb-2">
-                        <input type="checkbox" class="form-check-input me-2" id="checkAsociarProducto">
-                        <label class="form-check-label" for="generaStockProductoEdit">Sin código</label>
-                    </div>
-                    <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
-                    <ul id="resultadosLista" class="list-group mt-2"></ul>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Ingrese una orden de trabajo" id="inputOrdenTrabajo">
+                    <button class="btn btn-primary" id="btn-buscar-orden-trabajo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                          </svg>
+                    </button>
                 </div>
-                <table id="tbl-orden-compra-productos" class="table mt-3">
+                <table id="tbl-detalle-orden-interna" class="table table-striped nowrap mt-3" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="col-2">Código</th>
-                            <th class="col-5">Descripción</th>
-                            <th class="col-1 text-center">Cantidad</th>
-                            <th class="col-2 text-center">Precio s/IGV</th>
-                            <th class="col-2 text-center">Total s/IGV</th>
+                            <th></th>
+                            <th></th>
+                            <th class="">Código</th>
+                            <th class="detalle-descripcion-oi">Descripción</th>
+                            <th class="detalle-observacion-oi">Observación</th>
+                            <th class="text-center detalle-cantidad-oi">Cantidad</th>
+                            <th class="text-center">Tipo</th>
+                            <th class="text-center">Estado</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Modificación</th>
+                            <th>Usu. Modificador</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -275,3 +272,53 @@
         </div>
     </div>
 </div>
+
+<!-- DIALOG DE COTIZACIONES -->
+ <div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cotizacionesModalLabel">Cotizaciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row mb-3">
+                        <div>
+                            <table id="cotizaciones-container" class="table table-striped nowrap"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>OT</th>
+                                        <th class="text-start">Fecha Cot.</th>
+                                        <th>Nro cotización</th>
+                                        <th>Nro Cot proveedor</th>
+                                        <th>Doc. proveedor</th>
+                                        <th>Raz. social proveedor</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Precio unitario</th>
+                                        <th class="text-center">Total</th>
+                                        <th>Tmp. entrega</th>
+                                        <th>Observación</th>
+                                        <th>Estado</th>
+                                        <th>Usu. Creador</th>
+                                        <th>Fec. Creación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cotizaciones-container-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-agregar-cotizaciones-detalle">Agregar</button>
+            </div>
+        </div>
+    </div>
+ </div>

@@ -366,6 +366,8 @@ $(document).ready(function () {
         const fechaEntregaPicker = $("#fechaEntregaPicker").val()
         const fechaValidezPicker = $("#fechaValidezPicker").val()
         const detalle_productos = $('#productosCotizacionTable tbody .detalle-cotizacion')
+        const formapagoCotizacionInput = $('#formapagoCotizacionInput').val().trim()
+        const monedaCotizacionInput = $('#monedaCotizacionInput').val().trim()
 
         let handleError = ''
         if (correoContactoCotizacionInput.length == 0) {
@@ -386,6 +388,14 @@ $(document).ready(function () {
 
         if (fechaValidezPicker.length == 0) {
             handleError += '- La fecha de validez es requerida\n'
+        }
+
+        if(formapagoCotizacionInput.length == 0) {
+            handleError += '- La forma de pago es requerida\n'
+        }
+
+        if(monedaCotizacionInput.length == 0) {
+            handleError += '- La moneda es requerida\n'
         }
 
         if (!validarDetalleCotizacion(detalle_productos)) {
@@ -440,11 +450,10 @@ $(document).ready(function () {
                 coc_fechavalidez: transformarFecha(fechaValidezPicker),
                 coc_notas: $('#notasCotizacionInput').val().trim(),
                 coc_total: $('#totalCotizacion').text(),
-                mon_codigo: $('#monedaCotizacionInput').val(),
-                coc_formapago: $('#formapagoCotizacionInput').val(),
+                mon_codigo: monedaCotizacionInput,
+                coc_formapago: formapagoCotizacionInput,
                 detalle_cotizacion: formatDetalleProductos
             }
-            console.log(formatData)
             const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'

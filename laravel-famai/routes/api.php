@@ -193,7 +193,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas detalle materiales orden interna
 Route::group(['middleware' => ['auth.jwt']], function () {
-    // Route::get('materialesByOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'findByOrdenInterna']);
     Route::get('detalleMaterialesOrdenInterna', [OrdenInternaMaterialesController::class, 'index']);
     Route::put('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'update']);
     Route::put('ordeninternamateriales/tipo/{id}', [OrdenInternaMaterialesController::class, 'updateTipoMaterial']);
@@ -211,6 +210,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('detalleMaterialesOrdenInterna/validacion', [OrdenInternaMaterialesController::class, 'indexValidacionCodigo']);
     Route::post('ordeninternamateriales/validar-codigo', [OrdenInternaMaterialesController::class, 'asignarCodigoProducto']);
     Route::post('detalleMaterialesOrdenInterna/materiales-cotizar', [OrdenInternaMaterialesController::class, 'informacionMaterialesCotizar']);
+    Route::post('detalleMaterialesOrdenInterna/findByNumeroOrdenTrabajo', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenTrabajo']);
 });
 
 // rutas detalle de adjuntos detalle materiales
@@ -326,6 +326,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::delete('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'destroy']);
     Route::put('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'update']);
+    Route::get('cotizacion-detalle-pendiente', [CotizacionDetalleController::class, 'findDetalleByEstadoPendiente']);
+    Route::post('cotizacion-detalle-masivo', [CotizacionDetalleController::class, 'informacionMaterialesMasivo']);
 });
 
 // rutas de detalle de archivo de cotizacion

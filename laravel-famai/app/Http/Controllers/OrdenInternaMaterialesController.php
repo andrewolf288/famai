@@ -193,25 +193,19 @@ class OrdenInternaMaterialesController extends Controller
         return response()->json($materiales);
     }
 
-    public function findByOrdenInterna(Request $request, $id)
+    public function findByNumeroOrdenTrabajo(Request $request)
     {
-        $ordenInterna = OrdenInterna::find($id);
-        // obtenemos el dato de almacen enviado
-        $almID = $request->input('alm_id', 1);
-        $materiales = OrdenInternaMateriales::with(['producto.unidad', 'producto.stock' => function ($q) use ($almID) {
-            if ($almID !== null) {
-                $q->where('alm_id', $almID)
-                    ->select('pro_id', 'alm_id', 'alp_stock');
-            } else {
-                $q->selectRaw('null as alp_stock');
-            }
-        }])
-            ->whereHas('ordenInternaParte', function ($query) use ($id) {
-                $query->where('oic_id', $id);
-            })
-            ->get();
+        $numeroOrdenTrabajo = $request->input('odt_numero', null);
 
-        return response()->json(["ordenInterna" => $ordenInterna, "materiales" => $materiales]);
+        $query = OrdenInternaMateriales::with(['ordenInternaParte.ordenInterna', 'producto.unidad']);
+
+        $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($numeroOrdenTrabajo) {
+            $q->where('odt_numero', $numeroOrdenTrabajo);
+        });
+
+        $materiales = $query->get();
+
+        return response()->json($materiales);
     }
 
     public function update(Request $request, $id)
@@ -519,9 +513,9 @@ class OrdenInternaMaterialesController extends Controller
             }
 
             $query->join('tblordenesinternasdetpartes_opd', 'tblordenesinternasdetpartes_opd.opd_id', '=', 'tblordenesinternasdetmateriales_odm.opd_id')
-            ->join('tblordenesinternascab_oic', 'tblordenesinternascab_oic.oic_id', '=', 'tblordenesinternasdetpartes_opd.oic_id')
-            ->orderBy('tblordenesinternascab_oic.odt_numero', 'asc')
-            ->orderBy('odm_feccreacion', 'desc');
+                ->join('tblordenesinternascab_oic', 'tblordenesinternascab_oic.oic_id', '=', 'tblordenesinternasdetpartes_opd.oic_id')
+                ->orderBy('tblordenesinternascab_oic.odt_numero', 'asc')
+                ->orderBy('odm_feccreacion', 'desc');
 
 
             // Obtener los resultados de la primera base de datos

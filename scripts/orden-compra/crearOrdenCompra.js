@@ -2,6 +2,10 @@ $(document).ready(() => {
     let abortController
     // inicializamos la data
     let cotizacionRelacionada = null
+    let dataTableCotizaciones
+    let dataTableMateriales
+    const dataCotizacionesContainer = $("#cotizaciones-container")
+    const dataMaterialesContainer = $("#tbl-detalle-orden-interna")
 
     $("#fechaOrdenCompraPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -13,7 +17,7 @@ $(document).ready(() => {
         setDate: new Date()
     }).datepicker("setDate", new Date())
 
-    // cargar areas
+    // ---------- CARGA DE AREAS INICIALES -----------
     const cargarTipoMonedas = async () => {
         try {
             const { data } = await client.get('/monedasSimple')
@@ -29,7 +33,7 @@ $(document).ready(() => {
         }
     }
 
-    // cargamos responsables
+    // ---------- CARGA DE TRABAJADORES INCIALES ------------
     const cargarTrabajadores = async () => {
         try {
             const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
@@ -38,7 +42,6 @@ $(document).ready(() => {
             const $solicitadoOrdenCompraInput = $('#solicitadoOrdenCompraInput')
             const $autorizadoOrdenCompraInput = $('#autorizadoOrdenCompraInput')
 
-            // Ordenar la data alfabéticamente según el nombre (índice [1])
             data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
 
             data.forEach(trabajador => {
@@ -48,7 +51,6 @@ $(document).ready(() => {
                 $autorizadoOrdenCompraInput.append(option.clone())
             })
 
-            // debo buscar el trabajador que corresponda al usuario logeado
             const { data: trabajador } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
             $elaboradoOrdenCompraInput.val(trabajador.tra_id)
         } catch (error) {
@@ -56,6 +58,7 @@ $(document).ready(() => {
         }
     }
 
+    // ---------- FUNCION DE INICIALIZACION DE INFORMACION ----------
     const initInformacion = async () => {
         try {
             await Promise.all([
@@ -67,58 +70,145 @@ $(document).ready(() => {
         }
     }
 
-    initInformacion()
+    // ----------- GESTION DE CREACION DE ORDEN DE COMPRA JALANDO UNA COTIZACION ------------
+    const dataTableOptions = {
+        destroy: true,
+        responsive: true,
+        paging: false,
+        searching: false,
+        info: true,
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false,
+            },
+            {
+                orderable: false,
+                render: DataTable.render.select(),
+                targets: 1,
+                className: 'form-check-input'
+            }
+        ],
+        select: {
+            style: 'multi',
+            selector: 'td.form-check-input'
+        },
+    }
 
-    // jalar de cotizacion
-    $('#btn-buscar-cotizacion').on('click', async function () {
-        const query = $('#numeroCotizacionInput').val().trim()
-        if (query.length >= 3) {
-            await buscarCotizacion(query)
+    // funcion para inicializar la informacion de cotizaciones respondidas por el proveedor
+    async function initCotizaciones() {
+        const modalCotizaciones = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
+        modalCotizaciones.show()
+
+        try {
+            if ($.fn.DataTable.isDataTable(dataCotizacionesContainer)) {
+                dataCotizacionesContainer.DataTable().destroy();
+            }
+            const { data } = await client.get('/cotizacion-detalle-pendiente')
+            $('#cotizaciones-container tbody').empty()
+            data.forEach(detalle => {
+                const { cotizacion, detalle_material, cod_id, cod_tiempoentrega, cod_descripcion, cod_observacion, cod_cantidad, cod_preciounitario, cod_total, cod_usucreacion, cod_feccreacion } = detalle
+                const { proveedor, moneda } = cotizacion
+
+                const rowItem = document.createElement('tr')
+                rowItem.dataset.detalle = cod_id
+
+                rowItem.innerHTML = `
+                    <td>
+                        <input type="hidden" value="${cod_id}" />
+                    </td>
+                    <td></td>
+                    <td>${detalle_material.orden_interna_parte?.orden_interna.odt_numero || 'N/A'}</td>
+                    <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
+                    <td>${cotizacion.coc_numero}</td>
+                    <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
+                    <td>${proveedor.prv_nrodocumento}</td>
+                    <td>${proveedor.prv_nombre}</td>
+                    <td>${escapeHTML(cod_descripcion)}</td>
+                    <td class="text-center">${cod_cantidad || 'N/A'}</td>
+                    <td class="text-center">${moneda.mon_simbolo || ''} ${cod_preciounitario || 'N/A'}</td>
+                    <td class="text-center">${moneda.mon_simbolo || ''} ${cod_total || 'N/A'}</td>
+                    <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
+                    <td>${escapeHTML(cod_observacion)}</td>
+                    <td>
+                        <span class="badge bg-primary">
+                            ${cotizacion.coc_estado}
+                        </span>
+                    </td>
+                    <td>${cod_usucreacion}</td>
+                    <td>${parseDate(cod_feccreacion)}</td>
+                `
+                $('#cotizaciones-container tbody').append(rowItem)
+            })
+            dataTableCotizaciones = dataCotizacionesContainer.DataTable(dataTableOptions)
+        } catch (error) {
+            console.log(error)
+            alert("Ocurrio un error al obtener las cotizaciones")
         }
+    }
+
+    // inicializamos la información
+    $("#btn-agregar-cotizaciones-detalle").on('click', async function () {
+        // debemos obtener los odm_id de los detalles seleccionados
+        const filasSeleccionadas = dataTableCotizaciones.rows({ selected: true }).nodes();
+        const valoresSeleccionados = [];
+        $(filasSeleccionadas).each(function (index, node) {
+            const valor = $(node).find('input[type="hidden"]').val(); // Extrae el valor del checkbox
+            valoresSeleccionados.push(valor);
+        });
+
+        if (valoresSeleccionados.length === 0) {
+            alert('Debe seleccionar al menos un material')
+            return
+        }
+
+        const formatData = {
+            materiales: valoresSeleccionados
+        }
+
+        try {
+            const { data } = await client.post('/cotizacion-detalle-masivo', formatData)
+            renderizarDetallesCotizacion(data)
+            // cerramos el modal y mostramos el formulario de creación
+            const dialogCotizaciones = bootstrap.Modal.getInstance(document.getElementById('cotizacionesModal'))
+            dialogCotizaciones.hide()
+        } catch (error) {
+            console.log(error)
+        }
+
     })
 
-    async function buscarCotizacion(query) {
-        try {
-            const queryEncoded = encodeURIComponent(query)
-            console.log(queryEncoded)
-            const { data } = await client.get(`/cotizacionByNumero?numero=${queryEncoded}`)
-            console.log(data)
-            // DATOS DE LA COTIZACION
-            cotizacionRelacionada = data.coc_id
-            // DATOS DEL PROVEEDOR
-            const {proveedor, moneda, detalle_cotizacion} = data
-            $('#idProveedorOrdenCompraInput').val(proveedor.prv_id)
-            $('#documentoProveedorInput').val(`${proveedor.tdo_codigo} - ${proveedor.prv_nrodocumento}`)
-            $('#razonSocialProveedorInput').val(proveedor.prv_nombre || '')
-            $('#correoProveedorInput').val(proveedor.prv_correo || '')
-            $('#contactoProveedorInput').val(proveedor.prv_contacto || '')
-            $('#whatsappProveedorInput').val(proveedor.prv_whatsapp || '')
-            $('#direccionProveedorInput').val(proveedor.prv_direccion || '')
-            // DATOS DE ORDEN DE COMPRA
-            $('#monedaOrdenCompraInput').val(moneda.mon_codigo)
-            $('#formaDePagoOrdenCompraInput').val(data.coc_formapago || '')
-            $('#notaOrdenCompraInput').val(data.coc_notas || '')
-            // DETALLE DE ORDEN DE COMPRA
-            $('#productosOrdenCompraBody').empty()
+    function renderizarDetallesCotizacion(materiales) {
+        console.log(materiales)
+        // cotizacionRelacionada = data.coc_id
+        // const {proveedor, moneda, detalle_cotizacion} = data
+        // $('#idProveedorOrdenCompraInput').val(proveedor.prv_id)
+        // $('#documentoProveedorInput').val(`${proveedor.tdo_codigo} - ${proveedor.prv_nrodocumento}`)
+        // $('#razonSocialProveedorInput').val(proveedor.prv_nombre || '')
+        // $('#correoProveedorInput').val(proveedor.prv_correo || '')
+        // $('#contactoProveedorInput').val(proveedor.prv_contacto || '')
+        // $('#whatsappProveedorInput').val(proveedor.prv_whatsapp || '')
+        // $('#direccionProveedorInput').val(proveedor.prv_direccion || '')
+        // $('#monedaOrdenCompraInput').val(moneda.mon_codigo)
+        // $('#formaDePagoOrdenCompraInput').val(data.coc_formapago || '')
+        // $('#notaOrdenCompraInput').val(data.coc_notas || '')
+        // $('#productosOrdenCompraBody').empty()
 
-            // recorremos la data del detalle de producto
-            detalle_cotizacion.forEach((detalle, index) => {
-                // debemos asegurarnos que este producto no fue agregado al detalle
-                const rowData = {
-                    pro_id: detalle.pro_id ? detalle.pro_id : obtenerIdUnico(),
-                    ocd_orden: index + 1,
-                    ocd_descripcion: detalle.cod_descripcion,
-                    ocd_cantidad: detalle.cod_cantidad,
-                    ocd_preciounitario: detalle.cod_preciounitario,
-                    ocd_total: detalle.cod_total,
-                    ocd_asociar: detalle.pro_id ? true : false
-                }
+        // recorremos la data del detalle de producto
+        materiales.forEach((detalle, index) => {
+            const rowData = {
+                odm_id: detalle.odm_id,
+                ocd_orden: index + 1,
+                ocd_descripcion: detalle.cod_descripcion,
+                ocd_cantidad: detalle.cod_cantidad,
+                ocd_preciounitario: detalle.cod_preciounitario,
+                ocd_total: detalle.cod_total,
+            }
 
-                // agregamos al detalle general
-                const rowItem = document.createElement('tr')
-                rowItem.classList.add(rowData.ocd_asociar ? '' : 'sin-asociar');
-                rowItem.innerHTML = `
-                <input class="producto-id" value="${rowData.pro_id}" type="hidden"/>
+            // agregamos al detalle general
+            const rowItem = document.createElement('tr')
+            rowItem.innerHTML = `
+                <input class="detalle-material-id" value="${rowData.odm_id}" type="hidden"/>
                 <td class="orden">${rowData.ocd_orden}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value='${rowData.ocd_descripcion}' readonly/>
@@ -153,47 +243,45 @@ $(document).ready(() => {
                     </div>
                 </td>
                 `
+            const cantidadDetalle = rowItem.querySelector('.cantidad-input')
+            const precioDetalle = rowItem.querySelector('.precio-input')
+            const botonEditar = rowItem.querySelector('.btn-orden-compra-editar')
+            const botonEliminar = rowItem.querySelector('.btn-orden-compra-eliminar')
+            const botonGuardar = rowItem.querySelector('.btn-orden-compra-guardar')
 
-                const cantidadDetalle = rowItem.querySelector('.cantidad-input')
-                const precioDetalle = rowItem.querySelector('.precio-input')
-                const botonEditar = rowItem.querySelector('.btn-orden-compra-editar')
-                const botonEliminar = rowItem.querySelector('.btn-orden-compra-eliminar')
-                const botonGuardar = rowItem.querySelector('.btn-orden-compra-guardar')
-
-                cantidadDetalle.addEventListener('input', function () {
-                    const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-                    if (!isNaN(total)) {
-                        rowItem.querySelector('.total-input').value = total.toFixed(2);
-                    } else {
-                        rowItem.querySelector('.total-input').value = '';
-                    }
-                })
-
-                precioDetalle.addEventListener('input', function () {
-                    const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-                    if (!isNaN(total)) {
-                        rowItem.querySelector('.total-input').value = total.toFixed(2);
-                    } else {
-                        rowItem.querySelector('.total-input').value = '';
-                    }
-                });
-
-                // escuchadores de acciones
-                botonEditar.addEventListener('click', function () { editarDetalleOrdenCompra(rowItem) })
-                botonGuardar.addEventListener('click', function () { guardarDetalleOrdenCompra(rowItem) })
-                botonEliminar.addEventListener('click', function () { eliminarDetalleOrdenCompra(rowData, rowItem) })
-
-                $('#productosOrdenCompraBody').append(rowItem)
-                calcularResumenOrdenCompra()
+            cantidadDetalle.addEventListener('input', function () {
+                const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                if (!isNaN(total)) {
+                    rowItem.querySelector('.total-input').value = total.toFixed(2);
+                } else {
+                    rowItem.querySelector('.total-input').value = '';
+                }
             })
 
-        } catch(error){
-            console.log(error)
-        }
-        
+            precioDetalle.addEventListener('input', function () {
+                const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                if (!isNaN(total)) {
+                    rowItem.querySelector('.total-input').value = total.toFixed(2);
+                } else {
+                    rowItem.querySelector('.total-input').value = '';
+                }
+            });
+
+            // escuchadores de acciones
+            botonEditar.addEventListener('click', function () { editarDetalleOrdenCompra(rowItem) })
+            botonGuardar.addEventListener('click', function () { guardarDetalleOrdenCompra(rowItem) })
+            botonEliminar.addEventListener('click', function () { eliminarDetalleOrdenCompra(rowData, rowItem) })
+
+            $('#productosOrdenCompraBody').append(rowItem)
+            calcularResumenOrdenCompra()
+        })
     }
 
-    // gestionamos informacion de proveedor
+    initCotizaciones()
+    initInformacion()
+
+
+    // ------------ GESTION DE INGRESO DE INFORMACION DE PROVEEDOR -------------
     $('#proveedoresInput').on('input', debounce(async function () {
         const query = $(this).val().trim()
         if (query.length >= 3) {
@@ -203,7 +291,6 @@ $(document).ready(() => {
         }
     }))
 
-    // al momento de presionar enter
     $('#searchProveedorSUNAT').on('click', async function (event) {
         console.log("first")
         const query = $('#proveedoresSUNAT').val().trim()
@@ -269,188 +356,77 @@ $(document).ready(() => {
         $('#direccionProveedorInput').val(prv_direccion || '')
     }
 
-    // funcion cargar modal de productos
-    $('#addProductBtn').on('click', async (event) => {
-        // reseteamos el modal
-        $('#checkAsociarProducto').prop('checked', false)
-        $('#productosInput').val('')
-        limpiarLista()
-        $('#tbl-orden-compra-productos tbody').empty()
-        // mostramos el modal
-        $('#addProductModal').modal('show')
+    // -------------- GESTION DE INGRESO DE PRODUCTOS DE ORDEN INTERNA ---------------
+
+    $("#addProductBtn").on('click', function () {
+        $("#inputOrdenTrabajo").val("")
+        $("#tbl-detalle-orden-interna tbody").empty()
+
+        // abrimos los modales
+        const modalAgregarProducto = new bootstrap.Modal(document.getElementById('addProductModal'))
+        modalAgregarProducto.show()
     })
 
-    // al momento de ir ingresando valores en el input
-    $('#productosInput').on('input', debounce(async function () {
-        const isChecked = $('#checkAsociarProducto').is(':checked')
-        const query = $(this).val().trim()
-        if (query.length >= 3 && !isChecked) {
-            await buscarMateriales(query)
-        } else {
-            limpiarLista()
-        }
-    }))
-
-    // al momento de presionar enter
-    $('#productosInput').on('keydown', function (event) {
-        // si es la tecla de enter
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            const isChecked = $('#checkAsociarProducto').is(':checked')
-            // si se desea agregar un producto sin código
-            if (isChecked) {
-                ingresarProductoSinCodigo()
-            } else {
-                return
-            }
-        }
-    });
-
-    async function buscarMateriales(query) {
-        if (abortController) {
-            abortController.abort();
-        }
-        abortController = new AbortController();
-        const signal = abortController.signal;
-
+    async function buscarDetalleOrdenTrabajo(ordenTrabajo) {
         try {
-            const queryEncoded = encodeURIComponent(query)
-            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
-            // Limpiamos la lista
-            limpiarLista()
-            // formamos la lista
+            if ($.fn.DataTable.isDataTable(dataMaterialesContainer)) {
+                dataMaterialesContainer.DataTable().destroy();
+            }
+
+            const formatData = {
+                odt_numero: ordenTrabajo
+            }
+            const {data} = await client.post('/detalleMaterialesOrdenInterna/findByNumeroOrdenTrabajo', formatData)
+            
+            $("#tbl-detalle-orden-interna tbody").empty()
+
             data.forEach(material => {
-                const listItem = document.createElement('li')
-                listItem.className = 'list-group-item list-group-item-action'
-                // listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - ${material.stock?.alp_stock || 0}`
-                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - Stock: ${material.alp_stock || '0.000000'} - Fec. Ult. Ingreso: ${material["UltimaFechaIngreso"] ? parseDateSimple(material["UltimaFechaIngreso"]) : 'No Aplica'}`
-                listItem.dataset.id = material.pro_id
-                listItem.addEventListener('click', () => seleccionarMaterial(material))
-                // agregar la lista completa
-                $('#resultadosLista').append(listItem)
+                const {producto} = material
+                const rowItem = document.createElement('tr')
+
+                rowItem.innerHTML = `
+                    <td>
+                        <input type="hidden" value="${material.odm_id}" />
+                    </td>
+                    <td></td>
+                    <td>${producto?.pro_codigo || 'N/A'}</td>
+                    <td>${escapeHTML(material.odm_descripcion)}</td>
+                    <td>${escapeHTML(material.odm_observacion)}</td>
+                    <td>${material.odm_cantidad}</td>
+                    <td>${material.odm_tipo == 1 ? 'R' : 'A'}</td>
+                    <td>${material.odm_estado}</td>
+                    <td>${parseDate(material.odm_fechacreacion)}</td>
+                    <td>${material.odm_usucreacion}</td>
+                    <td>${material.odm_fechamodificacion ? parseDate(material.odm_fechamodificacion) : 'N/A'}</td>
+                    <td>${material.odm_usumodificacion ? material.odm_usumodificacion : 'N/A'}</td>
+                `
+                $("#tbl-detalle-orden-interna tbody").append(rowItem)
             })
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                console.log('Petición abortada'); // Maneja el error de la petición abortada
-            } else {
-                console.error('Error al buscar materiales:', error);
-                alert('Error al buscar materiales. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
-            }
+
+            dataTableMateriales = dataMaterialesContainer.DataTable(dataTableOptions)
+
+        } catch(error){
+            console.log(error)
+            alert('Error al buscar el detalle de la orden de trabajo')
         }
     }
 
-    function limpiarLista() {
-        $('#resultadosLista').empty()
-    }
-
-    function ingresarProductoSinCodigo() {
-        const pro_codigo = ""
-        const pro_id = obtenerIdUnico()
-        const pro_descripcion = $.trim($('#productosInput').val())
-
-        if (pro_descripcion.length < 3) {
-            alert('La descripción debe tener al menos 3 caracteres')
-        } else {
-            $('#productosInput').val('')
-            const rowItem = document.createElement('tr')
-            rowItem.classList.add('sin-asociar');
-            rowItem.innerHTML = `
-                <input class="producto-id" value="${pro_id}" type="hidden"/>
-                <td>${pro_codigo}</td>
-                <td>
-                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion}'/>
-                </td>
-                <td>
-                    <input type="number" class="form-control cantidad-input" value='1.00'/>
-                </td>
-                <td>
-                    <input type="number" class="form-control precio-input" value=''/>
-                </td>
-                <td>
-                    <input type="number" class="form-control total-input" value='' readonly/>
-                </td>
-             `
-            const cantidad = rowItem.querySelector('.cantidad-input')
-            const precio = rowItem.querySelector('.precio-input')
-
-            cantidad.addEventListener('input', function () {
-                const total = parseFloat(cantidad.value) * parseFloat(precio.value);
-                if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2);
-                } else {
-                    rowItem.querySelector('.total-input').value = '';
-                }
-            })
-
-            precio.addEventListener('input', function () {
-                const total = parseFloat(cantidad.value) * parseFloat(precio.value);
-                if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2);
-                } else {
-                    rowItem.querySelector('.total-input').value = '';
-                }
-            });
-            $('#tbl-orden-compra-productos tbody').html(rowItem)
+    $("#btn-buscar-orden-trabajo").on('click', function () {
+        const ordenTrabajo = $("#inputOrdenTrabajo").val().trim()
+        if (ordenTrabajo.length === 0) {
+            alert('Por favor, ingrese un número de orden de trabajo')
+            return
         }
-    }
 
-    function seleccionarMaterial(material) {
-        const { pro_id, pro_codigo, pro_descripcion } = material
+        buscarDetalleOrdenTrabajo(ordenTrabajo)
+    })
 
-        // limpiamos el input
-        limpiarLista()
-        $('#productosInput').val('')
-
-        const rowItem = document.createElement('tr')
-        rowItem.innerHTML = `
-        <input class="producto-id" value="${pro_id}" type="hidden"/>
-        <td>${pro_codigo}</td>
-        <td>
-            <input type="text" class="form-control descripcion-input" value='${pro_descripcion}' readonly/>
-        </td>
-        <td>
-            <input type="number" class="form-control cantidad-input" value='1.00'/>
-        </td>
-        <td>
-            <input type="number" class="form-control precio-input" value=''/>
-        </td>
-        <td>
-            <input type="number" class="form-control total-input" value='' readonly/>
-        </td>
-        `
-
-        const cantidad = rowItem.querySelector('.cantidad-input')
-        const precio = rowItem.querySelector('.precio-input')
-
-        cantidad.addEventListener('input', function () {
-            const total = parseFloat(cantidad.value) * parseFloat(precio.value);
-            if (!isNaN(total)) {
-                rowItem.querySelector('.total-input').value = total.toFixed(2);
-            } else {
-                rowItem.querySelector('.total-input').value = '';
-            }
-        })
-
-        precio.addEventListener('input', function () {
-            const total = parseFloat(cantidad.value) * parseFloat(precio.value);
-            if (!isNaN(total)) {
-                rowItem.querySelector('.total-input').value = total.toFixed(2);
-            } else {
-                rowItem.querySelector('.total-input').value = '';
-            }
-        });
-
-        $('#tbl-orden-compra-productos tbody').html(rowItem)
-    }
-
-    // boton de agregar producto
     $('#btn-agregar-producto').on('click', function () {
         const productos = $('#tbl-orden-compra-productos tbody tr')
 
         let handleError = ''
         if (productos.length > 0) {
             let fila = $(productos[0])
-            const asociar = fila.hasClass('sin-asociar') ? false : true
             const producto = fila.find('.producto-id').val()
             const descripcion = fila.find('.descripcion-input').val().trim()
             const cantidad = fila.find('.cantidad-input').val()
@@ -481,18 +457,15 @@ $(document).ready(() => {
                 }
                 // debemos asegurarnos que este producto no fue agregado al detalle
                 const rowData = {
-                    pro_id: producto,
                     ocd_orden: $('#productosOrdenCompraTable tbody tr').length + 1,
                     ocd_descripcion: descripcion,
                     ocd_cantidad: cantidad,
                     ocd_preciounitario: precio,
                     ocd_total: total,
-                    ocd_asociar: asociar
                 }
 
                 // agregamos al detalle general
                 const rowItem = document.createElement('tr')
-                rowItem.classList.add(rowData.ocd_asociar ? '' : 'sin-asociar');
                 rowItem.innerHTML = `
                 <input class="producto-id" value="${rowData.pro_id}" type="hidden"/>
                 <td class="orden">${rowData.ocd_orden}</td>
@@ -620,26 +593,26 @@ $(document).ready(() => {
         const subtotalOrdenCompra = $('#subtotalOrdenCompra')
         const igvOrdenCompra = $('#igvOrdenCompra')
         const totalOrdenCompra = $('#totalOrdenCompra')
-    
+
         const productos = $('#productosOrdenCompraTable tbody tr')
         let subtotalOrdenCompraAcumulado = 0
-    
+
         // Sumar los totales de todos los productos
         productos.each(function (index, row) {
             const total = parseFloat($(row).find('.total-input').val())
             subtotalOrdenCompraAcumulado += total
         })
-    
+
         // Cálculo sin redondeo previo
         const igv = subtotalOrdenCompraAcumulado * 0.18
         const total = subtotalOrdenCompraAcumulado + igv
-    
+
         // Aplicar toFixed(2) solo al mostrar los valores
         subtotalOrdenCompra.text(subtotalOrdenCompraAcumulado.toFixed(2))
         igvOrdenCompra.text(igv.toFixed(2))
         totalOrdenCompra.text(total.toFixed(2))
     }
-    
+
 
     // funcion para validar ingreso unico de producto
     function buscarDetalleProducto(id) {
@@ -678,20 +651,20 @@ $(document).ready(() => {
         const detalle_productos = $('#productosOrdenCompraTable tbody tr')
 
         let handleError = ''
-        if(occ_fecha.length === 0 || prv_id.length === 0 || detalle_productos.length === 0) {
-            if(occ_fecha.length === 0) {
+        if (occ_fecha.length === 0 || prv_id.length === 0 || detalle_productos.length === 0) {
+            if (occ_fecha.length === 0) {
                 handleError += '- La fecha de orden de compra es requerida\n'
             }
-            if(prv_id.length === 0) {
+            if (prv_id.length === 0) {
                 handleError += '- El proveedor es requerido\n'
             }
-            if(detalle_productos.length === 0) {
+            if (detalle_productos.length === 0) {
                 handleError += '- Se debe agregar al menos un producto al detalle\n'
             }
 
         }
-        
-        if(handleError.length > 0) {
+
+        if (handleError.length > 0) {
             alert(handleError)
             return
         }

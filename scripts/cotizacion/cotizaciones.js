@@ -47,6 +47,7 @@ $(document).ready(() => {
                     </td>
                     <td>
                         <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : 'bg-success'}">${cotizacion.coc_estado}</span>
+                    </td>
                     <td>
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-cotizacion-editar me-1" data-cotizacion="${cotizacion.coc_id}">

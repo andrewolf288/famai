@@ -218,16 +218,16 @@ class CotizacionController extends Controller
             }
 
             DB::commit();
-
             // retorna la generacion de un PDF
             $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
             $data = [
                 'proveedor' => $proveedor,
+                'trabajador' => $tra_solicitante,
                 'detalleMateriales' => $detalleMateriales,
                 'fechaActual' => DateHelper::parserFechaActual(),
                 'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id"
             ];
-
+            
             $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
@@ -470,7 +470,7 @@ class CotizacionController extends Controller
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Ocurrió un error al enviar la cotización'], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

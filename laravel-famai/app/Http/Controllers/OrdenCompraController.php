@@ -39,7 +39,6 @@ class OrdenCompraController extends Controller
         try {
             // Valida el request
             $validatedData = validator($request->all(), [
-                'coc_id' => 'nullable|exists:tblcotizacionescab_coc,coc_id',
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
                 'pvc_cuentasoles' => 'nullable|integer',
                 'pvc_cuentadolares' => 'nullable|integer',
@@ -71,7 +70,6 @@ class OrdenCompraController extends Controller
 
             $ordencompra = OrdenCompra::create([
                 'occ_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
-                'coc_id' => $validatedData['coc_id'],
                 'prv_id' => $validatedData['prv_id'],
                 'pvc_cuentasoles' => $validatedData['pvc_cuentasoles'],
                 'pvc_cuentadolares' => $validatedData['pvc_cuentadolares'],
