@@ -93,8 +93,8 @@
                             <div class="col-md-6">
                                 <label for="monedaCotizacionInput">Moneda</label>
                                 <select id="monedaCotizacionInput" class="form-select">
-                                    <option value="SOL" selected>SOLES</option>
-                                    <option value="DOL">DOLARES</option>
+                                    <option value="SOL" selected>S/. SOLES</option>
+                                    <option value="DOL">$ DOLARES</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -130,8 +130,10 @@
                     <table class="table" id="productosCotizacionTable">
                         <thead>
                             <tr>
+                                <th class="text-center"></th>
                                 <th class="col-1">Item</th>
                                 <th class="col-3">Descripción</th>
+                                <th class="text-center">UND.</th>
                                 <th class="col-3">Observación</th>
                                 <th class="col-1">Tiempo Entrega (dias)</th>
                                 <th class="col-1 text-center">Cantidad</th>
@@ -153,7 +155,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <span class="fw-bold">Total:</span>
-                            <span>S/<span id="totalCotizacion">0.00</span></span>
+                            <span>
+                                <span class="moneda ms-1"></span>
+                                <span id="totalCotizacion">0.00</span>
+                            </span>
                         </div>
                     </div>
                 </div>

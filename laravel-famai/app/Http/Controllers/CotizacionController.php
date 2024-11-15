@@ -451,6 +451,8 @@ class CotizacionController extends Controller
                     'cod_cantidad' => $detalle['cod_cantidad'],
                     'cod_preciounitario' => $detalle['cod_preciounitario'],
                     'cod_total' => $detalle['cod_total'],
+                    'cod_cotizar' => 1,
+                    'cod_marcas' => $detalle['cod_marcas'],
                 ]);
             }
 
