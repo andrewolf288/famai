@@ -474,30 +474,4 @@ class CotizacionController extends Controller
         }
     }
 
-    // funcion para traer cotizacion by producto
-    public function findCotizacionByProducto(Request $request)
-    {
-        $pageSize = $request->input('page_size', 10);
-        $page = $request->input('page', 1);
-        $producto = $request->input('pro_id');
-
-        $query = CotizacionDetalle::with(['cotizacion', 'detalleMaterial.producto']);
-
-        if($producto !== null) {
-            $producto = (int) $producto;
-            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
-                $q->where('pro_id', $producto);
-            });
-        }
-
-        $query->orderBy('coc_fechacotizacion', 'desc');
-
-        $cotizacionDetalle = $query->paginate($pageSize, ['*'], 'page', $page);
-
-        return response()->json([
-            'message' => 'Se listan las cotizaciones',
-            'data' => $cotizacionDetalle->items(),
-            'count' => $cotizacionDetalle->total()
-        ]);
-    }
 }

@@ -18,6 +18,7 @@ use App\OrdenCompraDetalle;
 use App\Producto;
 use App\Trabajador;
 use App\Unidad;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class OrdenInternaMaterialesController extends Controller
@@ -25,11 +26,9 @@ class OrdenInternaMaterialesController extends Controller
 
     public function index(Request $request)
     {
-        // $pageSize = $request->input('page_size', 10);
-        // $page = $request->input('page', 1);
         $ordenTrabajo = $request->input('odt_numero', null);
         $tipoProceso = $request->input('oic_tipo', null);
-        $almID = $request->input('alm_id', '01_AQPAG');
+        $responsable = $request->input('tra_nombre', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
         // multifilters
@@ -42,7 +41,10 @@ class OrdenInternaMaterialesController extends Controller
                 'producto.unidad',
                 'ordenInternaParte.ordenInterna'
             ]
-        )->whereNotIn('odm_tipo', [3, 4, 5]);
+        )
+            ->withCount('cotizaciones')
+            ->withCount('ordenesCompra')
+            ->whereNotIn('odm_tipo', [3, 4, 5]);
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -55,6 +57,12 @@ class OrdenInternaMaterialesController extends Controller
         if ($tipoProceso !== null) {
             $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($tipoProceso) {
                 $q->where('oic_tipo', $tipoProceso);
+            });
+        }
+
+        if($responsable !== null){
+            $query->whereHas('responsable', function ($q) use ($responsable) {
+                $q->whereRaw("tra_nombre COLLATE SQL_Latin1_General_CP1_CI_AI LIKE ?", ['%' . $responsable . '%']);
             });
         }
 
@@ -78,7 +86,7 @@ class OrdenInternaMaterialesController extends Controller
                 }
                 // pendiente de emision de cotizacion
                 if ($palabra === 'pendiente_emitir_cotizacion') {
-                    $query->where('odm_estado', 'CRD');
+                    $query->where('odm_estado', 'REQ');
                 }
                 // material sin codigo
                 if ($palabra === 'material_sin_codigo') {
@@ -125,6 +133,16 @@ class OrdenInternaMaterialesController extends Controller
         $query->orderBy('odm_feccreacion', 'desc');
 
         return response($query->get());
+    }
+
+    public function show($id)
+    {
+        $ordenInternaMaterial = OrdenInternaMateriales::with(
+            [
+                'responsable',
+            ]
+        )->findOrFail($id);
+        return response()->json($ordenInternaMaterial);
     }
 
     public function indexValidacionCodigo(Request $request)
@@ -306,8 +324,11 @@ class OrdenInternaMaterialesController extends Controller
 
             $ordenInternaMaterial->update([
                 'tra_responsable' => $request->input('tra_responsable'),
+                'odm_fecasignacionresponsable' => Carbon::now(),
                 'odm_usumodificacion' => $user->usu_codigo,
             ]);
+
+            $ordenInternaMaterial->load('responsable');
 
             DB::commit();
             return response()->json($ordenInternaMaterial, 200);
@@ -897,7 +918,8 @@ class OrdenInternaMaterialesController extends Controller
     // detalle material - cotizacion
     public function findCotizacionByMaterial($id)
     {
-        $detalleCotizacion = CotizacionDetalle::with('cotizacion.proveedor')->where('odm_id', $id)->get();
+        $detalleCotizacion = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
+            ->where('odm_id', $id)->get();
         return response()->json($detalleCotizacion);
     }
 
@@ -922,6 +944,7 @@ class OrdenInternaMaterialesController extends Controller
             DB::beginTransaction();
 
             $pro_id = null;
+            $pro_descripcion = null;
             // buscamos el material en la base de datos
             $findMaterial = Producto::where('pro_codigo', $request['pro_codigo'])->first();
             // en caso no se encuentre, se crea el registro
@@ -970,12 +993,14 @@ class OrdenInternaMaterialesController extends Controller
                     ]);
                     // se establece el ID correspondiente
                     $pro_id = $productoCreado->pro_id;
+                    $pro_descripcion = $productoCreado->pro_descripcion;
                 } else {
                     throw new Exception('Material no encontrado en la base de datos secundaria');
                 }
             } else {
                 // en el caso que se encuentre el producto en base de datos dbfamai
                 $pro_id = $findMaterial->pro_id;
+                $pro_descripcion = $findMaterial->pro_descripcion;
             }
 
             // buscamos el material en la base de datos
@@ -990,6 +1015,7 @@ class OrdenInternaMaterialesController extends Controller
             // actualizamos el material
             $ordenInternaMaterial->update([
                 'pro_id' => $pro_id,
+                'odm_descripcion' => $pro_descripcion,
                 'odm_observacion' => $codigoIncrustado . $ordenInternaMaterial->odm_descripcion . ' - ' . $ordenInternaMaterial->odm_observacion,
                 'odm_usumodificacion' => $user->usu_codigo
             ]);

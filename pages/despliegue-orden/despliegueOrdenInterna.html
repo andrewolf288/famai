@@ -39,6 +39,7 @@
                 <option value="">Seleccione un filtro</option>
                 <option value="odt_numero">Orden trabajo</option>
                 <option value="oic_tipo">Tipo proceso</option>
+                <option value="tra_nombre">Responsable</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -366,11 +367,16 @@
             </div>
             <div class="modal-body">
                 <div>
-                    <p>Responsable: <span id="responsableDetalleMaterial"></span></p>
-                </div>
-                <div>
                     <input type="text" id="idDetalleMaterialByResponsable" hidden>
                     <select id="selectorResponsableDetalleMaterial" class="form-select"></select>
+                </div>
+                <div class="mt-2 ms-1">
+                    <p> 
+                        <span class="fw-bold">Responsable:</span> <span id="responsableDetalleMaterial"></span>
+                    </p>
+                </div>
+                <div class="ms-1">
+                    <p> <span class="fw-bold">Fecha asignación responsable:</span> <span id="fechaAsignacionResponsableDetalleMaterial"></span></p>
                 </div>
             </div>
             <div class="modal-footer">

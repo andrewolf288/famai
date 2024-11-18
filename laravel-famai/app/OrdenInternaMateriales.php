@@ -14,6 +14,7 @@ class OrdenInternaMateriales extends Model
         'opd_id',
         'pro_id',
         'tra_responsable',
+        'odm_fecasignacionresponsable',
         'odm_item',
         'odm_descripcion',
         'odm_cantidad',
@@ -66,4 +67,17 @@ class OrdenInternaMateriales extends Model
     {
         return $this->hasMany(OrdenInternaMaterialesAdjuntos::class, 'odm_id');
     }
+
+    // relacion con cotizaciones
+    public function cotizaciones()
+    {
+        return $this->hasMany(CotizacionDetalle::class, 'odm_id');
+    }
+
+    // relacion con ordenes de compra
+    public function ordenesCompra()
+    {
+        return $this->hasMany(OrdenCompraDetalle::class, 'odm_id');
+    }
+
 }

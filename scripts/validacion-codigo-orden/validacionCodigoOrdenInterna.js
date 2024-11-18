@@ -143,7 +143,7 @@ $(document).ready(() => {
     function seleccionarMaterial(material) {
         limpiarLista()
         $('#productosInput').val('')
-        $("#btn-asignar-codigos").prop('disabled', false)
+        $("#btn-asignar-codigo").prop('disabled', false)
         const { pro_id, pro_codigo, pro_descripcion, alp_stock, UltimaFechaIngreso } = material
 
         const row = `
@@ -175,7 +175,7 @@ $(document).ready(() => {
         limpiarLista()
         $('#productosInput').val('')
         // deshabilitamos el boton de asignación
-        $("#btn-asignar-codigos").prop('disabled', true)
+        $("#btn-asignar-codigo").prop('disabled', true)
 
         const modalAsignacionCodigo = new bootstrap.Modal(document.getElementById('asignacionCodigosModal'))
         modalAsignacionCodigo.show()
@@ -186,11 +186,11 @@ $(document).ready(() => {
         const row = $(this).closest('tr')
         row.remove()
         // deshabilitamos el boton de asignación
-        $("#btn-asignar-codigos").prop('disabled', true)
+        $("#btn-asignar-codigo").prop('disabled', true)
     })
 
     // hacer click en el boton de asginacion
-    $("#btn-asignar-codigos").on('click', async function () {
+    $("#btn-asignar-codigo").on('click', async function () {
         var pro_codigo = $('#tbl-asignar-codigos tbody tr:first').data('id');
         // buscamos el codigo 
         const formatData = {

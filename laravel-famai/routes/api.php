@@ -24,7 +24,6 @@ use App\Http\Controllers\OrdenCompraDetalleController;
 use App\Http\Controllers\OrdenInternaMaterialesAdjuntosController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
-use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProductoProveedorController;
 use App\Http\Controllers\SubFamiliaController;
 use App\Http\Controllers\TrabajadorController;
@@ -37,7 +36,6 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -194,6 +192,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 // rutas detalle materiales orden interna
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('detalleMaterialesOrdenInterna', [OrdenInternaMaterialesController::class, 'index']);
+    Route::get('detalleMaterialOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'show']);
     Route::put('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'update']);
     Route::put('ordeninternamateriales/tipo/{id}', [OrdenInternaMaterialesController::class, 'updateTipoMaterial']);
     Route::put('ordeninternamateriales/responsable/{id}', [OrdenInternaMaterialesController::class, 'updateResponsableMaterial']);
@@ -319,7 +318,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
     Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
-    Route::get('cotizacion-findByProducto', [CotizacionController::class, 'findCotizacionByProducto']);
 });
 
 // rutas de detalle de cotizacion
@@ -328,6 +326,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'update']);
     Route::get('cotizacion-detalle-pendiente', [CotizacionDetalleController::class, 'findDetalleByEstadoPendiente']);
     Route::post('cotizacion-detalle-masivo', [CotizacionDetalleController::class, 'informacionMaterialesMasivo']);
+    Route::get('cotizacion-detalle-findByProducto', [CotizacionDetalleController::class, 'findCotizacionByProducto']);
 });
 
 // rutas de detalle de archivo de cotizacion

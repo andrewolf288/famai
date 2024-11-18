@@ -89,4 +89,36 @@ class CotizacionDetalleController extends Controller
 
         return response()->json($detalleMaterialesCotizar);
     }
+
+    // funcion para traer cotizacion by producto
+    public function findCotizacionByProducto(Request $request)
+    {
+        $pageSize = $request->input('page_size', 10);
+        $page = $request->input('page', 1);
+        $producto = $request->input('pro_id');
+
+        $query = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda' ,'detalleMaterial.producto.unidad'])
+                                    ->whereHas('cotizacion', function ($query) {
+                                        $query->where('coc_estado', '!=' ,'SOL');
+                                    })
+                                    ->where('cod_cotizar', 1);
+
+        if($producto !== null) {
+            $producto = (int) $producto;
+            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
+                $q->where('pro_id', $producto);
+            });
+        }
+
+        // ordenamos de manera descendente
+        $query->orderBy('cod_feccreacion', 'desc');
+
+        $cotizacionDetalle = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        return response()->json([
+            'message' => 'Se listan las cotizaciones',
+            'data' => $cotizacionDetalle->items(),
+            'count' => $cotizacionDetalle->total()
+        ]);
+    }
 }

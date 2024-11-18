@@ -29,7 +29,7 @@ $(document).ready(() => {
         destroy: true,
         responsive: true,
         paging: false,
-        searching: false,
+        searching: true,
         info: true,
         columnDefs: [
             {
@@ -50,6 +50,14 @@ $(document).ready(() => {
         order: [[2, 'asc']],
     }
 
+    const dataTableOptionsHistorico = {
+        destroy: true,
+        responsive: true,
+        paging: false,
+        searching: false,
+        info: true,
+    }
+
     // gestion de multiselect
     $('select[multiple]').multiselect()
 
@@ -67,11 +75,12 @@ $(document).ready(() => {
             const { data } = await client.get(URL)
             data.forEach((material, index) => {
                 // obtenemos los datos
-                const { producto, orden_interna_parte } = material
+                const { producto, orden_interna_parte, cotizaciones_count, ordenes_compra_count } = material
                 const { orden_interna } = orden_interna_parte
                 const { odt_numero, oic_tipo } = orden_interna
 
                 const rowItem = document.createElement('tr')
+                rowItem.dataset.detalle = material.odm_id
                 rowItem.innerHTML = `
                     <td>
                         <input type="hidden" value="${material.odm_id}"/>
@@ -102,13 +111,25 @@ $(document).ready(() => {
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-responsable" data-responsable="${material.tra_responsable}" data-detalle="${material.odm_id}">${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}</button>
+                        <button class="btn btn-primary btn-responsable" data-detalle="${material.odm_id}">
+                                ${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}
+                        </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-primary btn-cotizado" data-detalle="${material.odm_id}">Cotizaciones</button>
+                        <button class="btn btn-primary position-relative btn-cotizado" data-detalle="${material.odm_id}">
+                            Cotizaciones
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                ${cotizaciones_count}
+                            </span>
+                        </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-primary btn-ordenado" data-detalle="${material.odm_id}">Ordenes de compra</button>
+                        <button class="btn btn-primary position-relative btn-ordenado" data-detalle="${material.odm_id}">
+                            Ordenes de compra
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                ${ordenes_compra_count}
+                            </span>
+                        </button>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-primary btn-reservado">0.00</button>
@@ -174,10 +195,11 @@ $(document).ready(() => {
     // ------------- GESTION DE HISTORICO --------------
 
     function initHistoricoCotizaciones(data) {
+        console.log(data)
         $('#historico-cotizaciones-container tbody').empty()
         data.forEach(detalle => {
             const { cotizacion } = detalle
-            const { proveedor } = cotizacion
+            const { proveedor, moneda } = cotizacion
             const rowItem = document.createElement('tr')
             rowItem.classList.add(`${cotizacion.coc_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
 
@@ -186,7 +208,7 @@ $(document).ready(() => {
             <td>${cotizacion.coc_numero}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
             <td>
-                <span class="badge bg-primary">
+                <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : cotizacion.coc_estado === 'RPR' ? 'bg-primary' : 'bg-success'}">
                     ${cotizacion.coc_estado}
                 </span>
             </td>
@@ -194,8 +216,8 @@ $(document).ready(() => {
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.cod_descripcion}</td>
             <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
-            <td class="text-center">${detalle.cod_preciounitario || 'N/A'}</td>
-            <td class="text-center">${detalle.cod_total || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_preciounitario || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_total || 'N/A'}</td>
             <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
             `
             $('#historico-cotizaciones-container tbody').append(rowItem)
@@ -229,7 +251,7 @@ $(document).ready(() => {
         })
     }
 
-    function initHistoricoByProducto(producto){
+    function initHistoricoByProducto(producto) {
         console.log(producto)
 
         // debemos verificar que sea un material asignado
@@ -239,19 +261,19 @@ $(document).ready(() => {
         }
 
         try {
-            const urlCotizacion = `/cotizacion-findByProducto?pro_id=${producto}`
+            const urlCotizacion = `/cotizacion-detalle-findByProducto?pro_id=${producto}`
             initPagination(urlCotizacion,
                 initHistoricoCotizaciones,
-                dataTableOptions,
+                dataTableOptionsHistorico,
                 10,
                 "#historico-cotizaciones-container",
                 "#historico-cotizaciones-container-body",
                 "#pagination-container-historico-cotizacion")
 
             const urlOrdenCompra = `/ordencompra-findByProducto?pro_id=${producto}`
-            initPagination(urlOrdenCompra, 
-                initHistoricoOrdenCompra, 
-                dataTableOptions,
+            initPagination(urlOrdenCompra,
+                initHistoricoOrdenCompra,
+                dataTableOptionsHistorico,
                 10,
                 "#historico-ordenescompra-container",
                 "#historico-ordenescompra-container-body",
@@ -292,16 +314,16 @@ $(document).ready(() => {
 
         data.forEach(detalle => {
             const { cotizacion } = detalle
-            const { proveedor } = cotizacion
+            const { proveedor, moneda } = cotizacion
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(`${cotizacion.coc_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
+            rowItem.classList.add(`${cotizacion.coc_estado === 'RPR' && detalle.cod_cotizar != 1 ? 'table-danger' : 'table-success'}`)
 
             rowItem.innerHTML = `
             <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
             <td>${cotizacion.coc_numero}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
             <td>
-                <span class="badge bg-primary">
+                <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : cotizacion.coc_estado === 'RPR' ? 'bg-primary' : 'bg-success'}">
                     ${cotizacion.coc_estado}
                 </span>
             </td>
@@ -309,8 +331,8 @@ $(document).ready(() => {
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.cod_descripcion}</td>
             <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
-            <td class="text-center">${detalle.cod_preciounitario || 'N/A'}</td>
-            <td class="text-center">${detalle.cod_total || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_preciounitario || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_total || 'N/A'}</td>
             <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
             `
             $('#data-container-cotizacion tbody').append(rowItem)
@@ -436,30 +458,32 @@ $(document).ready(() => {
     $("#data-container-body").on('click', '.btn-responsable', async function () {
         // obtenemos el valor del id del detalle de material
         const idDetalleMaterial = $(this).data('detalle')
-        const responsable = $(this).data('responsable')
-        // establecemos los valores
+
+        // consultamos la informacion de detalle de material
+        const {data:ordenMaterial} = await client.get(`/detalleMaterialOrdenInterna/${idDetalleMaterial}`)
+
+        const idResponsable = ordenMaterial.tra_responsable
+        const nombreResponsable = ordenMaterial.responsable?.tra_nombre || 'Sin responsable'
+        const fechaResponsable = ordenMaterial.odm_fecasignacionresponsable ? parseDate(ordenMaterial.odm_fecasignacionresponsable) : 'Sin fecha de asignación'
         $("#idDetalleMaterialByResponsable").val(idDetalleMaterial)
+        $("#responsableDetalleMaterial").text(nombreResponsable)
+        $("#fechaAsignacionResponsableDetalleMaterial").text(fechaResponsable)
+
         // hacemos llamado a la lista de trabajadores
         const { data } = await client.get('/trabajadoresSimple')
-
-        if (responsable) {
-            const trabajadorResponsable = data.find(trabajador => trabajador.tra_id == responsable)
-            $("#responsableDetalleMaterial").text(trabajadorResponsable.tra_nombre)
-        } else {
-            $("#responsableDetalleMaterial").text("Sin responsable")
-        }
-
+        
         const $selectorResponsable = $('#selectorResponsableDetalleMaterial')
         $selectorResponsable.empty()
 
         // Ordenar la data alfabéticamente según el nombre (índice [1])
         data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
 
-        $selectorResponsable.append($('<option>').val('').text('Sin responsable'))
+        $selectorResponsable.append($('<option selected>').val('').text('Sin responsable'))
         data.forEach(trabajador => {
-            const option = $(`<option ${trabajador.tra_id == responsable ? 'selected' : ''}>`).val(trabajador.tra_id).text(trabajador.tra_nombre)
+            const option = $(`<option ${trabajador.tra_id == idResponsable ? 'selected' : ''}>`).val(trabajador.tra_id).text(trabajador.tra_nombre)
             $selectorResponsable.append(option.clone())
         })
+
         // abrimos el modal
         const loadModalResponsable = new bootstrap.Modal(document.getElementById('responsableModal'))
         loadModalResponsable.show()
@@ -479,10 +503,20 @@ $(document).ready(() => {
             tra_responsable: responsable
         }
         try {
-            await client.put(`/ordeninternamateriales/responsable/${idDetalleMaterial}`, formatData)
+            const { data } = await client.put(`/ordeninternamateriales/responsable/${idDetalleMaterial}`, formatData)
+            const row = dataTable.rows().nodes().to$().filter(function () {
+                return $(this).find('button.btn-responsable').data('detalle') == idDetalleMaterial;
+            })
+
+            if (row.length > 0) {
+                const botonResponsable = row.find('button.btn-responsable')
+                botonResponsable.text(data.responsable.tra_nombre)
+                dataTable.row(row).invalidate().draw(false)
+            }
+
+            // cerramos el modal
             const loadModalResponsable = bootstrap.Modal.getInstance(document.getElementById('responsableModal'))
             loadModalResponsable.hide()
-            // initPagination(`${apiURL}?alm_id=1&fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 50)
         } catch (error) {
             console.log(error)
             alert('Error al cambiar responsable')
@@ -660,7 +694,7 @@ $(document).ready(() => {
         $element.remove()
     })
 
-    $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-historico-detalle-material', async function() {
+    $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-historico-detalle-material', async function () {
         const producto = $(this).data('historico')
         initHistoricoByProducto(producto)
     })
