@@ -1016,7 +1016,7 @@ class OrdenInternaMaterialesController extends Controller
             $ordenInternaMaterial->update([
                 'pro_id' => $pro_id,
                 'odm_descripcion' => $pro_descripcion,
-                'odm_observacion' => $codigoIncrustado . $ordenInternaMaterial->odm_descripcion . ' - ' . $ordenInternaMaterial->odm_observacion,
+                'odm_observacion' => $codigoIncrustado . ($ordenInternaMaterial->odm_descripcion ? $ordenInternaMaterial->odm_descripcion : '') . ' - ' . ($ordenInternaMaterial->odm_observacion ? $ordenInternaMaterial->odm_observacion : ''),
                 'odm_usumodificacion' => $user->usu_codigo
             ]);
 
