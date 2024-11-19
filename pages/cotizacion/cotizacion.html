@@ -1,9 +1,9 @@
 <h2 class="mb-3 fs-4">Lista de Cotizaciones</h2>
 <div class="row justify-content-end mb-2">
   <div class="col-auto">
-    <a href="cotizacion/crear" class="btn btn-agregar">
+    <!-- <a href="cotizacion/crear" class="btn btn-agregar">
       Crear Cotizacion
-    </a>
+    </a> -->
   </div>
 </div>
 <div class="row mb-3">
@@ -57,6 +57,7 @@
     <th>Nro Cot proveedor</th>
     <th>Doc. proveedor</th>
     <th>Raz. social proveedor</th>
+    <th class="text-center">Moneda</th>
     <th class="text-center">Total</th>
     <th>Ver detalle</th>
     <th>Estado</th>
@@ -80,15 +81,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <table id="tbl-cotizacion-detalle" class="table mt-3">
+        <table id="tbl-cotizacion-detalle" class="table mt-3 table-striped nowrap">
           <thead>
             <tr>
               <th>Item</th>
+              <th class="text-center">Cotizar</th>
+              <th>OT</th>
               <th>Descripción</th>
               <th>Observación</th>
               <th class="text-center">Cantidad</th>
-              <th class="text-center">Precio Unitario</th>
-              <th class="text-center">Total</th>
+              <th class="text-center">PRECIO s/IGV</th>
+              <th class="text-center">TOTAL s/IGV</th>
               <th class="text-center">Tmp. Entrega</th>
             </tr>
           </thead>

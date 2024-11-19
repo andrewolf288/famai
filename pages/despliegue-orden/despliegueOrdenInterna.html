@@ -111,9 +111,9 @@
                 <div>
                     <h2 class="fs-5">Proveedores</h2>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="proveedoresSUNAT" class="form-label">
-                                RUC/DNI
+                                RUC/DNI de SUNAT
                             </label>
                             <div class="input-group">
                                 <input type="text" id="proveedoresSUNAT" class="form-control"
@@ -127,19 +127,22 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-9 mb-3 position-relative">
                             <label for="proveedoresInput" class="form-label">
                                 Razón Social
                             </label>
                             <input type="text" id="proveedoresInput" class="form-control"
                                 placeholder="Ingrese razón social..." autocomplete="off">
-                            <ul id="resultadosLista" class="list-group mt-2"></ul>
+                            <ul id="resultadosLista" class="list-group mt-2 position-absolute"
+                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
+                            </ul>
                         </div>
                     </div>
                     <!-- SECCION DE DATA PROVEEDORES-->
                     <table id="tbl-cotizaciones-proveedores" class="table mt-3">
                         <thead>
                             <tr>
+                                <th>Filtro</th>
                                 <th class="col-3">Nombre</th>
                                 <th class="col-1 text-center">Tip. Documento</th>
                                 <th class="col-2">Documento</th>
@@ -479,7 +482,6 @@
                                 style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th></th>
                                         <th class="text-start">Fecha Ord. Compra</th>
                                         <th>Num. Ord. Compra</th>
                                         <th>Estado</th>

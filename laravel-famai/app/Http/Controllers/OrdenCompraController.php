@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DateHelper;
 use App\OrdenCompra;
 use App\OrdenCompraDetalle;
+use App\OrdenInternaMateriales;
 use App\Trabajador;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\UtilHelper;
 
 class OrdenCompraController extends Controller
 {
@@ -55,6 +58,7 @@ class OrdenCompraController extends Controller
                 'occ_total' => 'required|numeric|min:1',
                 'occ_subtotal' => 'required|numeric|min:1',
                 'occ_impuesto' => 'required|numeric|min:1',
+                'occ_porcentajeimpuesto' => 'required|numeric|min:1',
                 'occ_observacionpago' => 'nullable|string',
                 'occ_adelanto' => 'nullable|numeric|min:1',
                 'occ_saldo' => 'nullable|numeric|min:1',
@@ -86,17 +90,26 @@ class OrdenCompraController extends Controller
                 'occ_total' => $validatedData['occ_total'],
                 'occ_subtotal' => $validatedData['occ_subtotal'],
                 'occ_impuesto' => $validatedData['occ_impuesto'],
+                'occ_porcentajeimpuesto' => $validatedData['occ_porcentajeimpuesto'],
                 'occ_observacionpago' => $validatedData['occ_observacionpago'],
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
-                'occ_estado' => '1',
+                'occ_estado' => 'CRD',
                 'occ_usucreacion' => $user->usu_codigo,
                 'occ_fecmodificacion' => null
             ]);
 
             foreach ($validatedData['detalle_productos'] as $detalle) {
+                // buscamos el material en la base de datos
+                $material = OrdenInternaMateriales::findOrFail($detalle['odm_id']);
+                $material->update([
+                    'odm_estado' => 'ODC',
+                    'odm_fecmodificacion' => Carbon::now(),
+                    'odm_usumodificacion' => $user->usu_codigo
+                ]);
+
                 $ordencompraDetalle = OrdenCompraDetalle::create([
-                    'pro_id' => $detalle['pro_id'],
+                    'odm_id' => $detalle['odm_id'],
                     'occ_id' => $ordencompra->occ_id,
                     'ocd_orden' => $detalle['ocd_orden'],
                     'ocd_descripcion' => $detalle['ocd_descripcion'],
@@ -214,11 +227,44 @@ class OrdenCompraController extends Controller
     {
         try {
             $occ_id = $request->input('occ_id');
-            $ordenCompra = OrdenCompra::with(['proveedor', 'moneda', 'elaborador', 'solicitador', 'autorizador', 'detalleOrdenCompra.producto.unidad'])->findOrFail($occ_id);
+            $ordenCompra = OrdenCompra::with([
+                'proveedor.cuentasBancarias.entidadBancaria', 
+                'moneda', 
+                'elaborador', 
+                'solicitador', 
+                'autorizador', 
+                'detalleOrdenCompra.detalleMaterial.producto.unidad'
+            ])->findOrFail($occ_id);
+            
+            $cuentas_bancarias = $ordenCompra->proveedor->cuentasBancarias ?? [];
+
+            $cuenta_banco_nacion = collect($cuentas_bancarias)->first(function ($cuenta) {
+                return UtilHelper::compareStringsIgnoreCaseAndAccents($cuenta->entidad_bancaria->eba_descripcion ?? '', 'Banco de la Nación');
+            });
+        
+            $cuenta_soles = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
+                if ($cuenta_banco_nacion) {
+                    return $cuenta->mon_codigo === 'SOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
+                } else {
+                    return $cuenta->mon_codigo === 'SOL';
+                }
+            });
+        
+            $cuenta_dolares = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
+                if ($cuenta_banco_nacion) {
+                    return $cuenta->mon_codigo === 'DOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
+                } else {
+                    return $cuenta->mon_codigo === 'DOL';
+                }
+            });
+
             $data = array_merge(
                 $ordenCompra->toArray(),
                 [
-                    'occ_fecha_formateada' => Carbon::parse($ordenCompra->occ_fecha)->format('d/m/Y'),
+                    'occ_fecha_formateada' => DateHelper::parserFechaActual(),
+                    'cuenta_banco_nacion' => $cuenta_banco_nacion,
+                    'cuenta_soles' => $cuenta_soles,
+                    'cuenta_dolares' => $cuenta_dolares
                 ]
             );
             $pdf = Pdf::loadView('orden-compra.ordencompra', $data);
@@ -257,32 +303,5 @@ class OrdenCompraController extends Controller
         }
 
         return response()->json('Se aprobaron las ordenes de compra', 200);
-    }
-
-    // funcion para traer orden de compra by producto
-    public function findOrdenCompraByProducto(Request $request)
-    {
-        $pageSize = $request->input('page_size', 10);
-        $page = $request->input('page', 1);
-        $producto = $request->input('pro_id');
-
-        $query =OrdenCompraDetalle::with(['detalleMaterial.producto', 'ordenCompra']);
-
-        if($producto !== null) {
-            $producto = (int) $producto;
-            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
-                $q->where('pro_id', $producto);
-            });
-        }
-
-        $query->orderBy('occ_fecha', 'desc');
-
-        $ordencompraDetalle = $query->paginate($pageSize, ['*'], 'page', $page);
-
-        return response()->json([
-            'message' => 'Se listan las ordenes de compra',
-            'data' => $ordencompraDetalle->items(),
-            'count' => $ordencompraDetalle->total()
-        ]);
     }
 }

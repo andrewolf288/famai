@@ -29,7 +29,7 @@ class OrdenCompraDetalle extends Model
     const UPDATED_AT = 'ocd_fecmodificacion';
 
     // detalle de material
-    public function detalleMaterial() 
+    public function detalleMaterial()
     {
         return $this->belongsTo(OrdenInternaMateriales::class, 'odm_id', 'odm_id');
     }

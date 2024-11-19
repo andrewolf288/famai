@@ -179,26 +179,26 @@
             <td>
                 <div class="info-row">
                     <span class="label">EMPRESA:</span>
-                    <span class="value">{{ $proveedor['prv_nombre'] }}</span>
+                    <span class="value">{{ $proveedor['prv_nombre'] ? $proveedor['prv_nombre'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">RUC:</span>
-                    <span class="value">{{ $proveedor['prv_nrodocumento'] }}</span>
+                    <span class="value">{{ $proveedor['prv_nrodocumento'] ? $proveedor['prv_nrodocumento'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">DIRECCION:</span>
-                    <span class="value">{{ $proveedor['prv_direccion'] }}</span>
+                    <span class="value">{{ $proveedor['prv_direccion'] ? $proveedor['prv_direccion'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CONTACTO:</span>
-                    <span class="value">{{ $proveedor['prv_contacto'] }}</span>
+                    <span class="value">{{ $proveedor['prv_contacto'] ? $proveedor['prv_contacto'] : '' }}</span>
                 </div>
             </td>
             {{-- Columna 2 --}}
             <td>
                 <div class="info-row">
                     <span class="label">TLF:</span>
-                    <span class="value">{{ $proveedor['prv_telefono'] }}/{{ $proveedor['prv_whatsapp'] }}</span>
+                    <span class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}/{{ $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CTA S/:</span>
@@ -220,11 +220,11 @@
         <tr>
             <td>
                 <div class="info-row">
-                    <span class="label">FECH. ENTREGA:</span>
+                    <span class="label">FEC. ENTREGA:</span>
                     <span class="value">{{ $coc_fechaentrega ? DateTime::createFromFormat('Y-m-d', $coc_fechaentrega)->format('d/m/Y'): '' }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">FECH. VALIDEZ:</span>
+                    <span class="label">FEC. VALIDEZ:</span>
                     <span class="value">{{ $coc_fechavalidez ? DateTime::createFromFormat('Y-m-d', $coc_fechavalidez)->format('d/m/Y'): '' }}</span>
                 </div>
             </td>
@@ -293,7 +293,7 @@
         <tr>
             <td style="width: 77.5%;"></td>
             <td style="width: 22.5%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
-                <span style="float: left;">TOTAL S/</span>
+                <span style="float: left;">TOTAL {{$moneda['mon_simbolo']}}</span>
                 <span style="float: right;">{{ $coc_total }}</span>
             </td>
         </tr>

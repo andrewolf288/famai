@@ -231,6 +231,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('requerimientos', [RequerimientoController::class, 'store']);
 });
 
+// rutas de requerimientos detalles
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('requerimientosdetalles', [RequerimientoController::class, 'showDetalleRequerimientos']);
+});
+
 // rutas de reportes
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('/generarReporteOrdenTrabajo', [OrdenInternaController::class, 'exportOrdenInternaPDF']);
@@ -317,11 +322,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
     Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
-    Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
 });
 
 // rutas de detalle de cotizacion
 Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
     Route::delete('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'destroy']);
     Route::put('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'update']);
     Route::get('cotizacion-detalle-pendiente', [CotizacionDetalleController::class, 'findDetalleByEstadoPendiente']);
@@ -342,7 +347,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
     Route::put('ordencompra/{id}', [OrdenCompraController::class, 'update']);
     Route::post('ordencompra/aprobar-masivo', [OrdenCompraController::class, 'aprobarMasivo']);
-    Route::get('ordencompra-findByProducto', [OrdenCompraController::class, 'findOrdenCompraByProducto']);
 });
 
 // rutas de ordendes de compra detalle
@@ -351,6 +355,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordencompra-cotizacion/{id}', [OrdenCompraDetalleController::class, 'findCotizacionByOrdenCompraDetalle']);
     Route::delete('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'destroy']);
     Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
+    Route::get('ordencompra-detalle-findByProducto', [OrdenCompraDetalleController::class, 'findOrdenCompraByProducto']);
 });
 
 // rutas de notificaciones

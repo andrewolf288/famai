@@ -49,13 +49,14 @@ $(document).ready(function () {
 
             // recorremos el detalle
             detalle_cotizacion.forEach(detalle => {
-                const { cod_id, cod_cantidad, cod_descripcion, cod_observacion, cod_orden, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, cod_marcas, detalle_material } = detalle
+                const { odm_id, cod_id, cod_cantidad, cod_descripcion, cod_observacion, cod_orden, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, cod_marcas, detalle_material } = detalle
                 const {producto} = detalle_material
 
                 const rowItem = document.createElement('tr')
                 rowItem.classList.add('detalle-cotizacion')
                 // inicializamos su dataset
                 rowItem.dataset.id = cod_id
+                rowItem.dataset.odmId = odm_id
                 // construimos la información a mostrar
                 rowItem.innerHTML = `
                     <td class="text-center">

@@ -46,4 +46,10 @@ class Proveedor extends Model
     {
         return $this->belongsTo(Ubigeo::class, 'ubi_codigo');
     }
+
+    // cuentas de bancos
+    public function cuentasBancarias()
+    {
+        return $this->hasMany(ProveedorCuentaBanco::class, 'prv_id', 'prv_id');
+    }
 }

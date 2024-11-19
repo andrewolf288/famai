@@ -88,3 +88,13 @@ function escapeHTML(text) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
 }
+
+function compareStringsIgnoreCaseAndAccents(str1, str2) {
+    const normalize = (str) => 
+        str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+    return normalize(str1) === normalize(str2);
+}

@@ -31,6 +31,20 @@ $(document).ready(() => {
         paging: false,
         searching: true,
         info: true,
+        language: {
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            search: "Buscar:",
+            zeroRecords: "No se encontraron resultados",
+            select: {
+                rows: {
+                    _: " - %d filas seleccionadas",
+                    0: " - Ninguna fila seleccionada",
+                    1: " - 1 fila seleccionada"
+                }
+            },
+        },
         columnDefs: [
             {
                 targets: 0,
@@ -41,13 +55,15 @@ $(document).ready(() => {
                 render: DataTable.render.select(),
                 targets: 1,
                 className: 'form-check-input'
-            }
+            },
+            {targets: [7, 8, 9], searchable: true},
+            {targets: [0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], searchable: false},
         ],
         select: {
             style: 'multi',
             selector: 'td.form-check-input'
         },
-        order: [[2, 'asc']],
+        order: [[4, 'desc']],
     }
 
     const dataTableOptionsHistorico = {
@@ -228,7 +244,7 @@ $(document).ready(() => {
         $('#historico-ordenescompra-container tbody').empty()
         data.forEach(detalle => {
             const { orden_compra } = detalle
-            const { proveedor } = orden_compra
+            const { proveedor, moneda } = orden_compra
             const rowItem = document.createElement('tr')
             rowItem.classList.add(`${orden_compra.occ_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
 
@@ -244,24 +260,39 @@ $(document).ready(() => {
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.ocd_descripcion}</td>
             <td class="text-center">${detalle.ocd_cantidad || 'N/A'}</td>
-            <td class="text-center">${detalle.ocd_preciounitario || 'N/A'}</td>
-            <td class="text-center">${detalle.ocd_total || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_preciounitario || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_total || 'N/A'}</td>
             `
             $('#historico-ordenescompra-container tbody').append(rowItem)
         })
     }
 
     function initHistoricoByProducto(producto) {
-        console.log(producto)
-
         // debemos verificar que sea un material asignado
         if (producto === null) {
             alert("Este material no tiene un código asignado")
             return
         }
 
+        let proveedoresFilter = []
+        // tenemos que detectar si el modal de cotizacion esta abierto
+        const loadModalPresupuesto = bootstrap.Modal.getInstance(document.getElementById('cotizacionesModal'))
+        if (loadModalPresupuesto) {
+            // buscamos el numero de documento de todos los proveedores que tiene un check en filter check
+            proveedoresFilter = $('.filter-check').filter(':checked').map((index, element) => {
+                const row = $(element).closest('tr')
+                const documentoProveedor = row.find('.nrodocumento-proveedor').text()
+                return documentoProveedor
+            }).get()
+        }
+
         try {
-            const urlCotizacion = `/cotizacion-detalle-findByProducto?pro_id=${producto}`
+            const params = new URLSearchParams({
+                pro_id: producto,
+                param: proveedoresFilter.join(','),
+            })
+
+            const urlCotizacion = `/cotizacion-detalle-findByProducto?${params.toString()}`;
             initPagination(urlCotizacion,
                 initHistoricoCotizaciones,
                 dataTableOptionsHistorico,
@@ -270,7 +301,7 @@ $(document).ready(() => {
                 "#historico-cotizaciones-container-body",
                 "#pagination-container-historico-cotizacion")
 
-            const urlOrdenCompra = `/ordencompra-findByProducto?pro_id=${producto}`
+            const urlOrdenCompra = `/ordencompra-detalle-findByProducto?${params.toString()}`
             initPagination(urlOrdenCompra,
                 initHistoricoOrdenCompra,
                 dataTableOptionsHistorico,
@@ -353,7 +384,7 @@ $(document).ready(() => {
 
         data.forEach(detalle => {
             const { orden_compra } = detalle
-            const { proveedor } = orden_compra
+            const { proveedor, moneda } = orden_compra
             const rowItem = document.createElement('tr')
             rowItem.classList.add(`${orden_compra.occ_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
 
@@ -369,8 +400,8 @@ $(document).ready(() => {
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.ocd_descripcion}</td>
             <td class="text-center">${detalle.ocd_cantidad || 'N/A'}</td>
-            <td class="text-center">${detalle.ocd_preciounitario || 'N/A'}</td>
-            <td class="text-center">${detalle.ocd_total || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_preciounitario || 'N/A'}</td>
+            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_total || 'N/A'}</td>
             `
             $('#data-container-ordencompra tbody').append(rowItem)
         })
@@ -780,6 +811,9 @@ $(document).ready(() => {
         const row = `
         <tr data-id-proveedor="${prv_id}">
             <input class="direccion-proveedor" type="hidden" value="${prv_direccion || ''}"/>
+            <td class="text-center">
+                <input type="checkbox" class="form-check-input filter-check"/>
+            </td>
             <td class="nombre-proveedor">${prv_nombre}</td>
             <td class="tipodocumento-proveedor text-center">${tdo_codigo}</td>
             <td class="nrodocumento-proveedor">${prv_nrodocumento}</td>

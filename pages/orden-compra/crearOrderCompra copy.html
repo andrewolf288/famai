@@ -27,61 +27,49 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-9 position-relative">
+                    <div class="col-md-9">
                         <label for="proveedoresInput">
                             Razón Social
                         </label>
                         <input type="text" id="proveedoresInput" class="form-control"
                             placeholder="Ingrese razón social..." autocomplete="off">
-                        <ul id="resultadosListaProveedores" class="list-group mt-2 position-absolute"
-                        style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
-                        </ul>
+                        <ul id="resultadosListaProveedores" class="list-group"></ul>
                     </div>
                 </div>
                 <div class="row mt-2">
                     <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
                     <div class="col-md-3">
                         <label for="documentoProveedorInput">Documento</label>
-                        <input type="text" id="documentoProveedorInput" class="form-control" readonly disabled/>
+                        <input type="text" id="documentoProveedorInput" class="form-control" readonly />
                     </div>
                     <div class="col-md-9">
                         <label for="razonSocialProveedorInput">Nombre</label>
-                        <input type="text" id="razonSocialProveedorInput" class="form-control" readonly disabled/>
+                        <input type="text" id="razonSocialProveedorInput" class="form-control" readonly />
                     </div>
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-4">
                         <label for="correoProveedorInput">Correo</label>
-                        <input type="email" id="correoProveedorInput" class="form-control" readonly disabled/>
+                        <input type="email" id="correoProveedorInput" class="form-control" readonly />
                     </div>
                     <div class="col-md-4">
                         <label for="contactoProveedorInput">Contacto</label>
-                        <input type="text" id="contactoProveedorInput" class="form-control" readonly disabled/>
+                        <input type="text" id="contactoProveedorInput" class="form-control" readonly />
                     </div>
                     <div class="col-md-4">
                         <label for="whatsappProveedorInput">Whatsapp</label>
-                        <input type="text" id="whatsappProveedorInput" class="form-control" readonly disabled/>
+                        <input type="text" id="whatsappProveedorInput" class="form-control" readonly />
                     </div>
                 </div>
                 <div class="row mt-2">
                     <div class="col-md-12">
                         <label for="direccionProveedorInput">Dirección</label>
-                        <textarea id="direccionProveedorInput" class="form-control" readonly disabled></textarea>
+                        <textarea id="direccionProveedorInput" class="form-control" readonly></textarea>
                     </div>
                 </div>
                 <div class="row mt-2">
-                    <div class="col-md-4">
-                        <label for="cuentaSolesProveedorOrdenCompra">CTA S/</label>
-                        <input type="text" id="cuentaSolesProveedorOrdenCompra" class="form-control" readonly disabled>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="cuentaDolaresProveedorOrdenCompra">CTA $</label>
-                        <input type="text" id="cuentaDolaresProveedorOrdenCompra" class="form-control" readonly disabled>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="cuentaBancoNacionProveedorOrdenCompra">CTA BCO NACION S/</label>
-                        <input type="text" id="cuentaBancoNacionProveedorOrdenCompra" class="form-control" readonly disabled>
-                    </div>
+                    <label for="cuentaProveedorOrdenCompra">Cuenta Proveedor</label>
+                    <select id="cuentaProveedorOrdenCompra" class="form-select"></select>
                 </div>
             </div>
         </div>
@@ -101,10 +89,7 @@
                     </div>
                     <div class="col-md-8">
                         <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
-                        <select id="formaDePagoOrdenCompraInput" class="form-select">
-                            <option value="CONTADO" selected>CONTADO</option>
-                            <option value="CREDITO">CREDITO</option>
-                        </select>
+                        <input type="text" id="formaDePagoOrdenCompraInput" class="form-control">
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -190,13 +175,19 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title">Productos</h5>
+            <!-- <button class="btn btn-success" id="addProductBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                    <path
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                </svg>
+            </button> -->
         </div>
         <div class="card-body">
             <table class="table" id="productosOrdenCompraTable">
                 <thead>
                     <tr>
                         <th>Item</th>
-                        <th>OT</th>
                         <th>Descripción</th>
                         <th>Cantidad</th>
                         <th>Precio s/IGV</th>
@@ -215,25 +206,17 @@
     <div class="col-md-6 col-lg-4">
         <div class="card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex justify-content-between">
                     <span class="fw-bold">Subtotal:</span>
-                    <span><span id="subtotalOrdenCompra">0.00</span></span>
+                    <span>S/<span id="subtotalOrdenCompra">0.00</span></span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="d-flex align-items-center">
-                        <span class="fw-bold me-2">IGV</span>
-                        <div class="input-group input-group-sm">
-                            <input type="number" id="porcentajeIGVOrdenCompra" class="form-control" value="18"
-                                style="width: 70px;"
-                            />
-                            <span class="input-group-text">%</span>
-                        </div>
-                    </div>
-                    <span><span id="igvOrdenCompra">0.00</span></span>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">IGV (18%):</span>
+                    <span>S/<span id="igvOrdenCompra">0.00</span></span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between">
                     <span class="fw-bold">Total:</span>
-                    <span><span id="totalOrdenCompra">0.00</span></span>
+                    <span>S/<span id="totalOrdenCompra">0.00</span></span>
                 </div>
             </div>
         </div>
@@ -244,9 +227,54 @@
     <button class="btn btn-primary" id="btn-guardar-orden-compra">Guardar</button>
 </div>
 
-<!-- DIALOG DE COTIZACIONES DESPLEGADO -->
-<div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel"
-    aria-hidden="true">
+<!-- DIALOG AGREGAR PRODUCTOS -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Ingrese una orden de trabajo" id="inputOrdenTrabajo">
+                    <button class="btn btn-primary" id="btn-buscar-orden-trabajo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                          </svg>
+                    </button>
+                </div>
+                <table id="tbl-detalle-orden-interna" class="table table-striped nowrap mt-3" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th class="">Código</th>
+                            <th class="detalle-descripcion-oi">Descripción</th>
+                            <th class="detalle-observacion-oi">Observación</th>
+                            <th class="text-center detalle-cantidad-oi">Cantidad</th>
+                            <th class="text-center">Tipo</th>
+                            <th class="text-center">Estado</th>
+                            <th>Fec. Creación</th>
+                            <th>Usu. Creador</th>
+                            <th>Fec. Modificación</th>
+                            <th>Usu. Modificador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DIALOG DE COTIZACIONES -->
+ <div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
@@ -254,36 +282,37 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex flex-row justify-content-center mb-3">
-                    <button class="btn btn-primary" id="btn-open-modal-requerimientos">Sin cotizar</button>
-                </div>
-                <div class="row mb-3">
-                    <table id="cotizaciones-container" class="table table-striped nowrap" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>OT</th>
-                                <th class="text-start">Fecha Cot.</th>
-                                <th>Nro cotización</th>
-                                <th>Nro Cot proveedor</th>
-                                <th>Doc. proveedor</th>
-                                <th>Raz. social proveedor</th>
-                                <th>Descripción</th>
-                                <th class="text-center">Cantidad</th>
-                                <th class="text-center">Precio unitario</th>
-                                <th class="text-center">Total</th>
-                                <th>Tmp. entrega</th>
-                                <th>Observación</th>
-                                <th>Estado</th>
-                                <th>Historial</th>
-                                <th>Usu. Creador</th>
-                                <th>Fec. Creación</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cotizaciones-container-body">
-                        </tbody>
-                    </table>
+                <div>
+                    <div class="row mb-3">
+                        <div>
+                            <table id="cotizaciones-container" class="table table-striped nowrap"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>OT</th>
+                                        <th class="text-start">Fecha Cot.</th>
+                                        <th>Nro cotización</th>
+                                        <th>Nro Cot proveedor</th>
+                                        <th>Doc. proveedor</th>
+                                        <th>Raz. social proveedor</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Precio unitario</th>
+                                        <th class="text-center">Total</th>
+                                        <th>Tmp. entrega</th>
+                                        <th>Observación</th>
+                                        <th>Estado</th>
+                                        <th>Usu. Creador</th>
+                                        <th>Fec. Creación</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cotizaciones-container-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -292,128 +321,4 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- DIALOG DE REQUERIMIENTOS DESPLEGADO -->
-<div class="modal fade" id="requerimientosModal" tabindex="-1" aria-labelledby="requerimientosModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="requerimientosModalLabel">Requerimientos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <table id="requerimientos-container" class="table table-striped nowrap" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>Fecha</th>
-                                <th>Fec. Entrega</th>
-                                <th>Código</th>
-                                <th>Descripción</th>
-                                <th>Observación</th>
-                                <th>Cantidad</th>
-                                <th>Área</th>
-                                <th>Responsable</th>
-                                <th>Historial</th>
-                                <th>Usu. Creador</th>
-                                <th>Fec. Creación</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requerimientos-container-body">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-agregar-requerimientos-detalle">Crear orden</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- DIALOG HISTORICO DE COTIZACIONES -->
-<div class="modal fade" id="historicoModal" tabindex="-1" aria-labelledby="historicoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="historicoModalLabel">Histórico</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- HISTORICO DE COTIZACIONES -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <p class="fw-bold">Cotizaciones</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-                                <div class="pagination-container" id="pagination-container-historico-cotizacion"></div>
-                            </div>
-                        </div>
-                        <div class="overflow-auto" style="height: 50%;">
-                            <table id="historico-cotizaciones-container" class="table table-striped nowrap"
-                                style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th class="text-start">Fecha Cot.</th>
-                                        <th>Nro cotización</th>
-                                        <th>Nro Cot proveedor</th>
-                                        <th>Estado</th>
-                                        <th>Doc. proveedor</th>
-                                        <th>Raz. social proveedor</th>
-                                        <th>Descripción</th>
-                                        <th class="text-center">Cantidad</th>
-                                        <th class="text-center">Precio unitario</th>
-                                        <th class="text-center">Total</th>
-                                        <th>Tmp. entrega</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historico-cotizaciones-container-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <!-- HISTORICO DE ORDENES DE COMPRA -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <p class="fw-bold">Ordenes de compra</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-                                <div class="pagination-container" id="pagination-container-historico-ordencompra"></div>
-                            </div>
-                        </div>
-                        <div class="overflow-auto" style="height: 50%;">
-                            <table id="historico-ordenescompra-container" class="table table-striped nowrap"
-                                style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th class="text-start">Fecha Ord. Compra</th>
-                                        <th>Num. Ord. Compra</th>
-                                        <th>Estado</th>
-                                        <th>Doc. proveedor</th>
-                                        <th>Raz. social proveedor</th>
-                                        <th>Descripción</th>
-                                        <th class="text-center">Cantidad</th>
-                                        <th class="text-center">Precio unitario</th>
-                                        <th class="text-center">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historico-ordenescompra-container-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+ </div>

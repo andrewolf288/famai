@@ -51,13 +51,16 @@
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
   <thead>
+    <th>Fecha Ord. Compra</th>
     <th class="text-start">Nro. Ord. Compra</th>
-    <th>Proveedor</th>
+    <th>Doc. proveedor</th>
+    <th>Raz. social proveedor</th>
     <th class="text-center">Moneda</th>
     <th class="text-center">Subtotal</th>
     <th class="text-center">Impuesto</th>
+    <th class="text-center">% IGV</th>
     <th class="text-center">Total</th>
-    <th>Fecha</th>
+    <th class="text-center">Ver detalle</th>
     <th>Estado</th>
     <th class="text-center">Acciones</th>
     <th>Fec. Creación</th>
@@ -68,3 +71,35 @@
   <tbody id="data-container-body">
   </tbody>
 </table>
+
+<!-- DETALLE DE ORDEN DE COMPRA -->
+<div class="modal fade" id="detalleOrdenCompraModal" tabindex="-1" aria-labelledby="detalleOrdenCompraModalLabel"
+aria-hidden="true">
+<div class="modal-dialog modal-fullscreen">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="detalleOrdenCompraModalLabel">Detalle Orden de Compra</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <table id="tbl-ordencompra-detalle" class="table mt-3 table-striped nowrap">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>OT</th>
+            <th>Descripción</th>
+            <th class="text-center">Cantidad</th>
+            <th class="text-center">PRECIO s/IGV</th>
+            <th class="text-center">TOTAL s/IGV</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    </div>
+  </div>
+</div>
+</div>

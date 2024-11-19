@@ -28,30 +28,33 @@
                             <input type="text" id="idProveedorInput" value="" hidden>
                             <div class="col-md-3">
                                 <label for="documentoProveedorInput">Documento</label>
-                                <input type="text" id="documentoProveedorInput" class="form-control" readonly />
+                                <input type="text" id="documentoProveedorInput" class="form-control" disabled />
                             </div>
                             <div class="col-md-9">
                                 <label for="razonSocialProveedorInput">Nombre</label>
-                                <input type="text" id="razonSocialProveedorInput" class="form-control" readonly />
+                                <input type="text" id="razonSocialProveedorInput" class="form-control" disabled />
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-md-4">
                                 <label for="contactoProveedorInput">Contacto</label>
-                                <input type="text" id="contactoProveedorInput" class="form-control" readonly />
+                                <input type="text" id="contactoProveedorInput" class="form-control" disabled />
                             </div>
                             <div class="col-md-4">
                                 <label for="telefonoProveedorInput">Teléfono</label>
-                                <input type="text" id="telefonoProveedorInput" class="form-control" readonly />
+                                <input type="text" id="telefonoProveedorInput" class="form-control" disabled />
                             </div>
                             <div class="col-md-4">
                                 <label for="whatsappProveedorInput">Celular</label>
-                                <input type="text" id="whatsappProveedorInput" class="form-control" readonly />
+                                <input type="text" id="whatsappProveedorInput" class="form-control" disabled />
                             </div>
                         </div>
                         <div class="row mt-2">
-                            <label for="direccionProveedorInput">Dirección</label>
-                            <textarea name="" id="direccionProveedorInput" class="form-control" rows="1" readonly></textarea>
+                            <div class="col-md-12">
+                                <label for="direccionProveedorInput">Dirección</label>
+                                <textarea name="" id="direccionProveedorInput" class="form-control" rows="1"
+                                    disabled></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -127,6 +130,18 @@
                     <h5 class="card-title">Productos</h5>
                 </div>
                 <div class="card-body table-responsive">
+                    <div class="alert alert-primary d-flex align-items-center mb-2" role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img"
+                            aria-label="Warning:">
+                            <path
+                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                        </svg>
+                        <div>
+                            Se debe desmarcar la casilla de aquellos detalles de cotización que no se quiere cotizar por
+                            el proveedor
+                        </div>
+                    </div>
                     <table class="table" id="productosCotizacionTable">
                         <thead>
                             <tr>
@@ -137,8 +152,8 @@
                                 <th class="col-3">Observación</th>
                                 <th class="col-1">Tiempo Entrega (dias)</th>
                                 <th class="col-1 text-center">Cantidad</th>
-                                <th class="col-1 text-center">Pre. Unitario</th>
-                                <th class="col-1 text-center">Total</th>
+                                <th class="col-1 text-center">Precio s/IGV</th>
+                                <th class="col-1 text-center">Total s/IGV</th>
                                 <th class="col-1 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -172,7 +187,8 @@
 
     <!-- Cuadro de mensaje -->
     <div id="mensajeExito" class="alert alert-success text-center p-4" role="alert" style="display: none;">
-        ¡Su cotización fue enviada exitosamente! Se adjuntará una copia de la cotización a su correo electrónico ingresado.
+        ¡Su cotización fue enviada exitosamente! Se adjuntará una copia de la cotización a su correo electrónico
+        ingresado.
     </div>
 
     <!-- Variables de configuracion -->

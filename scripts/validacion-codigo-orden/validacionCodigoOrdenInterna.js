@@ -24,8 +24,26 @@ $(document).ready(() => {
         destroy: true,
         responsive: true,
         paging: false,
-        searching: false,
-        info: false
+        searching: true,
+        info: false,
+        language: {
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            search: "Buscar:",
+            zeroRecords: "No se encontraron resultados",
+            select: {
+                rows: {
+                    _: " - %d filas seleccionadas",
+                    0: " - Ninguna fila seleccionada",
+                    1: " - 1 fila seleccionada"
+                }
+            },
+        },
+        columnDefs: [
+            {targets: [3, 4, 5], searchable: true},
+            {targets: [0, 1, 2, 6, 7], searchable: false},
+        ]
     }
 
     // Inicializacion de data table

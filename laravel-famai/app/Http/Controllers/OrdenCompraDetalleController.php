@@ -11,7 +11,8 @@ class OrdenCompraDetalleController extends Controller
 {
     public function findDetalleByOrdenCompra($id)
     {
-        $detalleCotizacion = OrdenCompraDetalle::with('detalleMaterial.ordenInternaParte.ordenInterna')->where('occ_id', $id)->get();
+        $detalleCotizacion = OrdenCompraDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'ordenCompra.moneda'])
+            ->where('occ_id', $id)->get();
         return response()->json($detalleCotizacion);
     }
 
@@ -30,7 +31,7 @@ class OrdenCompraDetalleController extends Controller
             'ocd_preciounitario' => 'required',
             'ocd_total' => 'required',
         ])->validate();
-        
+
         $ordencompra->update([
             'ocd_descripcion' => $request->input('ocd_descripcion'),
             'ocd_cantidad' => $request->input('ocd_cantidad'),
@@ -53,7 +54,7 @@ class OrdenCompraDetalleController extends Controller
         // arreglamos el orden de la cotizacion
         $ordenescompra = OrdenCompraDetalle::where('occ_id', $ordencompraID)->get();
         $numeroOrden = 1;
-        
+
         foreach ($ordenescompra as $detalle) {
             $detalle->update([
                 'ocd_orden' => $numeroOrden
@@ -68,5 +69,44 @@ class OrdenCompraDetalleController extends Controller
     {
         $detalleCotizacion = CotizacionDetalle::with('cotizacion.proveedor')->where('odm_id', $id)->get();
         return response()->json($detalleCotizacion);
+    }
+
+    // funcion para traer orden de compra by producto
+    public function findOrdenCompraByProducto(Request $request)
+    {
+        $pageSize = $request->input('page_size', 10);
+        $page = $request->input('page', 1);
+        $producto = $request->input('pro_id');
+
+        $proveedoresFilter = $request->input('param', '');
+
+        if ($proveedoresFilter) {
+            $proveedoresFilter = explode(',', $proveedoresFilter);
+        }
+
+        $query = OrdenCompraDetalle::with(['detalleMaterial.producto.unidad', 'ordenCompra.proveedor', 'ordenCompra.moneda']);
+
+        if ($producto !== null) {
+            $producto = (int) $producto;
+            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
+                $q->where('pro_id', $producto);
+            });
+        }
+
+        if (!empty($proveedoresFilter)) {
+            $query->whereHas('cotizacion.proveedor', function ($q) use ($proveedoresFilter) {
+                $q->whereIn('prv_nrodocumento', $proveedoresFilter);
+            });
+        }
+
+        $query->orderBy('ocd_feccreacion', 'desc');
+
+        $ordencompraDetalle = $query->paginate($pageSize, ['*'], 'page', $page);
+
+        return response()->json([
+            'message' => 'Se listan las ordenes de compra',
+            'data' => $ordencompraDetalle->items(),
+            'count' => $ordencompraDetalle->total()
+        ]);
     }
 }

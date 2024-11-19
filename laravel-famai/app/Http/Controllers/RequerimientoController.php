@@ -49,6 +49,31 @@ class RequerimientoController extends Controller
         ]);
     }
 
+    public function showDetalleRequerimientos(Request $request)
+    {
+        $odm_tipo = $request->input('odm_estado', null);
+
+        $query = OrdenInternaMateriales::with([
+            'ordenInternaParte.ordenInterna.area',
+            'ordenInternaParte.ordenInterna.trabajadorOrigen',
+            'producto.unidad'
+        ])
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->whereNull('odt_numero');
+            });
+
+        // filtro de estado de detalle de material de orden interna
+        if ($odm_tipo !== null) {
+            $query->where('odm_estado', $odm_tipo);
+        }
+
+        $query->orderBy('odm_feccreacion', 'desc');
+
+        $requerimientos = $query->get();
+
+        return response()->json($requerimientos);
+    }
+
     // Funcion multipart para guardar requeriminetos
     public function store(Request $request)
     {
@@ -106,8 +131,8 @@ class RequerimientoController extends Controller
                 'opd_usucreacion' => $user->usu_codigo,
                 'opd_fecmodificacion' => null
             ]);
-    
-            foreach($data['detalle_requerimiento'] as $index => $material){
+
+            foreach ($data['detalle_requerimiento'] as $index => $material) {
                 $pro_id = null;
                 // si se debe asociat el amterial
                 if ($material['odm_asociar']) {
@@ -125,7 +150,7 @@ class RequerimientoController extends Controller
                             ])
                             ->where('T0.ItemCode', $material['pro_id'])
                             ->first();
-    
+
                         if ($productoSecondary) {
                             // debemos hacer validaciones de la unidad
                             $uni_codigo = 'SIN';
@@ -177,7 +202,7 @@ class RequerimientoController extends Controller
                     'odm_cantidad' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
-                    'odm_estado' => 'CRD',
+                    'odm_estado' => 'REQ',
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
                 ]);
@@ -204,7 +229,7 @@ class RequerimientoController extends Controller
             }
             DB::commit();
             return response()->json(['message' => 'Requerimiento creado correctamente'], 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }

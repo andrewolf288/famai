@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Cotizacion;
 use App\CotizacionDetalle;
+use App\Proveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -11,19 +13,21 @@ class CotizacionDetalleController extends Controller
 
     public function findDetalleByEstadoPendiente()
     {
-        $cotizacionesDetalle = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda' ,'detalleMaterial.ordenInternaParte.ordenInterna'])
+        $cotizacionesDetalle = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda' ,'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto.unidad'])
             ->whereHas('cotizacion', function ($query) {
                 $query->where('coc_estado', 'RPR');
             })
             ->where('cod_cotizar', 1)
-            ->orderBy('cod_feccreacion', 'desc');
+            ->orderBy('cod_feccreacion', 'desc')
+            ->get();
 
-        return response()->json($cotizacionesDetalle->get());
+        return response()->json($cotizacionesDetalle);
     }
 
     public function findDetalleByCotizacion($id)
     {
-        $detalleCotizacion = CotizacionDetalle::where('coc_id', $id)->get();
+        $detalleCotizacion = CotizacionDetalle::with(['cotizacion.moneda', 'detalleMaterial.producto.unidad', 'detalleMaterial.ordenInternaParte.ordenInterna'])
+                                ->where('coc_id', $id)->get();
         return response()->json($detalleCotizacion);
     }
 
@@ -82,12 +86,25 @@ class CotizacionDetalleController extends Controller
         $detalleMaterialesCotizar = [];
 
         foreach ($materiales as $material) {
-            $detalle = CotizacionDetalle::with(['detalleMaterial.producto.unidad', 'detalleMaterial.ordenInternaParte.ordenInterna'])
-                ->find($material);
+            $detalle = CotizacionDetalle::with(['cotizacion.proveedor', 'detalleMaterial.producto.unidad', 'detalleMaterial.ordenInternaParte.ordenInterna'])
+                ->findOrFail($material);
             $detalleMaterialesCotizar[] = $detalle;
         }
 
-        return response()->json($detalleMaterialesCotizar);
+        // obtenemos informacion del proveedor
+        $cotizacion = Cotizacion::with(['moneda'])
+                        ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->coc_id);
+
+        $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda'])
+                        ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->proveedor->prv_id);
+
+        $data = [
+            'cotizacion' => $cotizacion,
+            'proveedor' => $proveedor,
+            'materiales' => $detalleMaterialesCotizar
+        ];
+
+        return response()->json($data);
     }
 
     // funcion para traer cotizacion by producto
@@ -96,6 +113,12 @@ class CotizacionDetalleController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $producto = $request->input('pro_id');
+
+        $proveedoresFilter = $request->input('param', '');
+
+        if ($proveedoresFilter) {
+            $proveedoresFilter = explode(',', $proveedoresFilter);
+        }
 
         $query = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda' ,'detalleMaterial.producto.unidad'])
                                     ->whereHas('cotizacion', function ($query) {
@@ -107,6 +130,12 @@ class CotizacionDetalleController extends Controller
             $producto = (int) $producto;
             $query->whereHas('detalleMaterial', function ($q) use ($producto) {
                 $q->where('pro_id', $producto);
+            });
+        }
+
+        if (!empty($proveedoresFilter)) {
+            $query->whereHas('cotizacion.proveedor', function ($q) use ($proveedoresFilter) {
+                $q->whereIn('prv_nrodocumento', $proveedoresFilter);
             });
         }
 

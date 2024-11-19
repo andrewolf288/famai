@@ -926,7 +926,8 @@ class OrdenInternaMaterialesController extends Controller
     // detalle material - orden compra
     public function findOrdenCompraByMaterial($id)
     {
-        $detalleOrdenCompra = OrdenCompraDetalle::with('ordenCompra.proveedor')->where('odm_id', $id)->get();
+        $detalleOrdenCompra = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda'])
+            ->where('odm_id', $id)->get();
         return response()->json($detalleOrdenCompra);
     }
 
@@ -1012,11 +1013,13 @@ class OrdenInternaMaterialesController extends Controller
             }
 
             $codigoIncrustado = $ordenInternaMaterial->pro_id !== null ? $ordenInternaMaterial->producto->pro_codigo . ' - ' : '';
+            $descripcionMaterial = $ordenInternaMaterial->odm_descripcion ? $ordenInternaMaterial->odm_descripcion : '';
+            $observacionMaterial = $ordenInternaMaterial->odm_observacion ? " - $ordenInternaMaterial->odm_observacion" : '';
             // actualizamos el material
             $ordenInternaMaterial->update([
                 'pro_id' => $pro_id,
                 'odm_descripcion' => $pro_descripcion,
-                'odm_observacion' => $codigoIncrustado . ($ordenInternaMaterial->odm_descripcion ? $ordenInternaMaterial->odm_descripcion : '') . ' - ' . ($ordenInternaMaterial->odm_observacion ? $ordenInternaMaterial->odm_observacion : ''),
+                'odm_observacion' => $codigoIncrustado . $descripcionMaterial . $observacionMaterial,
                 'odm_usumodificacion' => $user->usu_codigo
             ]);
 

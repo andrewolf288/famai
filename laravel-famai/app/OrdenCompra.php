@@ -29,6 +29,7 @@ class OrdenCompra extends Model
         'occ_notas',
         'occ_total',
         'occ_subtotal',
+        'occ_porcentajeimpuesto',
         'occ_impuesto',
         'occ_observacionpago',
         'occ_adelanto',

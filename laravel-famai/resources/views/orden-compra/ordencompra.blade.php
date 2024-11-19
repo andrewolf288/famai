@@ -188,38 +188,38 @@
             <td>
                 <div class="info-row">
                     <span class="label">EMPRESA:</span>
-                    <span class="value">{{ $proveedor['prv_nombre'] }}</span>
+                    <span class="value">{{ $proveedor['prv_nombre'] ? $proveedor['prv_nombre'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">RUC:</span>
-                    <span class="value">{{ $proveedor['prv_nrodocumento'] }}</span>
+                    <span class="value">{{ $proveedor['prv_nrodocumento'] ? $proveedor['prv_nrodocumento'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">DIRECCION:</span>
-                    <span class="value">{{ $proveedor['prv_direccion'] }}</span>
+                    <span class="value">{{ $proveedor['prv_direccion'] ? $proveedor['prv_direccion'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CONTACTO:</span>
-                    <span class="value">{{ $proveedor['prv_contacto'] }}</span>
+                    <span class="value">{{ $proveedor['prv_contacto'] ? $proveedor['prv_contacto'] : '' }}</span>
                 </div>
             </td>
             {{-- Columna 2 --}}
             <td>
                 <div class="info-row">
                     <span class="label">TLF:</span>
-                    <span class="value">{{ $proveedor['prv_telefono'] }}/{{ $proveedor['prv_whatsapp'] }}</span>
+                    <span class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}/{{ $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CTA S/:</span>
-                    <span class="value"></span>
+                    <span class="value">{{ $cuenta_soles ? $cuenta_soles['pvc_numerocuenta'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CTA $/:</span>
-                    <span class="value"></span>
+                    <span class="value">{{ $cuenta_dolares ? $cuenta_dolares['pvc_numerocuenta'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CTA BCO NACION S/:</span>
-                    <span class="value"></span>
+                    <span class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</span>
                 </div>
             </td>
         </tr>
@@ -229,12 +229,12 @@
         <tr>
             <td>
                 <div class="info-row">
-                    <span class="label">FECH. ENTREGA</span>
-                    <span class="value">{{$occ_fechaentrega}}</span>
+                    <span class="label">FEC. ENTREGA:</span>
+                    <span class="value">{{$occ_fechaentrega ? DateTime::createFromFormat('Y-m-d', $occ_fechaentrega)->format('d/m/Y'): ''}}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">ELABORADO POR:</span>
-                    <span class="value">{{$elaborador['tra_nombre']}}</span>
+                    <span class="value">{{$elaborador ? $elaborador['tra_nombre'] : ''}}</span>
                 </div>
             </td>
             <td>
@@ -274,11 +274,10 @@
         <tbody>
             @foreach ($detalle_orden_compra as $detalle)
                 <tr>
-                    {{-- <td class="col-item">{{ $loop->iteration }}</td> --}}
                     <td class="col-item">{{ $detalle['ocd_orden'] }}</td>
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
-                    <td class="col-und">{{ $detalle['pro_id'] != null ? $detalle['producto']['unidad']['uni_codigo'] : '' }}</td>
+                    <td class="col-und">{{ $detalle['detalle_material']['producto'] ? $detalle['detalle_material']['producto']['unidad']['uni_codigo'] : '' }}</td>
                     <td class="col-precio">{{$detalle['ocd_preciounitario']}}</td>
                     <td class="col-total">{{$detalle['ocd_total']}}</td>
                 </tr>
@@ -303,14 +302,14 @@
                     <tr>
                         <td
                             style="width: 25%;height: 110px;font-size: 12px; font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;">
-                            SOLICITADO POR: {{$solicitador['tra_nombre']}}</td>
+                            SOLICITADO POR: {{$solicitador ? $solicitador['tra_nombre'] : ''}}</td>
                         <td
                             style="width: 75%;height: 110px;font-size: 12px; font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;">
-                            AUTORIZADO POR: {{$autorizador['tra_nombre']}}</td>
+                            AUTORIZADO POR: {{$autorizador ? $autorizador['tra_nombre'] : ''}}</td>
                     </tr>
                     <tr>
                         <td style="font-size: 12px;height: 50px;font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;"
-                            colspan="2">NOTAS: {{$occ_notas}}</td>
+                            colspan="2">NOTAS: {{$occ_notas ? $occ_notas : ''}}</td>
                     </tr>
                     <tr>
                         <td style="font-size: 9px;height: 50px;border: 1px solid #000000;padding-left: 1px;"
@@ -331,11 +330,11 @@
                             style="height: 55px;border: 1px solid #000000;font-size: 12px;font-weight: bold;vertical-align: top;padding: 0px 1px 0px 1px">
                             <table style="border-collapse: collapse; width: 100%;">
                                 <tr>
-                                    <td style="text-align: left; padding: 0;">SUBTOT S/</td>
+                                    <td style="text-align: left; padding: 0;">SUBTOT {{$moneda['mon_simbolo']}}</td>
                                     <td style="text-align: right; padding: 0;">{{$occ_subtotal}}</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: left; padding: 0;">I.G.V. 18%</td>
+                                    <td style="text-align: left; padding: 0;">I.G.V. {{$occ_porcentajeimpuesto}}%</td>
                                     <td style="text-align: right; padding: 0;">{{$occ_impuesto}}</td>
                                 </tr>
                             </table>
@@ -344,14 +343,14 @@
                     <tr>
                         <td
                             style="height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
-                            <span style="float: left;">TOTAL S/</span>
+                            <span style="float: left;">TOTAL {{$moneda['mon_simbolo']}}</span>
                             <span style="float: right;">{{$occ_total}}</span>
                         </td>
                     </tr>
                     <tr>
                         <td
                             style="height: 85px;border: 1px solid #000000;vertical-align: top;font-weight: bold;padding: 0px 2px 0px 2px;">
-                            <span style="font-size:10px;">Observación de Pago: {{$occ_observacionpago}}</span>
+                            <span style="font-size:10px;">Observación de Pago: {{$occ_observacionpago ? $occ_observacionpago : ''}}</span>
                         </td>
                     </tr>
                     <tr>
@@ -360,12 +359,12 @@
                             <table style="border-collapse: collapse; width: 100%;">
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Adelanto:</td>
-                                    <td style="text-align: right; padding: 0;">{{$occ_adelanto}}</td>
+                                    <td style="text-align: right; padding: 0;">{{$occ_adelanto ? $occ_adelanto : ''}}</td>
                                 </tr>
                                 <br>
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Saldo:</td>
-                                    <td style="text-align: right; padding: 0;">{{$occ_saldo}}</td>
+                                    <td style="text-align: right; padding: 0;">{{$occ_saldo ? $occ_saldo : ''}}</td>
                                 </tr>
                             </table>
                         </td>
