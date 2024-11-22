@@ -166,6 +166,11 @@ $(document).ready(function () {
 
     // Maneja el evento de clic en el botón de busqueda
     $('#copyButton').on('click', async () => {
+        const ingresoOT = $('#idClienteInput').val().trim()
+        if(ingresoOT.length === 0){
+            alert('Asegurate de primero haber ingresado una orden de trabajo.')
+            return
+        }
         // abrimos el modal de ingreso de informacion
         const loaderModalSearchOI = new bootstrap.Modal(document.getElementById('ordenInternaSearchModal'))
         loaderModalSearchOI.show()

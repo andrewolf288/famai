@@ -937,9 +937,9 @@ $(document).ready(async function () {
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-recuperado-cliente', async function () {
         const $row = $(this).closest('tr')
         const $observacionInput = $row.find('.observacion-input')
-        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
+        const observacion = $observacionInput.val().trim().replace(/^\(R\)\s*/, '')
         // añadimos el texto
-        const textNota = 'recuperar - ' + observacion
+        const textNota = '(R) ' + observacion.trim()
 
         // accedemos a los estilos de los demas botones
         const $btnProporcionado = $row.find('.btn-detalle-proporcionado-cliente')
