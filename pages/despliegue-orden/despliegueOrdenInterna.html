@@ -431,6 +431,39 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <!-- HISTORICO DE ORDENES DE COMPRA -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <p class="fw-bold">Ordenes de compra</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+                                <div class="pagination-container" id="pagination-container-historico-ordencompra"></div>
+                            </div>
+                        </div>
+                        <div class="overflow-auto" style="height: 50%;">
+                            <table id="historico-ordenescompra-container" class="table table-striped nowrap"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">Fecha Ord. Compra</th>
+                                        <th>Num. Ord. Compra</th>
+                                        <th>Estado</th>
+                                        <th>Doc. proveedor</th>
+                                        <th>Raz. social proveedor</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Precio unitario</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historico-ordenescompra-container-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 <!-- HISTORICO DE COTIZACIONES -->
                 <div class="card mt-3">
                     <div class="card-header">
@@ -461,39 +494,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="historico-cotizaciones-container-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <!-- HISTORICO DE ORDENES DE COMPRA -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <p class="fw-bold">Ordenes de compra</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-                                <div class="pagination-container" id="pagination-container-historico-ordencompra"></div>
-                            </div>
-                        </div>
-                        <div class="overflow-auto" style="height: 50%;">
-                            <table id="historico-ordenescompra-container" class="table table-striped nowrap"
-                                style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th class="text-start">Fecha Ord. Compra</th>
-                                        <th>Num. Ord. Compra</th>
-                                        <th>Estado</th>
-                                        <th>Doc. proveedor</th>
-                                        <th>Raz. social proveedor</th>
-                                        <th>Descripción</th>
-                                        <th class="text-center">Cantidad</th>
-                                        <th class="text-center">Precio unitario</th>
-                                        <th class="text-center">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historico-ordenescompra-container-body">
                                 </tbody>
                             </table>
                         </div>

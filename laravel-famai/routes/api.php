@@ -192,11 +192,13 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 // rutas detalle materiales orden interna
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('detalleMaterialesOrdenInterna', [OrdenInternaMaterialesController::class, 'index']);
+    Route::get('detalleMaterialesOrdenInterna-resumido', [OrdenInternaMaterialesController::class, 'indexResumido']);
     Route::get('detalleMaterialOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'show']);
     Route::put('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'update']);
     Route::put('ordeninternamateriales/tipo/{id}', [OrdenInternaMaterialesController::class, 'updateTipoMaterial']);
     Route::put('ordeninternamateriales/responsable/{id}', [OrdenInternaMaterialesController::class, 'updateResponsableMaterial']);
-    Route::post('ordeninternamateriales/presupuesto/{id}', [OrdenInternaMaterialesController::class, 'updatePresupuesto']);
+    Route::post('ordeninternamateriales/responsable-masivo', [OrdenInternaMaterialesController::class, 'updateResponsableMaterialMasivo']);
+    // Route::post('ordeninternamateriales/presupuesto/{id}', [OrdenInternaMaterialesController::class, 'updatePresupuesto']);
     Route::delete('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'destroy']);
     Route::get('ordeninternamateriales/export-excel', [OrdenInternaMaterialesController::class, 'exportExcel']);
     Route::get('ordeninternamateriales/export-excel-presupuesto', [OrdenInternaMaterialesController::class, 'exportExcelPresupuesto']);
@@ -204,8 +206,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordeninternamateriales/export-cotizacion', [OrdenInternaMaterialesController::class, 'exportPDFCotizacion']);
     Route::post('ordeninternamateriales/export-cotizacion-text', [OrdenInternaMaterialesController::class, 'exportTXTCotizacion']);
     Route::get('detalleMaterialesByNumero', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenInterna']);
-    Route::get('ordeninternamateriales/cotizacion/{id}', [OrdenInternaMaterialesController::class, 'findCotizacionByMaterial']);
-    Route::get('ordeninternamateriales/ordencompra/{id}', [OrdenInternaMaterialesController::class, 'findOrdenCompraByMaterial']);
+    Route::get('ordeninternamateriales/cotizacion', [OrdenInternaMaterialesController::class, 'findCotizacionByMaterial']);
+    Route::get('ordeninternamateriales/ordencompra', [OrdenInternaMaterialesController::class, 'findOrdenCompraByMaterial']);
     Route::get('detalleMaterialesOrdenInterna/validacion', [OrdenInternaMaterialesController::class, 'indexValidacionCodigo']);
     Route::post('ordeninternamateriales/validar-codigo', [OrdenInternaMaterialesController::class, 'asignarCodigoProducto']);
     Route::post('detalleMaterialesOrdenInterna/materiales-cotizar', [OrdenInternaMaterialesController::class, 'informacionMaterialesCotizar']);
@@ -356,6 +358,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::delete('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'destroy']);
     Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
     Route::get('ordencompra-detalle-findByProducto', [OrdenCompraDetalleController::class, 'findOrdenCompraByProducto']);
+    Route::post('ordencompra-detalle/ultimo-proveedor', [OrdenCompraDetalleController::class, 'findUltimoProveedorByProducto']);
 });
 
 // rutas de notificaciones

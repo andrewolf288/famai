@@ -109,4 +109,21 @@ class OrdenCompraDetalleController extends Controller
             'count' => $ordencompraDetalle->total()
         ]);
     }
+
+    public function findUltimoProveedorByProducto(Request $request)
+    {
+        $productos = $request->input('productos', []);
+
+        $query = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'detalleMaterial.producto'])
+            ->whereHas('detalleMaterial.producto', function ($q) use ($productos) {
+                $q->whereIn('pro_id', $productos);
+            });
+        
+        $data = $query->get();
+        $dataProveedores = $data->map(function ($item) {
+            return $item->ordenCompra->proveedor;
+        })->unique('prv_id');
+
+        return response()->json($dataProveedores);
+    }
 }

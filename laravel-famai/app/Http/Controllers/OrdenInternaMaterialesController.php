@@ -60,7 +60,7 @@ class OrdenInternaMaterialesController extends Controller
             });
         }
 
-        if($responsable !== null){
+        if ($responsable !== null) {
             $query->whereHas('responsable', function ($q) use ($responsable) {
                 $q->whereRaw("tra_nombre COLLATE SQL_Latin1_General_CP1_CI_AI LIKE ?", ['%' . $responsable . '%']);
             });
@@ -135,6 +135,142 @@ class OrdenInternaMaterialesController extends Controller
         return response($query->get());
     }
 
+    // index resumido
+    public function indexResumido(Request $request)
+    {
+        $ordenTrabajo = $request->input('odt_numero', null);
+        $tipoProceso = $request->input('oic_tipo', null);
+        $responsable = $request->input('tra_nombre', null);
+        $fecha_desde = $request->input('fecha_desde', null);
+        $fecha_hasta = $request->input('fecha_hasta', null);
+        // multifilters
+        $multifilter = $request->input('multifilter', null);
+
+        // se necesita agregar informacion de procedimiento almacenado
+        $query = OrdenInternaMateriales::with(
+            [
+                'responsable',
+                'producto.unidad',
+                'ordenInternaParte.ordenInterna'
+            ]
+        )
+            ->withCount('cotizaciones')
+            ->withCount('ordenesCompra')
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->where('odm_estado', '!=', 'ODC');
+
+        // filtro de orden de trabajo
+        if ($ordenTrabajo !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                $q->where('odt_numero', $ordenTrabajo);
+            });
+        }
+
+        // filtro de tipo de proceso
+        if ($tipoProceso !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($tipoProceso) {
+                $q->where('oic_tipo', $tipoProceso);
+            });
+        }
+
+        if ($responsable !== null) {
+            $query->whereHas('responsable', function ($q) use ($responsable) {
+                $q->whereRaw("tra_nombre COLLATE SQL_Latin1_General_CP1_CI_AI LIKE ?", ['%' . $responsable . '%']);
+            });
+        }
+
+        // filtro de fecha
+        if ($fecha_desde !== null && $fecha_hasta !== null) {
+            $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+        }
+
+        // Procesar el parámetro multiselect
+        if ($multifilter !== null) {
+            // Separar el string por "OR" y crear un array con cada palabra
+            $palabras = explode('OR', $request->input('multifilter'));
+
+            // Agregar el grupo de condiciones OR
+            // $query->where(function ($q) use ($palabras, $almID) {
+            foreach ($palabras as $palabra) {
+                // pendiente de emision de orden de compra
+                if ($palabra === 'pendiente_emitir_orden_compra') {
+                    $query->where('odm_estado', 'COT');
+                }
+                // pendiente de emision de cotizacion
+                if ($palabra === 'pendiente_emitir_cotizacion') {
+                    $query->where('odm_estado', 'REQ');
+                }
+                // material sin codigo
+                if ($palabra === 'material_sin_codigo') {
+                    $query->where('pro_id', null);
+                }
+                // material sin compra
+                if ($palabra === 'material_sin_compra') {
+                    $query->whereNotNull('pro_id');
+                    $query->orderBy('odm_feccreacion', 'desc');
+
+                    $data = $query->get();
+                    $dataFiltrada = [];
+
+                    foreach ($data as $item) {
+                        $productoCodigo = $item->producto->pro_codigo;
+
+                        $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
+                            ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
+                            ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
+                            ->where('PDN1.ItemCode', '=', $productoCodigo)
+                            ->first();
+
+                        // Comprobar si ultima_fecha_compra es null
+                        if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
+                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
+                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
+                                ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
+                                ->where('IGN1.ItemCode', '=', $productoCodigo)
+                                ->first();
+
+                            if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
+                                $dataFiltrada[] = $item;
+                            }
+                        }
+                    }
+
+                    return response($dataFiltrada);
+                }
+            }
+        }
+
+        $data = $query->get();
+
+        // debemos agrupar la información
+        $agrupados = $data
+            ->whereNotNull('pro_id')
+            ->groupBy('pro_id')
+            ->map(function ($grupo, $pro_id) {
+                return [
+                    'pro_id' => (int) $pro_id,
+                    'pro_codigo' => $grupo->first()->producto->pro_codigo,
+                    'pro_descripcion' => $grupo->first()->producto->pro_descripcion,
+                    'uni_codigo' => $grupo->first()->producto->unidad->uni_codigo,
+                    'cantidad' => $grupo->sum('odm_cantidad'),
+                    'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
+                    'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
+                    'detalle' => $grupo->values()
+                ];
+            })
+            ->values();
+
+        $sinAgrupar = $data
+            ->whereNull('pro_id')
+            ->values();
+
+        // Combinar los resultados
+        $resultado = $agrupados->concat($sinAgrupar);
+
+        return response()->json($resultado);
+    }
+
+    // mostrar detalle de un material por ID
     public function show($id)
     {
         $ordenInternaMaterial = OrdenInternaMateriales::with(
@@ -335,6 +471,42 @@ class OrdenInternaMaterialesController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateResponsableMaterialMasivo(Request $request)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+
+            $request->validate([
+                'tra_responsable' => 'required|exists:tbltrabajadores_tra,tra_id',
+                'param' => 'required|string',
+            ]);
+
+            $detalleMaterialesFilter = $request->input('param', '');
+
+            if ($detalleMaterialesFilter) {
+                $detalleMaterialesFilter = explode(',', $detalleMaterialesFilter);
+            }
+
+            OrdenInternaMateriales::whereIn('odm_id', $detalleMaterialesFilter)
+                ->update([
+                    'tra_responsable' => $request->input('tra_responsable'),
+                    'odm_fecasignacionresponsable' => Carbon::now(),
+                    'odm_usumodificacion' => $user->usu_codigo,
+                ]);
+            
+            $primerRegistro = OrdenInternaMateriales::whereIn('odm_id', $detalleMaterialesFilter)->first();
+            if($primerRegistro){
+                $primerRegistro->load('responsable');
+            }
+
+            DB::commit();
+            return response()->json($primerRegistro);
+        } catch (Exception $e) {
+            DB::rollBack();
         }
     }
 
@@ -916,18 +1088,32 @@ class OrdenInternaMaterialesController extends Controller
     }
 
     // detalle material - cotizacion
-    public function findCotizacionByMaterial($id)
+    public function findCotizacionByMaterial(Request $request)
     {
+        $detalleMaterialesFilter = $request->input('param', '');
+
+        if ($detalleMaterialesFilter) {
+            $detalleMaterialesFilter = explode(',', $detalleMaterialesFilter);
+        }
+
         $detalleCotizacion = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
-            ->where('odm_id', $id)->get();
+            ->whereIn('odm_id', $detalleMaterialesFilter)
+            ->get();
         return response()->json($detalleCotizacion);
     }
 
     // detalle material - orden compra
-    public function findOrdenCompraByMaterial($id)
+    public function findOrdenCompraByMaterial(Request $request)
     {
+        $detalleMaterialesFilter = $request->input('param', '');
+
+        if ($detalleMaterialesFilter) {
+            $detalleMaterialesFilter = explode(',', $detalleMaterialesFilter);
+        }
+
         $detalleOrdenCompra = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda'])
-            ->where('odm_id', $id)->get();
+            ->whereIn('odm_id', $detalleMaterialesFilter)
+            ->get();
         return response()->json($detalleOrdenCompra);
     }
 

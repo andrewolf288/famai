@@ -339,7 +339,11 @@ $(document).ready(() => {
     // ------------ DETALLE DE COTIZACIONES ------------
     $("#data-container-body").on('click', '.btn-cotizado', async function () {
         const id = $(this).data('detalle')
-        const { data } = await client.get(`/ordeninternamateriales/cotizacion/${id}`)
+        const params = new URLSearchParams({
+            param: [id].join(','),
+        })
+
+        const { data } = await client.get(`/ordeninternamateriales/cotizacion?${params.toString()}`)
         console.log(data)
         $("#data-container-cotizacion tbody").empty()
 
@@ -377,8 +381,11 @@ $(document).ready(() => {
 
     $("#data-container-body").on('click', '.btn-ordenado', async function () {
         const id = $(this).data('detalle')
-        console.log(id)
-        const { data } = await client.get(`/ordeninternamateriales/ordencompra/${id}`)
+        const params = new URLSearchParams({
+            param: [id].join(','),
+        })
+
+        const { data } = await client.get(`/ordeninternamateriales/ordencompra?${params.toString()}`)
 
         $("#data-container-ordencompra tbody").empty()
 
@@ -531,10 +538,11 @@ $(document).ready(() => {
         }
 
         const formatData = {
-            tra_responsable: responsable
+            tra_responsable: responsable,
+            param: [idDetalleMaterial].join(',')
         }
         try {
-            const { data } = await client.put(`/ordeninternamateriales/responsable/${idDetalleMaterial}`, formatData)
+            const { data } = await client.post(`/ordeninternamateriales/responsable-masivo`, formatData)
             const row = dataTable.rows().nodes().to$().filter(function () {
                 return $(this).find('button.btn-responsable').data('detalle') == idDetalleMaterial;
             })
