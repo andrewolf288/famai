@@ -90,6 +90,21 @@ $(document).ready(() => {
 
         // vaciamos la lista
         $('#data-container-body').empty()
+        // agregamos un loader
+        $('#data-container-body').append(`
+            <tr>
+                <td colspan="100%">
+                    <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="mt-2">Cargando...</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `)
 
         try {
             const { data } = await client.get(URL)
@@ -104,7 +119,7 @@ $(document).ready(() => {
                         <td>${material.pro_codigo || 'N/A'}</td>
                         <td>${material.pro_descripcion || 'N/A'}</td>
                         <td class="text-center">${material.uni_codigo || 'N/A'}</td>
-                        <td class="text-center">${material.cantidad || 'N/A'}</td>
+                        <td class="text-center">${material.cantidad.toFixed(2) || 'N/A'}</td>
                         <td class="text-center">${"0.00"}</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>

@@ -80,4 +80,10 @@ class OrdenInternaMateriales extends Model
         return $this->hasMany(OrdenCompraDetalle::class, 'odm_id');
     }
 
+    // accessors
+    // public function getOdmCantidadAttribute($value)
+    // {
+    //     return number_format($value, 2, '.', ',');
+    // }
+
 }
