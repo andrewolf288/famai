@@ -497,9 +497,9 @@ class OrdenInternaMaterialesController extends Controller
                     'odm_fecasignacionresponsable' => Carbon::now(),
                     'odm_usumodificacion' => $user->usu_codigo,
                 ]);
-            
+
             $primerRegistro = OrdenInternaMateriales::whereIn('odm_id', $detalleMaterialesFilter)->first();
-            if($primerRegistro){
+            if ($primerRegistro) {
                 $primerRegistro->load('responsable');
             }
 
@@ -1040,10 +1040,25 @@ class OrdenInternaMaterialesController extends Controller
         // buscamos informacion de trabajador
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
+        $agrupados = [];
+        foreach ($detalleMateriales as $detalle) {
+            $cod_orden = $detalle['cod_orden'];
+
+            if (!isset($agrupados[$cod_orden])) {
+                // Si no existe el grupo, inicializamos con el primer elemento
+                $agrupados[$cod_orden] = $detalle;
+                $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
+            } else {
+                // Si ya existe el grupo, sumamos la cantidad
+                $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+            }
+        }
+        $agrupadosIndexado = array_values($agrupados);
+
         $data = [
             'proveedor' => $proveedor,
             'trabajador' => $trabajador,
-            'detalleMateriales' => $detalleMateriales,
+            'detalleMateriales' => $agrupadosIndexado,
             'fechaActual' => DateHelper::parserFechaActual(),
             'url_cotizacion' => null
         ];
@@ -1058,6 +1073,21 @@ class OrdenInternaMaterialesController extends Controller
         $proveedor = $request->input('proveedor', null);
         $detalleMateriales = $request->input('detalle_materiales', []);
 
+        $agrupados = [];
+        foreach ($detalleMateriales as $detalle) {
+            $cod_orden = $detalle['cod_orden'];
+
+            if (!isset($agrupados[$cod_orden])) {
+                // Si no existe el grupo, inicializamos con el primer elemento
+                $agrupados[$cod_orden] = $detalle;
+                $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
+            } else {
+                // Si ya existe el grupo, sumamos la cantidad
+                $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+            }
+        }
+        $agrupadosIndexado = array_values($agrupados);
+
         $ruc = "20134690080";
         $razon_social = "FAMAI SEAL JET S.A.C.";
         $fecha = date('d') . ' de ' . date('F') . ' ' . date('Y');
@@ -1070,7 +1100,7 @@ class OrdenInternaMaterialesController extends Controller
         $txt_content .= "   PRODUCTO   CANTIDAD\n";
 
         // Agregar los productos
-        foreach ($detalleMateriales as $index => $item) {
+        foreach ($agrupadosIndexado as $index => $item) {
             $txt_content .= ($index + 1) . ". " . $item["cod_descripcion"] . "     " . $item["cod_cantidad"] . "\n";
         }
 

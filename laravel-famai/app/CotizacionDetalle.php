@@ -21,7 +21,6 @@ class CotizacionDetalle extends Model
         'cod_preciounitario',
         'cod_total',
         'cod_cotizar',
-        'cod_marcas',
         'cod_activo',
         'cod_usucreacion',
         'cod_feccreacion',

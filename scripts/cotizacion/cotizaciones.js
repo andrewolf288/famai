@@ -24,6 +24,16 @@ $(document).ready(() => {
         paging: false,
         searching: false,
         info: false,
+        columnDefs: [
+            {
+                targets: 1,
+                type: 'string'
+            },
+            {
+                targets: 3,
+                type: 'string'
+            }
+        ]
     }
 
     function initDataTable(data) {
@@ -35,8 +45,8 @@ $(document).ready(() => {
                     <td>${cotizacion.coc_fechacotizacion !== null ? parseDateSimple(cotizacion.coc_fechacotizacion) : 'No aplica'}</td>
                     <td>${cotizacion.coc_numero || 'No aplica'}</td>
                     <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
-                    <td>${cotizacion.proveedor?.prv_nombre || 'No aplica'}</td>
                     <td class="text-left">${cotizacion.proveedor?.prv_nrodocumento || 'No aplica'}</td>
+                    <td>${cotizacion.proveedor?.prv_nombre || 'No aplica'}</td>
                     <td class="text-center">${moneda?.mon_descripcion || 'No aplica'}</td>
                     <td class="text-center">${moneda?.mon_simbolo || ''} ${cotizacion.coc_total || 'No aplica'}</td>
                     <td class="text-center">

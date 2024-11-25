@@ -92,13 +92,12 @@ $(document).ready(() => {
         try {
             const { data } = await client.get(URL)
             despliegueMaterialesResumido = data
+            let content = ''
             data.forEach((material, index) => {
-
-                const rowItem = document.createElement('tr')
-                rowItem.dataset.index = index
                 if (material.detalle !== undefined) {
                     const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, cotizaciones_count, ordenes_compra_count, detalle } = material
-                    rowItem.innerHTML = `
+                    content += `
+                    <tr data-index="${index}">
                         <td></td>
                         <td></td>
                         <td>${pro_codigo || 'N/A'}</td>
@@ -110,7 +109,7 @@ $(document).ready(() => {
                             <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-primary btn-historico" data-historico="${pro_id || null}">
+                            <button class="btn btn-sm btn-primary btn-historico" data-historico="${pro_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
                                     <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
@@ -145,11 +144,12 @@ $(document).ready(() => {
                         <td class="text-center">
                             <button class="btn btn-primary btn-atendido">0.00</button>
                         </td>
+                    </tr>
                     `
-                    $('#data-container-body').append(rowItem)
                 } else {
                     const { odm_id, odm_descripcion, odm_cantidad, tra_responsable, responsable, cotizaciones_count, ordenes_compra_count } = material
-                    rowItem.innerHTML = `
+                    content += `
+                    <tr data-index="${index}">
                         <td></td>
                         <td></td>
                         <td>N/A</td>
@@ -196,10 +196,11 @@ $(document).ready(() => {
                         <td class="text-center">
                             <button class="btn btn-primary btn-atendido">0.00</button>
                         </td>
+                    </tr>
                     `
-                    $('#data-container-body').append(rowItem)
                 }
             })
+            $('#data-container-body').html(content)
             // inicializamos el datatable
             dataTable = dataContainer.DataTable(dataTableOptions)
         } catch (error) {
@@ -354,6 +355,7 @@ $(document).ready(() => {
     }
 
     function initHistoricoByProducto(producto) {
+        console.log(producto)
         // debemos verificar que sea un material asignado
         if (producto === null) {
             alert("Este material no tiene un código asignado")
@@ -701,9 +703,8 @@ $(document).ready(() => {
         // debemos ingresar la informacion de detalle a cotizar
         $('#tbl-cotizaciones-materiales tbody').empty()
         let content = ''
-        console.log(detalleCotizacion)
         detalleCotizacion.forEach((detalle, index) => {
-            if(detalle.odm_id === undefined){
+            if (detalle.odm_id === undefined) {
                 content = `
                 <tr data-index="${index}">
                     <td>${detalle.pro_codigo}</td>
@@ -910,4 +911,221 @@ $(document).ready(() => {
         row.remove()
     })
 
+    // exportar en pdf la cotizacion
+    $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-pdf', async (event) => {
+        const row = $(event.currentTarget).closest('tr')
+        const id_proveedor = row.data('id-proveedor')
+
+        const proveedor = {
+            prv_id: id_proveedor,
+            prv_direccion: row.find('.direccion-proveedor').val() || '',
+            prv_nombre: row.find('.nombre-proveedor').text() || '',
+            tdo_codigo: row.find('.tipodocumento-proveedor').text() || '',
+            prv_nrodocumento: row.find('.nrodocumento-proveedor').text() || '',
+            prv_contacto: row.find('.contacto-proveedor').val() || '',
+            prv_whatsapp: row.find('.celular-proveedor').val() || '',
+            prv_telefono: row.find('.telefono-proveedor').val() || '',
+            prv_correo: row.find('.correo-proveedor').val() || ''
+        }
+
+        const detalleMateriales = []
+
+        if (confirm('¿Deseas generar una cotización?')) {
+            const rows = $('#tbl-cotizaciones-materiales tbody tr')
+            let cod_orden = 1;
+            rows.each(function () {
+                const index = $(this).data('index')
+                const observacion = $(this).find('.observacion-detalle').val().trim()
+
+                const detalleIndex = detalleCotizacion[index]
+                if (detalleIndex.odm_id === undefined) {
+                    detalleIndex.detalle.forEach(detalle => {
+                        detalleMateriales.push({
+                            cod_orden: cod_orden,
+                            odm_id: detalle.odm_id,
+                            uni_codigo: detalle.producto.uni_codigo,
+                            cod_descripcion: detalle.producto.pro_descripcion,
+                            cod_observacion: observacion,
+                            cod_cantidad: detalle.odm_cantidad
+                        })
+                    })
+                } else {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
+                        odm_id: detalleIndex.odm_id,
+                        uni_codigo: '',
+                        cod_descripcion: detalleIndex.odm_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: detalleIndex.odm_cantidad
+                    })
+                }
+                cod_orden++
+            })
+
+            const formatData = {
+                proveedor,
+                detalle_materiales: detalleMateriales
+            }
+
+            try {
+                const response = await client.post('/cotizacionesByDespliegue', formatData, {
+                    headers: {
+                        'Accept': 'application/pdf'
+                    },
+                    responseType: 'blob'
+                })
+
+                const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                row.addClass('table-success')
+                showModalPreview(pdfUrl)
+            } catch (error) {
+                if (error.response && error.response.data instanceof Blob) {
+                    try {
+                        const text = await error.response.data.text();
+                        const json = JSON.parse(text);
+
+                        console.error('Error del servidor:', json.error || 'Error desconocido');
+                        alert(json.error || 'Ocurrió un error inesperado en el servidor');
+                    } catch (parseError) {
+                        console.error('Error al procesar el JSON del blob:', parseError);
+                        alert('No se pudo procesar la respuesta del error');
+                    }
+                } else {
+                    console.error('Error inesperado:', error);
+                    alert('Ocurrió un error inesperado al momento de generar la cotización');
+                }
+            }
+        } else {
+            const rows = $('#tbl-cotizaciones-materiales tbody tr')
+            let cod_orden = 1;
+            rows.each(function () {
+                const index = $(this).data('index')
+                const observacion = $(this).find('.observacion-detalle').val().trim()
+
+                const detalleIndex = detalleCotizacion[index]
+                if (detalleIndex.odm_id === undefined) {
+                    detalleIndex.detalle.forEach(detalle => {
+                        detalleMateriales.push({
+                            cod_orden: cod_orden,
+                            uni_codigo: detalle.producto.uni_codigo,
+                            cod_descripcion: detalle.producto.pro_descripcion,
+                            cod_observacion: observacion,
+                            cod_cantidad: detalle.odm_cantidad
+                        })
+                    })
+                } else {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
+                        uni_codigo: '',
+                        cod_descripcion: detalleIndex.odm_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: detalleIndex.odm_cantidad
+                    })
+                }
+                cod_orden++
+            })
+
+            const formatData = {
+                proveedor,
+                detalle_materiales: detalleMateriales
+            }
+
+            try {
+                const response = await client.post('/ordeninternamateriales/export-cotizacion', formatData, {
+                    headers: {
+                        'Accept': 'application/pdf'
+                    },
+                    responseType: 'blob'
+                })
+
+                const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                showModalPreview(pdfUrl)
+            } catch (error) {
+                console.log(error)
+                alert("Hubo un error al generar el pdf de la cotización")
+            }
+        }
+    })
+
+    function showModalPreview(pdfUrl) {
+        document.getElementById('pdf-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
+
+    // Funcion para exportar en txt
+    $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-text', async (event) => {
+        const row = $(event.currentTarget).closest('tr')
+        const id_proveedor = row.data('id-proveedor')
+
+        const proveedor = {
+            prv_id: id_proveedor,
+            prv_direccion: row.find('.direccion-proveedor').val() || '',
+            prv_nombre: row.find('.nombre-proveedor').text() || '',
+            tdo_codigo: row.find('.tipodocumento-proveedor').text() || '',
+            prv_nrodocumento: row.find('.nrodocumento-proveedor').text() || '',
+            prv_contacto: row.find('.contacto-proveedor').val() || '',
+            prv_whatsapp: row.find('.celular-proveedor').val() || '',
+            prv_telefono: row.find('.telefono-proveedor').val() || '',
+            prv_correo: row.find('.correo-proveedor').val() || ''
+        }
+
+        const detalleMateriales = []
+
+        const rows = $('#tbl-cotizaciones-materiales tbody tr')
+        let cod_orden = 1;
+        rows.each(function () {
+            const index = $(this).data('index')
+            const observacion = $(this).find('.observacion-detalle').val().trim()
+
+            const detalleIndex = detalleCotizacion[index]
+            if (detalleIndex.odm_id === undefined) {
+                detalleIndex.detalle.forEach(detalle => {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
+                        uni_codigo: detalle.producto.uni_codigo,
+                        cod_descripcion: detalle.producto.pro_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: detalle.odm_cantidad
+                    })
+                })
+            } else {
+                detalleMateriales.push({
+                    cod_orden: cod_orden,
+                    uni_codigo: '',
+                    cod_descripcion: detalleIndex.odm_descripcion,
+                    cod_observacion: observacion,
+                    cod_cantidad: detalleIndex.odm_cantidad
+                })
+            }
+            cod_orden++
+        })
+
+        try {
+            const formatData = {
+                proveedor,
+                detalle_materiales: detalleMateriales
+            }
+            console.log(formatData)
+            const response = await client.post('/ordeninternamateriales/export-cotizacion-text', formatData, {
+                headers: {
+                    'Accept': 'text/plain'
+                },
+                responseType: 'blob'
+            })
+            const textBlob = new Blob([response.data], { type: 'text/plain' });
+            const textUrl = URL.createObjectURL(textBlob);
+            showModalPreviewText(textUrl)
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
+    function showModalPreviewText(pdfUrl) {
+        document.getElementById('txt-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewTXTModal"));
+        modal.show();
+    }
 })

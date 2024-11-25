@@ -196,12 +196,18 @@ class CotizacionController extends Controller
                 'coc_estado' => 'SOL',
             ]);
 
-            $counter = 1;
             foreach ($detalleMateriales as $detalle) {
-                $cotizacionDetalle = CotizacionDetalle::create([
+                $detalleMaterial = OrdenInternaMateriales::findOrFail($detalle['odm_id']);
+
+                // si un detalle ya ha sido ordenado para una compra, salimos de la operación
+                if ($detalleMaterial->odm_estado == 'ODC') {
+                    throw new Exception("El material $detalleMaterial->odm_descripcion con cantidad $detalleMaterial->odm_cantidad, ya ha sido ordenado para una compra");
+                }
+
+                CotizacionDetalle::create([
                     'coc_id' => $cotizacion->coc_id,
                     'odm_id' => $detalle['odm_id'],
-                    'cod_orden' => $counter,
+                    'cod_orden' => $detalle['cod_orden'],
                     'cod_descripcion' => $detalle['cod_descripcion'],
                     'cod_observacion' => $detalle['cod_observacion'],
                     'cod_cantidad' => $detalle['cod_cantidad'],
@@ -210,29 +216,42 @@ class CotizacionController extends Controller
                     'cod_fecmodificacion' => null
                 ]);
 
-                $detalleMaterial = OrdenInternaMateriales::findOrFail($detalle['odm_id']);
                 $detalleMaterial->odm_estado = 'COT';
                 $detalleMaterial->save();
-
-                $counter++;
             }
 
             DB::commit();
+
+            $agrupados = [];
+            foreach ($detalleMateriales as $detalle) {
+                $cod_orden = $detalle['cod_orden'];
+
+                if (!isset($agrupados[$cod_orden])) {
+                    // Si no existe el grupo, inicializamos con el primer elemento
+                    $agrupados[$cod_orden] = $detalle;
+                    $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
+                } else {
+                    // Si ya existe el grupo, sumamos la cantidad
+                    $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+                }
+            }
+            $agrupadosIndexado = array_values($agrupados);
+
             // retorna la generacion de un PDF
             $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
             $data = [
                 'proveedor' => $proveedor,
                 'trabajador' => $tra_solicitante,
-                'detalleMateriales' => $detalleMateriales,
+                'detalleMateriales' => $agrupadosIndexado,
                 'fechaActual' => DateHelper::parserFechaActual(),
                 'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id"
             ];
-            
+
             $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(["error" => $e->getMessage()], 500);
+            return response()->json(["error" => $e->getMessage()], 500, ['Content-Type' => 'application/json']);
         }
     }
 
@@ -379,10 +398,14 @@ class CotizacionController extends Controller
             foreach ($cotizacion->detalleCotizacion as $detalle) {
                 $odm_id = $detalle->odm_id;
                 $material = OrdenInternaMateriales::find($odm_id);
-                $material->update([
-                    'odm_estado' => 'REQ',
-                    'odm_fecmodificacion' => Carbon::now()
-                ]);
+
+                // si el detalle de material es un estado diferente de ODC
+                if ($material->odm_estado != 'ODC') {
+                    $material->update([
+                        'odm_estado' => 'REQ',
+                        'odm_fecmodificacion' => Carbon::now()
+                    ]);
+                }
 
                 $detalle->delete();
             }
@@ -403,8 +426,38 @@ class CotizacionController extends Controller
     // funcion para mostrar cotizacion para proveedor
     public function showCotizacionProveedor($id)
     {
-        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad', 'detalleCotizacionArchivos'])->findOrFail($id);
-        return response()->json($cotizacion);
+        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($id);
+        $cotizacionDetalle = CotizacionDetalle::with(['detalleMaterial.producto.unidad'])
+            ->where('coc_id', $cotizacion->coc_id)
+            ->get();
+
+        $agrupado_detalle = $cotizacionDetalle
+            ->where('odm_id', '!=', null)
+            ->groupBy('cod_orden')
+            ->map(function ($detalle, $cod_orden) {
+                return [
+                    'cod_orden' => $cod_orden,
+                    'cod_descripcion' => $detalle->first()->cod_descripcion,
+                    'cod_observacion' => $detalle->first()->cod_observacion,
+                    'uni_codigo' => $detalle->first()->detalleMaterial->producto ? $detalle->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
+                    'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                    'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
+                    'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                    'cod_total' => $detalle->first()->cod_total,
+                    'detalle' => $detalle->values()
+                ];
+            })
+            ->values();
+
+        $detalle_marcas = $cotizacionDetalle
+            ->where('odm_id', '==', null)
+            ->values();
+
+        return response()->json([
+            "cotizacion" => $cotizacion,
+            "agrupado_detalle" => $agrupado_detalle,
+            "detalle_marcas" => $detalle_marcas
+        ]);
     }
 
     // funcion para editar cotizacion para proveedor
@@ -443,7 +496,9 @@ class CotizacionController extends Controller
             $detalleCotizacion = $validatedData['detalle_cotizacion'];
             foreach ($detalleCotizacion as $detalle) {
                 // Buscamos el detalle de cotizacion
-                $detalleCotizacion = CotizacionDetalle::findOrFail($detalle['cod_id']);
+                $detalleCotizacion = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
+                                                ->where('cod_orden', $detalle['cod_orden'])
+                                                ->get();
                 // actualizamos
                 $detalleCotizacion->update([
                     'cod_observacion' => $detalle['cod_observacion'],
@@ -452,8 +507,23 @@ class CotizacionController extends Controller
                     'cod_preciounitario' => $detalle['cod_preciounitario'],
                     'cod_total' => $detalle['cod_total'],
                     'cod_cotizar' => 1,
-                    'cod_marcas' => $detalle['cod_marcas'],
                 ]);
+
+                // recorremos el detalle de marcas
+                foreach ($detalle['detalle_marcas'] as $marca) {
+                    CotizacionDetalle::create([
+                        'coc_id' => $cotizacion->coc_id,
+                        'cod_orden' => $detalle['cod_orden'],
+                        'cod_descripcion' => $marca['cod_descripcion'],
+                        'cod_observacion' => $marca['cod_observacion'],
+                        'cod_tiempoentrega' => $marca['cod_tiempoentrega'],
+                        'cod_cantidad' => $marca['cod_cantidad'],
+                        'cod_preciounitario' => $marca['cod_preciounitario'],
+                        'cod_total' => $marca['cod_total'],
+                        'cod_cotizar' => 1,
+                        'cod_fecmodificacion' => null
+                    ]);
+                }
             }
 
             DB::commit();
@@ -473,5 +543,4 @@ class CotizacionController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 }

@@ -83,7 +83,6 @@
     <tbody id="data-container-body">
     </tbody>
 </table>
-
 <!-- DIALOG DE DETALLE DE MATERIALES -->
 <div class="modal fade" id="modalDetalleMaterialModal" tabindex="-1" aria-labelledby="modalDetalleMaterialModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
@@ -117,7 +116,6 @@
         </div>
     </div>
 </div>
-
 <!-- DIALOG DE COTIZACION -->
 <div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel"
     aria-hidden="true">
@@ -443,6 +441,44 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- PREVISUALIZAR PDF -->
+<div class="modal fade" id="previewPDFModal" tabindex="-1" aria-labelledby="previewPDFModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="z-index: 1056;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewPDFModalLabel">Previsualizar solicitud de cotización (PDF)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div style="height: 80vh;">
+                    <iframe id="pdf-frame" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- PREVISUALIZAR TXT -->
+<div class="modal fade" id="previewTXTModal" tabindex="-1" aria-labelledby="previewTXTModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="z-index: 1056;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewTXTModalLabel">Previsualizar solicitud de cotización (TXT)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div style="height: 80vh;">
+                    <iframe id="txt-frame" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>

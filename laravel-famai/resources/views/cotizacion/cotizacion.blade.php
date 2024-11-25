@@ -17,6 +17,7 @@
             margin-top: 3cm;
             margin-left: 20px;
             margin-right: 30px;
+            margin-bottom: 1.5cm;
         }
 
         header {
@@ -27,6 +28,16 @@
             height: 3cm;
             margin-top: 20px;
             margin-bottom: 20px;
+            margin-left: 20px;
+            margin-right: 30px;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0cm;
+            left: 0cm;
+            right: 0cm;
+            height: 1.5cm;
             margin-left: 20px;
             margin-right: 30px;
         }
@@ -77,7 +88,7 @@
         .table-factura-cabecera {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 3px;
+            margin-top: 5px;
             border: 1px solid black;
         }
 
@@ -100,6 +111,7 @@
 
         .table-detalle-factura thead {
             background-color: #C0C0C0;
+            display: table-header-group;
         }
 
         .table-detalle-factura th,
@@ -257,7 +269,7 @@
         </tr>
     </table>
     {{-- Detalle de factura --}}
-    <table class="table-detalle-factura">
+    <table class="table-detalle-factura" style="margin-top: 5px;">
         <thead>
             <tr>
                 <th class="col-item">ITEM</th>
@@ -269,36 +281,24 @@
                 <th class="col-total">TOT. s/IGV</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody> 
             @foreach ($detalleMateriales as $material)
                 <tr>
-                    <td class="col-item">{{ $loop->iteration }}</td>
+                    <td class="col-item" style="text-align: center;">{{ $loop->iteration }}</td>
                     <td class="col-descripcion">{{ $material['cod_descripcion'] }}</td>
-                    <th class="col-tiempoentrega">&nbsp;</th>
-                    <td class="col-cantidad">{{ $material['cod_cantidad'] }}</td>
-                    <td class="col-und">{{ $material['uni_codigo'] }}</td>
+                    <th class="col-tiempoentrega" style="text-align: center;">&nbsp;</th>
+                    <td class="col-cantidad" style="text-align: center;">{{ $material['cod_cantidad'] }}</td>
+                    <td class="col-und" style="text-align: center;">{{ $material['uni_codigo'] }}</td>
                     <td class="col-precio">&nbsp;</td>
                     <td class="col-total">&nbsp;</td>
                 </tr>
             @endforeach
-
-            @for ($i = count($detalleMateriales); $i < 32; $i++)
-                <tr>
-                    <td class="col-item">&nbsp;</td>
-                    <td class="col-descripcion">&nbsp;</td>
-                    <th class="col-tiempoentrega">&nbsp;</th>
-                    <td class="col-cantidad">&nbsp;</td>
-                    <td class="col-und">&nbsp;</td>
-                    <td class="col-precio">&nbsp;</td>
-                    <td class="col-total">&nbsp;</td>
-                </tr>
-            @endfor
         </tbody>
     </table>
     <table style="width: 100%;height: 20px;border-collapse: collapse;">
         <tr>
-            <td style="width: 77.5%;"></td>
-            <td style="width: 22.5%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
+            <td style="width: 80.50%;"></td>
+            <td style="width: 19.50%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
                 <span style="float: left;">TOTAL S/</span>
                 <span style="float: right;"></span>
             </td>
@@ -310,28 +310,28 @@
         <p style="margin-top: 10px;margin-bottom: 10px;font-size: 12.5px;text-align: center;">Para ingresar su cotización debes abrir el siguiente enlace en un navegador: <span style="color: #0000FF">{{$url_cotizacion}}</span></p>
     @endif
 
-
-    <hr style="margin-top: 2px">
-    <table style="width: 100%; border-collapse: collapse">
-        <tr>
-            <td style="width: 45%; color:#0000FF;font-size: 10px;text-align:center;">
-                AREQUIPA: Jacinto Ibañez 510 Pque. Industrial <br>
-                Telf. 51-054-232827 Telefax 51-054-243999 <br>
-                Movil: 994689089 / 959969104 <br>
-                E-mail proveedores@famaisealjet.com arequipa@famaisealjet.com
-            </td>
-            <td style="width: 25%; color:#0000FF;font-size: 10px;text-align:center;">
-                LIMA : Ricardo Herrera 699 Lima 1 <br>
-                Altura Cdra. 13 Av. Argentina <br>
-                Móvil: 994689089 / 959609946
-            </td>
-            <td style="width: 30%; color:#0000FF;font-size: 10px;text-align:center;">
-                MOQUEGUA - ILO : Urb. Tupac Amaru C-12 <br>
-                Teléfono: 053-481873 • <br>
-                Móvil: 964923629 / 976865311 / 959969107
-            </td>
-        </tr>
-    </table>
+    <footer>
+        <table style="width: 100%; border-collapse: collapse">
+            <tr>
+                <td style="width: 45%; color:#0000FF;font-size: 10px;text-align:center;">
+                    AREQUIPA: Jacinto Ibañez 510 Pque. Industrial <br>
+                    Telf. 51-054-232827 Telefax 51-054-243999 <br>
+                    Movil: 994689089 / 959969104 <br>
+                    E-mail proveedores@famaisealjet.com arequipa@famaisealjet.com
+                </td>
+                <td style="width: 25%; color:#0000FF;font-size: 10px;text-align:center;">
+                    LIMA : Ricardo Herrera 699 Lima 1 <br>
+                    Altura Cdra. 13 Av. Argentina <br>
+                    Móvil: 994689089 / 959609946
+                </td>
+                <td style="width: 30%; color:#0000FF;font-size: 10px;text-align:center;">
+                    MOQUEGUA - ILO : Urb. Tupac Amaru C-12 <br>
+                    Teléfono: 053-481873 • <br>
+                    Móvil: 964923629 / 976865311 / 959969107
+                </td>
+            </tr>
+        </table>
+    </footer>
 </body>
 
 </html>

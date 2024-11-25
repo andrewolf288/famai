@@ -112,7 +112,7 @@ class CotizacionDetalleController extends Controller
     {
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
-        $producto = $request->input('pro_id');
+        $producto = $request->input('pro_id', null);
 
         $proveedoresFilter = $request->input('param', '');
 
@@ -128,7 +128,7 @@ class CotizacionDetalleController extends Controller
 
         if($producto !== null) {
             $producto = (int) $producto;
-            $query->whereHas('detalleMaterial', function ($q) use ($producto) {
+            $query->whereHas('detalleMaterial.producto', function ($q) use ($producto) {
                 $q->where('pro_id', $producto);
             });
         }
