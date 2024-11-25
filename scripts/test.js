@@ -30,7 +30,9 @@ $(document).ready(() => {
     const dataTableOptions = {
         destroy: true,
         responsive: true,
-        paging: false,
+        paging: true,
+        pageLength: 50,
+        lengthMenu: [50, 100, 250, 500],
         searching: true,
         info: true,
         language: {
@@ -95,38 +97,31 @@ $(document).ready(() => {
             let content = ''
             data.forEach((material, index) => {
                 if (material.detalle !== undefined) {
-                    const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, cotizaciones_count, ordenes_compra_count, detalle } = material
                     content += `
                     <tr data-index="${index}">
                         <td></td>
                         <td></td>
-                        <td>${pro_codigo || 'N/A'}</td>
-                        <td>${pro_descripcion || 'N/A'}</td>
-                        <td class="text-center">${uni_codigo || 'N/A'}</td>
-                        <td class="text-center">${cantidad.toFixed(2) || 'N/A'}</td>
+                        <td>${material.pro_codigo || 'N/A'}</td>
+                        <td>${material.pro_descripcion || 'N/A'}</td>
+                        <td class="text-center">${material.uni_codigo || 'N/A'}</td>
+                        <td class="text-center">${material.cantidad || 'N/A'}</td>
                         <td class="text-center">${"0.00"}</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-primary btn-historico" data-historico="${pro_id}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                                    <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                                    <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                                    <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                                </svg>
-                            </button>
+                            <button class="btn btn-sm btn-primary btn-historico" data-historico="${material.pro_id}">Ver histórico</button>
                         </td>
                         <td>
                             <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
-                                ${detalle[0].tra_responsable ? detalle[0].responsable.tra_nombre : 'Sin responsable'}
+                                ${material.detalle[0].responsable?.tra_nombre || 'Sin responsable'}
                             </button>
                         </td>
                         <td class="text-center">
                             <button class="btn btn-primary position-relative btn-cotizado" data-index-detalle="${index}">
                                 Cotizaciones
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${cotizaciones_count}
+                                    ${material.cotizaciones_count}
                                 </span>
                             </button>
                         </td>
@@ -134,7 +129,7 @@ $(document).ready(() => {
                             <button class="btn btn-primary position-relative btn-ordenado" data-index-detalle="${index}">
                                 Ordenes de compra
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${ordenes_compra_count}
+                                    ${material.ordenes_compra_count}
                                 </span>
                             </button>
                         </td>
@@ -147,46 +142,39 @@ $(document).ready(() => {
                     </tr>
                     `
                 } else {
-                    const { odm_id, odm_descripcion, odm_cantidad, tra_responsable, responsable, cotizaciones_count, ordenes_compra_count } = material
                     content += `
                     <tr data-index="${index}">
                         <td></td>
                         <td></td>
                         <td>N/A</td>
-                        <td>${odm_descripcion || 'N/A'}</td>
+                        <td>${material.odm_descripcion || 'N/A'}</td>
                         <td class="text-center">N/A</td>
-                        <td class="text-center">${odm_cantidad}</td>
+                        <td class="text-center">${material.odm_cantidad}</td>
                         <td class="text-center">0.00</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-secondary" disabled>Ver detalle</button>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-secondary" disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                                    <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                                    <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                                    <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                                </svg>
-                            </button>
+                            <button class="btn btn-sm btn-secondary" disabled>Ver histórico</button>
                         </td>
                         <td>
                             <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
-                                ${tra_responsable ? responsable.tra_nombre : 'Sin responsable'}
+                                ${material.responsable?.tra_nombre || 'Sin responsable'}
                             </button>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-primary position-relative btn-cotizado" data-detalle="${odm_id}">
+                            <button class="btn btn-primary position-relative btn-cotizado" data-detalle="${material.odm_id}">
                                 Cotizaciones
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${cotizaciones_count}
+                                    ${material.cotizaciones_count}
                                 </span>
                             </button>
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-primary position-relative btn-ordenado" data-detalle="${odm_id}">
+                            <button class="btn btn-primary position-relative btn-ordenado" data-detalle="${material.odm_id}">
                                 Ordenes de compra
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${ordenes_compra_count}
+                                    ${material.ordenes_compra_count}
                                 </span>
                             </button>
                         </td>
@@ -200,6 +188,7 @@ $(document).ready(() => {
                     `
                 }
             })
+
             $('#data-container-body').html(content)
             // inicializamos el datatable
             dataTable = dataContainer.DataTable(dataTableOptions)
