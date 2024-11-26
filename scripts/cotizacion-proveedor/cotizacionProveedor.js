@@ -21,6 +21,7 @@ $(document).ready(function () {
     async function traerInformacionCotizacion() {
         try {
             const { data } = await axios.get(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`)
+            console.log(data)
             const { cotizacion, agrupado_detalle, detalle_marcas } = data
             const { proveedor, coc_estado, coc_total, coc_cotizacionproveedor, coc_notas, coc_correocontacto, coc_fechaentrega, coc_fechavalidez, mon_codigo, coc_formapago } = cotizacion
             $("#documentoProveedorInput").val(`${proveedor.tdo_codigo}-${proveedor.prv_nrodocumento}`)
@@ -39,56 +40,80 @@ $(document).ready(function () {
 
             // si el estado es SOL, entonces solo permitimos la lectura
             if (coc_estado !== 'SOL') {
-                $("#correoContactoCotizacionInput").attr('readonly', true)
-                $("#cotizacionProveedorCotizacionInput").attr('readonly', true)
+                $("#correoContactoCotizacionInput").attr('disabled', true)
+                $("#cotizacionProveedorCotizacionInput").attr('disabled', true)
                 $("#fechaEntregaPicker").datepicker('disable')
                 $("#fechaValidezPicker").datepicker('disable')
-                $("#notasCotizacionInput").attr('readonly', true)
+                $("#notasCotizacionInput").attr('disabled', true)
                 $("#monedaCotizacionInput").attr('disabled', true)
                 $("#formapagoCotizacionInput").attr('disabled', true)
             }
 
             // el detalle agrupado se debe recorrer
-            agrupado_detalle.forEach(detalle => {
-                const { cod_orden, cod_cantidad, cod_descripcion, cod_observacion, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, uni_codigo } = detalle
-                const rowItem = document.createElement('tr')
-                rowItem.classList.add('detalle-cotizacion')
-                rowItem.dataset.orden = cod_orden
-                rowItem.innerHTML = `
+            agrupado_detalle
+                .filter(detalle => {
+                    if (coc_estado === 'SOL') {
+                        return true
+                    } else {
+                        if (detalle.cod_cotizar == "1") {
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
+                })
+                .forEach(detalle => {
+                    const { cod_orden, cod_cantidad, cod_descripcion, cod_observacion, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, uni_codigo } = detalle
+                    const rowItem = document.createElement('tr')
+                    rowItem.classList.add('detalle-cotizacion')
+                    rowItem.dataset.orden = cod_orden
+                    rowItem.innerHTML = `
                     <td class="text-center">
                         <input class="form-check-input cotizar-checkbox" type="checkbox" ${coc_estado === 'SOL' ? 'checked' : cod_cotizar == 1 ? 'checked' : ''} ${coc_estado !== 'SOL' ? 'disabled' : ''} />
                     </td>
                     <td class="orden">${cod_orden}</td>
-                    <td class="descripcion-input">
-                        ${escapeHTML(cod_descripcion) || ''}
-                    </td>
+                    <td class="descripcion-input">${cod_descripcion || ''}</td>
                     <td class="unidad-input">
                         ${uni_codigo}
                     </td>
                     <td>
-                        <textarea class="form-control observacion-input" rows="1" readonly>${escapeHTML(cod_observacion) || ''}</textarea>
+                        ${coc_estado === 'SOL' ?
+                            `<textarea class="form-control observacion-input" rows="1" readonly>${escapeHTML(cod_observacion) || ''}</textarea>`
+                            : `${cod_observacion || ''}`
+                        }
                     </td>
-                    <td>
-                        <input type="number" class="form-control tiempoentrega-input" value='${cod_tiempoentrega || 0}' readonly/>
+                    <td class="text-center">
+                        ${coc_estado === 'SOL' ?
+                            `<input type="number" class="form-control tiempoentrega-input" value='${cod_tiempoentrega || 0}' readonly/>`
+                            : `${cod_tiempoentrega}`
+                        }
                     </td>
-                    <td>
-                        <input type="number" class="form-control cantidad-input" value='${cod_cantidad || 0.00}' readonly/>
+                    <td class="text-center">
+                    ${coc_estado === 'SOL' ?
+                            `<input type="number" class="form-control cantidad-input" value='${cod_cantidad || 0.00}' readonly/>`
+                            : `${cod_cantidad.toFixed(2)}`
+                        }
                     </td>
-                    <td>
-                        <div class="d-flex align-items-center">
+                    <td class="text-center">
+                        <div class="d-flex align-items-center justify-content-center">
                             <span class="moneda me-1"></span>
-                            <input type="number" class="form-control precio-input" value='${cod_preciounitario || 0.00}' readonly/>
+                            ${coc_estado === 'SOL' ?
+                            `<input type="number" class="form-control precio-input" value='${cod_preciounitario || 0.00}' readonly/>`
+                            : `${cod_preciounitario}`
+                        }
                         </div>
                     </td>
-                    <td>
-                        <div class="d-flex align-items-center">
+                    <td class="text-center">
+                        <div class="d-flex align-items-center justify-content-center">
                             <span class="moneda me-1"></span>
-                            <input type="number" class="form-control total-input" value='${cod_total || 0.00}' readonly/>
+                            ${coc_estado === 'SOL' ?
+                            `<input type="number" class="form-control total-input" value='${cod_total || 0.00}' readonly/>`
+                            : `${cod_total}`}
                         </div>
                     </td>
                     <td>
                         ${coc_estado === 'SOL'
-                        ? `
+                            ? `
                         <div class="d-flex justify-content-around">
                             <button class="btn btn-sm btn-warning btn-cotizacion-editar me-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -111,83 +136,70 @@ $(document).ready(function () {
                     </td>
                     `
 
-                if (coc_estado === 'SOL') {
-                    const cantidadDetalle = rowItem.querySelector('.cantidad-input')
-                    const precioDetalle = rowItem.querySelector('.precio-input')
-                    const botonEditar = rowItem.querySelector('.btn-cotizacion-editar')
-                    const botonGuardar = rowItem.querySelector('.btn-cotizacion-guardar')
+                    if (coc_estado === 'SOL') {
+                        const cantidadDetalle = rowItem.querySelector('.cantidad-input')
+                        const precioDetalle = rowItem.querySelector('.precio-input')
+                        const botonEditar = rowItem.querySelector('.btn-cotizacion-editar')
+                        const botonGuardar = rowItem.querySelector('.btn-cotizacion-guardar')
 
-                    cantidadDetalle.addEventListener('input', function () {
-                        const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-                        if (!isNaN(total)) {
-                            rowItem.querySelector('.total-input').value = total.toFixed(2);
-                        } else {
-                            rowItem.querySelector('.total-input').value = '';
-                        }
+                        cantidadDetalle.addEventListener('input', function () {
+                            const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                            if (!isNaN(total)) {
+                                rowItem.querySelector('.total-input').value = total.toFixed(2);
+                            } else {
+                                rowItem.querySelector('.total-input').value = '';
+                            }
+                        })
+
+                        precioDetalle.addEventListener('input', function () {
+                            const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                            if (!isNaN(total)) {
+                                rowItem.querySelector('.total-input').value = total.toFixed(2);
+                            } else {
+                                rowItem.querySelector('.total-input').value = '';
+                            }
+                        });
+
+                        // escuchadores de acciones
+                        botonEditar.addEventListener('click', function () { editarDetalleCotizacion(rowItem) })
+                        botonGuardar.addEventListener('click', function () { guardarDetalleCotizacion(rowItem) })
+                    }
+
+                    $('#productosCotizacionTable tbody').append(rowItem)
+
+                    // manejamos el cambio de checkbox
+                    rowItem.querySelector('.cotizar-checkbox').addEventListener('change', function () {
+                        calcularResumenCotizacion()
                     })
 
-                    precioDetalle.addEventListener('input', function () {
-                        const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-                        if (!isNaN(total)) {
-                            rowItem.querySelector('.total-input').value = total.toFixed(2);
-                        } else {
-                            rowItem.querySelector('.total-input').value = '';
-                        }
-                    });
-
-                    // escuchadores de acciones
-                    botonEditar.addEventListener('click', function () { editarDetalleCotizacion(rowItem) })
-                    botonGuardar.addEventListener('click', function () { guardarDetalleCotizacion(rowItem) })
-                }
-
-                $('#productosCotizacionTable tbody').append(rowItem)
-
-                // manejamos el cambio de checkbox
-                rowItem.querySelector('.cotizar-checkbox').addEventListener('change', function () {
-                    calcularResumenCotizacion()
-                })
-
-                // ahora debemos agregar la información de las marcas
-                detalle_marcas.filter(detalle => detalle.cod_orden == cod_orden).forEach(detalle => {
-                    const { cod_orden, cod_descripcion, uni_codigo, cod_observacion, tiempoentrega, cod_preciounitario, cod_total, cod_cantidad } = detalle
-                    const rowItem = document.createElement('tr')
-                    rowItem.classList.add('detalle-cotizacion-marca')
-                    rowItem.dataset.orden = cod_orden
-                    rowItem.innerHTML = `
+                    // ahora debemos agregar la información de las marcas
+                    detalle_marcas
+                        .filter(detalleFilter => detalleFilter.cod_orden == cod_orden)
+                        .forEach(detalle => {
+                            const rowItemMarca = document.createElement('tr')
+                            rowItemMarca.classList.add('detalle-cotizacion-marca')
+                            rowItemMarca.dataset.orden = cod_orden
+                            rowItemMarca.innerHTML = `
                         <td></td>
                         <td></td>
-                        <td>
-                            ${escapeHTML(cod_descripcion) || ''}
-                        </td>
-                        <td>
-                            ${uni_codigo}
-                        </td>
-                        <td>
-                            <textarea class="form-control observacion-marca-input" rows="1" readonly>
-                                ${escapeHTML(cod_observacion) || ''}
-                            </textarea>
-                        </td>
-                        <td>
-                        <input type="number" class="form-control tiempoentrega-marca-input" value='${tiempoentrega}' readonly/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control cantidad-marca-input" value='${cod_cantidad}' readonly/>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <span class="moneda me-1"></span>
-                                <input type="number" class="form-control precio-marca-input" value='${cod_preciounitario}' readonly/>
+                        <td>${detalle.cod_descripcion || ''}</td>
+                        <td>${uni_codigo || ''}</td>
+                        <td>${detalle.cod_observacion || ''}</td>
+                        <td class="text-center">${detalle.cod_tiempoentrega}</td>
+                        <td class="text-center">${detalle.cod_cantidad}</td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span class="moneda me-1"></span>${detalle.cod_preciounitario}
                             </div>
                         </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <span class="moneda me-1"></span>
-                                <input type="number" class="form-control total-marca-input" value='${cod_total}' readonly/>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <span class="moneda me-1"></span>${detalle.cod_total}
                             </div>
                         </td>
                         <td>
                         ${coc_estado === 'SOL'
-                            ? `
+                                    ? `
                             <div class="d-flex justify-content-around">
                                 <button class="btn btn-sm btn-warning btn-cotizacion-marca-editar me-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
@@ -206,11 +218,12 @@ $(document).ready(function () {
                                     </svg>
                                 </button>
                             </div>`
-                            : ''}
+                                    : ''}
                         </td>
                     `
+                            $('#productosCotizacionTable tbody').append(rowItemMarca)
+                        })
                 })
-            })
 
             // debemos controlar el boton de guardado
             if (coc_estado === 'SOL') {
@@ -250,10 +263,8 @@ $(document).ready(function () {
         rowItemMarca.innerHTML = `
             <td></td>
             <td></td>
+            <td class="descripcion-marca-input">${descripcionMarca}</td>
             <td>
-                ${escapeHTML(descripcionMarca)}
-            </td>
-            <td class="descripcion-marca-input">
                 ${unidadMarca}
             </td>
             <td>
@@ -489,7 +500,7 @@ $(document).ready(function () {
             .filter(function () {
                 return $(this).find('.cotizar-checkbox').is(':checked');
             })
-        
+
         const pendientes = detalle_productos.filter(function () {
             return $(this).find('.btn-cotizacion-guardar').is(':visible');
         })
@@ -579,7 +590,7 @@ $(document).ready(function () {
                 detalle_cotizacion: formatDetalleProductos
             }
             console.log(formatData)
-            return
+            // return
             const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'

@@ -81,23 +81,102 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <table id="tbl-cotizacion-detalle" class="table mt-3 table-striped nowrap">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th class="text-center">Cotizar</th>
-              <th>OT</th>
-              <th>Descripción</th>
-              <th>Observación</th>
-              <th class="text-center">Cantidad</th>
-              <th class="text-center">PRECIO s/IGV</th>
-              <th class="text-center">TOTAL s/IGV</th>
-              <th class="text-center">Tmp. Entrega</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+        <!-- TABLE AGRUPADO -->
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">Detalle agrupado</h5>
+          </div>
+          <div class="card-body">
+            <table id="tbl-cotizacion-detalle-agrupado" class="table mt-2 table-striped nowrap">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="text-center">Cotizar</th>
+                  <th>Descripción</th>
+                  <th>Observación</th>
+                  <th class="text-center">Tmp. Entrega</th>
+                  <th class="text-center">Unidad</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-center">PRECIO s/IGV</th>
+                  <th class="text-center">TOTAL s/IGV</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TABLE MARCAS -->
+        <div class="card mt-2">
+          <div class="card-header">
+            <h5 class="card-title">Detalle marcas</h5>
+          </div>
+          <div class="card-body">
+            <table id="tbl-cotizacion-detalle-marcas" class="table mt-3 table-striped nowrap">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Descripción</th>
+                  <th>Observación</th>
+                  <th class="text-center">Tmp. Entrega</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-center">PRECIO s/IGV</th>
+                  <th class="text-center">TOTAL s/IGV</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TABLE COTIZACION DETALLE -->
+        <div class="card mt-2">
+          <div class="card-header">
+            <h5 class="card-title">Detalle específico</h5>
+          </div>
+          <div class="card-body">
+            <table id="tbl-cotizacion-detalle-especifico" class="table mt-3 table-striped nowrap">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="text-center">Cotizar</th>
+                  <th>OT</th>
+                  <th>Descripción</th>
+                  <th>Observación</th>
+                  <th class="text-center">Tmp. Entrega</th>
+                  <th class="text-center">Cantidad</th>
+                  <th class="text-center">PRECIO s/IGV</th>
+                  <th class="text-center">TOTAL s/IGV</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div class="modal fade" id="previewPDFModal" tabindex="-1" aria-labelledby="previewPDFModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewPDFModalLabel">Previsualizar Cotización</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div style="height: 80vh;">
+          <iframe id="pdf-frame" width="100%" height="100%" style="border: none;"></iframe>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

@@ -363,13 +363,44 @@ class CotizacionController extends Controller
     {
         try {
             $coc_id = $request->input('coc_id');
-            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad'])->findOrFail($coc_id);
-            $data = array_merge(
-                $cotizacion->toArray(),
-                [
-                    'coc_fecha_formateada' => DateHelper::parserFechaActual(),
-                ]
-            );
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($coc_id);
+
+            $detalleCotizacion = CotizacionDetalle::with(['detalleMaterial.producto.unidad'])
+                ->where('coc_id', $cotizacion->coc_id)
+                ->where('cod_cotizar', 1)
+                ->get();
+
+            $agrupado = $detalleCotizacion
+                ->where('odm_id', '!=', null)
+                ->groupBy('cod_orden')
+                ->map(function ($grupo, $cod_orden) {
+                    return [
+                        'cod_orden' => $cod_orden,
+                        'cod_descripcion' => $grupo->first()->cod_descripcion,
+                        'cod_observacion' => $grupo->first()->cod_observacion,
+                        'uni_codigo' => $grupo->first()->detalleMaterial->producto ? $grupo->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
+                        'cod_cantidad' => $grupo->sum('cod_cantidad'),
+                        'cod_tiempoentrega' => $grupo->first()->cod_tiempoentrega,
+                        'cod_preciounitario' => $grupo->first()->cod_preciounitario,
+                        'cod_total' => $grupo->sum('cod_total'),
+                    ];
+                })
+                ->values();
+
+            $marcas = $detalleCotizacion
+                ->where('odm_id', '==', null)
+                ->values();
+
+            $combinado = $agrupado->merge($marcas);
+            $combinadoOrdenado = $combinado->sortBy('cod_orden')->values();
+
+            $data = [
+                'cotizacion' => $cotizacion,
+                'proveedor' => $cotizacion->proveedor,
+                'detalle_cotizacion' => $combinadoOrdenado,
+                'coc_fecha_formateada' => DateHelper::parserFechaActual(),
+            ];
+
             $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
@@ -397,16 +428,22 @@ class CotizacionController extends Controller
             // Eliminamos los detalles de la cotización
             foreach ($cotizacion->detalleCotizacion as $detalle) {
                 $odm_id = $detalle->odm_id;
-                $material = OrdenInternaMateriales::find($odm_id);
+                if($odm_id != null){
+                    // comprobamos si es la unica cotizacion del material
+                    $cotizacionesDetalle = CotizacionDetalle::where('odm_id', $odm_id)->count();
+                    if ($cotizacionesDetalle == 1) {
+                        // buscamos el detalle de material
+                        $material = OrdenInternaMateriales::findOrFail($odm_id);
+                        // si el detalle de material es un estado diferente de ODC
+                        if ($material->odm_estado != 'ODC') {
+                            $material->update([
+                                'odm_estado' => 'REQ',
+                                'odm_fecmodificacion' => Carbon::now()
+                            ]);
+                        }
+                    }
 
-                // si el detalle de material es un estado diferente de ODC
-                if ($material->odm_estado != 'ODC') {
-                    $material->update([
-                        'odm_estado' => 'REQ',
-                        'odm_fecmodificacion' => Carbon::now()
-                    ]);
                 }
-
                 $detalle->delete();
             }
 
@@ -444,6 +481,7 @@ class CotizacionController extends Controller
                     'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                     'cod_preciounitario' => $detalle->first()->cod_preciounitario,
                     'cod_total' => $detalle->first()->cod_total,
+                    'cod_cotizar' => $detalle->first()->cod_cotizar,
                     'detalle' => $detalle->values()
                 ];
             })
@@ -496,18 +534,19 @@ class CotizacionController extends Controller
             $detalleCotizacion = $validatedData['detalle_cotizacion'];
             foreach ($detalleCotizacion as $detalle) {
                 // Buscamos el detalle de cotizacion
-                $detalleCotizacion = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
-                                                ->where('cod_orden', $detalle['cod_orden'])
-                                                ->get();
-                // actualizamos
-                $detalleCotizacion->update([
-                    'cod_observacion' => $detalle['cod_observacion'],
-                    'cod_tiempoentrega' => $detalle['cod_tiempoentrega'],
-                    'cod_cantidad' => $detalle['cod_cantidad'],
-                    'cod_preciounitario' => $detalle['cod_preciounitario'],
-                    'cod_total' => $detalle['cod_total'],
-                    'cod_cotizar' => 1,
-                ]);
+                $detalleCotizacionResumido = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
+                    ->where('cod_orden', $detalle['cod_orden'])
+                    ->get();
+
+                foreach ($detalleCotizacionResumido as $detalleResumido) {
+                    $detalleResumido->update([
+                        'cod_observacion' => $detalle['cod_observacion'],
+                        'cod_tiempoentrega' => $detalle['cod_tiempoentrega'],
+                        'cod_preciounitario' => $detalle['cod_preciounitario'],
+                        'cod_total' => $detalleResumido->cod_cantidad * floatval($detalle['cod_preciounitario']),
+                        'cod_cotizar' => 1,
+                    ]);
+                }
 
                 // recorremos el detalle de marcas
                 foreach ($detalle['detalle_marcas'] as $marca) {
@@ -521,7 +560,8 @@ class CotizacionController extends Controller
                         'cod_preciounitario' => $marca['cod_preciounitario'],
                         'cod_total' => $marca['cod_total'],
                         'cod_cotizar' => 1,
-                        'cod_fecmodificacion' => null
+                        'cod_fecmodificacion' => null,
+                        'cod_usucreacion' => null,
                     ]);
                 }
             }
@@ -529,13 +569,44 @@ class CotizacionController extends Controller
             DB::commit();
 
             // proveedor
-            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante', 'detalleCotizacion.detalleMaterial.producto.unidad'])->findOrFail($id);
-            $data = array_merge(
-                $cotizacion->toArray(),
-                [
-                    'coc_fecha_formateada' => DateHelper::parserFechaActual(),
-                ]
-            );
+            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($id);
+
+            $detalleCotizacion = CotizacionDetalle::with(['detalleMaterial.producto.unidad'])
+                ->where('coc_id', $cotizacion->coc_id)
+                ->where('cod_cotizar', 1)
+                ->get();
+
+            $agrupado = $detalleCotizacion
+                ->where('odm_id', '!=', null)
+                ->groupBy('cod_orden')
+                ->map(function ($grupo, $cod_orden) {
+                    return [
+                        'cod_orden' => $cod_orden,
+                        'cod_descripcion' => $grupo->first()->cod_descripcion,
+                        'cod_observacion' => $grupo->first()->cod_observacion,
+                        'uni_codigo' => $grupo->first()->detalleMaterial->producto ? $grupo->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
+                        'cod_cantidad' => $grupo->sum('cod_cantidad'),
+                        'cod_tiempoentrega' => $grupo->first()->cod_tiempoentrega,
+                        'cod_preciounitario' => $grupo->first()->cod_preciounitario,
+                        'cod_total' => $grupo->sum('cod_total')
+                    ];
+                })
+                ->values();
+
+            $marcas = $detalleCotizacion
+                ->where('odm_id', '==', null)
+                ->values();
+
+            $combinado = $agrupado->merge($marcas);
+            $combinadoOrdenado = $combinado->sortBy('cod_orden')->values();
+
+            $data = [
+                'cotizacion' => $cotizacion,
+                'proveedor' => $cotizacion->proveedor,
+                'detalle_cotizacion' => $combinadoOrdenado,
+                'coc_fecha_formateada' => DateHelper::parserFechaActual(),
+            ];
+
             $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {

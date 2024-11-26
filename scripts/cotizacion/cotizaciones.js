@@ -39,7 +39,7 @@ $(document).ready(() => {
     function initDataTable(data) {
         let content = ''
         data.forEach((cotizacion, index) => {
-            const {moneda} = cotizacion
+            const { moneda } = cotizacion
             content += `
                 <tr>
                     <td>${cotizacion.coc_fechacotizacion !== null ? parseDateSimple(cotizacion.coc_fechacotizacion) : 'No aplica'}</td>
@@ -124,26 +124,77 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-cotizacion-detalle', async function () {
         const id = $(this).data('cotizacion')
         try {
-            const {data} = await client.get(`/cotizacion-detalle/${id}`)
-            // llenamos la tabla con los datos
-            $('#tbl-cotizacion-detalle tbody').empty()
-            data.forEach(detalle => {
-                const {cotizacion} = detalle
-                const {moneda} = cotizacion
-                const {detalle_material} = detalle
-                const {orden_interna_parte} = detalle_material
+            const { data } = await client.get(`/cotizacion-detalle/${id}`)
+            const { agrupado, marcas, detalle_materiales } = data
 
-                $('#tbl-cotizacion-detalle tbody').append(`
+            // Llenamos los datos agrupados
+            let simbolo = ''
+            $('#tbl-cotizacion-detalle-agrupado tbody').empty()
+            agrupado.forEach(agrupado => {
+                const { cod_orden, cod_descripcion, cod_observacion, uni_codigo, cod_cantidad, cod_preciounitario, cod_total, cod_cotizar, cod_tiempoentrega, mon_simbolo } = agrupado
+                simbolo = mon_simbolo
+                $('#tbl-cotizacion-detalle-agrupado tbody').append(`
                     <tr>
-                        <td>${detalle.cod_orden}</td>
-                        <td class="text-center">${detalle.cod_cotizar == 1 ? 'SI' : 'NO'}</td>
+                        <td>${cod_orden}</td>
+                        <td class="text-center">
+                            <span class="badge ${cod_cotizar == 1 ? 'bg-success' : 'bg-danger'}">${cod_cotizar == 1 ? 'SI' : 'NO'}</span>
+                        </td>
+                        <td>${cod_descripcion}</td>
+                        <td>${cod_observacion || 'N/A'}</td>
+                        <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
+                        <td class="text-center">${uni_codigo || 'N/A'}</td>
+                        <td class="text-center">${cod_cantidad.toFixed(2) || 'N/A'}</td>
+                        <td class="text-center">${mon_simbolo} ${cod_preciounitario || 'N/A'}</td>
+                        <td class="text-center">${mon_simbolo} ${cod_total.toFixed(2) || 'N/A'}</td>
+                    </tr>
+                `)
+            })
+            $('#tbl-cotizacion-detalle-agrupado tbody').append(`
+                <tr>
+                    <td colspan="8" class="text-end fw-bold">Total</td>
+                    <td class="text-center fw-bold">${simbolo} ${agrupado.reduce((total, agrupado) => total + agrupado.cod_total, 0).toFixed(2)}</td>
+                </tr>
+            `)
+
+            // Llenamos los datos de marcas
+            $('#tbl-cotizacion-detalle-marcas tbody').empty()
+            marcas.forEach(marca => {
+                const { cotizacion, cod_orden, cod_descripcion, cod_observacion, cod_tiempoentrega, cod_cantidad, cod_preciounitario, cod_total } = marca
+                const { moneda } = cotizacion
+                $('#tbl-cotizacion-detalle-marcas tbody').append(`
+                    <tr>
+                        <td>${cod_orden}</td>
+                        <td>${cod_descripcion}</td>
+                        <td>${cod_observacion || 'N/A'}</td>
+                        <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
+                        <td class="text-center">${cod_cantidad || 'N/A'}</td>
+                        <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_preciounitario || 'N/A'}</td>
+                        <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_total || 'N/A'}</td>
+                    </tr>
+                `)
+            })
+
+            // Llenamos los datos de los materiales especifico
+            $('#tbl-cotizacion-detalle-especifico tbody').empty()
+            detalle_materiales.forEach(detalle => {
+                const { cotizacion, cod_orden, cod_cotizar, cod_descripcion, cod_tiempoentrega, cod_observacion, cod_cantidad, cod_preciounitario, cod_total } = detalle
+                const { moneda } = cotizacion
+                const { detalle_material } = detalle
+                const { orden_interna_parte } = detalle_material
+
+                $('#tbl-cotizacion-detalle-especifico tbody').append(`
+                    <tr>
+                        <td>${cod_orden}</td>
+                        <td class="text-center">
+                            <span class="badge ${cod_cotizar == 1 ? 'bg-success' : 'bg-danger'}">${cod_cotizar == 1 ? 'SI' : 'NO'}</span>
+                        </td>
                         <td>${orden_interna_parte.orden_interna?.odt_numero || 'N/A'}</td>
-                        <td>${detalle.cod_descripcion}</td>
-                        <td>${detalle.cod_observacion || 'N/A'}</td>
-                        <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
-                        <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_preciounitario || 'N/A'}</td>
-                        <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_total || 'N/A'}</td>
-                        <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
+                        <td>${cod_descripcion}</td>
+                        <td>${cod_observacion || 'N/A'}</td>
+                        <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
+                        <td class="text-center">${cod_cantidad || 'N/A'}</td>
+                        <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_preciounitario || 'N/A'}</td>
+                        <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_total || 'N/A'}</td>
                     </tr>
                 `)
             })
@@ -151,7 +202,8 @@ $(document).ready(() => {
             // abrimos el modal
             const modalDetalleCotizacion = new bootstrap.Modal(document.getElementById('detalleCotizacionModal'))
             modalDetalleCotizacion.show()
-        } catch(error){
+        } catch (error) {
+            console.log(error)
             alert('Error al obtener el detalle de la cotización')
         }
     })
@@ -175,7 +227,6 @@ $(document).ready(() => {
     // FUNCION PARA GENERAR PDF
     $('#data-container').on('click', '.btn-cotizacion-pdf', async function () {
         const id = $(this).data('cotizacion')
-        console.log("Generar pdf de ID COTIZACION: ", id)
         try {
             const response = await client.get(`/cotizaciones/exportarPDF?coc_id=${id}`, {
                 headers: {
@@ -184,17 +235,18 @@ $(document).ready(() => {
                 responseType: 'blob'
             })
 
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `reporte_cotizacion_${id}.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            showModalPreview(pdfUrl)
         } catch (error) {
             console.log(error)
             alert('Error al generar el reporte')
         }
     })
+
+    function showModalPreview(pdfUrl) {
+        document.getElementById('pdf-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
 })

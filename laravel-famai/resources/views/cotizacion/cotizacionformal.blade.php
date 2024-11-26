@@ -175,7 +175,7 @@
                             <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">COTIZACIÓN</td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">{{$coc_numero}}</td>
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">{{$cotizacion['coc_numero']}}</td>
                         </tr>
                     </table>
                 </td>
@@ -233,27 +233,27 @@
             <td>
                 <div class="info-row">
                     <span class="label">FEC. ENTREGA:</span>
-                    <span class="value">{{ $coc_fechaentrega ? DateTime::createFromFormat('Y-m-d', $coc_fechaentrega)->format('d/m/Y'): '' }}</span>
+                    <span class="value">{{ $cotizacion['coc_fechaentrega'] ? DateTime::createFromFormat('Y-m-d', $cotizacion['coc_fechaentrega'])->format('d/m/Y'): '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">FEC. VALIDEZ:</span>
-                    <span class="value">{{ $coc_fechavalidez ? DateTime::createFromFormat('Y-m-d', $coc_fechavalidez)->format('d/m/Y'): '' }}</span>
+                    <span class="value">{{ $cotizacion['coc_fechavalidez'] ? DateTime::createFromFormat('Y-m-d', $cotizacion['coc_fechavalidez'])->format('d/m/Y'): '' }}</span>
                 </div>
             </td>
             <td>
                 <div class="info-row">
                     <span class="label">MONEDA:</span>
-                    <span class="value">{{ $moneda['mon_descripcion'] }}</span>
+                    <span class="value">{{ $cotizacion['moneda']['mon_descripcion'] }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">FORMA DE PAGO:</span>
-                    <span class="value">{{ $coc_formapago }}</span>
+                    <span class="value">{{ $cotizacion['coc_formapago'] }}</span>
                 </div>
             </td>
             <td>
                 <div class="info-row">
                     <span class="label">Elaborado por:</span>
-                    <span class="value">{{$solicitante ? $solicitante['tra_nombre']: ''}}</span>
+                    <span class="value">{{$cotizacion['solicitante'] ? $cotizacion['solicitante']['tra_nombre']: ''}}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">ACTIVO:</span>
@@ -278,11 +278,11 @@
         <tbody>
             @foreach ($detalle_cotizacion as $material)
                 <tr>
-                    <td class="col-item">{{ $loop->iteration }}</td>
-                    <td class="col-descripcion">{{ $material['cod_descripcion'] }}</td>
+                    <td class="col-item">{{ $material['cod_orden'] }}</td>
+                    <td class="col-descripcion">{{ $material['cod_descripcion'] }}{{ $material['cod_observacion'] ? " - " . $material['cod_observacion'] : ''}}</td>
                     <th class="col-tiempoentrega" style="text-align: center;">{{ $material['cod_tiempoentrega'] }}</th>
-                    <td class="col-cantidad" style="text-align: center;">{{ $material['cod_cantidad'] }}</td>
-                    <td class="col-und" style="text-align: center;">{{ $material['detalle_material']['producto'] ? $material['detalle_material']['producto']['unidad']['uni_codigo'] : ''}}</td>
+                    <td class="col-cantidad" style="text-align: center;">{{number_format($material['cod_cantidad'],2)}}</td>
+                    <td class="col-und" style="text-align: center;">{{ $material['uni_codigo'] ? $material['uni_codigo'] : '' }}</td>
                     <td class="col-precio" style="text-align: center;">{{ $material['cod_preciounitario']}} </td>
                     <td class="col-total" style="text-align: center;">{{ $material['cod_total'] }}</td>
                 </tr>
@@ -293,16 +293,11 @@
         <tr>
             <td style="width: 80.50%;"></td>
             <td style="width: 19.50%;height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
-                <span style="float: left;">TOTAL {{$moneda['mon_simbolo']}}</span>
-                <span style="float: right;">{{ $coc_total }}</span>
+                <span style="float: left;">TOTAL {{ $cotizacion['moneda']['mon_simbolo'] }}</span>
+                <span style="float: right;">{{ $cotizacion['coc_total'] }}</span>
             </td>
         </tr>
     </table>
-
-    {{-- URL COTIZACION --}}
-    {{-- @if($url_cotizacion != null)
-        <p style="margin-top: 10px;margin-bottom: 10px;font-size: 12.5px;text-align: center;">Para ingresar su cotización debes abrir el siguiente enlace en un navegador: <span style="color: #0000FF">{{$url_cotizacion}}</span></p>
-    @endif --}}
 
     <footer>
         <table style="width: 100%; border-collapse: collapse">

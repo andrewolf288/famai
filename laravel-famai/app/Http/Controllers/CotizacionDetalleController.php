@@ -13,7 +13,7 @@ class CotizacionDetalleController extends Controller
 
     public function findDetalleByEstadoPendiente()
     {
-        $cotizacionesDetalle = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda' ,'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto.unidad'])
+        $cotizacionesDetalle = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda', 'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto.unidad'])
             ->whereHas('cotizacion', function ($query) {
                 $query->where('coc_estado', 'RPR');
             })
@@ -26,9 +26,49 @@ class CotizacionDetalleController extends Controller
 
     public function findDetalleByCotizacion($id)
     {
-        $detalleCotizacion = CotizacionDetalle::with(['cotizacion.moneda', 'detalleMaterial.producto.unidad', 'detalleMaterial.ordenInternaParte.ordenInterna'])
-                                ->where('coc_id', $id)->get();
-        return response()->json($detalleCotizacion);
+        $detalleCotizacion = CotizacionDetalle::with(
+            [
+                'cotizacion.moneda',
+                'detalleMaterial.producto.unidad',
+                'detalleMaterial.ordenInternaParte.ordenInterna'
+            ]
+        )
+            ->where('coc_id', $id)
+            ->get();
+
+        $agrupado = $detalleCotizacion
+            ->where('odm_id', '!=', null)
+            ->groupBy('cod_orden')
+            ->map(function ($grupo, $cod_orden) {
+                return [
+                    'cod_orden' => $cod_orden,
+                    'cod_descripcion' => $grupo->first()->cod_descripcion,
+                    'cod_observacion' => $grupo->first()->cod_observacion,
+                    'uni_codigo' => $grupo->first()->detalleMaterial->producto ? $grupo->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
+                    'cod_cantidad' => $grupo->sum('cod_cantidad'),
+                    'cod_preciounitario' => $grupo->first()->cod_preciounitario,
+                    'cod_total' => $grupo->sum('cod_total'),
+                    'mon_simbolo' => $grupo->first()->cotizacion->moneda ? $grupo->first()->cotizacion->moneda->mon_simbolo : '',
+                    'cod_cotizar' => $grupo->first()->cod_cotizar
+                ];
+            })
+            ->values();
+
+        $marcas = $detalleCotizacion
+            ->where('odm_id', '==', null)
+            ->values();
+
+        $detalleMateriales = $detalleCotizacion
+            ->where('odm_id', '!=', null)
+            ->values();
+
+        $data = [
+            'agrupado' => $agrupado,
+            'marcas' => $marcas,
+            'detalle_materiales' => $detalleMateriales
+        ];
+
+        return response()->json($data);
     }
 
     public function update(Request $request, $id)
@@ -93,10 +133,10 @@ class CotizacionDetalleController extends Controller
 
         // obtenemos informacion del proveedor
         $cotizacion = Cotizacion::with(['moneda'])
-                        ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->coc_id);
+            ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->coc_id);
 
         $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda'])
-                        ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->proveedor->prv_id);
+            ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->proveedor->prv_id);
 
         $data = [
             'cotizacion' => $cotizacion,
@@ -120,13 +160,13 @@ class CotizacionDetalleController extends Controller
             $proveedoresFilter = explode(',', $proveedoresFilter);
         }
 
-        $query = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda' ,'detalleMaterial.producto.unidad'])
-                                    ->whereHas('cotizacion', function ($query) {
-                                        $query->where('coc_estado', '!=' ,'SOL');
-                                    })
-                                    ->where('cod_cotizar', 1);
+        $query = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda', 'detalleMaterial.producto.unidad'])
+            ->whereHas('cotizacion', function ($query) {
+                $query->where('coc_estado', '!=', 'SOL');
+            })
+            ->where('cod_cotizar', 1);
 
-        if($producto !== null) {
+        if ($producto !== null) {
             $producto = (int) $producto;
             $query->whereHas('detalleMaterial.producto', function ($q) use ($producto) {
                 $q->where('pro_id', $producto);
