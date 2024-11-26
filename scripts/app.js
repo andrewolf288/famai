@@ -106,6 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta para despliegue orden interna resumido
+    router.on('/logistica-requerimiento', () => {
+        privateRoute(() => {
+            loadContent('pages/despliegue-orden-resumido/despliegueOrdenInternResumido.html', 'scripts/despliegue-orden-resumido/despliegueOrdenResumido.js')
+        })
+    })
+
     // Ruta para proveedores
     router.on('/proveedores', () => {
         privateRoute(() => {
