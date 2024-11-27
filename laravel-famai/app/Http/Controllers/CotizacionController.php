@@ -215,7 +215,7 @@ class CotizacionController extends Controller
                     'cod_descripcion' => $detalle['cod_descripcion'],
                     'cod_observacion' => $detalle['cod_observacion'],
                     'cod_cantidad' => $detalle['cod_cantidad'],
-                    'cod_parastock' => $detalle['cod_parastock'],
+                    'cod_parastock' => isset($detalle['cod_parastock']) ? $detalle['cod_parastock'] : 0,
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null
