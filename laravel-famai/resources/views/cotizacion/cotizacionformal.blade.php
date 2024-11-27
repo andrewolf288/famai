@@ -277,8 +277,8 @@
         </thead>
         <tbody>
             @foreach ($detalle_cotizacion as $material)
-                <tr>
-                    <td class="col-item">{{ $material['cod_orden'] }}</td>
+                <tr style="{{isset($material['flag_selecto']) ? 'background-color: #dbd9d9;' : ''}}">
+                    <td class="col-item">{{ $loop->iteration }}</td>
                     <td class="col-descripcion">{{ $material['cod_descripcion'] }}{{ $material['cod_observacion'] ? " - " . $material['cod_observacion'] : ''}}</td>
                     <th class="col-tiempoentrega" style="text-align: center;">{{ $material['cod_tiempoentrega'] }}</th>
                     <td class="col-cantidad" style="text-align: center;">{{number_format($material['cod_cantidad'],2)}}</td>

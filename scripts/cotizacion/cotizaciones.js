@@ -179,19 +179,24 @@ $(document).ready(() => {
 
             // Llenamos los datos de los materiales especifico
             $('#tbl-cotizacion-detalle-especifico tbody').empty()
+            console.log(detalle_materiales)
             detalle_materiales.forEach(detalle => {
                 const { cotizacion, cod_orden, cod_cotizar, cod_descripcion, cod_tiempoentrega, cod_observacion, cod_cantidad, cod_preciounitario, cod_total } = detalle
                 const { moneda } = cotizacion
                 const { detalle_material } = detalle
-                const { orden_interna_parte } = detalle_material
 
                 $('#tbl-cotizacion-detalle-especifico tbody').append(`
                     <tr>
                         <td>${cod_orden}</td>
                         <td class="text-center">
-                            <span class="badge ${cod_cotizar == 1 ? 'bg-success' : 'bg-danger'}">${cod_cotizar == 1 ? 'SI' : 'NO'}</span>
+                            ${detalle_material ? 
+                                `<span class="badge ${cod_cotizar == 1 ? 'bg-success' : 'bg-danger'}">${cod_cotizar == 1 ? 'SI' : 'NO'}</span>`
+                                :
+                                `<span class="badge bg-primary">STOCK</span>`
+                            }
+                            
                         </td>
-                        <td>${orden_interna_parte.orden_interna?.odt_numero || 'N/A'}</td>
+                        <td>${detalle_material?.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
                         <td>${cod_descripcion}</td>
                         <td>${cod_observacion || 'N/A'}</td>
                         <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>

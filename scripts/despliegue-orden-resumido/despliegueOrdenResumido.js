@@ -452,7 +452,6 @@ $(document).ready(() => {
             const { cotizacion } = detalle
             const { proveedor, moneda } = cotizacion
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(`${cotizacion.coc_estado === 'RPR' && detalle.cod_cotizar != 1 ? 'table-danger' : 'table-success'}`)
 
             rowItem.innerHTML = `
             <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
@@ -500,7 +499,6 @@ $(document).ready(() => {
             const { orden_compra } = detalle
             const { proveedor, moneda } = orden_compra
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(`${orden_compra.occ_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
 
             rowItem.innerHTML = `
             <td>${parseDateSimple(orden_compra.occ_fecha)}</td>
@@ -718,9 +716,12 @@ $(document).ready(() => {
                         <textarea class="form-control observacion-detalle" rows="1"></textarea>
                     </td>
                     <td class="text-center">${detalle.uni_codigo}</td>
-                    <td class="text-center">${detalle.cantidad.toFixed(2)}</td>
+                    <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
                     <td class="text-center">
-                        <div class="d-flex justify-content-around">
+                        <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" min="${detalle.cantidad}"/>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center">
                             <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
@@ -745,9 +746,12 @@ $(document).ready(() => {
                         <textarea class="form-control observacion-detalle" rows="1">${detalle.odm_observacion || ""}</textarea>
                     </td>
                     <td class="text-center">N/A</td>
-                    <td class="text-center">${detalle.odm_cantidad}</td>
+                    <td class="text-center cantidad-requerida-detalle">${detalle.odm_cantidad}</td>
                     <td class="text-center">
-                        <div class="d-flex justify-content-around">
+                        <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" min="${detalle.odm_cantidad}"/>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center">
                             <button class="btn btn-sm btn-secondary btn-historico-detalle-material me-1" disabled>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
@@ -921,6 +925,7 @@ $(document).ready(() => {
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')
 
+        // formamos la informacion de proveedor
         const proveedor = {
             prv_id: id_proveedor,
             prv_direccion: row.find('.direccion-proveedor').val() || '',
@@ -934,44 +939,89 @@ $(document).ready(() => {
         }
 
         const detalleMateriales = []
+        let generarCotizacion = false
+        // debemos verificar si se desea generar una cotización o no
+        if (confirm('¿Deseas generar una cotización?')) generarCotizacion = true
 
-        if (confirm('¿Deseas generar una cotización?')) {
-            const rows = $('#tbl-cotizaciones-materiales tbody tr')
-            let cod_orden = 1;
-            rows.each(function () {
-                const index = $(this).data('index')
-                const observacion = $(this).find('.observacion-detalle').val().trim()
+        const rows = $('#tbl-cotizaciones-materiales tbody tr')
+        let cod_orden = 1;
 
-                const detalleIndex = detalleCotizacion[index]
-                if (detalleIndex.odm_id === undefined) {
-                    detalleIndex.detalle.forEach(detalle => {
-                        detalleMateriales.push({
-                            cod_orden: cod_orden,
-                            odm_id: detalle.odm_id,
-                            uni_codigo: detalle.producto.uni_codigo,
-                            cod_descripcion: detalle.producto.pro_descripcion,
-                            cod_observacion: observacion,
-                            cod_cantidad: detalle.odm_cantidad
-                        })
-                    })
-                } else {
+        rows.each(function () {
+            const index = $(this).data('index')
+            const observacion = $(this).find('.observacion-detalle').val().trim()
+            const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val().trim()
+            const cantidadRequerida = $(this).find('.cantidad-requerida-detalle').text().trim()
+
+            if (esValorNumericoValidoYMayorQueCero(cantidadPedida) && esValorNumericoValidoYMayorQueCero(cantidadRequerida)) {
+                if (parseFloat(cantidadRequerida) > parseFloat(cantidadPedida)) {
+                    alert('La cantidad requerida es mayor a la cantidad pedida')
+                    return
+                }
+            } else {
+                alert('La cantidad requerida deben ser un valor numérico mayor a 0')
+                return
+            }
+
+            const detalleIndex = detalleCotizacion[index]
+            if (detalleIndex.odm_id === undefined) {
+                detalleIndex.detalle.forEach(detalle => {
                     detalleMateriales.push({
                         cod_orden: cod_orden,
-                        odm_id: detalleIndex.odm_id,
+                        odm_id: detalle.odm_id,
+                        pro_id: detalleIndex.pro_id,
+                        uni_codigo: detalle.producto.uni_codigo,
+                        cod_descripcion: detalle.producto.pro_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: detalle.odm_cantidad
+                    })
+                })
+
+                // si lo pedido es mayor a lo requerido
+                if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
+                        pro_id: detalleIndex.pro_id,
+                        uni_codigo: detalleIndex.uni_codigo,
+                        cod_descripcion: detalleIndex.pro_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
+                        cod_parastock: 1
+                    })
+                }
+            } else {
+                detalleMateriales.push({
+                    cod_orden: cod_orden,
+                    odm_id: detalleIndex.odm_id,
+                    uni_codigo: '',
+                    cod_descripcion: detalleIndex.odm_descripcion,
+                    cod_observacion: observacion,
+                    cod_cantidad: detalleIndex.odm_cantidad
+                })
+
+                // si lo pedido es mayor a lo requerido
+                if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
                         uni_codigo: '',
                         cod_descripcion: detalleIndex.odm_descripcion,
                         cod_observacion: observacion,
-                        cod_cantidad: detalleIndex.odm_cantidad
+                        cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
+                        cod_parastock: 1
                     })
                 }
-                cod_orden++
-            })
-
-            const formatData = {
-                proveedor,
-                detalle_materiales: detalleMateriales
             }
+            cod_orden++
+        })
 
+        const formatData = {
+            proveedor,
+            detalle_materiales: detalleMateriales
+        }
+
+        console.log(formatData)
+
+        // return
+        if (generarCotizacion) {
             try {
                 const response = await client.post('/cotizacionesByDespliegue', formatData, {
                     headers: {
@@ -1002,40 +1052,6 @@ $(document).ready(() => {
                 }
             }
         } else {
-            const rows = $('#tbl-cotizaciones-materiales tbody tr')
-            let cod_orden = 1;
-            rows.each(function () {
-                const index = $(this).data('index')
-                const observacion = $(this).find('.observacion-detalle').val().trim()
-
-                const detalleIndex = detalleCotizacion[index]
-                if (detalleIndex.odm_id === undefined) {
-                    detalleIndex.detalle.forEach(detalle => {
-                        detalleMateriales.push({
-                            cod_orden: cod_orden,
-                            uni_codigo: detalle.producto.uni_codigo,
-                            cod_descripcion: detalle.producto.pro_descripcion,
-                            cod_observacion: observacion,
-                            cod_cantidad: detalle.odm_cantidad
-                        })
-                    })
-                } else {
-                    detalleMateriales.push({
-                        cod_orden: cod_orden,
-                        uni_codigo: '',
-                        cod_descripcion: detalleIndex.odm_descripcion,
-                        cod_observacion: observacion,
-                        cod_cantidad: detalleIndex.odm_cantidad
-                    })
-                }
-                cod_orden++
-            })
-
-            const formatData = {
-                proveedor,
-                detalle_materiales: detalleMateriales
-            }
-
             try {
                 const response = await client.post('/ordeninternamateriales/export-cotizacion', formatData, {
                     headers: {

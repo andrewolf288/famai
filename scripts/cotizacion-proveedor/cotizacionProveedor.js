@@ -51,22 +51,24 @@ $(document).ready(function () {
 
             // el detalle agrupado se debe recorrer
             agrupado_detalle
-                .filter(detalle => {
-                    if (coc_estado === 'SOL') {
-                        return true
-                    } else {
-                        if (detalle.cod_cotizar == "1") {
-                            return true
-                        } else {
-                            return false
-                        }
-                    }
-                })
+                // .filter(detalle => {
+                //     if (coc_estado === 'SOL') {
+                //         return true
+                //     } else {
+                //         if (detalle.cod_cotizar == "1") {
+                //             return true
+                //         } else {
+                //             return false
+                //         }
+                //     }
+                // })
                 .forEach(detalle => {
-                    const { cod_orden, cod_cantidad, cod_descripcion, cod_observacion, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, uni_codigo } = detalle
+                    const { pro_id, cod_orden, cod_cantidad, cod_descripcion, cod_observacion, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, uni_codigo } = detalle
                     const rowItem = document.createElement('tr')
                     rowItem.classList.add('detalle-cotizacion')
+                    rowItem.classList.add(`${coc_estado === 'SOL' ? 'table-light' : cod_cotizar == 1 ? 'table-success' : 'table-light'}`)
                     rowItem.dataset.orden = cod_orden
+                    rowItem.dataset.producto = pro_id
                     rowItem.innerHTML = `
                     <td class="text-center">
                         <input class="form-check-input cotizar-checkbox" type="checkbox" ${coc_estado === 'SOL' ? 'checked' : cod_cotizar == 1 ? 'checked' : ''} ${coc_estado !== 'SOL' ? 'disabled' : ''} />
@@ -85,7 +87,7 @@ $(document).ready(function () {
                     <td class="text-center">
                         ${coc_estado === 'SOL' ?
                             `<input type="number" class="form-control tiempoentrega-input" value='${cod_tiempoentrega || 0}' readonly/>`
-                            : `${cod_tiempoentrega}`
+                            : `${cod_tiempoentrega || 'N/A'}`
                         }
                     </td>
                     <td class="text-center">
@@ -99,7 +101,7 @@ $(document).ready(function () {
                             <span class="moneda me-1"></span>
                             ${coc_estado === 'SOL' ?
                             `<input type="number" class="form-control precio-input" value='${cod_preciounitario || 0.00}' readonly/>`
-                            : `${cod_preciounitario}`
+                            : `${cod_preciounitario || 'N/A'}`
                         }
                         </div>
                     </td>
@@ -108,7 +110,8 @@ $(document).ready(function () {
                             <span class="moneda me-1"></span>
                             ${coc_estado === 'SOL' ?
                             `<input type="number" class="form-control total-input" value='${cod_total || 0.00}' readonly/>`
-                            : `${cod_total}`}
+                            : `${cod_total.toFixed(2)}`
+                            }
                         </div>
                     </td>
                     <td>
@@ -179,48 +182,49 @@ $(document).ready(function () {
                             const rowItemMarca = document.createElement('tr')
                             rowItemMarca.classList.add('detalle-cotizacion-marca')
                             rowItemMarca.dataset.orden = cod_orden
+                            rowItemMarca.dataset.producto = pro_id
                             rowItemMarca.innerHTML = `
-                        <td></td>
-                        <td></td>
-                        <td>${detalle.cod_descripcion || ''}</td>
-                        <td>${uni_codigo || ''}</td>
-                        <td>${detalle.cod_observacion || ''}</td>
-                        <td class="text-center">${detalle.cod_tiempoentrega}</td>
-                        <td class="text-center">${detalle.cod_cantidad}</td>
-                        <td class="text-center">
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="moneda me-1"></span>${detalle.cod_preciounitario}
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="moneda me-1"></span>${detalle.cod_total}
-                            </div>
-                        </td>
-                        <td>
-                        ${coc_estado === 'SOL'
+                                <td></td>
+                                <td></td>
+                                <td>${detalle.cod_descripcion || ''}</td>
+                                <td>${uni_codigo || ''}</td>
+                                <td>${detalle.cod_observacion || ''}</td>
+                                <td class="text-center">${detalle.cod_tiempoentrega}</td>
+                                <td class="text-center">${detalle.cod_cantidad}</td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <span class="moneda me-1"></span>${detalle.cod_preciounitario}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <span class="moneda me-1"></span>${detalle.cod_total}
+                                    </div>
+                                </td>
+                                <td>
+                                ${coc_estado === 'SOL'
                                     ? `
-                            <div class="d-flex justify-content-around">
-                                <button class="btn btn-sm btn-warning btn-cotizacion-marca-editar me-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-sm btn-success btn-cotizacion-marca-guardar me-2" style="display: none;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
-                                        <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
-                                        <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-sm btn-danger btn-cotizacion-marca-eliminar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                                    </svg>
-                                </button>
-                            </div>`
+                                    <div class="d-flex justify-content-around">
+                                        <button class="btn btn-sm btn-warning btn-cotizacion-marca-editar me-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-success btn-cotizacion-marca-guardar me-2" style="display: none;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
+                                                <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
+                                                <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger btn-cotizacion-marca-eliminar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                            </svg>
+                                        </button>
+                                    </div>`
                                     : ''}
-                        </td>
-                    `
+                                </td>
+                            `
                             $('#productosCotizacionTable tbody').append(rowItemMarca)
                         })
                 })
@@ -255,10 +259,12 @@ $(document).ready(function () {
         const unidadMarca = $(rowItem).find('.unidad-input').text()
         const cantidadMarca = $(rowItem).find('.cantidad-input').val()
         const orden = $(rowItem).data('orden')
+        const producto = $(rowItem).data('producto')
 
         const rowItemMarca = document.createElement('tr')
         rowItemMarca.classList.add('detalle-cotizacion-marca')
         rowItemMarca.dataset.orden = orden
+        rowItemMarca.dataset.producto = producto
 
         rowItemMarca.innerHTML = `
             <td></td>
@@ -552,10 +558,12 @@ $(document).ready(function () {
             const formatDetalleProductos = []
             detalle_productos.each(function (index, row) {
                 const orden = $(row).data('orden')
+                const producto = $(row).data('producto')
                 const detalleMarcasReferencia = $(`#productosCotizacionTable tbody .detalle-cotizacion-marca`).filter(`[data-orden='${orden}']`)
 
                 const item = {
                     cod_orden: orden,
+                    pro_id: producto,
                     cod_observacion: $(row).find('.observacion-input').val(),
                     cod_tiempoentrega: $(row).find('.tiempoentrega-input').val(),
                     cod_cantidad: $(row).find('.cantidad-input').val(),
@@ -566,6 +574,7 @@ $(document).ready(function () {
                         .filter((index, marca) => esValorNumericoValidoYMayorQueCero($(marca).find('.total-marca-input').val()) && $(marca).find('.observacion-marca-input').val().trim().length > 0)
                         .map((index, marca) => {
                             return {
+                                pro_id: producto,
                                 cod_descripcion: $(marca).find('.descripcion-marca-input').text(),
                                 cod_observacion: $(marca).find('.observacion-marca-input').val(),
                                 cod_tiempoentrega: $(marca).find('.tiempoentrega-marca-input').val(),
@@ -589,8 +598,7 @@ $(document).ready(function () {
                 coc_formapago: formapagoCotizacionInput,
                 detalle_cotizacion: formatDetalleProductos
             }
-            console.log(formatData)
-            // return
+
             const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
                 headers: {
                     'Accept': 'application/pdf'

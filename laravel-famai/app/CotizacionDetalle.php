@@ -13,6 +13,7 @@ class CotizacionDetalle extends Model
     protected $fillable = [
         'coc_id',
         'odm_id',
+        'pro_id',
         'cod_orden',
         'cod_tiempoentrega',
         'cod_descripcion',
@@ -22,6 +23,7 @@ class CotizacionDetalle extends Model
         'cod_total',
         'cod_cotizar',
         'cod_activo',
+        'cod_parastock',
         'cod_usucreacion',
         'cod_feccreacion',
         'cod_usumodificacion',
@@ -43,4 +45,9 @@ class CotizacionDetalle extends Model
         return $this->belongsTo(Cotizacion::class, 'coc_id', 'coc_id');
     }
 
+    // producto
+    public function producto()
+    {
+        return $this->belongsTo(Producto::class, 'pro_id')->selectFields();
+    }
 }

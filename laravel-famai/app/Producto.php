@@ -73,7 +73,6 @@ class Producto extends Model
         return $this->hasOne(AlmacenProducto::class, 'pro_id', 'pro_id');
     }
 
-
     // relacion de subfamilia
     public function subfamilia()
     {

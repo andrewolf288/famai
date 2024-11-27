@@ -197,20 +197,25 @@ class CotizacionController extends Controller
             ]);
 
             foreach ($detalleMateriales as $detalle) {
-                $detalleMaterial = OrdenInternaMateriales::findOrFail($detalle['odm_id']);
 
-                // si un detalle ya ha sido ordenado para una compra, salimos de la operación
-                if ($detalleMaterial->odm_estado == 'ODC') {
-                    throw new Exception("El material $detalleMaterial->odm_descripcion con cantidad $detalleMaterial->odm_cantidad, ya ha sido ordenado para una compra");
+                if (isset($detalle['odm_id'])) {
+                    $detalleMaterial = OrdenInternaMateriales::findOrFail($detalle['odm_id']);
+
+                    // si un detalle ya ha sido ordenado para una compra, salimos de la operación
+                    if ($detalleMaterial->odm_estado == 'ODC') {
+                        throw new Exception("El material $detalleMaterial->odm_descripcion con cantidad $detalleMaterial->odm_cantidad, ya ha sido ordenado para una compra");
+                    }
                 }
 
                 CotizacionDetalle::create([
                     'coc_id' => $cotizacion->coc_id,
-                    'odm_id' => $detalle['odm_id'],
                     'cod_orden' => $detalle['cod_orden'],
+                    'odm_id' => isset($detalle['odm_id']) ? $detalle['odm_id'] : null,
+                    'pro_id' => isset($detalle['pro_id']) ? $detalle['pro_id'] : null,
                     'cod_descripcion' => $detalle['cod_descripcion'],
                     'cod_observacion' => $detalle['cod_observacion'],
                     'cod_cantidad' => $detalle['cod_cantidad'],
+                    'cod_parastock' => $detalle['cod_parastock'],
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null
@@ -365,33 +370,42 @@ class CotizacionController extends Controller
             $coc_id = $request->input('coc_id');
             $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($coc_id);
 
-            $detalleCotizacion = CotizacionDetalle::with(['detalleMaterial.producto.unidad'])
+            $detalleCotizacion = CotizacionDetalle::with(['producto'])
                 ->where('coc_id', $cotizacion->coc_id)
                 ->where('cod_cotizar', 1)
                 ->get();
 
-            $agrupado = $detalleCotizacion
-                ->where('odm_id', '!=', null)
+            // Filtrar agrupados y no agrupados
+            $agrupado = $detalleCotizacion->filter(function ($detalle) {
+                return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+            });
+
+            $marcas = $detalleCotizacion->filter(function ($detalle) {
+                return $detalle->odm_id === null && $detalle->cod_parastock == 0;
+            });
+
+            $agrupado_detalle = $agrupado
                 ->groupBy('cod_orden')
-                ->map(function ($grupo, $cod_orden) {
+                ->map(function ($detalle, $cod_orden) {
                     return [
+                        'pro_id' => $detalle->first()->pro_id,
                         'cod_orden' => $cod_orden,
-                        'cod_descripcion' => $grupo->first()->cod_descripcion,
-                        'cod_observacion' => $grupo->first()->cod_observacion,
-                        'uni_codigo' => $grupo->first()->detalleMaterial->producto ? $grupo->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
-                        'cod_cantidad' => $grupo->sum('cod_cantidad'),
-                        'cod_tiempoentrega' => $grupo->first()->cod_tiempoentrega,
-                        'cod_preciounitario' => $grupo->first()->cod_preciounitario,
-                        'cod_total' => $grupo->sum('cod_total'),
+                        'cod_descripcion' => $detalle->first()->cod_descripcion,
+                        'cod_observacion' => $detalle->first()->cod_observacion,
+                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
+                        'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                        'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
+                        'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                        'cod_total' => $detalle->sum('cod_total'),
+                        'flag_selecto' => true
                     ];
                 })
                 ->values();
 
-            $marcas = $detalleCotizacion
-                ->where('odm_id', '==', null)
+            $detalle_marcas = $marcas
                 ->values();
 
-            $combinado = $agrupado->merge($marcas);
+            $combinado = $agrupado_detalle->merge($detalle_marcas);
             $combinadoOrdenado = $combinado->sortBy('cod_orden')->values();
 
             $data = [
@@ -428,7 +442,7 @@ class CotizacionController extends Controller
             // Eliminamos los detalles de la cotización
             foreach ($cotizacion->detalleCotizacion as $detalle) {
                 $odm_id = $detalle->odm_id;
-                if($odm_id != null){
+                if ($odm_id != null) {
                     // comprobamos si es la unica cotizacion del material
                     $cotizacionesDetalle = CotizacionDetalle::where('odm_id', $odm_id)->count();
                     if ($cotizacionesDetalle == 1) {
@@ -442,7 +456,6 @@ class CotizacionController extends Controller
                             ]);
                         }
                     }
-
                 }
                 $detalle->delete();
             }
@@ -464,31 +477,39 @@ class CotizacionController extends Controller
     public function showCotizacionProveedor($id)
     {
         $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($id);
-        $cotizacionDetalle = CotizacionDetalle::with(['detalleMaterial.producto.unidad'])
+        $cotizacionDetalle = CotizacionDetalle::with(['producto'])
             ->where('coc_id', $cotizacion->coc_id)
             ->get();
 
-        $agrupado_detalle = $cotizacionDetalle
-            ->where('odm_id', '!=', null)
+        // Filtrar agrupados y no agrupados
+        $agrupado = $cotizacionDetalle->filter(function ($detalle) {
+            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+        });
+
+        $marcas = $cotizacionDetalle->filter(function ($detalle) {
+            return $detalle->odm_id === null && $detalle->cod_parastock == 0;
+        });
+
+        $agrupado_detalle = $agrupado
             ->groupBy('cod_orden')
             ->map(function ($detalle, $cod_orden) {
                 return [
+                    'pro_id' => $detalle->first()->pro_id,
                     'cod_orden' => $cod_orden,
                     'cod_descripcion' => $detalle->first()->cod_descripcion,
                     'cod_observacion' => $detalle->first()->cod_observacion,
-                    'uni_codigo' => $detalle->first()->detalleMaterial->producto ? $detalle->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
+                    'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
                     'cod_cantidad' => $detalle->sum('cod_cantidad'),
                     'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                     'cod_preciounitario' => $detalle->first()->cod_preciounitario,
-                    'cod_total' => $detalle->first()->cod_total,
+                    'cod_total' => $detalle->sum('cod_total'),
                     'cod_cotizar' => $detalle->first()->cod_cotizar,
                     'detalle' => $detalle->values()
                 ];
             })
             ->values();
 
-        $detalle_marcas = $cotizacionDetalle
-            ->where('odm_id', '==', null)
+        $detalle_marcas = $marcas
             ->values();
 
         return response()->json([
@@ -553,6 +574,7 @@ class CotizacionController extends Controller
                     CotizacionDetalle::create([
                         'coc_id' => $cotizacion->coc_id,
                         'cod_orden' => $detalle['cod_orden'],
+                        'pro_id' => $marca['pro_id'],
                         'cod_descripcion' => $marca['cod_descripcion'],
                         'cod_observacion' => $marca['cod_observacion'],
                         'cod_tiempoentrega' => $marca['cod_tiempoentrega'],
@@ -571,33 +593,42 @@ class CotizacionController extends Controller
             // proveedor
             $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($id);
 
-            $detalleCotizacion = CotizacionDetalle::with(['detalleMaterial.producto.unidad'])
+            $detalleCotizacion = CotizacionDetalle::with(['producto'])
                 ->where('coc_id', $cotizacion->coc_id)
                 ->where('cod_cotizar', 1)
                 ->get();
 
-            $agrupado = $detalleCotizacion
-                ->where('odm_id', '!=', null)
+            // Filtrar agrupados y no agrupados
+            $agrupado = $detalleCotizacion->filter(function ($detalle) {
+                return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+            });
+
+            $marcas = $detalleCotizacion->filter(function ($detalle) {
+                return $detalle->odm_id === null && $detalle->cod_parastock == 0;
+            });
+
+            $agrupado_detalle = $agrupado
                 ->groupBy('cod_orden')
-                ->map(function ($grupo, $cod_orden) {
+                ->map(function ($detalle, $cod_orden) {
                     return [
+                        'pro_id' => $detalle->first()->pro_id,
                         'cod_orden' => $cod_orden,
-                        'cod_descripcion' => $grupo->first()->cod_descripcion,
-                        'cod_observacion' => $grupo->first()->cod_observacion,
-                        'uni_codigo' => $grupo->first()->detalleMaterial->producto ? $grupo->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
-                        'cod_cantidad' => $grupo->sum('cod_cantidad'),
-                        'cod_tiempoentrega' => $grupo->first()->cod_tiempoentrega,
-                        'cod_preciounitario' => $grupo->first()->cod_preciounitario,
-                        'cod_total' => $grupo->sum('cod_total')
+                        'cod_descripcion' => $detalle->first()->cod_descripcion,
+                        'cod_observacion' => $detalle->first()->cod_observacion,
+                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
+                        'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                        'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
+                        'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                        'cod_total' => $detalle->sum('cod_total'),
+                        'flag_selecto' => true
                     ];
                 })
                 ->values();
 
-            $marcas = $detalleCotizacion
-                ->where('odm_id', '==', null)
+            $detalle_marcas = $marcas
                 ->values();
 
-            $combinado = $agrupado->merge($marcas);
+            $combinado = $agrupado_detalle->merge($detalle_marcas);
             $combinadoOrdenado = $combinado->sortBy('cod_orden')->values();
 
             $data = [

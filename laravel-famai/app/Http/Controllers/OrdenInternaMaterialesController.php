@@ -156,8 +156,10 @@ class OrdenInternaMaterialesController extends Controller
         )
             ->withCount('cotizaciones')
             ->withCount('ordenesCompra')
-            ->whereNotIn('odm_tipo', [3, 4, 5])
-            ->where('odm_estado', '!=', 'ODC');
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('oic_estado', 'PROCESO');
+            })
+            ->whereNotIn('odm_tipo', [3, 4, 5]);
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {

@@ -29,43 +29,55 @@ class CotizacionDetalleController extends Controller
         $detalleCotizacion = CotizacionDetalle::with(
             [
                 'cotizacion.moneda',
-                'detalleMaterial.producto.unidad',
+                'producto',
                 'detalleMaterial.ordenInternaParte.ordenInterna'
             ]
         )
             ->where('coc_id', $id)
             ->get();
+        
+        // Filtrar agrupados y no agrupados
+        $agrupado = $detalleCotizacion->filter(function ($detalle) {
+            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+        });
 
-        $agrupado = $detalleCotizacion
-            ->where('odm_id', '!=', null)
+        $marcas = $detalleCotizacion->filter(function ($detalle) {
+            return $detalle->odm_id === null && $detalle->cod_parastock == 0;
+        });
+
+        $materiales = $detalleCotizacion->filter(function ($detalle) {
+            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+        })->sort(function ($a, $b) {
+            return $a->cod_orden - $b->cod_orden;
+        });
+
+        $agrupadoDetalle = $agrupado
             ->groupBy('cod_orden')
-            ->map(function ($grupo, $cod_orden) {
+            ->map(function ($detalle, $cod_orden) {
                 return [
                     'cod_orden' => $cod_orden,
-                    'cod_descripcion' => $grupo->first()->cod_descripcion,
-                    'cod_observacion' => $grupo->first()->cod_observacion,
-                    'uni_codigo' => $grupo->first()->detalleMaterial->producto ? $grupo->first()->detalleMaterial->producto->unidad->uni_codigo : 'N/A',
-                    'cod_cantidad' => $grupo->sum('cod_cantidad'),
-                    'cod_preciounitario' => $grupo->first()->cod_preciounitario,
-                    'cod_total' => $grupo->sum('cod_total'),
-                    'mon_simbolo' => $grupo->first()->cotizacion->moneda ? $grupo->first()->cotizacion->moneda->mon_simbolo : '',
-                    'cod_cotizar' => $grupo->first()->cod_cotizar
+                    'cod_descripcion' => $detalle->first()->cod_descripcion,
+                    'cod_observacion' => $detalle->first()->cod_observacion,
+                    'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
+                    'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                    'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                    'cod_total' => $detalle->sum('cod_total'),
+                    'mon_simbolo' => $detalle->first()->cotizacion->moneda ? $detalle->first()->cotizacion->moneda->mon_simbolo : '',
+                    'cod_cotizar' => $detalle->first()->cod_cotizar,
                 ];
             })
             ->values();
 
-        $marcas = $detalleCotizacion
-            ->where('odm_id', '==', null)
+        $marcasDetalle = $marcas
             ->values();
 
-        $detalleMateriales = $detalleCotizacion
-            ->where('odm_id', '!=', null)
+        $materialesDetalle = $materiales
             ->values();
 
         $data = [
-            'agrupado' => $agrupado,
-            'marcas' => $marcas,
-            'detalle_materiales' => $detalleMateriales
+            'agrupado' => $agrupadoDetalle,
+            'marcas' => $marcasDetalle,
+            'detalle_materiales' => $materialesDetalle
         ];
 
         return response()->json($data);
