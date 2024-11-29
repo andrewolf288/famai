@@ -3,6 +3,7 @@ $(document).ready(() => {
     let abortController
     let despliegueMaterialesResumido = []
     let detalleCotizacion = []
+    const STOCK_PREFIX = "STOCK:"
 
     // variables para el manejo de datatable
     let dataTable;
@@ -109,6 +110,7 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(URL)
+            console.log(data)
             despliegueMaterialesResumido = data
             let content = ''
             data.forEach((material, index) => {
@@ -254,16 +256,14 @@ $(document).ready(() => {
     })
 
     // ---------- ADMINISTRACIÓN DE DETALLE DE DATOS ------------
-    $('#data-container-body').on('click', '.btn-detalle', function () {
-        const indexDetalle = $(this).data('index-detalle')
-        const detalleMaterial = despliegueMaterialesResumido[indexDetalle]
 
+    function initDetalleMaterialAgrupado(data) {
         $("#tbl-despliegue-materiales-body").empty()
         let cantidadTotal = 0;
 
         // recorremos el detalle material para completar la información
-        detalleMaterial.detalle.forEach((material) => {
-            const { producto, orden_interna_parte, odm_cantidad, odm_descripcion, odm_observacion, odm_tipo, odm_estado, odm_feccreacion } = material
+        data.forEach((material) => {
+            const { producto, orden_interna_parte, odm_cantidad, odm_descripcion, odm_observacion, odm_tipo, odm_estado, odm_feccreacion, odm_usucreacion, odm_fecmodificacion, odm_usumodificacion } = material
             const { orden_interna } = orden_interna_parte
             const { odt_numero, oic_tipo } = orden_interna
 
@@ -276,13 +276,16 @@ $(document).ready(() => {
                 <td>${parseDate(odm_feccreacion)}</td>
                 <td class="text-center">${odm_estado}</td>
                 <td class="text-center">
-                    ${odm_tipo == 1 ? 'R' : 'A'}
+                ${odm_tipo == 1 ? 'R' : 'A'}
                 </td>
                 <td>${producto?.pro_codigo || 'N/A'}</td>
                 <td>${odm_descripcion || 'N/A'}</td>
                 <td>${odm_observacion || 'N/A'}</td>
                 <td class="text-center">${producto.unidad?.uni_codigo || 'N/A'}</td>
                 <td class="text-center">${odm_cantidad}</td>
+                <td>${odm_usucreacion}</td>
+                <td>${odm_fecmodificacion ? parseDate(odm_fecmodificacion) : 'N/A'}</td>
+                <td>${odm_usumodificacion ? odm_usumodificacion : 'N/A'}</td>
             `
             $("#tbl-despliegue-materiales-body").append(rowItem)
 
@@ -294,11 +297,18 @@ $(document).ready(() => {
         rowTotal.innerHTML = `
             <td colspan="9" class="text-end fw-bold">Total</td>
             <td class="text-center">${cantidadTotal.toFixed(2)}</td>
+            <td colspan="3"></td>
         `
         $("#tbl-despliegue-materiales-body").append(rowTotal)
 
         const modalDetalleMateriales = new bootstrap.Modal(document.getElementById('modalDetalleMaterialModal'))
         modalDetalleMateriales.show()
+    }
+
+    $('#data-container-body').on('click', '.btn-detalle', function () {
+        const indexDetalle = $(this).data('index-detalle')
+        const detalleMaterial = despliegueMaterialesResumido[indexDetalle]
+        initDetalleMaterialAgrupado(detalleMaterial.detalle)
     })
 
     // ------------- GESTION DE HISTORICO --------------
@@ -708,12 +718,15 @@ $(document).ready(() => {
         let content = ''
         detalleCotizacion.forEach((detalle, index) => {
             if (detalle.odm_id === undefined) {
+                const observacion = unionObservaciones(detalle.detalle)
+                const rowsObs = observacion.split('\n').length
+                console.log(rowsObs)
                 content = `
                 <tr data-index="${index}">
                     <td>${detalle.pro_codigo}</td>
                     <td>${detalle.pro_descripcion}</td>
                     <td>
-                        <textarea class="form-control observacion-detalle" rows="1"></textarea>
+                        <textarea class="form-control observacion-detalle" rows="${Math.max(1,rowsObs)}">${observacion}</textarea>
                     </td>
                     <td class="text-center">${detalle.uni_codigo}</td>
                     <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
@@ -722,6 +735,12 @@ $(document).ready(() => {
                     </td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center">
+                            <button class="btn btn-sm btn-primary btn-detalle me-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                </svg>
+                            </button>
                             <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
@@ -752,6 +771,12 @@ $(document).ready(() => {
                     </td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center">
+                            <button class="btn btn-sm btn-secondary me-1" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                </svg>
+                            </button>
                             <button class="btn btn-sm btn-secondary btn-historico-detalle-material me-1" disabled>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
@@ -771,10 +796,44 @@ $(document).ready(() => {
             }
 
             $('#tbl-cotizaciones-materiales tbody').append(content)
+
         })
 
         const dialogCotizacion = new bootstrap.Modal(document.getElementById('cotizacionesModal'))
         dialogCotizacion.show()
+    })
+
+    // evento para escuchar cuando se cambie la cantidad pedida
+    $('#tbl-cotizaciones-materiales tbody').on('input', '.cantidad-pedida-detalle' ,function () {
+        const row = $(this).closest('tr')
+        const cantidadRequerida = parseFloat(row.find('.cantidad-requerida-detalle').text())
+        const cantidadPedida = parseFloat($(this).val()) || 0
+
+        const diferencia = cantidadPedida - cantidadRequerida
+        const observaciones = row.find('.observacion-detalle').val().split("\n").filter(line => line.trim() !== "")
+
+        const stockIndex = observaciones.findIndex(line => line.startsWith(STOCK_PREFIX))
+
+        if (diferencia > 0) {
+            const stockObservacion = `${STOCK_PREFIX} ${parseFloat(diferencia).toFixed(2)} -`
+            if (stockIndex >= 0) {
+                observaciones[stockIndex] = stockObservacion;
+            } else {
+                observaciones.push(stockObservacion);
+            }
+        } else {
+            if (stockIndex >= 0) {
+                observaciones.splice(stockIndex, 1);
+            }
+        }
+        row.find('.observacion-detalle').attr("rows", Math.max(1, observaciones.length))
+        row.find('.observacion-detalle').val(observaciones.join("\n"))
+    })
+
+    $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-detalle', (event) => {
+        const $element = $(event.currentTarget).closest('tr')
+        const index = $element.data('index')
+        initDetalleMaterialAgrupado(detalleCotizacion[index].detalle)
     })
 
     $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-delete-detalle-material', (event) => {
@@ -1064,8 +1123,21 @@ $(document).ready(() => {
                 const pdfUrl = URL.createObjectURL(pdfBlob);
                 showModalPreview(pdfUrl)
             } catch (error) {
-                console.log(error)
-                alert("Hubo un error al generar el pdf de la cotización")
+                if (error.response && error.response.data instanceof Blob) {
+                    try {
+                        const text = await error.response.data.text();
+                        const json = JSON.parse(text);
+
+                        console.error('Error del servidor:', json.error || 'Error desconocido');
+                        alert(json.error || 'Ocurrió un error inesperado en el servidor');
+                    } catch (parseError) {
+                        console.error('Error al procesar el JSON del blob:', parseError);
+                        alert('No se pudo procesar la respuesta del error');
+                    }
+                } else {
+                    console.error('Error inesperado:', error);
+                    alert('Ocurrió un error inesperado al momento de generar la cotización');
+                }
             }
         }
     })

@@ -50,7 +50,7 @@
                     <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
                     <option value="pendiente_emitir_cotizacion">Pendiente de emitir cotización</option>
                     <option value="material_sin_codigo">Material sin codigo</option>
-                    <option value="material_sin_compra">Material sin compra</option>
+                    <option value="material_sin_compra">Material sin histórico</option>
                 </select>
             </div>
             <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
@@ -83,39 +83,6 @@
     <tbody id="data-container-body">
     </tbody>
 </table>
-<!-- DIALOG DE DETALLE DE MATERIALES -->
-<div class="modal fade" id="modalDetalleMaterialModal" tabindex="-1" aria-labelledby="modalDetalleMaterialModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalDetalleMaterialModalLabel">Detalle de materiales orden interna</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <table id="tbl-despliegue-materiales" class="table mt-3 table-striped nowrap">
-                        <thead>
-                            <tr>
-                                <th>Proceso</th>
-                                <th>OT</th>
-                                <th>Fec. Det. OI</th>
-                                <th class="text-center">Estado</th>
-                                <th class="text-center">Tipo</th>
-                                <th>Cod Producto</th>
-                                <th>Producto</th>
-                                <th>Obs Producto</th>
-                                <th class="text-center">Und.</th>
-                                <th class="text-center">Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbl-despliegue-materiales-body">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- DIALOG DE COTIZACION -->
 <div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel"
     aria-hidden="true">
@@ -439,6 +406,42 @@
                                 <td>Andrew Jacobo Castillo</td>
                                 <td>30.00</td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- DIALOG DE DETALLE DE MATERIALES -->
+<div class="modal fade" id="modalDetalleMaterialModal" tabindex="-1" aria-labelledby="modalDetalleMaterialModalLabel">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content" style="z-index: 1056;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetalleMaterialModalLabel">Detalle de materiales orden interna</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table id="tbl-despliegue-materiales" class="table mt-3 table-striped nowrap">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>OT</th>
+                                <th>Fec. Det. OI</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Tipo</th>
+                                <th>Cod Producto</th>
+                                <th>Producto</th>
+                                <th>Obs Producto</th>
+                                <th class="text-center">Und.</th>
+                                <th class="text-center">Cantidad</th>
+                                <th>Usu. Creador</th>
+                                <th>Fec. Modificacion</th>
+                                <th>Usu. Modificador</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-despliegue-materiales-body">
                         </tbody>
                     </table>
                 </div>

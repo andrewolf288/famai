@@ -5,10 +5,15 @@ namespace App\Http\Controllers;
 use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\CotizacionDetalleArchivos;
+use App\EntidadBancaria;
 use App\Helpers\DateHelper;
+use App\Helpers\UtilHelper;
+use App\Moneda;
 use App\OrdenCompraDetalle;
 use App\OrdenInternaMateriales;
 use App\Producto;
+use App\Proveedor;
+use App\ProveedorCuentaBanco;
 use App\Trabajador;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -190,7 +195,6 @@ class CotizacionController extends Controller
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $proveedor['prv_id'],
                 'tra_solicitante' => $tra_solicitante,
-                'coc_fechacotizacion' => Carbon::now()->format('Y-m-d'),
                 'coc_usucreacion' => $user->usu_codigo,
                 'coc_fecmodificacion' => null,
                 'coc_estado' => 'SOL',
@@ -249,10 +253,19 @@ class CotizacionController extends Controller
                 'trabajador' => $tra_solicitante,
                 'detalleMateriales' => $agrupadosIndexado,
                 'fechaActual' => DateHelper::parserFechaActual(),
+                'usuarioImpresion' => $user->usu_codigo,
+                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
                 'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id"
             ];
 
-            $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
+            $pdfOptions = [
+                'paper' => 'a4',
+                'orientation' => 'landscape',
+            ];
+
+            $pdf = Pdf::loadView('cotizacion.cotizacion', $data)
+                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
@@ -366,6 +379,7 @@ class CotizacionController extends Controller
 
     public function exportarPDF(Request $request)
     {
+        $user = auth()->user();
         try {
             $coc_id = $request->input('coc_id');
             $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($coc_id);
@@ -380,10 +394,6 @@ class CotizacionController extends Controller
                 return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
             });
 
-            $marcas = $detalleCotizacion->filter(function ($detalle) {
-                return $detalle->odm_id === null && $detalle->cod_parastock == 0;
-            });
-
             $agrupado_detalle = $agrupado
                 ->groupBy('cod_orden')
                 ->map(function ($detalle, $cod_orden) {
@@ -392,8 +402,9 @@ class CotizacionController extends Controller
                         'cod_orden' => $cod_orden,
                         'cod_descripcion' => $detalle->first()->cod_descripcion,
                         'cod_observacion' => $detalle->first()->cod_observacion,
-                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
-                        'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                        'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
+                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
+                        'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
                         'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                         'cod_preciounitario' => $detalle->first()->cod_preciounitario,
                         'cod_total' => $detalle->sum('cod_total'),
@@ -402,23 +413,30 @@ class CotizacionController extends Controller
                 })
                 ->values();
 
-            $detalle_marcas = $marcas
-                ->values();
-
-            $combinado = $agrupado_detalle->merge($detalle_marcas);
-            $combinadoOrdenado = $combinado->sortBy('cod_orden')->values();
+            $pdfOptions = [
+                'paper' => 'a4',
+                'orientation' => 'landscape',
+            ];
 
             $data = [
                 'cotizacion' => $cotizacion,
                 'proveedor' => $cotizacion->proveedor,
-                'detalle_cotizacion' => $combinadoOrdenado,
-                'coc_fecha_formateada' => DateHelper::parserFechaActual(),
+                'detalle_cotizacion' => $agrupado_detalle,
+                'coc_fecha_formateada' => DateHelper::parserFecha($cotizacion->coc_fechacotizacion),
+                'usuarioImpresion' => $user->usu_codigo,
+                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+                // 'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
             ];
 
-            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
+            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data)
+                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()], 500);
+            return response()->json([
+                "error" => $e->getMessage(),
+                "linea" => $e->getLine()
+            ], 500);
         }
     }
 
@@ -476,7 +494,18 @@ class CotizacionController extends Controller
     // funcion para mostrar cotizacion para proveedor
     public function showCotizacionProveedor($id)
     {
-        $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($id);
+        // información de monedas
+        $monedas = Moneda::select('mon_codigo', 'mon_descripcion', 'mon_simbolo', 'mon_activo')
+            ->where('mon_activo', 1)
+            ->get();
+
+        // informacion de bancos
+        $bancos = EntidadBancaria::select('eba_id', 'eba_descripcion', 'eba_activo')
+            ->where('eba_activo', 1)
+            ->get();
+
+        // informacion de cotizacion
+        $cotizacion = Cotizacion::with(['proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'solicitante'])->findOrFail($id);
         $cotizacionDetalle = CotizacionDetalle::with(['producto'])
             ->where('coc_id', $cotizacion->coc_id)
             ->get();
@@ -498,8 +527,10 @@ class CotizacionController extends Controller
                     'cod_orden' => $cod_orden,
                     'cod_descripcion' => $detalle->first()->cod_descripcion,
                     'cod_observacion' => $detalle->first()->cod_observacion,
+                    'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
                     'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
                     'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                    'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
                     'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                     'cod_preciounitario' => $detalle->first()->cod_preciounitario,
                     'cod_total' => $detalle->sum('cod_total'),
@@ -514,6 +545,8 @@ class CotizacionController extends Controller
 
         return response()->json([
             "cotizacion" => $cotizacion,
+            "monedas" => $monedas,
+            "bancos" => $bancos,
             "agrupado_detalle" => $agrupado_detalle,
             "detalle_marcas" => $detalle_marcas
         ]);
@@ -524,17 +557,61 @@ class CotizacionController extends Controller
     {
         try {
             DB::beginTransaction();
+
+            $proveedorRequest = $request->input('proveedor');
+            // validacion de cotizacion
             $validatedData = validator($request->all(), [
                 'coc_cotizacionproveedor' => 'required|string',
                 'coc_correocontacto' => 'required|email',
-                'coc_fechaentrega' => 'required|date',
                 'coc_fechavalidez' => 'required|date',
+                'coc_lugarentrega' => 'nullable|string',
+                'coc_conigv' => 'required|boolean',
                 'coc_notas' => 'nullable|string',
                 'coc_total' => 'required|numeric|min:1',
                 'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
                 'coc_formapago' => 'required|string',
                 'detalle_cotizacion' => 'required|array|min:1',
             ])->validate();
+
+            // validacion de proveedor
+            $validatedDataProveedor = validator($proveedorRequest, [
+                'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
+                'prv_correo' => 'nullable|email',
+                'prv_direccion' => 'nullable|string',
+                'prv_contacto' => 'nullable|string',
+                'prv_telefono' => 'nullable|string',
+                'prv_whatsapp' => 'nullable|string',
+                'cuentas_bancarias' => 'required|array|min:1',
+            ])->validate();
+
+            // actualizamos informacion de proveedor
+            $proveedor = Proveedor::findOrFail($validatedDataProveedor['prv_id']);
+            $proveedor->update([
+                'prv_correo' => $validatedDataProveedor['prv_correo'],
+                'prv_direccion' => $validatedDataProveedor['prv_direccion'],
+                'prv_contacto' => $validatedDataProveedor['prv_contacto'],
+                'prv_telefono' => $validatedDataProveedor['prv_telefono'],
+                'prv_whatsapp' => $validatedDataProveedor['prv_whatsapp']
+            ]);
+
+            // actualizamos las cuentas
+            foreach ($validatedDataProveedor['cuentas_bancarias'] as $cuenta) {
+                if (isset($cuenta['pvc_id'])) {
+                    $cuentaBancaria = ProveedorCuentaBanco::findOrFail($cuenta['pvc_id']);
+                    $cuentaBancaria->update([
+                        'pvc_numerocuenta' => $cuenta['pvc_numerocuenta'],
+                        'mon_codigo' => $cuenta['mon_codigo'],
+                        'eba_id' => $cuenta['eba_id'],
+                    ]);
+                } else {
+                    ProveedorCuentaBanco::create([
+                        'prv_id' => $proveedor->prv_id,
+                        'pvc_numerocuenta' => $cuenta['pvc_numerocuenta'],
+                        'mon_codigo' => $cuenta['mon_codigo'],
+                        'eba_id' => $cuenta['eba_id'],
+                    ]);
+                }
+            }
 
             // actualizamos la cotizacion
             $cotizacion = Cotizacion::findOrFail($id);
@@ -544,11 +621,12 @@ class CotizacionController extends Controller
                 'coc_correocontacto' => $validatedData['coc_correocontacto'],
                 'coc_formapago' => $validatedData['coc_formapago'],
                 'mon_codigo' => $validatedData['mon_codigo'],
-                'coc_fechaentrega' => $validatedData['coc_fechaentrega'],
                 'coc_fechavalidez' => $validatedData['coc_fechavalidez'],
                 'coc_notas' => $validatedData['coc_notas'],
                 'coc_total' => $validatedData['coc_total'],
-                'coc_estado' => 'RPR'
+                'coc_conigv' => $validatedData['coc_conigv'],
+                'coc_lugarentrega' => $validatedData['coc_lugarentrega'],
+                'coc_estado' => 'RPR',
             ]);
 
             // actualizamos los detalles de la cotizacion
@@ -559,32 +637,24 @@ class CotizacionController extends Controller
                     ->where('cod_orden', $detalle['cod_orden'])
                     ->get();
 
+                $cantidadCotizadaTotal = intval($detalle['cod_cantidadcotizada']);
                 foreach ($detalleCotizacionResumido as $detalleResumido) {
-                    $detalleResumido->update([
-                        'cod_observacion' => $detalle['cod_observacion'],
-                        'cod_tiempoentrega' => $detalle['cod_tiempoentrega'],
-                        'cod_preciounitario' => $detalle['cod_preciounitario'],
-                        'cod_total' => $detalleResumido->cod_cantidad * floatval($detalle['cod_preciounitario']),
-                        'cod_cotizar' => 1,
-                    ]);
-                }
+                    $cantidadRequerida = intval($detalleResumido->cod_cantidad);
+                    $cantidadCotizadaDetalle = min($cantidadCotizadaTotal, $cantidadRequerida);
 
-                // recorremos el detalle de marcas
-                foreach ($detalle['detalle_marcas'] as $marca) {
-                    CotizacionDetalle::create([
-                        'coc_id' => $cotizacion->coc_id,
-                        'cod_orden' => $detalle['cod_orden'],
-                        'pro_id' => $marca['pro_id'],
-                        'cod_descripcion' => $marca['cod_descripcion'],
-                        'cod_observacion' => $marca['cod_observacion'],
-                        'cod_tiempoentrega' => $marca['cod_tiempoentrega'],
-                        'cod_cantidad' => $marca['cod_cantidad'],
-                        'cod_preciounitario' => $marca['cod_preciounitario'],
-                        'cod_total' => $marca['cod_total'],
+                    $precioUnitario = round(floatval($detalle['cod_preciounitario']), 2);
+                    $total = round($cantidadCotizadaDetalle * $precioUnitario, 2);
+
+                    $detalleResumido->update([
+                        'cod_cantidadcotizada' => $cantidadCotizadaDetalle,
+                        'cod_observacionproveedor' => $detalle['cod_observacionproveedor'],
+                        'cod_tiempoentrega' => $detalle['cod_tiempoentrega'],
+                        'cod_preciounitario' => $precioUnitario,
+                        'cod_total' => $total,
                         'cod_cotizar' => 1,
-                        'cod_fecmodificacion' => null,
-                        'cod_usucreacion' => null,
                     ]);
+
+                    $cantidadCotizadaTotal -= $cantidadCotizadaDetalle;
                 }
             }
 
@@ -603,10 +673,6 @@ class CotizacionController extends Controller
                 return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
             });
 
-            $marcas = $detalleCotizacion->filter(function ($detalle) {
-                return $detalle->odm_id === null && $detalle->cod_parastock == 0;
-            });
-
             $agrupado_detalle = $agrupado
                 ->groupBy('cod_orden')
                 ->map(function ($detalle, $cod_orden) {
@@ -615,8 +681,9 @@ class CotizacionController extends Controller
                         'cod_orden' => $cod_orden,
                         'cod_descripcion' => $detalle->first()->cod_descripcion,
                         'cod_observacion' => $detalle->first()->cod_observacion,
-                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
-                        'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                        'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
+                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
+                        'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
                         'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                         'cod_preciounitario' => $detalle->first()->cod_preciounitario,
                         'cod_total' => $detalle->sum('cod_total'),
@@ -625,23 +692,50 @@ class CotizacionController extends Controller
                 })
                 ->values();
 
-            $detalle_marcas = $marcas
-                ->values();
-
-            $combinado = $agrupado_detalle->merge($detalle_marcas);
-            $combinadoOrdenado = $combinado->sortBy('cod_orden')->values();
+            $pdfOptions = [
+                'paper' => 'a4',
+                'orientation' => 'landscape',
+            ];
 
             $data = [
                 'cotizacion' => $cotizacion,
                 'proveedor' => $cotizacion->proveedor,
-                'detalle_cotizacion' => $combinadoOrdenado,
-                'coc_fecha_formateada' => DateHelper::parserFechaActual(),
+                'detalle_cotizacion' => $agrupado_detalle,
+                'coc_fecha_formateada' => DateHelper::parserFecha($cotizacion->coc_fechacotizacion),
+                'usuarioImpresion' => $proveedor->prv_nombre,
+                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+                // 'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
             ];
 
-            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data);
+            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data)
+                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateEstadoCotizacion($id)
+    {
+        $user = auth()->user();
+        try{
+            $validatedData = validator(request()->all(), [
+                'coc_estado' => 'required',
+            ])->validate();
+
+            $cotizacion = Cotizacion::findOrFail($id);
+
+            $cotizacion->update([
+                'coc_usumodificacion' => $user->usu_codigo,
+                'coc_estado' => $validatedData['coc_estado'],
+            ]);
+
+            return response()->json([
+                'message' => 'Cotización actualizada',
+            ]);
+        } catch(Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

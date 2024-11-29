@@ -3,9 +3,7 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(new URL(url).search);
     const coc_id = urlParams.get('coc_id');
 
-    $("#fechaEntregaPicker").datepicker({
-        dateFormat: 'dd/mm/yy',
-    })
+    const cuentaConSeparadoresRegex = /^[\d\- ]{8,30}$/
 
     $("#fechaValidezPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -21,212 +19,178 @@ $(document).ready(function () {
     async function traerInformacionCotizacion() {
         try {
             const { data } = await axios.get(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`)
-            console.log(data)
-            const { cotizacion, agrupado_detalle, detalle_marcas } = data
-            const { proveedor, coc_estado, coc_total, coc_cotizacionproveedor, coc_notas, coc_correocontacto, coc_fechaentrega, coc_fechavalidez, mon_codigo, coc_formapago } = cotizacion
-            $("#documentoProveedorInput").val(`${proveedor.tdo_codigo}-${proveedor.prv_nrodocumento}`)
-            $("#razonSocialProveedorInput").val(proveedor.prv_nombre || '')
-            $("#contactoProveedorInput").val(proveedor.prv_contacto || '')
-            $("#telefonoProveedorInput").val(proveedor.prv_telefono || '')
-            $("#whatsappProveedorInput").val(proveedor.prv_whatsapp || '')
-            $("#correoContactoCotizacionInput").val(`${coc_correocontacto ? coc_correocontacto : proveedor.prv_correo || ''}`)
-            $("#direccionProveedorInput").val(proveedor.prv_direccion || '')
+            const { cotizacion, agrupado_detalle, monedas, bancos } = data
+            const { proveedor, coc_estado, coc_total, coc_cotizacionproveedor, coc_notas, coc_correocontacto, coc_fechavalidez, mon_codigo, coc_formapago, coc_lugarentrega } = cotizacion
+            const { cuentas_bancarias, prv_id, tdo_codigo, prv_nrodocumento, prv_nombre, prv_contacto, prv_telefono, prv_whatsapp, prv_direccion, prv_correo } = proveedor
+
+            const formaPago = coc_formapago ? coc_formapago.split('-') : null
+            const tipoFormaPago = formaPago ? formaPago[0] : null
+            const detalleFormaPago = formaPago ? formaPago[1] : null
+
+            // agregamos informacion de las monedas
+            monedas.forEach((moneda) => {
+                const option = $('<option>').val(moneda["mon_codigo"]).text(`${moneda["mon_simbolo"]} ${moneda["mon_descripcion"]}`)
+                $("#monedaCotizacionInput").append(option)
+            })
+
+            // agregamos informacion de las entidades bancarias
+            const defaultOptionEntidadBancararia = $('<option>').val('').text('Seleccione una entidad bancaria')
+            $("#cuentaSolesProveedorSelect").append(defaultOptionEntidadBancararia.clone())
+            $("#cuentaDolaresProveedorSelect").append(defaultOptionEntidadBancararia.clone())
+            $("#cuentaBancoNacionProveedorSelect").append(defaultOptionEntidadBancararia.clone())
+            bancos.forEach((banco) => {
+                const option = $('<option>').val(banco["eba_id"]).text(banco["eba_descripcion"])
+                $("#cuentaSolesProveedorSelect").append(option.clone())
+                $("#cuentaDolaresProveedorSelect").append(option.clone())
+                if(compareStringsIgnoreCaseAndAccents(banco["eba_descripcion"],'Banco de la Nación')) {
+                    $("#cuentaBancoNacionProveedorSelect").append(option.clone())
+                }
+            })
+
+            // datos de proveedor
+            $("#idProveedorInput").val(prv_id)
+            $("#documentoProveedorInput").val(`${tdo_codigo}-${prv_nrodocumento}`)
+            $("#razonSocialProveedorInput").val(prv_nombre || '')
+            $("#contactoProveedorInput").val(prv_contacto || '')
+            $("#telefonoProveedorInput").val(prv_telefono || '')
+            $("#whatsappProveedorInput").val(prv_whatsapp || '')
+            $("#direccionProveedorInput").val(prv_direccion || '')
+            const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => compareStringsIgnoreCaseAndAccents(cuenta.entidad_bancaria?.eba_descripcion, 'Banco de la Nación'))
+            const cuenta_soles = cuentas_bancarias.find(cuenta => {
+                if (cuenta_banco_nacion) {
+                    return cuenta.mon_codigo === 'SOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+                } else {
+                    return cuenta.mon_codigo === 'SOL'
+                }
+            })
+            const cuenta_dolares = cuentas_bancarias.find(cuenta => {
+                if (cuenta_banco_nacion) {
+                    return cuenta.mon_codigo === 'DOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+                } else {
+                    cuenta.mon_codigo === 'DOL'
+                }
+            })
+
+            $("#cuentaSolesProveedorSelect").val(cuenta_soles?.eba_id || '')
+            $("#cuentaSolesProveedorInput").val(cuenta_soles?.pvc_numerocuenta || '')
+            $("#idCuentaBancariaSoles").val(cuenta_soles?.pvc_id || '')
+            $("#cuentaDolaresProveedorSelect").val(cuenta_dolares?.eba_id || '')
+            $("#cuentaDolaresProveedorInput").val(cuenta_dolares?.pvc_numerocuenta || '')
+            $("#idCuentaBancariaDolares").val(cuenta_dolares?.pvc_id || '')
+            $("#cuentaBancoNacionProveedorSelect").val(cuenta_banco_nacion?.eba_id || '')
+            $("#cuentaBancoNacionProveedorInput").val(cuenta_banco_nacion?.pvc_numerocuenta || '')
+            $("#idCuentaBancariaBancoNacion").val(cuenta_banco_nacion?.pvc_id || '')
+            // datos de cotizacion
+            $("#correoContactoCotizacionInput").val(`${coc_correocontacto ? coc_correocontacto : prv_correo || ''}`)
             $("#cotizacionProveedorCotizacionInput").val(coc_cotizacionproveedor)
-            $("#fechaEntregaPicker").datepicker("setDate", coc_fechaentrega ? moment(coc_fechaentrega).toDate() : moment().toDate())
             $("#fechaValidezPicker").datepicker("setDate", coc_fechavalidez ? moment(coc_fechavalidez).toDate() : moment().toDate())
-            $("#notasCotizacionInput").val(coc_notas)
             $("#monedaCotizacionInput").val(mon_codigo || 'SOL')
-            $("#formapagoCotizacionInput").val(coc_formapago || 'CONTADO')
+            $("#formapagoCotizacionInput").val(coc_formapago ? tipoFormaPago : 'CONTADO')
+            $("#lugarEntregaCotizacionInput").val(coc_lugarentrega || '')
+            $("#observacionFormapagoCotizacionInput").val(detalleFormaPago || '')
+            $("#notasCotizacionInput").val(coc_notas)
 
             // si el estado es SOL, entonces solo permitimos la lectura
             if (coc_estado !== 'SOL') {
-                $("#correoContactoCotizacionInput").attr('disabled', true)
+                // datos de proveedor
+                $("#contactoProveedorInput").attr('disabled', true)
+                $("#telefonoProveedorInput").attr('disabled', true)
+                $("#whatsappProveedorInput").attr('disabled', true)
+                $("#direccionProveedorInput").attr('disabled', true)
+                $("#cuentaSolesProveedorSelect").attr('disabled', true)
+                $("#cuentaSolesProveedorInput").attr('disabled', true)
+                $("#cuentaDolaresProveedorSelect").attr('disabled', true)
+                $("#cuentaDolaresProveedorInput").attr('disabled', true)
+                $("#cuentaBancoNacionProveedorSelect").attr('disabled', true)
+                $("#cuentaBancoNacionProveedorInput").attr('disabled', true)
+                // detalle de cotizacion
                 $("#cotizacionProveedorCotizacionInput").attr('disabled', true)
-                $("#fechaEntregaPicker").datepicker('disable')
+                $("#correoContactoCotizacionInput").attr('disabled', true)
                 $("#fechaValidezPicker").datepicker('disable')
-                $("#notasCotizacionInput").attr('disabled', true)
                 $("#monedaCotizacionInput").attr('disabled', true)
                 $("#formapagoCotizacionInput").attr('disabled', true)
+                $("#observacionFormapagoCotizacionInput").attr('disabled', true)
+                $("#lugarEntregaCotizacionInput").attr('disabled', true)
+                // nota de cotizacion
+                $("#notasCotizacionInput").attr('disabled', true)
             }
 
             // el detalle agrupado se debe recorrer
             agrupado_detalle
-                // .filter(detalle => {
-                //     if (coc_estado === 'SOL') {
-                //         return true
-                //     } else {
-                //         if (detalle.cod_cotizar == "1") {
-                //             return true
-                //         } else {
-                //             return false
-                //         }
-                //     }
-                // })
                 .forEach(detalle => {
-                    const { pro_id, cod_orden, cod_cantidad, cod_descripcion, cod_observacion, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, uni_codigo } = detalle
+                    const { pro_id, cod_orden, cod_cantidad, cod_cantidadcotizada, cod_descripcion, cod_observacion, cod_observacionproveedor, cod_preciounitario, cod_total, cod_tiempoentrega, cod_cotizar, uni_codigo } = detalle
+                    const lineasObservaciones = cod_observacion?.split("\n").length || 1
                     const rowItem = document.createElement('tr')
-                    rowItem.classList.add('detalle-cotizacion')
                     rowItem.classList.add(`${coc_estado === 'SOL' ? 'table-light' : cod_cotizar == 1 ? 'table-success' : 'table-light'}`)
                     rowItem.dataset.orden = cod_orden
                     rowItem.dataset.producto = pro_id
                     rowItem.innerHTML = `
-                    <td class="text-center">
-                        <input class="form-check-input cotizar-checkbox" type="checkbox" ${coc_estado === 'SOL' ? 'checked' : cod_cotizar == 1 ? 'checked' : ''} ${coc_estado !== 'SOL' ? 'disabled' : ''} />
-                    </td>
                     <td class="orden">${cod_orden}</td>
                     <td class="descripcion-input">${cod_descripcion || ''}</td>
-                    <td class="unidad-input">
-                        ${uni_codigo}
+                    <td>
+                        <textarea class="form-control observacion-input" rows="${Math.max(1, lineasObservaciones)}" disabled>${escapeHTML(cod_observacion) || ''}</textarea>
                     </td>
                     <td>
-                        ${coc_estado === 'SOL' ?
-                            `<textarea class="form-control observacion-input" rows="1" readonly>${escapeHTML(cod_observacion) || ''}</textarea>`
-                            : `${cod_observacion || ''}`
-                        }
+                        <textarea class="form-control observacionproveedor-input" rows="${Math.max(1, lineasObservaciones)}" ${coc_estado === 'SOL' ? '' : 'disabled'}>${escapeHTML(cod_observacionproveedor) || ''}</textarea>
                     </td>
+                    <td class="unidad-input">${uni_codigo}</td>
                     <td class="text-center">
                         ${coc_estado === 'SOL' ?
-                            `<input type="number" class="form-control tiempoentrega-input" value='${cod_tiempoentrega || 0}' readonly/>`
+                            `<input type="number" class="form-control tiempoentrega-input" value='${cod_tiempoentrega || 0}'/>`
                             : `${cod_tiempoentrega || 'N/A'}`
                         }
                     </td>
+                    <td class="text-center cantidadrequerida-input">${cod_cantidad.toFixed(2)}</td>
                     <td class="text-center">
-                    ${coc_estado === 'SOL' ?
-                            `<input type="number" class="form-control cantidad-input" value='${cod_cantidad || 0.00}' readonly/>`
-                            : `${cod_cantidad.toFixed(2)}`
+                        <div class="d-flex align-items-center justify-content-center">
+                            ${coc_estado === 'SOL' ?
+                            `<input type="number" class="form-control cantidadcotizada-input" max="${cod_cantidad}" value='${cod_cantidadcotizada || 0.00}'/>`
+                            : `${cod_cantidadcotizada || 'N/A'}`
                         }
+                        </div>
                     </td>
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center">
                             <span class="moneda me-1"></span>
                             ${coc_estado === 'SOL' ?
-                            `<input type="number" class="form-control precio-input" value='${cod_preciounitario || 0.00}' readonly/>`
+                            `<input type="number" class="form-control precio-input" value='${cod_preciounitario || 0.00}'/>`
                             : `${cod_preciounitario || 'N/A'}`
                         }
                         </div>
                     </td>
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center">
-                            <span class="moneda me-1"></span>
-                            ${coc_estado === 'SOL' ?
-                            `<input type="number" class="form-control total-input" value='${cod_total || 0.00}' readonly/>`
-                            : `${cod_total.toFixed(2)}`
-                            }
+                            <span class="moneda me-1"></span><span class="total-input">${cod_total.toFixed(2)}</span>
                         </div>
-                    </td>
-                    <td>
-                        ${coc_estado === 'SOL'
-                            ? `
-                        <div class="d-flex justify-content-around">
-                            <button class="btn btn-sm btn-warning btn-cotizacion-editar me-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                                </svg>
-                            </button>
-                            <button class="btn btn-sm btn-success btn-cotizacion-guardar me-2" style="display: none;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
-                                    <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
-                                    <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-                                </svg>
-                            </button>
-                            <button class="btn btn-sm btn-primary btn-cotizacion-agregar-marca">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
-                                </svg>
-                            </button>
-                        </div>
-                        `: ''}
                     </td>
                     `
 
                     if (coc_estado === 'SOL') {
-                        const cantidadDetalle = rowItem.querySelector('.cantidad-input')
+                        const cantidadDetalle = rowItem.querySelector('.cantidadcotizada-input')
                         const precioDetalle = rowItem.querySelector('.precio-input')
-                        const botonEditar = rowItem.querySelector('.btn-cotizacion-editar')
-                        const botonGuardar = rowItem.querySelector('.btn-cotizacion-guardar')
 
                         cantidadDetalle.addEventListener('input', function () {
                             const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
                             if (!isNaN(total)) {
-                                rowItem.querySelector('.total-input').value = total.toFixed(2);
+                                rowItem.querySelector('.total-input').textContent = total.toFixed(2);
                             } else {
-                                rowItem.querySelector('.total-input').value = '';
+                                rowItem.querySelector('.total-input').textContent = '';
                             }
+                            calcularResumenCotizacion()
                         })
 
                         precioDetalle.addEventListener('input', function () {
                             const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
                             if (!isNaN(total)) {
-                                rowItem.querySelector('.total-input').value = total.toFixed(2);
+                                rowItem.querySelector('.total-input').textContent = total.toFixed(2);
                             } else {
-                                rowItem.querySelector('.total-input').value = '';
+                                rowItem.querySelector('.total-input').textContent = '';
                             }
+                            calcularResumenCotizacion()
                         });
-
-                        // escuchadores de acciones
-                        botonEditar.addEventListener('click', function () { editarDetalleCotizacion(rowItem) })
-                        botonGuardar.addEventListener('click', function () { guardarDetalleCotizacion(rowItem) })
                     }
 
                     $('#productosCotizacionTable tbody').append(rowItem)
-
-                    // manejamos el cambio de checkbox
-                    rowItem.querySelector('.cotizar-checkbox').addEventListener('change', function () {
-                        calcularResumenCotizacion()
-                    })
-
-                    // ahora debemos agregar la información de las marcas
-                    detalle_marcas
-                        .filter(detalleFilter => detalleFilter.cod_orden == cod_orden)
-                        .forEach(detalle => {
-                            const rowItemMarca = document.createElement('tr')
-                            rowItemMarca.classList.add('detalle-cotizacion-marca')
-                            rowItemMarca.dataset.orden = cod_orden
-                            rowItemMarca.dataset.producto = pro_id
-                            rowItemMarca.innerHTML = `
-                                <td></td>
-                                <td></td>
-                                <td>${detalle.cod_descripcion || ''}</td>
-                                <td>${uni_codigo || ''}</td>
-                                <td>${detalle.cod_observacion || ''}</td>
-                                <td class="text-center">${detalle.cod_tiempoentrega}</td>
-                                <td class="text-center">${detalle.cod_cantidad}</td>
-                                <td class="text-center">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <span class="moneda me-1"></span>${detalle.cod_preciounitario}
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <span class="moneda me-1"></span>${detalle.cod_total}
-                                    </div>
-                                </td>
-                                <td>
-                                ${coc_estado === 'SOL'
-                                    ? `
-                                    <div class="d-flex justify-content-around">
-                                        <button class="btn btn-sm btn-warning btn-cotizacion-marca-editar me-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                                            </svg>
-                                        </button>
-                                        <button class="btn btn-sm btn-success btn-cotizacion-marca-guardar me-2" style="display: none;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
-                                                <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
-                                                <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-                                            </svg>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger btn-cotizacion-marca-eliminar">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                                            </svg>
-                                        </button>
-                                    </div>`
-                                    : ''}
-                                </td>
-                            `
-                            $('#productosCotizacionTable tbody').append(rowItemMarca)
-                        })
                 })
 
             // debemos controlar el boton de guardado
@@ -236,10 +200,11 @@ $(document).ready(function () {
             } else {
                 $("#btn-guardar-cotizacion-proveedor").remove()
                 $("#totalCotizacion").text(coc_total)
-                const moneda = $('#monedaCotizacionInput').find('option:selected').text()
-                const simboloMoneda = moneda.split(' ')[0]
-                $('.moneda').text(simboloMoneda)
             }
+            // parseamos el valor de la moneda
+            const moneda = $('#monedaCotizacionInput').find('option:selected').text()
+            const simboloMoneda = moneda.split(' ')[0]
+            $('.moneda').text(simboloMoneda)
         } catch (error) {
             console.log(error)
             alert('Error al cargar la cotización')
@@ -248,204 +213,21 @@ $(document).ready(function () {
 
     traerInformacionCotizacion()
 
-    // ---------- GESTION DE DETALLES DE MARCAS ------------
-    $("#productosCotizacionTable tbody").on('click', '.btn-cotizacion-agregar-marca', function () {
-        const rowItem = $(this).closest('tr')
-        agregarDetalleCotizacionMarca(rowItem)
+    // ---------- GESTION DE INCLUSION DE IGV ------------
+    $("#incluyeIGVCotizacion").on('change', function () {
+        $(".flagIGV").text($(this).is(':checked') ? 'c/IGV' : 's/IGV')
     })
 
-    function agregarDetalleCotizacionMarca(rowItem) {
-        const descripcionMarca = $(rowItem).find('.descripcion-input').text()
-        const unidadMarca = $(rowItem).find('.unidad-input').text()
-        const cantidadMarca = $(rowItem).find('.cantidad-input').val()
-        const orden = $(rowItem).data('orden')
-        const producto = $(rowItem).data('producto')
-
-        const rowItemMarca = document.createElement('tr')
-        rowItemMarca.classList.add('detalle-cotizacion-marca')
-        rowItemMarca.dataset.orden = orden
-        rowItemMarca.dataset.producto = producto
-
-        rowItemMarca.innerHTML = `
-            <td></td>
-            <td></td>
-            <td class="descripcion-marca-input">${descripcionMarca}</td>
-            <td>
-                ${unidadMarca}
-            </td>
-            <td>
-                <textarea class="form-control observacion-marca-input" rows="1" readonly></textarea>
-            </td>
-            <td>
-                <input type="number" class="form-control tiempoentrega-marca-input" value="0" readonly/>
-            </td>
-            <td>
-                <input type="number" class="form-control cantidad-marca-input" value="${cantidadMarca}" readonly/>
-            </td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <span class="moneda me-1"></span>
-                    <input type="number" class="form-control precio-marca-input" value="0" readonly/>
-                </div>
-            </td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <span class="moneda me-1"></span>
-                    <input type="number" class="form-control total-marca-input" value="0" readonly/>
-                </div>
-            </td>
-            <td>
-                <div class="d-flex justify-content-around">
-                    <button class="btn btn-sm btn-warning btn-cotizacion-marca-editar me-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
-                        </svg>
-                    </button>
-                    <button class="btn btn-sm btn-success btn-cotizacion-marca-guardar me-2" style="display: none;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
-                            <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"/>
-                            <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"/>
-                        </svg>
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-cotizacion-marca-eliminar">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                        </svg>
-                    </button>
-                </div>
-            </td>
-        `
-        const cantidadDetalle = rowItemMarca.querySelector('.cantidad-marca-input')
-        const precioDetalle = rowItemMarca.querySelector('.precio-marca-input')
-        const botonEditar = rowItemMarca.querySelector('.btn-cotizacion-marca-editar')
-        const botonGuardar = rowItemMarca.querySelector('.btn-cotizacion-marca-guardar')
-        const botonEliminar = rowItemMarca.querySelector('.btn-cotizacion-marca-eliminar')
-
-        cantidadDetalle.addEventListener('input', function () {
-            const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-            if (!isNaN(total)) {
-                rowItemMarca.querySelector('.total-marca-input').value = total.toFixed(2);
-            } else {
-                rowItemMarca.querySelector('.total-marca-input').value = '';
-            }
-        })
-
-        precioDetalle.addEventListener('input', function () {
-            const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-            if (!isNaN(total)) {
-                rowItemMarca.querySelector('.total-marca-input').value = total.toFixed(2);
-            } else {
-                rowItemMarca.querySelector('.total-marca-input').value = '';
-            }
-        });
-
-        // escuchadores de acciones
-        botonEditar.addEventListener('click', function () { editarDetalleCotizacionMarca(rowItemMarca) })
-        botonGuardar.addEventListener('click', function () { guardarDetalleCotizacionMarca(rowItemMarca) })
-        botonEliminar.addEventListener('click', function () { eliminarDetalleCotizacionMarca(rowItemMarca) })
-
-        // agregamos el row despues del rowItem
-        $(rowItem).after(rowItemMarca)
-    }
-
-    // guardar edicion de detalle de cotizacion marca
-    function guardarDetalleCotizacionMarca(rowItem) {
-        const cantidadDetalle = $(rowItem).find('.cantidad-marca-input')
-        const precioDetalle = $(rowItem).find('.precio-marca-input')
-
-        let handleError = ''
-        if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val()) || !esValorNumericoValidoYMayorQueCero(precioDetalle.val())) {
-            if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val())) {
-                handleError += '- La cantidad debe ser un valor numérico mayor a 0\n'
-            }
-            if (!esValorNumericoValidoYMayorQueCero(precioDetalle.val())) {
-                handleError += '- El precio debe ser un valor numérico mayor a 0\n'
-            }
-        }
-
-        if (handleError.length > 0) {
-            alert(handleError)
-            return
-        }
-
-        $(rowItem).find('.observacion-marca-input').prop('readonly', true)
-        $(rowItem).find('.tiempoentrega-marca-input').prop('readonly', true)
-        $(rowItem).find('.cantidad-marca-input').prop('readonly', true)
-        $(rowItem).find('.precio-marca-input').prop('readonly', true)
-        $(rowItem).find('.btn-cotizacion-marca-guardar').css('display', 'none')
-        $(rowItem).find('.btn-cotizacion-marca-editar').css('display', '')
-    }
-
-    // edicion de detalle de cotizacion marca
-    function editarDetalleCotizacionMarca(rowItem) {
-        $(rowItem).find('.observacion-marca-input').prop('readonly', false)
-        $(rowItem).find('.tiempoentrega-marca-input').prop('readonly', false)
-        $(rowItem).find('.cantidad-marca-input').prop('readonly', false)
-        $(rowItem).find('.precio-marca-input').prop('readonly', false)
-        $(rowItem).find('.btn-cotizacion-marca-editar').css('display', 'none')
-        $(rowItem).find('.btn-cotizacion-marca-guardar').css('display', '')
-    }
-
-    // eliminacion de detalle de cotizacion marca
-    function eliminarDetalleCotizacionMarca(rowItem) {
-        $(rowItem).remove()
-    }
-
     // ----------- GESTION DE DETALLES DE COTIZACION ..........
-
-    // guardar edicion de detalle de cotizacion
-    function guardarDetalleCotizacion(rowItem) {
-        const cantidadDetalle = $(rowItem).find('.cantidad-input')
-        const precioDetalle = $(rowItem).find('.precio-input')
-
-        let handleError = ''
-        if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val()) || !esValorNumericoValidoYMayorQueCero(precioDetalle.val())) {
-            if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val())) {
-                handleError += '- La cantidad debe ser un valor numérico mayor a 0\n'
-            }
-            if (!esValorNumericoValidoYMayorQueCero(precioDetalle.val())) {
-                handleError += '- El precio debe ser un valor numérico mayor a 0\n'
-            }
-        }
-
-        if (handleError.length > 0) {
-            alert(handleError)
-            return
-        }
-
-        calcularResumenCotizacion()
-
-        $(rowItem).find('.observacion-input').prop('readonly', true)
-        $(rowItem).find('.tiempoentrega-input').prop('readonly', true)
-        // $(rowItem).find('.cantidad-input').prop('readonly', true)
-        $(rowItem).find('.precio-input').prop('readonly', true)
-        $(rowItem).find('.btn-cotizacion-guardar').css('display', 'none')
-        $(rowItem).find('.btn-cotizacion-editar').css('display', '')
-    }
-
-    // edicion de detalle de producto
-    function editarDetalleCotizacion(rowItem) {
-        $(rowItem).find('.observacion-input').prop('readonly', false)
-        $(rowItem).find('.tiempoentrega-input').prop('readonly', false)
-        // $(rowItem).find('.cantidad-input').prop('readonly', false)
-        $(rowItem).find('.precio-input').prop('readonly', false)
-        $(rowItem).find('.btn-cotizacion-editar').css('display', 'none')
-        $(rowItem).find('.btn-cotizacion-guardar').css('display', '')
-    }
-
     // funcion para calcular resumen de cotizacion
     function calcularResumenCotizacion() {
         const totalCotizacion = $('#totalCotizacion')
-        const productos = $('#productosCotizacionTable tbody .detalle-cotizacion')
+        const productos = $('#productosCotizacionTable tbody tr')
         let totalCotizacionAcumulado = 0
-        productos.each(function (index, row) {
-            const cotizar = $(row).find('.cotizar-checkbox').is(':checked')
-            if (cotizar) {
-                const total = parseFloat($(row).find('.total-input').val() || 0)
-                totalCotizacionAcumulado += total
-            }
+        productos.each(function (_, row) {
+            const total = parseFloat($(row).find('.total-input').text() || 0)
+            totalCotizacionAcumulado += total
         })
-
         totalCotizacion.text((totalCotizacionAcumulado).toFixed(2))
     }
 
@@ -458,6 +240,17 @@ $(document).ready(function () {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    // buscar banco de la nacion
+    function compareStringsIgnoreCaseAndAccents(str1, str2) {
+        const normalize = (str) => 
+            str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
+    
+        return normalize(str1) === normalize(str2);
     }
 
     // funcion de validacion
@@ -474,16 +267,49 @@ $(document).ready(function () {
 
     // validar detalle de cotizacion
     function validarDetalleCotizacion(detalle) {
-        let esValido = true;
+        const detalleCotizacionErrores = [];
+        const detalleCotizacionValidos = []
         detalle.each(function () {
-            const totalInput = $(this).find('.total-input').val();
+            const totalInput = $(this).find('.total-input').text();
             const tiempoentrega = $(this).find('.tiempoentrega-input').val();
-            if (!esValorNumericoValidoYMayorQueCero(totalInput) || !esValorNumericoValidoYMayorQueCero(tiempoentrega)) {
-                esValido = false;
-                return false;
+
+            const validoTotal = esValorNumericoValidoYMayorQueCero(totalInput)
+            const validoTiempoentrega = esValorNumericoValidoYMayorQueCero(tiempoentrega)
+            if (!validoTotal || !validoTiempoentrega) {
+                const errores = []
+                if (!validoTotal){
+                    errores.push('El total debe ser un valor numérico mayor a 0')
+                }
+
+                if(!validoTiempoentrega){
+                    errores.push('El tiempo de entrega debe ser un valor numérico mayor a 0')
+                }
+
+                const formatError = {
+                    descripcion: $(this).find('.descripcion-input').text(),
+                    cantidad: $(this).find('.cantidadrequerida-input').text(),
+                    error: errores
+                }
+                detalleCotizacionErrores.push(formatError)
+            } else {
+                const formatDetalle = {
+                    cod_orden: $(this).data('orden'),
+                    pro_id: $(this).data('producto'),
+                    cod_observacionproveedor: $(this).find('.observacionproveedor-input').val(),
+                    cod_tiempoentrega: $(this).find('.tiempoentrega-input').val(),
+                    cod_cantidadcotizada: $(this).find('.cantidadcotizada-input').val(),
+                    cod_preciounitario: $(this).find('.precio-input').val(),
+                    cod_total: $(this).find('.total-input').text(),
+                    cod_cotizar: 1,
+                }
+                detalleCotizacionValidos.push(formatDetalle)
             }
         });
-        return esValido;
+
+        return {
+            validos: detalleCotizacionValidos,
+            errores: detalleCotizacionErrores
+        }
     }
 
     // validar email
@@ -495,31 +321,34 @@ $(document).ready(function () {
     // funcion para guardar cotizacion
     $("#btn-guardar-cotizacion-proveedor").on('click', async function (e) {
         e.preventDefault()
-
+        // datos del proveedor
+        const idProveedorInput = $("#idProveedorInput").val().trim()
         const correoContactoCotizacionInput = $('#correoContactoCotizacionInput').val().trim()
+        const contactoProveedorInput = $("#contactoProveedorInput").val().trim()
+        const telefonoProveedorInput = $("#telefonoProveedorInput").val().trim()
+        const whatsappProveedorInput = $("#whatsappProveedorInput").val().trim()
+        const direccionProveedorInput = $("#direccionProveedorInput").val().trim()
+        const entidadBancariaSolesInput = $("#cuentaSolesProveedorSelect").val().trim()
+        const cuentaBancariaSolesInput = $("#cuentaSolesProveedorInput").val().trim()
+        const idCuentaBancariaSolesInput = $("#idCuentaBancariaSoles").val().trim()
+        const entidadBancariaDolaresInput = $("#cuentaDolaresProveedorSelect").val().trim()
+        const cuentaBancariaDolaresInput = $("#cuentaDolaresProveedorInput").val().trim()
+        const idCuentaBancariaDolaresInput = $("#idCuentaBancariaDolares").val().trim()
+        const entidadBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorSelect").val().trim()
+        const cuentaBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorInput").val().trim()
+        const idCuentaBancariaBancoNacionInput = $("#idCuentaBancariaBancoNacion").val().trim()
+        // datos de la cotizacion
         const cotizacionProveedorCotizacionInput = $('#cotizacionProveedorCotizacionInput').val().trim()
-        const fechaEntregaPicker = $("#fechaEntregaPicker").val()
         const fechaValidezPicker = $("#fechaValidezPicker").val()
         const formapagoCotizacionInput = $("#formapagoCotizacionInput").val().trim()
         const monedaCotizacionInput = $("#monedaCotizacionInput").val().trim()
-        const detalle_productos = $('#productosCotizacionTable tbody .detalle-cotizacion')
-            .filter(function () {
-                return $(this).find('.cotizar-checkbox').is(':checked');
-            })
+        const detalleFormaPagoCotizacionInput = $("#observacionFormapagoCotizacionInput").val().trim()
+        const lugarEntregaCotizacionInput = $("#lugarEntregaCotizacionInput").val().trim()
 
-        const pendientes = detalle_productos.filter(function () {
-            return $(this).find('.btn-cotizacion-guardar').is(':visible');
-        })
-
-        if (pendientes.length > 0) {
-            alert('Existen detalles pendientes de guardar')
-            return
-        }
+        const detalle_productos = $('#productosCotizacionTable tbody tr')
 
         let handleError = ''
-        if (correoContactoCotizacionInput.length == 0) {
-            handleError += '- El correo de contacto es requerido\n'
-        } else {
+        if (correoContactoCotizacionInput.length != 0) {
             if (!validarEmail(correoContactoCotizacionInput)) {
                 handleError += '- El correo de contacto es inválido\n'
             }
@@ -527,10 +356,6 @@ $(document).ready(function () {
 
         if (cotizacionProveedorCotizacionInput.length == 0) {
             handleError += '- El número de cotización del proveedor es requerido\n'
-        }
-
-        if (fechaEntregaPicker.length == 0) {
-            handleError += '- La fecha de entrega es requerida\n'
         }
 
         if (fechaValidezPicker.length == 0) {
@@ -545,86 +370,127 @@ $(document).ready(function () {
             handleError += '- La moneda es requerida\n'
         }
 
-        if (!validarDetalleCotizacion(detalle_productos)) {
-            handleError += '- Asegurese de que todos los detalles tengan en tiempo de entrega, cantidad y precio un valor numérico mayor a 0\n'
-        }
-
         if (handleError.length > 0) {
             alert(handleError)
             return
         }
 
         try {
-            const formatDetalleProductos = []
-            detalle_productos.each(function (index, row) {
-                const orden = $(row).data('orden')
-                const producto = $(row).data('producto')
-                const detalleMarcasReferencia = $(`#productosCotizacionTable tbody .detalle-cotizacion-marca`).filter(`[data-orden='${orden}']`)
-
-                const item = {
-                    cod_orden: orden,
-                    pro_id: producto,
-                    cod_observacion: $(row).find('.observacion-input').val(),
-                    cod_tiempoentrega: $(row).find('.tiempoentrega-input').val(),
-                    cod_cantidad: $(row).find('.cantidad-input').val(),
-                    cod_preciounitario: $(row).find('.precio-input').val(),
-                    cod_total: $(row).find('.total-input').val(),
-                    cod_cotizar: $(row).find('.cotizar-checkbox').is(':checked'),
-                    detalle_marcas: detalleMarcasReferencia
-                        .filter((index, marca) => esValorNumericoValidoYMayorQueCero($(marca).find('.total-marca-input').val()) && $(marca).find('.observacion-marca-input').val().trim().length > 0)
-                        .map((index, marca) => {
-                            return {
-                                pro_id: producto,
-                                cod_descripcion: $(marca).find('.descripcion-marca-input').text(),
-                                cod_observacion: $(marca).find('.observacion-marca-input').val(),
-                                cod_tiempoentrega: $(marca).find('.tiempoentrega-marca-input').val(),
-                                cod_cantidad: $(marca).find('.cantidad-marca-input').val(),
-                                cod_preciounitario: $(marca).find('.precio-marca-input').val(),
-                                cod_total: $(marca).find('.total-marca-input').val(),
-                            }
-                        }).get()
-                }
-                formatDetalleProductos.push(item)
-            })
-
-            const formatData = {
-                coc_cotizacionproveedor: cotizacionProveedorCotizacionInput,
-                coc_correocontacto: correoContactoCotizacionInput,
-                coc_fechaentrega: transformarFecha(fechaEntregaPicker),
-                coc_fechavalidez: transformarFecha(fechaValidezPicker),
-                coc_notas: $('#notasCotizacionInput').val().trim(),
-                coc_total: $('#totalCotizacion').text(),
-                mon_codigo: monedaCotizacionInput,
-                coc_formapago: formapagoCotizacionInput,
-                detalle_cotizacion: formatDetalleProductos
+            const {validos, errores} = validarDetalleCotizacion(detalle_productos)
+            let confirmarCotizacion = false
+            
+            if(errores.length > 0) {
+                const listaErrores = []
+                errores.forEach(detalleError => {
+                    const {descripcion, cantidad, error} = detalleError
+                    listaErrores.push(`- El detalle ${descripcion} con cantidad:  ${cantidad}, tiene los siguientes errores: ${error}`)
+                })
+                const mensajeError = "No se completaron los siguientes detalles de la cotización:\n" + listaErrores.join("\n") + "\n" + "¿Desea guardar la cotización?"
+                confirmarCotizacion = confirm(mensajeError)
             }
 
-            const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
-                headers: {
-                    'Accept': 'application/pdf'
-                },
-                responseType: 'blob'
-            })
+            if(confirmarCotizacion){
+                const cuentasBancarias = []
+                const handleErrorsCuentasBancarias = []
 
-            // // descargar directamente PDF de cotizacion
+                // validamos cuenta en soles
+                if(entidadBancariaSolesInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaSolesInput)) {
+                    cuentasBancarias.push({
+                        pvc_id: idCuentaBancariaSolesInput.length != 0 ? idCuentaBancariaSolesInput : null,
+                        eba_id: entidadBancariaSolesInput,
+                        pvc_numerocuenta: cuentaBancariaSolesInput,
+                        mon_codigo: 'SOL'
+                    })
+                } else {
+                    handleErrorsCuentasBancarias.push('La cuenta bancaria en soles es inválida')
+                }
 
-            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-            const pdfUrl = URL.createObjectURL(pdfBlob);
-            const link = document.createElement('a');
-            link.href = pdfUrl;
-            link.download = `cotizacion_${coc_id}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(pdfUrl);
+                // validamos cuenta en dolares
+                if(entidadBancariaDolaresInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaDolaresInput)) {
+                    cuentasBancarias.push({
+                        pvc_id: idCuentaBancariaDolaresInput.length != 0 ? idCuentaBancariaDolaresInput : null,
+                        eba_id: entidadBancariaDolaresInput,
+                        pvc_numerocuenta: cuentaBancariaDolaresInput,
+                        mon_codigo: 'DOL'
+                    })
+                } else {
+                    handleErrorsCuentasBancarias.push('La cuenta bancaria en dolares es inválida')
+                }
 
-            // ocultamos el formulario
-            $('#formContent').fadeOut();
-            // mostramos cuador de exito de envio
-            $('#mensajeExito').fadeIn();
+                // validamos cuenta del banco de la nacion
+                if(entidadBancariaBancoNacionInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaBancoNacionInput)) {
+                    cuentasBancarias.push({
+                        pvc_id: idCuentaBancariaBancoNacionInput.length != 0 ? idCuentaBancariaBancoNacionInput : null,
+                        eba_id: entidadBancariaBancoNacionInput,
+                        pvc_numerocuenta: cuentaBancariaBancoNacionInput,
+                        mon_codigo: 'SOL'
+                    })
+                } else {
+                    handleErrorsCuentasBancarias.push('La cuenta bancaria del banco de la nación es inválida')
+                }
 
-            // debemos descargar automaticamente el PDF generado
+                if(cuentasBancarias.length == 0) {
+                    alert('Debes agregar información válida de al menos una cuenta bancaria')
+                    return
+                }
+
+                if(handleErrorsCuentasBancarias.length > 0) {
+                    const mensajeErrorCuentas = "¿Deseas continuar?\nSe encontraron los siguientes errores en las cuentas bancarias:\n" + handleErrorsCuentasBancarias.join("\n")
+                    if(!confirm(mensajeErrorCuentas)){
+                        return
+                    }
+                }
+                
+                if(validos.length > 0) {
+                    const formatData = {
+                        coc_conigv: $("#incluyeIGVCotizacion").is(':checked') ? 1 : 0,
+                        mon_codigo: monedaCotizacionInput,
+                        coc_formapago: `${formapagoCotizacionInput}-${detalleFormaPagoCotizacionInput}`,
+                        coc_cotizacionproveedor: cotizacionProveedorCotizacionInput,
+                        coc_fechavalidez: transformarFecha(fechaValidezPicker),
+                        coc_correocontacto: correoContactoCotizacionInput,
+                        coc_lugarentrega: lugarEntregaCotizacionInput,
+                        coc_total: $('#totalCotizacion').text(),
+                        coc_notas: $('#notasCotizacionInput').val().trim(),
+                        detalle_cotizacion: validos,
+                        proveedor: {
+                            prv_id: idProveedorInput,
+                            prv_contacto: contactoProveedorInput,
+                            prv_telefono: telefonoProveedorInput,
+                            prv_whatsapp: whatsappProveedorInput,
+                            prv_direccion: direccionProveedorInput,
+                            prv_correo: correoContactoCotizacionInput,
+                            cuentas_bancarias: cuentasBancarias
+                        }
+                    }
+                    console.log(formatData)
+                    const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
+                        headers: {
+                            'Accept': 'application/pdf'
+                        },
+                        responseType: 'blob'
+                    })
+        
+                    const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+                    const link = document.createElement('a');
+                    link.href = pdfUrl;
+                    link.download = `cotizacion_${coc_id}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(pdfUrl);
+        
+                    // ocultamos el formulario
+                    $('#formContent').fadeOut();
+                    // mostramos cuador de exito de envio
+                    $('#mensajeExito').fadeIn();
+                } else {
+                    alert("No se ha completado ningún detalle de la cotización")
+                }
+            }
         } catch (error) {
+            console.log(error)
             alert('Hubo un error en el envio de la cotizacion. Intentelo más tarde.')
         }
     })

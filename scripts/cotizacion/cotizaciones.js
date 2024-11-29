@@ -76,9 +76,15 @@ $(document).ready(() => {
                                     <path fill-rule="evenodd" d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2zM4.165 13.668c.09.18.23.343.438.419.207.075.412.04.58-.03.318-.13.635-.436.926-.786.333-.401.683-.927 1.021-1.51a11.7 11.7 0 0 1 1.997-.406c.3.383.61.713.91.95.28.22.603.403.934.417a.86.86 0 0 0 .51-.138c.155-.101.27-.247.354-.416.09-.181.145-.37.138-.563a.84.84 0 0 0-.2-.518c-.226-.27-.596-.4-.96-.465a5.8 5.8 0 0 0-1.335-.05 11 11 0 0 1-.98-1.686c.25-.66.437-1.284.52-1.794.036-.218.055-.426.048-.614a1.24 1.24 0 0 0-.127-.538.7.7 0 0 0-.477-.365c-.202-.043-.41 0-.601.077-.377.15-.576.47-.651.823-.073.34-.04.736.046 1.136.088.406.238.848.43 1.295a20 20 0 0 1-1.062 2.227 7.7 7.7 0 0 0-1.482.645c-.37.22-.699.48-.897.787-.21.326-.275.714-.08 1.103"/>
                                 </svg>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger btn-cotizacion-eliminar" data-cotizacion="${cotizacion.coc_id}">
+                            <button class="btn btn-sm btn-outline-danger btn-cotizacion-eliminar me-1" data-cotizacion="${cotizacion.coc_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                     <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm ${cotizacion.coc_estado === 'SOL' ? 'btn-secondary' : 'btn-success'} btn-cotizacion-reactivar" data-cotizacion="${cotizacion.coc_id}" ${cotizacion.coc_estado === 'SOL' ? 'disabled' : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewBox="0 0 16 16">
+                                    <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9"/>
+                                    <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z"/>
                                 </svg>
                             </button>
                         </div>
@@ -128,13 +134,13 @@ $(document).ready(() => {
         const id = $(this).data('cotizacion')
         try {
             const { data } = await client.get(`/cotizacion-detalle/${id}`)
-            const { agrupado, marcas, detalle_materiales } = data
+            const { agrupado, detalle_materiales } = data
 
             // Llenamos los datos agrupados
             let simbolo = ''
             $('#tbl-cotizacion-detalle-agrupado tbody').empty()
             agrupado.forEach(agrupado => {
-                const { cod_orden, cod_descripcion, cod_observacion, uni_codigo, cod_cantidad, cod_preciounitario, cod_total, cod_cotizar, cod_tiempoentrega, mon_simbolo } = agrupado
+                const { cod_orden, cod_descripcion, cod_observacion, cod_observacionproveedor, uni_codigo, cod_cantidad, cod_cantidadcotizada, cod_preciounitario, cod_total, cod_cotizar, cod_tiempoentrega, mon_simbolo } = agrupado
                 simbolo = mon_simbolo
                 $('#tbl-cotizacion-detalle-agrupado tbody').append(`
                     <tr>
@@ -144,9 +150,11 @@ $(document).ready(() => {
                         </td>
                         <td>${cod_descripcion}</td>
                         <td>${cod_observacion || 'N/A'}</td>
+                        <td>${cod_observacionproveedor || 'N/A'}</td>
                         <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
                         <td class="text-center">${uni_codigo || 'N/A'}</td>
                         <td class="text-center">${cod_cantidad.toFixed(2) || 'N/A'}</td>
+                        <td class="text-center">${cod_cantidadcotizada.toFixed(2) || 'N/A'}</td>
                         <td class="text-center">${mon_simbolo} ${cod_preciounitario || 'N/A'}</td>
                         <td class="text-center">${mon_simbolo} ${cod_total.toFixed(2) || 'N/A'}</td>
                     </tr>
@@ -154,34 +162,16 @@ $(document).ready(() => {
             })
             $('#tbl-cotizacion-detalle-agrupado tbody').append(`
                 <tr>
-                    <td colspan="8" class="text-end fw-bold">Total</td>
+                    <td colspan="10" class="text-end fw-bold">Total</td>
                     <td class="text-center fw-bold">${simbolo} ${agrupado.reduce((total, agrupado) => total + agrupado.cod_total, 0).toFixed(2)}</td>
                 </tr>
             `)
-
-            // Llenamos los datos de marcas
-            $('#tbl-cotizacion-detalle-marcas tbody').empty()
-            marcas.forEach(marca => {
-                const { cotizacion, cod_orden, cod_descripcion, cod_observacion, cod_tiempoentrega, cod_cantidad, cod_preciounitario, cod_total } = marca
-                const { moneda } = cotizacion
-                $('#tbl-cotizacion-detalle-marcas tbody').append(`
-                    <tr>
-                        <td>${cod_orden}</td>
-                        <td>${cod_descripcion}</td>
-                        <td>${cod_observacion || 'N/A'}</td>
-                        <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
-                        <td class="text-center">${cod_cantidad || 'N/A'}</td>
-                        <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_preciounitario || 'N/A'}</td>
-                        <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_total || 'N/A'}</td>
-                    </tr>
-                `)
-            })
 
             // Llenamos los datos de los materiales especifico
             $('#tbl-cotizacion-detalle-especifico tbody').empty()
             console.log(detalle_materiales)
             detalle_materiales.forEach(detalle => {
-                const { cotizacion, cod_orden, cod_cotizar, cod_descripcion, cod_tiempoentrega, cod_observacion, cod_cantidad, cod_preciounitario, cod_total } = detalle
+                const { cotizacion, cod_orden, cod_cotizar, cod_descripcion, cod_tiempoentrega, cod_cantidad, cod_cantidadcotizada, cod_preciounitario, cod_total } = detalle
                 const { moneda } = cotizacion
                 const { detalle_material } = detalle
 
@@ -198,9 +188,9 @@ $(document).ready(() => {
                         </td>
                         <td>${detalle_material?.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
                         <td>${cod_descripcion}</td>
-                        <td>${cod_observacion || 'N/A'}</td>
                         <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
                         <td class="text-center">${cod_cantidad || 'N/A'}</td>
+                        <td class="text-center">${cod_cantidadcotizada || 'N/A'}</td>
                         <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_preciounitario || 'N/A'}</td>
                         <td class="text-center">${moneda?.mon_simbolo || ''} ${cod_total || 'N/A'}</td>
                     </tr>
@@ -230,6 +220,22 @@ $(document).ready(() => {
         }
         try {
             await client.delete(`/cotizacion/${id}`)
+            const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
+            initPagination(URL, initDataTable, dataTableOptions)
+        } catch (error) {
+            console.log(error)
+            alert('Error al eliminar la cotización')
+        }
+    })
+
+    //FUNCION PARA REACTIVAR COTIZACION
+    $('#data-container').on('click', '.btn-cotizacion-reactivar', async function () {
+        const id = $(this).data('cotizacion')
+        if (!confirm('¿Desea habilitar esta cotización nuevamente?')) {
+            return
+        }
+        try {
+            await client.patch(`/cotizacion/update-estado/${id}`, {coc_estado: 'SOL'})
             const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
             initPagination(URL, initDataTable, dataTableOptions)
         } catch (error) {

@@ -38,22 +38,59 @@
                         <div class="row mt-2">
                             <div class="col-md-4">
                                 <label for="contactoProveedorInput">Contacto</label>
-                                <input type="text" id="contactoProveedorInput" class="form-control" disabled />
+                                <input type="text" id="contactoProveedorInput" class="form-control"/>
                             </div>
                             <div class="col-md-4">
                                 <label for="telefonoProveedorInput">Teléfono</label>
-                                <input type="text" id="telefonoProveedorInput" class="form-control" disabled />
+                                <input type="text" id="telefonoProveedorInput" class="form-control"/>
                             </div>
                             <div class="col-md-4">
                                 <label for="whatsappProveedorInput">Celular</label>
-                                <input type="text" id="whatsappProveedorInput" class="form-control" disabled />
+                                <input type="text" id="whatsappProveedorInput" class="form-control"/>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-md-12">
                                 <label for="direccionProveedorInput">Dirección</label>
-                                <textarea name="" id="direccionProveedorInput" class="form-control" rows="1"
-                                    disabled></textarea>
+                                <textarea name="" id="direccionProveedorInput" class="form-control" rows="1"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label for="cuentaSolesProveedorLabel">Cuenta Soles</label>
+                                <div class="row">
+                                    <input type="text" id="idCuentaBancariaSoles" value="" hidden>
+                                    <div class="col-md-6">
+                                        <select class="form-select" id="cuentaSolesProveedorSelect"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input class="form-control" type="text" id="cuentaSolesProveedorInput">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-1">
+                                <label for="cuentaDolaresProveedorLabel">Cuenta Dolares</label>
+                                <div class="row">
+                                    <input type="text" id="idCuentaBancariaDolares" value="" hidden>
+                                    <div class="col-md-6">
+                                        <select class="form-select" id="cuentaDolaresProveedorSelect"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input class="form-control" type="text" id="cuentaDolaresProveedorInput">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-1">
+                                <label for="cuentaBancoNacionProveedorLabel">Cuenta Banco de la Nación</label>
+                                <div class="row">
+                                    <input type="text" id="idCuentaBancariaBancoNacion" value="" hidden>
+                                    <div class="col-md-6">
+                                        <select class="form-select" id="cuentaBancoNacionProveedorSelect"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input class="form-control" type="text" id="cuentaBancoNacionProveedorInput">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -67,22 +104,16 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label for="cotizacionProveedorCotizacionInput">Número cotización</label>
                                 <input type="text" id="cotizacionProveedorCotizacionInput" class="form-control" />
-                            </div>
-                            <div class="col-md-6">
-                                <div>
-                                    <label for="correoContactoCotizacionInput">Correo contacto</label>
-                                    <input type="text" id="correoContactoCotizacionInput" class="form-control">
-                                </div>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-md-6">
                                 <div>
-                                    <label for="fechaEntregaPicker">Fecha entrega</label>
-                                    <input type="text" id="fechaEntregaPicker" class="form-control">
+                                    <label for="correoContactoCotizacionInput">Correo contacto</label>
+                                    <input type="text" id="correoContactoCotizacionInput" class="form-control">
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -96,8 +127,6 @@
                             <div class="col-md-6">
                                 <label for="monedaCotizacionInput">Moneda</label>
                                 <select id="monedaCotizacionInput" class="form-select">
-                                    <option value="SOL" selected>S/. SOLES</option>
-                                    <option value="DOL">$ DOLARES</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -106,6 +135,18 @@
                                     <option value="CONTADO" selected>CONTADO</option>
                                     <option value="CREDITO">CREDITO</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="observacionFormapagoCotizacionInput">Detalle de pago</label>
+                                <textarea name="" id="observacionFormapagoCotizacionInput" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="lugarEntregaCotizacionInput">Lugar de entrega</label>
+                                <textarea name="" id="lugarEntregaCotizacionInput" class="form-control" rows="2"></textarea>
                             </div>
                         </div>
                     </div>
@@ -138,23 +179,28 @@
                                 d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
                         </svg>
                         <div>
-                            Se debe desmarcar la casilla de aquellos detalles de cotización que no se quiere cotizar por
-                            el proveedor
+                            Los detalles de cotización que tengan un totalizado de 0.00 no se consideran en la cotización
                         </div>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="incluyeIGVCotizacion">
+                        <label class="form-check-label" for="incluyeIGVCotizacion">
+                            Precio incluye IGV
+                        </label>
                     </div>
                     <table class="table" id="productosCotizacionTable">
                         <thead>
                             <tr>
-                                <th class="text-center"></th>
-                                <th class="col-1">Item</th>
-                                <th class="col-3">Descripción</th>
-                                <th class="text-center">UND.</th>
+                                <th>#</th>
+                                <th class="col-2">Descripción</th>
                                 <th class="col-3">Observación</th>
+                                <th class="col-2">Obs. Proveedor</th>
+                                <th class="text-center">UND.</th>
                                 <th class="col-1 text-center">Tiempo Entrega (dias)</th>
-                                <th class="col-1 text-center">Cantidad</th>
-                                <th class="col-1 text-center">Precio s/IGV</th>
-                                <th class="col-1 text-center">Total s/IGV</th>
-                                <th class="col-1 text-center">Acciones</th>
+                                <th class="col-1 text-center">Cant. Req</th>
+                                <th class="col-1 text-center">Cant. Cot</th>
+                                <th class="col-1 text-center">Precio <span class="flagIGV">s/IGV</span></th>
+                                <th class="col-1 text-center">Total <span class="flagIGV">s/IGV</span></th>
                             </tr>
                         </thead>
                         <tbody id="productosCotizacionBody">
@@ -190,6 +236,24 @@
         ¡Su cotización fue enviada exitosamente! Se adjuntará una copia de la cotización a su correo electrónico
         ingresado.
     </div>
+
+    <!-- Dialos de errores -->
+    <!-- <div class="modal fade" id="modalError" tabindex="-1" aria-labelledby="modalErrorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalErrorLabel">Se han encontrado errores</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="mensajeError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="guardarCotizacion">Guardar cotización</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
 
     <!-- Variables de configuracion -->
     <script src="scripts/config.js"></script>

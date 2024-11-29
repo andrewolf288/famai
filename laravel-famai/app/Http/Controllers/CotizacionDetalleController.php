@@ -41,14 +41,8 @@ class CotizacionDetalleController extends Controller
             return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
         });
 
-        $marcas = $detalleCotizacion->filter(function ($detalle) {
-            return $detalle->odm_id === null && $detalle->cod_parastock == 0;
-        });
-
         $materiales = $detalleCotizacion->filter(function ($detalle) {
             return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
-        })->sort(function ($a, $b) {
-            return $a->cod_orden - $b->cod_orden;
         });
 
         $agrupadoDetalle = $agrupado
@@ -58,9 +52,12 @@ class CotizacionDetalleController extends Controller
                     'cod_orden' => $cod_orden,
                     'cod_descripcion' => $detalle->first()->cod_descripcion,
                     'cod_observacion' => $detalle->first()->cod_observacion,
+                    'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
                     'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : 'N/A',
                     'cod_cantidad' => $detalle->sum('cod_cantidad'),
+                    'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
                     'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                    'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                     'cod_total' => $detalle->sum('cod_total'),
                     'mon_simbolo' => $detalle->first()->cotizacion->moneda ? $detalle->first()->cotizacion->moneda->mon_simbolo : '',
                     'cod_cotizar' => $detalle->first()->cod_cotizar,
@@ -68,15 +65,11 @@ class CotizacionDetalleController extends Controller
             })
             ->values();
 
-        $marcasDetalle = $marcas
-            ->values();
-
         $materialesDetalle = $materiales
             ->values();
 
         $data = [
             'agrupado' => $agrupadoDetalle,
-            'marcas' => $marcasDetalle,
             'detalle_materiales' => $materialesDetalle
         ];
 

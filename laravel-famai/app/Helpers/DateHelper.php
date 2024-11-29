@@ -31,4 +31,10 @@ class DateHelper
         Carbon::setLocale('es');
         return Carbon::now()->isoFormat('D [de] MMMM [del] YYYY');
     }
+
+    public static function parserFecha($fecha)
+    {
+        Carbon::setLocale('es');
+        return Carbon::parse($fecha)->isoFormat('D [de] MMMM [del] YYYY');
+    }
 }

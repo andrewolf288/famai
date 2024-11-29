@@ -324,6 +324,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
     Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
+    Route::patch('cotizacion/update-estado/{id}', [CotizacionController::class, 'updateEstadoCotizacion']);
 });
 
 // rutas de detalle de cotizacion

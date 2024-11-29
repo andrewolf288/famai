@@ -98,3 +98,18 @@ function compareStringsIgnoreCaseAndAccents(str1, str2) {
 
     return normalize(str1) === normalize(str2);
 }
+
+function unionObservaciones(detalleMateriales) {
+    let observacion = ""
+    detalleMateriales.forEach(detalle => {
+        const detalleObservacion = detalle.odm_observacion
+        if(detalleObservacion){
+            const obs = detalleObservacion.trim().replace(/[\r\n]+/g, " ")
+            if(obs.length > 0){
+                observacion += "CANT: " + detalle.odm_cantidad + " - " + obs + "\n"
+            }
+        }
+    })
+
+    return observacion.trimEnd()
+}

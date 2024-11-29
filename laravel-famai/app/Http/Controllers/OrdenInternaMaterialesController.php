@@ -1036,37 +1036,50 @@ class OrdenInternaMaterialesController extends Controller
     public function exportPDFCotizacion(Request $request)
     {
         $user = auth()->user();
-        $proveedor = $request->input('proveedor', null);
-        $detalleMateriales = $request->input('detalle_materiales', []);
+        try {
+            $proveedor = $request->input('proveedor', null);
+            $detalleMateriales = $request->input('detalle_materiales', []);
 
-        // buscamos informacion de trabajador
-        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+            // buscamos informacion de trabajador
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-        $agrupados = [];
-        foreach ($detalleMateriales as $detalle) {
-            $cod_orden = $detalle['cod_orden'];
+            $agrupados = [];
+            foreach ($detalleMateriales as $detalle) {
+                $cod_orden = $detalle['cod_orden'];
 
-            if (!isset($agrupados[$cod_orden])) {
-                // Si no existe el grupo, inicializamos con el primer elemento
-                $agrupados[$cod_orden] = $detalle;
-                $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
-            } else {
-                // Si ya existe el grupo, sumamos la cantidad
-                $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+                if (!isset($agrupados[$cod_orden])) {
+                    // Si no existe el grupo, inicializamos con el primer elemento
+                    $agrupados[$cod_orden] = $detalle;
+                    $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
+                } else {
+                    // Si ya existe el grupo, sumamos la cantidad
+                    $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+                }
             }
+            $agrupadosIndexado = array_values($agrupados);
+
+            $pdfOptions = [
+                'paper' => 'a4',
+                'orientation' => 'landscape',
+            ];
+
+            $data = [
+                'proveedor' => $proveedor,
+                'trabajador' => $trabajador,
+                'detalleMateriales' => $agrupadosIndexado,
+                'fechaActual' => DateHelper::parserFechaActual(),
+                'usuarioImpresion' => $user->usu_codigo,
+                'fechaHoraImpresion'=> date('Y-m-d H:i:s'),
+                'url_cotizacion' => null
+            ];
+
+            $pdf = Pdf::loadView('cotizacion.cotizacion', $data)
+                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+                
+            return $pdf->download('cotizacion.pdf');
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        $agrupadosIndexado = array_values($agrupados);
-
-        $data = [
-            'proveedor' => $proveedor,
-            'trabajador' => $trabajador,
-            'detalleMateriales' => $agrupadosIndexado,
-            'fechaActual' => DateHelper::parserFechaActual(),
-            'url_cotizacion' => null
-        ];
-
-        $pdf = Pdf::loadView('cotizacion.cotizacion', $data);
-        return $pdf->download('cotizacion.pdf');
     }
 
     // EXPORTAR EN TXT COTIZACION
