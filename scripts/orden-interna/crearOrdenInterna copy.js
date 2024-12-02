@@ -24,12 +24,6 @@ $(document).ready(function () {
         detalle_partes: []
     }
 
-    // -------- MANEJO DE FECHA ----------
-    $("#fechaPicker").datepicker({
-        dateFormat: 'dd/mm/yy',
-        setDate: new Date()
-    }).datepicker("setDate", new Date())
-
     // funcion de buscar Orden de Trabajo
     const buscarOrdenTrabajo = async () => {
         // Obtener el valor del campo de texto
@@ -190,7 +184,9 @@ $(document).ready(function () {
     })
 
     // cargar areas
-    const cargarAreas = (data) => {
+    const cargarAreas = async (data) => {
+        // try {
+        // const { data } = await client.get('/areasSimple')
         const $areaSelect = $('#areaSelect')
 
         data.sort((a, b) => a["are_descripcion"].localeCompare(b["are_descripcion"]))
@@ -199,14 +195,20 @@ $(document).ready(function () {
             const option = $('<option>').val(area["are_codigo"]).text(area["are_descripcion"])
             $areaSelect.append(option)
         })
+        // } catch (error) {
+        //     alert('Error al obtener las areas')
+        // }
     }
 
     // cargamos responsables
-    const cargarResponsables = (data) => {
+    const cargarResponsables = async (data) => {
+        // try {
+        // const { data } = await client.get('/trabajadoresSimple')
         const $responsableOrigen = $('#responsableOrigen')
         const $responsableMaestro = $('#responsableMaestro')
         const $responsableAlmacen = $('#responsableAlmacen')
 
+        // Ordenar la data alfabéticamente según el nombre (índice [1])
         data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
 
         data.forEach(responsable => {
@@ -215,60 +217,90 @@ $(document).ready(function () {
             $responsableMaestro.append(option.clone())
             $responsableAlmacen.append(option.clone())
         })
+        // } catch (error) {
+        //     alert('Error al obtener los encargados')
+        // }
     }
 
     // cargar informacion segun usuario
-    const cargarInformacionUsuario = (data) => {
-        if(data){
+    const cargarInformacionUsuario = async () => {
+        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
+        try {
+            const { data } = await client.get(`/trabajadorByUsuario/${usu_codigo}`)
             $('#areaSelect').val(data.are_codigo)
             $('#otInput').val(data.sed_codigo)
             $('#responsableOrigen').val(data.tra_id)
-        } else {
-            alert('El usuario logeado no esta relacionado con ningun trabajador')
+        } catch (error) {
+            const { response } = error
+            if (response.status === 404) {
+                alert('El usuario logeado no esta relacionado con ningun trabajador')
+            } else {
+                alert('Ocurrio un error al traer la informacion de trabajador')
+            }
         }
     }
 
+    // -------- MANEJO DE FECHA ----------
+    $("#fechaPicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+        setDate: new Date()
+    }).datepicker("setDate", new Date())
+
     // --------- CARGA INICIAL DE DATA DE PARTES ----------
-    const cargarTablaOrdenInterna = (data) => {
-        const dataOrdenada = data.sort((a, b) => a.oip_orden - b.oip_orden)
-        dataOrdenada.forEach(function (item, index) {
-            const { oip_id, oip_descripcion } = item
-            const data = {
-                oip_id: oip_id,
-                oip_descripcion: oip_descripcion,
-                detalle_materiales: [],
-                detalle_procesos: []
-            }
-            ordenInterna["detalle_partes"].push(data)
-        })
+    const cargarTablaOrdenInterna = async (data) => {
+        try {
+            const { data } = await client.get('/partesSimple')
+            const dataOrdenada = data.sort((a, b) => a.oip_orden - b.oip_orden)
+            dataOrdenada.forEach(function (item, index) {
+                const { oip_id, oip_descripcion } = item
+                const data = {
+                    oip_id: oip_id,
+                    oip_descripcion: oip_descripcion,
+                    detalle_materiales: [],
+                    detalle_procesos: []
+                }
+                ordenInterna["detalle_partes"].push(data)
+            })
+        } catch (error) {
+            alert("Error al cargar la lista de partes")
+        }
     }
 
     // traemos la informacion necesaria para crear la orden interna
     const traerInformacionCreacionOrdenInterna = async () => {
-        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
         try {
-            showLoaderModal()
-            const { data } = await client.get(`/informacion-creacion-orden-interna?usu_codigo=${usu_codigo}`)
-            console.log(data)
+            const { data } = await client.get('/informacion-creacion-orden-interna')
             const { trabajador, responsables, areas, partes } = data
+
             // cargamos las areas
             cargarAreas(areas)
             // cargar responsables
             cargarResponsables(responsables)
             // cargar partes
             cargarTablaOrdenInterna(partes)
-            // cargar informacion segun el trabajador usuario
-            cargarInformacionUsuario(trabajador)
         } catch (error) {
-            console.log(error)
-            alert('Ocurrio un error al intentar obtener la información para la creación de la orden interna')
+
+        }
+    }
+
+    const initInformacion = async () => {
+        try {
+            showLoaderModal()
+            await Promise.all([
+                cargarTablaOrdenInterna(),
+                cargarAreas(),
+                cargarResponsables(),
+            ])
+            cargarInformacionUsuario()
+        } catch (error) {
+            alert("Error al cargar los datos")
         } finally {
             hideLoaderModal()
         }
     }
 
     // inicializamos la data
-    traerInformacionCreacionOrdenInterna()
+    initInformacion()
 
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {

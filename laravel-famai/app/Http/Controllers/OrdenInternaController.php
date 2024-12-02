@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Area;
 use App\Cliente;
 use App\Helpers\DateHelper;
 use App\Notificaciones;
@@ -10,11 +11,10 @@ use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
 use App\OrdenInternaProcesos;
 use App\OrdenTrabajo;
+use App\Parte;
 use App\Producto;
 use App\Unidad;
 use Carbon\Carbon;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,6 +72,38 @@ class OrdenInternaController extends Controller
             'message' => 'Se listan las ordenes internas',
             'data' => $ordenesInternas->items(),
             'count' => $ordenesInternas->total()
+        ]);
+    }
+
+    // funcion que trae toda la informacion necesaria para la creación de orden interna
+    public function informacionCreacionOrdenInterna(Request $request)
+    {
+        $usuario = $request->input('usu_codigo');
+        // buscamos algun trabajador que este relacionado con el usuario
+        $trabajador = Trabajador::where('usu_codigo', $usuario)->first();
+        // por defecto el área sera de HIDRAULICA
+        $are_codigo = 'HID';
+        if ($trabajador) {
+            if ($trabajador->are_codigo != 'HID' && $trabajador->are_codigo != 'CAR') {
+                $are_codigo = 'HID';
+            } else {
+                $are_codigo = $trabajador->are_codigo;
+            }
+        }
+
+        // traemos informacion de los responsables
+        $responsables = Trabajador::all();
+        // traemos informacion de las areas
+        $areas = Area::all();
+        // traemos informacion de las partes involucradas
+        $partes = Parte::where('are_codigo', $are_codigo)
+            ->orderBy('oip_orden', 'asc')
+            ->get();
+        return response()->json([
+            'trabajador' => $trabajador,
+            'responsables' => $responsables,
+            'areas' => $areas,
+            'partes' => $partes
         ]);
     }
 

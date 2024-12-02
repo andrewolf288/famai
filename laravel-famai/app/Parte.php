@@ -13,6 +13,7 @@ class Parte extends Model
     protected $fillable = [
         'oip_descripcion',
         'oip_orden',
+        'are_codigo',
         'oip_activo',
         'oip_usucreacion',
         'oip_feccreacion',
