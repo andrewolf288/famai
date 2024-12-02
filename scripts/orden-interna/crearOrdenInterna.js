@@ -35,8 +35,7 @@ $(document).ready(function () {
         const are_codigo = $(this).val()
         try {
             const {data} = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
-            console.log(data)
-            ordenInterna["detalle_partes"] = data
+            cargarTablaOrdenInterna(data)
         } catch(error) {
             console.log(error)
         }
@@ -397,6 +396,11 @@ $(document).ready(function () {
             oic_equipo_descripcion: $oiValorEquipo,
             oic_componente: $oiValorComponente,
             detalle_partes: ordenInterna.detalle_partes,
+        }
+
+        if (ordenInterna["detalle_partes"].length === 0) {
+            alert('No hay detalle de partes. Esta área no tiene información de partes\n')
+            return
         }
 
         // // formateamos la data de numero de orden
