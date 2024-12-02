@@ -33,8 +33,12 @@ $(document).ready(function () {
     // ver evento de cambio de area
     $('#areaSelect').on('change', async function () {
         const are_codigo = $(this).val()
-        const {data} = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
-        ordenInterna["detalle_partes"] = data
+        try {
+            const {data} = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
+            ordenInterna["detalle_partes"] = data
+        } catch(error) {
+            console.log(error)
+        }
     })
 
     // funcion de buscar Orden de Trabajo
