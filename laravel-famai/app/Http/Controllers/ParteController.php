@@ -14,9 +14,13 @@ class ParteController extends Controller
         return response()->json($partes);
     }
 
-    public function indexSimple()
+    public function indexSimple(Request $request)
     {
-        $partes = Parte::where('oip_activo', 1)->select('oip_id', 'oip_descripcion', 'oip_orden')->get();
+        $are_codigo = $request->input('are_codigo');
+        $partes = Parte::where('oip_activo', 1)
+                    ->where('are_codigo', $are_codigo)
+                    ->select('oip_id', 'oip_descripcion', 'oip_orden')->get();
+                    
         return response()->json($partes);
     }
 }

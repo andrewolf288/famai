@@ -30,6 +30,13 @@ $(document).ready(function () {
         setDate: new Date()
     }).datepicker("setDate", new Date())
 
+    // ver evento de cambio de area
+    $('#areaSelect').on('change', async function () {
+        const are_codigo = $(this).val()
+        const {data} = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
+        ordenInterna["detalle_partes"] = data
+    })
+
     // funcion de buscar Orden de Trabajo
     const buscarOrdenTrabajo = async () => {
         // Obtener el valor del campo de texto
@@ -230,6 +237,8 @@ $(document).ready(function () {
 
     // --------- CARGA INICIAL DE DATA DE PARTES ----------
     const cargarTablaOrdenInterna = (data) => {
+        // reseteamos el detalle de partes
+        ordenInterna["detalle_partes"] = []
         const dataOrdenada = data.sort((a, b) => a.oip_orden - b.oip_orden)
         dataOrdenada.forEach(function (item, index) {
             const { oip_id, oip_descripcion } = item
@@ -308,6 +317,9 @@ $(document).ready(function () {
             }
             if ($oiEncargadoOrigen.length === 0) {
                 handleError += '- Se debe ingresar información de encargado origen\n'
+            }
+            if (ordenInterna["detalle_partes"].length === 0) {
+                handleError += '- No hay detalle de partes. Esta área no tiene información de partes\n'
             }
         }
 
