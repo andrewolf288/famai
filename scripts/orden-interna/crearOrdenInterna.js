@@ -231,7 +231,9 @@ $(document).ready(function () {
     // cargar informacion segun usuario
     const cargarInformacionUsuario = (data) => {
         if(data){
-            $('#areaSelect').val(data.are_codigo)
+            if(data.are_codigo == 'HID' || data.are_codigo == 'CAR'){
+                $('#areaSelect').val(data.are_codigo)
+            }
             $('#otInput').val(data.sed_codigo)
             $('#responsableOrigen').val(data.tra_id)
         } else {

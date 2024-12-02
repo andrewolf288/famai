@@ -81,7 +81,6 @@ class OrdenInternaController extends Controller
         $usuario = $request->input('usu_codigo');
         // buscamos algun trabajador que este relacionado con el usuario
         $trabajador = Trabajador::where('usu_codigo', $usuario)->first();
-        // por defecto el área sera de HIDRAULICA
         $are_codigo = null;
         if ($trabajador) {
             $are_codigo = $trabajador->are_codigo;
@@ -90,7 +89,9 @@ class OrdenInternaController extends Controller
         // traemos informacion de los responsables
         $responsables = Trabajador::all();
         // traemos informacion de las areas
-        $areas = Area::all();
+        $areas = Area::where('are_codigo', 'CAR')
+            ->orWhere('are_codigo', 'HID')
+            ->get();
         // traemos informacion de las partes involucradas
         $partes = [];
         if ($are_codigo) {
