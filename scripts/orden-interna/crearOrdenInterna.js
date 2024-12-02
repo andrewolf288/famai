@@ -35,6 +35,7 @@ $(document).ready(function () {
         const are_codigo = $(this).val()
         try {
             const {data} = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
+            console.log(data)
             ordenInterna["detalle_partes"] = data
         } catch(error) {
             console.log(error)
