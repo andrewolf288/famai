@@ -1,5 +1,5 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-    <h2 class="mb-3 fs-4">Despliegue OT-Material</h2>
+    <h2 class="mb-3 fs-4">despliegue OT seguimiento</h2>
     <button class="btn btn-success mt-2 mt-md-0 ms-md-2" id="btn-export-data">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
@@ -32,13 +32,14 @@
         </div>
     </div>
 
-    <!-- Filtros  -->
+    <!-- Filtro input  -->
     <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
         <div class="d-flex flex-column flex-md-row">
             <select id="filter-selector" class="form-select w-100 w-md-auto">
                 <option value="">Seleccione un filtro</option>
                 <option value="odt_numero">Orden trabajo</option>
                 <option value="oic_tipo">Tipo proceso</option>
+                <option value="tra_nombre">Responsable</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -46,7 +47,11 @@
 
             <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
         </div>
-        <div class="d-flex flex-column flex-md-row mt-3 w-75">
+    </div>
+
+    <!-- Filtro multiselect -->
+    <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
+        <div class="d-flex flex-column flex-md-row mt-3 w-100">
             <div class="col-10">
                 <select id="filterMultipleSelector" class="form-select" multiple>
                     <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
@@ -55,27 +60,20 @@
                     <option value="material_sin_compra">Material sin compra</option>
                 </select>
             </div>
-            <button class="col-2 btn btn-primary mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
+            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
         </div>
     </div>
-
-    <!-- Paginación a la derecha -->
-    <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-        <div class="pagination-container" id="pagination-container"></div>
-    </div>
 </div>
 
-<div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
+<!-- <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
     <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
     <button class="btn btn-primary" id="btn-reservar-materiales">Reservar</button>
-</div>
+</div> -->
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
     <thead>
         <th></th>
-        <th class="text-center">
-            Check
-        </th>
+        <th></th>
         <th class="text-center">Proceso</th>
         <th class="text-center">OT</th>
         <th>Fec. Det OI</th>
@@ -87,11 +85,12 @@
         <th class="text-center">Cantidad</th>
         <th class="text-center">Und.</th>
         <th class="text-center">Stock Alm</th>
+        <th class="text-center">Histórico</th>
+        <th>Responsable</th>
         <th class="text-center">Cotizado</th>
         <th class="text-center">Orden compra</th>
         <th class="text-center">Reservado</th>
         <th class="text-center">Atendido</th>
-        <th>Responsable</th>
         <th>Presupuesto</th>
     </thead>
     <tbody id="data-container-body">
@@ -112,9 +111,9 @@
                 <div>
                     <h2 class="fs-5">Proveedores</h2>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label for="proveedoresSUNAT" class="form-label">
-                                RUC/DNI
+                                RUC/DNI de SUNAT
                             </label>
                             <div class="input-group">
                                 <input type="text" id="proveedoresSUNAT" class="form-control"
@@ -128,19 +127,22 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-9 mb-3 position-relative">
                             <label for="proveedoresInput" class="form-label">
                                 Razón Social
                             </label>
                             <input type="text" id="proveedoresInput" class="form-control"
                                 placeholder="Ingrese razón social..." autocomplete="off">
-                            <ul id="resultadosLista" class="list-group mt-2"></ul>
+                            <ul id="resultadosLista" class="list-group mt-2 position-absolute"
+                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
+                            </ul>
                         </div>
                     </div>
                     <!-- SECCION DE DATA PROVEEDORES-->
                     <table id="tbl-cotizaciones-proveedores" class="table mt-3">
                         <thead>
                             <tr>
+                                <th>Filtro</th>
                                 <th class="col-3">Nombre</th>
                                 <th class="col-1 text-center">Tip. Documento</th>
                                 <th class="col-2">Documento</th>
@@ -368,11 +370,16 @@
             </div>
             <div class="modal-body">
                 <div>
-                    <p>Responsable: <span id="responsableDetalleMaterial"></span></p>
-                </div>
-                <div>
                     <input type="text" id="idDetalleMaterialByResponsable" hidden>
                     <select id="selectorResponsableDetalleMaterial" class="form-select"></select>
+                </div>
+                <div class="mt-2 ms-1">
+                    <p> 
+                        <span class="fw-bold">Responsable:</span> <span id="responsableDetalleMaterial"></span>
+                    </p>
+                </div>
+                <div class="ms-1">
+                    <p> <span class="fw-bold">Fecha asignación responsable:</span> <span id="fechaAsignacionResponsableDetalleMaterial"></span></p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -383,6 +390,7 @@
     </div>
 </div>
 
+<!-- DIALOG PRESUPUESTO -->
 <div class="modal fade" id="presupuestoModal" tabindex="-1" aria-labelledby="presupuestoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -409,6 +417,88 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="btn-cambiar-presupuesto-detalle">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DIALOG HISTORICO DE COTIZACIONES -->
+<div class="modal fade" id="historicoModal" tabindex="-1" aria-labelledby="historicoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historicoModalLabel">Histórico</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- HISTORICO DE ORDENES DE COMPRA -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <p class="fw-bold">Ordenes de compra</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+                                <div class="pagination-container" id="pagination-container-historico-ordencompra"></div>
+                            </div>
+                        </div>
+                        <div class="overflow-auto" style="height: 50%;">
+                            <table id="historico-ordenescompra-container" class="table table-striped nowrap"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">Fecha Ord. Compra</th>
+                                        <th>Num. Ord. Compra</th>
+                                        <th>Estado</th>
+                                        <th>Doc. proveedor</th>
+                                        <th>Raz. social proveedor</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Precio unitario</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historico-ordenescompra-container-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- HISTORICO DE COTIZACIONES -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <p class="fw-bold">Cotizaciones</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+                                <div class="pagination-container" id="pagination-container-historico-cotizacion"></div>
+                            </div>
+                        </div>
+                        <div class="overflow-auto" style="height: 50%;">
+                            <table id="historico-cotizaciones-container" class="table table-striped nowrap"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th class="text-start">Fecha Cot.</th>
+                                        <th>Nro cotización</th>
+                                        <th>Nro Cot proveedor</th>
+                                        <th>Estado</th>
+                                        <th>Doc. proveedor</th>
+                                        <th>Raz. social proveedor</th>
+                                        <th>Descripción</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Precio unitario</th>
+                                        <th class="text-center">Total</th>
+                                        <th>Tmp. entrega</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historico-cotizaciones-container-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

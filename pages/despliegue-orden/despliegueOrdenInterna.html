@@ -65,15 +65,8 @@
     </div>
 </div>
 
-<!-- <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
-    <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
-    <button class="btn btn-primary" id="btn-reservar-materiales">Reservar</button>
-</div> -->
-
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
     <thead>
-        <th></th>
-        <th></th>
         <th class="text-center">Proceso</th>
         <th class="text-center">OT</th>
         <th>Fec. Det OI</th>
@@ -96,134 +89,6 @@
     <tbody id="data-container-body">
     </tbody>
 </table>
-
-<!-- DIALOG DE COTIZACION -->
-<div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="cotizacionesModalLabel">Cotización</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- SECCION DE FORM -->
-                <div>
-                    <h2 class="fs-5">Proveedores</h2>
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label for="proveedoresSUNAT" class="form-label">
-                                RUC/DNI de SUNAT
-                            </label>
-                            <div class="input-group">
-                                <input type="text" id="proveedoresSUNAT" class="form-control"
-                                    placeholder="Ingrese Nro. documento..." autocomplete="off">
-                                <button id="searchProveedorSUNAT" class="btn btn-primary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                        class="bi bi-search" viewBox="0 0 16 16">
-                                        <path
-                                            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-9 mb-3 position-relative">
-                            <label for="proveedoresInput" class="form-label">
-                                Razón Social
-                            </label>
-                            <input type="text" id="proveedoresInput" class="form-control"
-                                placeholder="Ingrese razón social..." autocomplete="off">
-                            <ul id="resultadosLista" class="list-group mt-2 position-absolute"
-                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- SECCION DE DATA PROVEEDORES-->
-                    <table id="tbl-cotizaciones-proveedores" class="table mt-3">
-                        <thead>
-                            <tr>
-                                <th>Filtro</th>
-                                <th class="col-3">Nombre</th>
-                                <th class="col-1 text-center">Tip. Documento</th>
-                                <th class="col-2">Documento</th>
-                                <th class="col-2">Correo</th>
-                                <th class="col-1">Contacto</th>
-                                <th class="col-1">Celular</th>
-                                <th class="col-1">Teléfono</th>
-                                <th class="col-1 text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbl-proveedores-container-body">
-                        </tbody>
-                    </table>
-                </div>
-                <hr>
-                <div>
-                    <h2 class="fs-5">Materiales</h2>
-                    <!-- SECCION DE DATA DE MATERIALES -->
-                    <table id="tbl-cotizaciones-materiales" class="table mt-3">
-                        <thead>
-                            <tr>
-                                <th class="col-1">OT</th>
-                                <th class="col-1">Código</th>
-                                <th class="col-1">Unidad</th>
-                                <th class="col-4">Descripción</th>
-                                <th class="col-3">Observación</th>
-                                <th class="col-1">Cant.</th>
-                                <th class="col-1">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbl-materiales-container-body">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- PREVISUALIZAR PDF -->
-<div class="modal fade" id="previewPDFModal" tabindex="-1" aria-labelledby="previewPDFModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content" style="z-index: 1056;">
-            <div class="modal-header">
-                <h5 class="modal-title" id="previewPDFModalLabel">Previsualizar solicitud de cotización (PDF)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div style="height: 80vh;">
-                    <iframe id="pdf-frame" width="100%" height="100%" style="border: none;"></iframe>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- PREVISUALIZAR TXT -->
-<div class="modal fade" id="previewTXTModal" tabindex="-1" aria-labelledby="previewTXTModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content" style="z-index: 1056;">
-            <div class="modal-header">
-                <h5 class="modal-title" id="previewTXTModalLabel">Previsualizar solicitud de cotización (TXT)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div style="height: 80vh;">
-                    <iframe id="txt-frame" width="100%" height="100%" style="border: none;"></iframe>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- DIALOG RESERVADO -->
 <div class="modal fade" id="reservacionModal" tabindex="-1" aria-labelledby="reservacionModalLabel" aria-hidden="true">
@@ -329,6 +194,7 @@
         </div>
     </div>
 </div>
+
 <!-- DIALOG ATENDIDO -->
 <div class="modal fade" id="atendidoModal" tabindex="-1" aria-labelledby="atendidoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
