@@ -110,7 +110,6 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(URL)
-            console.log(data)
             despliegueMaterialesResumido = data
             let content = ''
             data.forEach((material, index) => {
@@ -313,7 +312,6 @@ $(document).ready(() => {
 
     // ------------- GESTION DE HISTORICO --------------
     function initHistoricoCotizaciones(data) {
-        console.log(data)
         $('#historico-cotizaciones-container tbody').empty()
         data.forEach(detalle => {
             const { cotizacion } = detalle
@@ -370,7 +368,6 @@ $(document).ready(() => {
     }
 
     function initHistoricoByProducto(producto) {
-        console.log(producto)
         // debemos verificar que sea un material asignado
         if (producto === null) {
             alert("Este material no tiene un código asignado")
@@ -455,7 +452,6 @@ $(document).ready(() => {
         }
 
         const { data } = await client.get(`/ordeninternamateriales/cotizacion?${params.toString()}`)
-        console.log(data)
         $("#data-container-cotizacion tbody").empty()
 
         data.forEach(detalle => {
@@ -578,7 +574,6 @@ $(document).ready(() => {
         // obtenemos el valor del id del detalle de material
         const indexDetalle = $("#idIndexDetalle").val()
         const detalleMaterial = despliegueMaterialesResumido[indexDetalle]
-        console.log(detalleMaterial)
         const responsable = $.trim($("#selectorResponsableDetalleMaterial").val())
 
         if (responsable.length == 0) {
@@ -599,7 +594,6 @@ $(document).ready(() => {
         }
 
         try {
-            console.log(formatData)
             const { data } = await client.post(`/ordeninternamateriales/responsable-masivo`, formatData)
             const row = dataTable.rows().nodes().to$().filter(function () {
                 return $(this).find('button.btn-responsable').data('index-detalle') == indexDetalle;
@@ -645,7 +639,48 @@ $(document).ready(() => {
 
         // extraemos la informacion correspondiente
         const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index))
-        detalleCotizacion = dataSeleccionada
+        const dataSeleccionadaMateriales = []
+        dataSeleccionada.forEach(detalle => {
+            if (detalle.odm_id == undefined) {
+                detalle.detalle.forEach(detalleElement => {
+                    dataSeleccionadaMateriales.push(detalleElement)
+                })
+            } else {
+                dataSeleccionadaMateriales.push(detalle)
+            }
+        })
+
+        const dataSeleccionadaAgrupada = dataSeleccionadaMateriales.reduce((acc, item) => {
+            if (item.pro_id != null && item.odm_observacion === null) {
+                // Buscar si ya existe un grupo para este pro_id
+                const existingGroup = acc.find((group) => group.pro_id === item.pro_id && group.odm_id == undefined)
+
+                if (existingGroup) {
+                    // Acumular cantidad y agregar al detalle
+                    existingGroup.cantidad += parseFloat(item.odm_cantidad)
+                    existingGroup.detalle.push(item)
+                } else {
+                    // Crear un nuevo grupo con detalle
+                    acc.push({
+                        pro_id: item.pro_id,
+                        pro_descripcion: item.producto.pro_descripcion,
+                        uni_codigo: item.producto.uni_codigo,
+                        pro_codigo: item.producto.pro_codigo,
+                        cantidad: parseFloat(item.odm_cantidad),
+                        detalle: [item],
+                    });
+                }
+            } else {
+                // Mantener elementos que no cumplen las condiciones
+                acc.push(item);
+            }
+
+            return acc;
+        }, []);
+
+        // detalleCotizacion = dataSeleccionada
+        detalleCotizacion = dataSeleccionadaAgrupada
+
         // de la data seleccionada extraemos los productos para poder buscar sus proveedores de ordenes de compra correspondientes
         const productosCotizacion = dataSeleccionada.filter(detalle => detalle.odm_id === undefined).map(detalle => {
             return detalle.detalle[0].pro_id
@@ -720,7 +755,6 @@ $(document).ready(() => {
             if (detalle.odm_id === undefined) {
                 const observacion = unionObservaciones(detalle.detalle)
                 const rowsObs = observacion.split('\n').length
-                console.log(rowsObs)
                 content = `
                 <tr data-index="${index}">
                     <td>${detalle.pro_codigo}</td>
@@ -759,7 +793,7 @@ $(document).ready(() => {
             } else {
                 content = `
                 <tr data-index="${index}">
-                    <td>N/A</td>
+                    <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
                     <td>${detalle.odm_descripcion}</td>
                     <td>
                         <textarea class="form-control observacion-detalle" rows="1">${detalle.odm_observacion || ""}</textarea>
@@ -840,7 +874,6 @@ $(document).ready(() => {
         const $element = $(event.currentTarget).closest('tr')
         const index = $element.data('index')
         detalleCotizacion[index] = null
-        console.log(detalleCotizacion)
         $element.remove()
     })
 
@@ -860,7 +893,6 @@ $(document).ready(() => {
 
     // al momento de presionar enter
     $('#searchProveedorSUNAT').on('click', async function (event) {
-        console.log("first")
         const query = $('#proveedoresSUNAT').val().trim()
         // si es la tecla de enter
         if (event.keyCode === 13) {
@@ -1077,8 +1109,6 @@ $(document).ready(() => {
             detalle_materiales: detalleMateriales
         }
 
-        console.log(formatData)
-
         // return
         if (generarCotizacion) {
             try {
@@ -1201,7 +1231,6 @@ $(document).ready(() => {
                 proveedor,
                 detalle_materiales: detalleMateriales
             }
-            console.log(formatData)
             const response = await client.post('/ordeninternamateriales/export-cotizacion-text', formatData, {
                 headers: {
                     'Accept': 'text/plain'
