@@ -234,6 +234,9 @@
                     if ($parte['oip_descripcion'] == 'OTROS') {
                         $nombreParte = 'OTR';
                     }
+                    if ($parte['oip_descripcion'] == 'EQUIPO') {
+                        $nombreParte = 'EQP';
+                    }
                 @endphp
 
                 @if ($countMateriales != 0 || $countProcesos != 0)
