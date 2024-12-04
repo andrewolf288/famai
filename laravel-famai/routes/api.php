@@ -387,14 +387,12 @@ Route::get('script-update', function () {
         $oic_id = $ordenInterna->oic_id;
         $partesOrdenInterna = OrdenInternaPartes::where('oic_id', $oic_id)->get();
         foreach ($partesOrdenInterna as $parte) {
-            $odp_id = $parte->odp_id;
-            $detalleMateriales = OrdenInternaMateriales::where('odp_id', $odp_id)->get();
+            $opd_id = $parte->opd_id;
+            $detalleMateriales = OrdenInternaMateriales::where('opd_id', $opd_id)->get();
             foreach ($detalleMateriales as $detalleMaterial) {
-                if($detalleMaterial->pro_id != null){
-                    $detalleMaterial->update([
-                        'odm_estado' => "REQ"
-                    ]);
-                }
+                $detalleMaterial->update([
+                    'odm_estado' => "REQ"
+                ]);
             }
         }
     }
