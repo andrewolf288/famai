@@ -44,7 +44,8 @@ class OrdenInternaMaterialesController extends Controller
         )
             ->withCount('cotizaciones')
             ->withCount('ordenesCompra')
-            ->whereNotIn('odm_tipo', [3, 4, 5]);
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->whereNotNull('odm_estado');
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -126,7 +127,6 @@ class OrdenInternaMaterialesController extends Controller
                     return response($dataFiltrada);
                 }
             }
-            // });
         }
 
         // ordenar de formar descendiente
@@ -159,7 +159,8 @@ class OrdenInternaMaterialesController extends Controller
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'PROCESO');
             })
-            ->whereNotIn('odm_tipo', [3, 4, 5]);
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->whereNotNull('odm_estado');
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -285,29 +286,24 @@ class OrdenInternaMaterialesController extends Controller
 
     public function indexValidacionCodigo(Request $request)
     {
-        $pageSize = $request->input('page_size', 10);
-        $page = $request->input('page', 1);
         $ordenTrabajo = $request->input('odt_numero', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
-        $flagIsNull = $request->input('flag_is_null', 'true');
+        // multifilters
+        $multifilter = $request->input('multifilter', null);
 
         $query = OrdenInternaMateriales::with(
             [
                 'responsable',
                 'producto.unidad',
-                'ordenInternaParte.ordenInterna'
+                'ordenInternaParte.ordenInterna.area'
             ]
-        )->whereHas('ordenInternaParte.ordenInterna', function ($query) {
-            $query->where('oic_estado', 'ENVIADO')
-                ->orWhere('oic_estado', 'EVALUADO');
-        });
-
-        // flag NULL
-        if ($flagIsNull === 'true') {
-            $query->whereNull('pro_id');
-        }
+        )
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('oic_estado', 'ENVIADO')
+                    ->orWhere('oic_estado', 'EVALUADO');
+            });
 
         // filtro por orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -321,15 +317,64 @@ class OrdenInternaMaterialesController extends Controller
             $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
         }
 
-        // ordenar de formar descendiente
-        $query->orderBy('odm_feccreacion', 'desc');
+        // Procesar el parámetro multiselect
+        if ($multifilter !== null) {
+            // Separar el string por "OR" y crear un array con cada palabra
+            $palabras = explode('OR', $request->input('multifilter'));
+            // si existe filtro de no verificado y verificado
+            if (in_array('no_verificados', $palabras) && in_array('verificados', $palabras)) {
+                $query->where(function ($query) {
+                    $query->whereNull('odm_estado');
+                    $query->orWhereNotNull('odm_estado');
+                });
+            } else {
+                if (in_array('no_verificados', $palabras)) {
+                    $query->whereNull('odm_estado');
+                }
+                if (in_array('verificados', $palabras)) {
+                    $query->whereNotNull('odm_estado');
+                }
+            }
 
-        $detalleMateriales = $query->paginate($pageSize, ['*'], 'page', $page);
-        return response()->json([
-            'message' => 'Se listan los materiales de la orden interna para validacion de codigo',
-            'data' => $detalleMateriales->items(),
-            'count' => $detalleMateriales->total()
-        ]);
+            // si eiste filtro de productos con codigo y sin codigo
+            if (in_array('productos_con_codigo', $palabras) && in_array('productos_sin_codigo', $palabras)) {
+                $query->where(function ($query) {
+                    $query->whereNotNull('pro_id');
+                    $query->orWhereNull('pro_id');
+                });
+            } else {
+                if (in_array('productos_con_codigo', $palabras)) {
+                    $query->whereNotNull('pro_id');
+                }
+                if (in_array('productos_sin_codigo', $palabras)) {
+                    $query->whereNull('pro_id');
+                }
+            }
+        }
+
+        $resultado = $query->get();
+        return response()->json($resultado);
+    }
+
+    public function validarMaterialesMasivo(Request $request)
+    {
+        $user = auth()->user();
+        $materiales = $request->input('materiales', []);
+        try {
+            DB::beginTransaction();
+            foreach ($materiales as $material) {
+                $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($material);
+                $ordenInternaMaterial->update([
+                    'odm_estado' => "REQ",
+                    'odm_usumodificacion' => $user->usu_codigo
+                ]);
+            }
+            DB::commit();
+            return response()->json($materiales, 200);
+        } catch(Exception $e) {
+            DB::rollBack();
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
     }
 
     public function findByNumeroOrdenInterna(Request $request)
@@ -591,8 +636,8 @@ class OrdenInternaMaterialesController extends Controller
     {
         try {
             $ordenTrabajo = $request->input('odt_numero', null);
-            $fecha_desde = $request->input('fecha_desde', null);
-            $fecha_hasta = $request->input('fecha_hasta', null);
+            // $fecha_desde = $request->input('fecha_desde', null);
+            // $fecha_hasta = $request->input('fecha_hasta', null);
 
             $query = OrdenInternaMateriales::with(
                 [
@@ -600,9 +645,8 @@ class OrdenInternaMaterialesController extends Controller
                     'ordenInternaParte.ordenInterna',
                     'usuarioCreador'
                 ]
-            )->where('odm_tipo', "!=", 3)
-                ->where("odm_tipo", "!=", 4)
-                ->where("odm_tipo", "!=", 5);
+            )->whereNotIn('odm_tipo', [3, 4, 5])
+            ->whereNotNull('odm_estado');
 
             // filtro de orden de trabajo
             if ($ordenTrabajo !== null) {
@@ -611,10 +655,10 @@ class OrdenInternaMaterialesController extends Controller
                 });
             }
 
-            // filtro de fecha
-            if ($fecha_desde !== null && $fecha_hasta !== null) {
-                $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
-            }
+            // // filtro de fecha
+            // if ($fecha_desde !== null && $fecha_hasta !== null) {
+            //     $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            // }
 
             $query->orderBy('odm_feccreacion', 'desc');
 
@@ -1069,13 +1113,13 @@ class OrdenInternaMaterialesController extends Controller
                 'detalleMateriales' => $agrupadosIndexado,
                 'fechaActual' => DateHelper::parserFechaActual(),
                 'usuarioImpresion' => $user->usu_codigo,
-                'fechaHoraImpresion'=> date('Y-m-d H:i:s'),
+                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
                 'url_cotizacion' => null
             ];
 
             $pdf = Pdf::loadView('cotizacion.cotizacion', $data)
                 ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
-                
+
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -1249,6 +1293,7 @@ class OrdenInternaMaterialesController extends Controller
             // actualizamos el material
             $ordenInternaMaterial->update([
                 'pro_id' => $pro_id,
+                'odm_estado' => 'REQ',
                 'odm_descripcion' => $pro_descripcion,
                 'odm_observacion' => $codigoIncrustado . $descripcionMaterial . $observacionMaterial,
                 'odm_usumodificacion' => $user->usu_codigo

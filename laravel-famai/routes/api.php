@@ -213,6 +213,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordeninternamateriales/validar-codigo', [OrdenInternaMaterialesController::class, 'asignarCodigoProducto']);
     Route::post('detalleMaterialesOrdenInterna/materiales-cotizar', [OrdenInternaMaterialesController::class, 'informacionMaterialesCotizar']);
     Route::post('detalleMaterialesOrdenInterna/findByNumeroOrdenTrabajo', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenTrabajo']);
+    // Validar materiales
+    Route::post('detalleMaterialesOrdenInterna/verificar-materiales', [OrdenInternaMaterialesController::class, 'validarMaterialesMasivo']);
 });
 
 // rutas detalle de adjuntos detalle materiales

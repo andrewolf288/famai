@@ -4,17 +4,23 @@ $(document).ready(() => {
     // URL ENDPOINT
     const apiURL = '/detalleMaterialesOrdenInterna/validacion'
     let idOrdenInternaMaterial = 0
+    let dataTable;
+    const dataContainer = $('#data-container')
+
+    // gestion de multiselect
+    $('select[multiple]').multiselect()
 
     // referencias de filtros
     const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
     const filterButton = $('#filter-button')
     const filterFechas = $('#filter-dates')
+    const filterMultiselect = $('#filtermultiselect-button')
 
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", moment().startOf('month').toDate());
+    }).datepicker("setDate", moment().toDate());
     $("#fechaHasta").datepicker({
         dateFormat: 'dd/mm/yy',
     }).datepicker("setDate", moment().toDate());
@@ -23,10 +29,13 @@ $(document).ready(() => {
     const dataTableOptions = {
         destroy: true,
         responsive: true,
-        paging: false,
+        paging: true,
+        pageLength: 25,
+        lengthMenu: [25, 50, 100, 250],
         searching: true,
-        info: false,
+        info: true,
         language: {
+            lengthMenu: "Mostrar _MENU_ registros por página",
             info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
             infoEmpty: "Mostrando 0 a 0 de 0 registros",
             infoFiltered: "(filtrado de _MAX_ registros totales)",
@@ -41,46 +50,93 @@ $(document).ready(() => {
             },
         },
         columnDefs: [
-            {targets: [3, 4, 5], searchable: true},
-            {targets: [0, 1, 2, 6, 7], searchable: false},
-        ]
+            {
+                targets: 0,
+                orderable: false,
+            },
+            {
+                orderable: false,
+                render: DataTable.render.select(),
+                targets: 1,
+                className: 'form-check-input'
+            },
+            { targets: 7, searchable: true },
+            { targets: [3, 4, 5, 6, 8, 9, 10], searchable: false },
+        ],
+        select: {
+            style: 'multi',
+            selector: 'td.form-check-input'
+        },
+        order: [[2, 'asc']],
     }
 
     // Inicializacion de data table
-    function initDataTable(data) {
-        let content = ''
+    async function initDataTable(URL = apiURL) {
+        // verificamos que no se haya inicializado el datatable
+        if ($.fn.DataTable.isDataTable(dataContainer)) {
+            dataContainer.DataTable().destroy();
+        }
         // vaciamos la lista
         $('#data-container-body').empty()
-        // recorremos la lista
-        data.forEach((material, index) => {
-            // obtenemos los datos
-            const { producto, orden_interna_parte } = material
-            const { orden_interna } = orden_interna_parte
-            const { odt_numero } = orden_interna
 
-            const rowItem = document.createElement('tr')
-            rowItem.innerHTML = `
-                <td>${odt_numero || 'N/A'}</td>
-                <td>${parseDate(material.odm_feccreacion)}</td>
-                <td>${material.odm_usucreacion}</td>
-                <td>${producto?.pro_codigo || 'N/A'}</td>
-                <td>${material.odm_descripcion}</td>
-                <td>${material.odm_observacion || 'N/A'}</td>
-                <td class="text-center">${material.odm_cantidad}</td>
-                <td class="text-center">
-                    <button class="btn btn-primary asignar-codigo" data-detalle="${material.odm_id}">Validar Código</button>
-                </td>
-            `
-            $('#data-container-body').append(rowItem)
-        })
+        try {
+            const { data } = await client.get(URL)
+            console.log(data)
+            // recorremos la lista
+            data.forEach((material, index) => {
+                // obtenemos los datos
+                const { producto, orden_interna_parte } = material
+                const { orden_interna } = orden_interna_parte
+                const { odt_numero, area } = orden_interna
+
+                const rowItem = document.createElement('tr')
+                rowItem.dataset.detalle = material.odm_id
+                rowItem.innerHTML = `
+                    <td></td>
+                    <td></td>
+                    <td>${odt_numero || 'N/A'}</td>
+                    <td>${area.are_descripcion}</td>
+                    <td>${parseDate(material.odm_feccreacion)}</td>
+                    <td>${material.odm_usucreacion}</td>
+                    <td>${producto?.pro_codigo || 'N/A'}</td>
+                    <td>${material.odm_descripcion}</td>
+                    <td>${material.odm_observacion || 'N/A'}</td>
+                    <td class="text-center">${material.odm_cantidad}</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary asignar-codigo" data-detalle="${material.odm_id}">Validar Código</button>
+                    </td>
+                `
+                $('#data-container-body').append(rowItem)
+            })
+            // inicializamos el datatable
+            dataTable = dataContainer.DataTable(dataTableOptions)
+        } catch (error) {
+            console.log(error)
+            alert('Error al cargar la data')
+        }
+    }
+
+    function filterData() {
+        const fecha_desde = transformarFecha($('#fechaDesde').val())
+        const fecha_hasta = transformarFecha($('#fechaHasta').val())
+
+        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}`
+
+        const filters = $('select[multiple]').val()
+        if (filters.length !== 0) {
+            filteredURL += `&multifilter=${filters.join('OR')}`
+        }
+
+        initDataTable(filteredURL)
     }
 
     filterFechas.on('click', () => {
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        const checkedTodos = $("#filter-checkbox").is(':checked')
-        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}&flag_is_null=${!checkedTodos}`
-        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+        filterData()
+    })
+
+    // filtro multi select
+    filterMultiselect.on('click', async () => {
+        filterData()
     })
 
     filterButton.on('click', () => {
@@ -91,24 +147,21 @@ $(document).ready(() => {
 
         let filteredURL = apiURL
 
-        // primero aplicamos el filtro de fechas
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-
-        const checkedTodos = $("#filter-checkbox").is(':checked')
         // debemos adjuntar el filtro de busqueda por criterio
         if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}&flag_is_null=${!checkedTodos}`
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+            const filters = $('select[multiple]').val()
+            if (filters.length !== 0) {
+                filteredURL += `&multifilter=${filters.join('OR')}`
+            }
         }
 
-        initPagination(filteredURL, initDataTable, dataTableOptions, 50)
+        initDataTable(filteredURL)
     })
 
-    initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}&flag_is_null=true`, initDataTable, dataTableOptions, 50)
+    initDataTable(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}&multifilter=no_verificados`)
 
     // ------ GESTIÓN DE ASIGNACIÓN DE CÓDIGOS ------
-
     // al momento de ir ingresando valores en el input
     $('#productosInput').on('input', debounce(async function () {
         const query = $(this).val().trim()
@@ -200,7 +253,7 @@ $(document).ready(() => {
     })
 
     // gestion de eliminacion de detalle de asignacion de codigos
-    $("#tbl-asignar-codigos").on('click','.eliminar-detalle', function () {
+    $("#tbl-asignar-codigos").on('click', '.eliminar-detalle', function () {
         const row = $(this).closest('tr')
         row.remove()
         // deshabilitamos el boton de asignación
@@ -223,11 +276,84 @@ $(document).ready(() => {
             modalAsignacionCodigo.hide()
 
             // cargamos la informacion
-            initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}&flag_is_null=true`, initDataTable, dataTableOptions, 50)
-        } catch(error) {
+            filterData()
+        } catch (error) {
             console.log(error)
             alert('Error al asignar el codigo')
         }
     })
+
+    // ------------- GESTION DE VERIFICACION -------------
+    $("#btn-validar-materiales").on('click', async function () {
+        const filasSeleccionadas = dataTable.rows({ selected: true }).nodes();
+        const indicesSeleccionados = [];
+        $(filasSeleccionadas).each(function (index, node) {
+            const valor = $(node).data('detalle');
+            indicesSeleccionados.push(valor);
+        });
+
+        // debe al menos seleccionarse un item
+        if (indicesSeleccionados.length === 0) {
+            alert('Debe seleccionar al menos un material')
+            return
+        }
+
+        const formatData = {
+            materiales: indicesSeleccionados
+        }
+
+        try {
+            await client.post('detalleMaterialesOrdenInterna/verificar-materiales', formatData)
+            filterData()
+        } catch (error) {
+            console.log(error)
+            alert('Error al verificar los materiales')
+        }
+    })
+
+    // ------------ GESTION DE EXCEL DE ALMACEN -------------
+    $("#btn-export-data-almacen").on('click', function () {
+        // abrimos el modal de ingreso de informacion
+        const loaderModalSearchOI = new bootstrap.Modal(document.getElementById('ordenInternaSearchModal'))
+        loaderModalSearchOI.show()
+    })
+
+    $("#btnExportarExcelAlmacen").on('click', function (event) {
+        event.preventDefault()
+        exportarExcelAlmacen()
+        const loaderModalSearchOI = bootstrap.Modal.getInstance(document.getElementById('ordenInternaSearchModal'))
+        loaderModalSearchOI.hide()
+    })
+
+    async function exportarExcelAlmacen() {
+        var oiValue = $('#ordenInternaInput').val().trim()
+
+        // Validar si el campo está vacío
+        if (oiValue.length === 0) {
+            alert('Por favor, ingrese un valor de Orden Interna para buscar.')
+            return
+        }
+
+        try {
+            let filteredURL = `/ordeninternamateriales/export-excel-almacen?odt_numero=${oiValue}`
+            const response = await client.get(filteredURL, {
+                responseType: 'blob',
+            })
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'reporte.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            const { response } = error
+            if (response.status === 404) {
+                alert(response.data.error)
+            } else {
+                alert('Error al buscar la orden interna')
+            }
+        }
+    }
 
 })

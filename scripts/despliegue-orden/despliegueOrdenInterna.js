@@ -89,7 +89,7 @@ $(document).ready(() => {
                     </td>
                     <td>${odt_numero || 'N/A'}</td>
                     <td>${parseDate(material.odm_feccreacion)}</td>
-                    <td>${material.odm_estado}</td>
+                    <td>${material.odm_estado || 'N/A'}</td>
                     <td class="text-center">
                         ${material.odm_tipo == 1 ? 'R' : 'A'}
                     </td>
