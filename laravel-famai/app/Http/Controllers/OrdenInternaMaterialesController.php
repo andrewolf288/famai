@@ -364,10 +364,12 @@ class OrdenInternaMaterialesController extends Controller
             DB::beginTransaction();
             foreach ($materiales as $material) {
                 $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($material);
-                $ordenInternaMaterial->update([
-                    'odm_estado' => "REQ",
-                    'odm_usumodificacion' => $user->usu_codigo
-                ]);
+                if($ordenInternaMaterial->pro_id != NULL){
+                    $ordenInternaMaterial->update([
+                        'odm_estado' => "REQ",
+                        'odm_usumodificacion' => $user->usu_codigo
+                    ]);
+                }
             }
             DB::commit();
             return response()->json($materiales, 200);
@@ -636,8 +638,16 @@ class OrdenInternaMaterialesController extends Controller
     {
         try {
             $ordenTrabajo = $request->input('odt_numero', null);
-            // $fecha_desde = $request->input('fecha_desde', null);
-            // $fecha_hasta = $request->input('fecha_hasta', null);
+
+            $findOrdenTrabajo = OrdenInterna::where('odt_numero', $ordenTrabajo)->first();
+            if(!$findOrdenTrabajo){
+                return response()->json(['error' => 'No se encontro la orden de trabajo'], 404);
+            } else {
+                $estadoOrdenTrabajo = $findOrdenTrabajo->oic_estado;
+                if($estadoOrdenTrabajo !== 'PROCESO'){
+                    return response()->json(['error' => 'La orden de trabajo no se encuentra en un estado PROCESO'], 404);
+                }
+            }
 
             $query = OrdenInternaMateriales::with(
                 [
@@ -645,8 +655,8 @@ class OrdenInternaMaterialesController extends Controller
                     'ordenInternaParte.ordenInterna',
                     'usuarioCreador'
                 ]
-            )->whereNotIn('odm_tipo', [3, 4, 5])
-            ->whereNotNull('odm_estado');
+            )->whereNotIn('odm_tipo', [3, 4, 5]);
+            // ->whereNotNull('odm_estado');
 
             // filtro de orden de trabajo
             if ($ordenTrabajo !== null) {
@@ -654,11 +664,6 @@ class OrdenInternaMaterialesController extends Controller
                     $q->where('odt_numero', $ordenTrabajo);
                 });
             }
-
-            // // filtro de fecha
-            // if ($fecha_desde !== null && $fecha_hasta !== null) {
-            //     $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
-            // }
 
             $query->orderBy('odm_feccreacion', 'desc');
 

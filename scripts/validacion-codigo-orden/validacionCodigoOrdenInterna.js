@@ -60,8 +60,8 @@ $(document).ready(() => {
                 targets: 1,
                 className: 'form-check-input'
             },
-            { targets: 7, searchable: true },
-            { targets: [3, 4, 5, 6, 8, 9, 10], searchable: false },
+            { targets: 8, searchable: true },
+            { targets: [2, 3, 4, 5, 6, 7, 9, 10, 11], searchable: false },
         ],
         select: {
             style: 'multi',
@@ -96,6 +96,7 @@ $(document).ready(() => {
                     <td></td>
                     <td>${odt_numero || 'N/A'}</td>
                     <td>${area.are_descripcion}</td>
+                    <td class="text-center">${material.odm_tipo == 1 ? 'R' : 'A'}</td>
                     <td>${parseDate(material.odm_feccreacion)}</td>
                     <td>${material.odm_usucreacion}</td>
                     <td>${producto?.pro_codigo || 'N/A'}</td>
@@ -347,11 +348,20 @@ $(document).ready(() => {
             link.click();
             link.remove();
         } catch (error) {
-            const { response } = error
-            if (response.status === 404) {
-                alert(response.data.error)
+            if (error.response && error.response.data) {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const errorMessage = JSON.parse(reader.result).error || "Ocurrió un error desconocido.";
+                        alert(`Error al exportar: ${errorMessage}`);
+                    };
+                    reader.readAsText(error.response.data);
+                } catch (parseError) {
+                    alert("Error desconocido al procesar la respuesta del servidor.");
+                }
             } else {
-                alert('Error al buscar la orden interna')
+                console.error(error);
+                alert("Error al exportar el archivo. Por favor, inténtalo de nuevo.");
             }
         }
     }
