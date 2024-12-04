@@ -382,18 +382,18 @@ Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotiz
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 
 Route::get('script-update', function () {
-    $ordenesInternas = OrdenInterna::where('oic_estado', 'PROCESO')->get();
-    foreach ($ordenesInternas as $ordenInterna) {
-        $oic_id = $ordenInterna->oic_id;
-        $partesOrdenInterna = OrdenInternaPartes::where('oic_id', $oic_id)->get();
-        foreach ($partesOrdenInterna as $parte) {
-            $opd_id = $parte->opd_id;
-            $detalleMateriales = OrdenInternaMateriales::where('opd_id', $opd_id)->get();
-            foreach ($detalleMateriales as $detalleMaterial) {
-                $detalleMaterial->update([
-                    'odm_estado' => "REQ"
-                ]);
-            }
-        }
-    }
+    // $ordenesInternas = OrdenInterna::where('oic_estado', 'PROCESO')->get();
+    // foreach ($ordenesInternas as $ordenInterna) {
+    //     $oic_id = $ordenInterna->oic_id;
+    //     $partesOrdenInterna = OrdenInternaPartes::where('oic_id', $oic_id)->get();
+    //     foreach ($partesOrdenInterna as $parte) {
+    //         $opd_id = $parte->opd_id;
+    //         $detalleMateriales = OrdenInternaMateriales::where('opd_id', $opd_id)->get();
+    //         foreach ($detalleMateriales as $detalleMaterial) {
+    //             $detalleMaterial->update([
+    //                 'odm_estado' => "REQ"
+    //             ]);
+    //         }
+    //     }
+    // }
 });
