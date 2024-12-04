@@ -35,6 +35,9 @@ use App\Http\Controllers\RequerimientoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\OrdenInterna;
+use App\OrdenInternaMateriales;
+use App\OrdenInternaPartes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -379,4 +382,20 @@ Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotiz
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 
 Route::get('script-update', function () {
+    $ordenesInternas = OrdenInterna::where('oic_estado', 'PROCESO')->get();
+    foreach ($ordenesInternas as $ordenInterna) {
+        $oic_id = $ordenInterna->oic_id;
+        $partesOrdenInterna = OrdenInternaPartes::where('oic_id', $oic_id)->get();
+        foreach ($partesOrdenInterna as $parte) {
+            $odp_id = $parte->odp_id;
+            $detalleMateriales = OrdenInternaMateriales::where('odp_id', $odp_id)->get();
+            foreach ($detalleMateriales as $detalleMaterial) {
+                if($detalleMaterial->pro_id != null){
+                    $detalleMaterial->update([
+                        'odm_estado' => "REQ"
+                    ]);
+                }
+            }
+        }
+    }
 });
