@@ -562,7 +562,7 @@ class CotizacionController extends Controller
             // validacion de cotizacion
             $validatedData = validator($request->all(), [
                 'coc_cotizacionproveedor' => 'required|string',
-                'coc_correocontacto' => 'required|email',
+                'coc_correocontacto' => 'nullable|email',
                 'coc_fechavalidez' => 'required|date',
                 'coc_lugarentrega' => 'nullable|string',
                 'coc_conigv' => 'required|boolean',
