@@ -15,6 +15,7 @@ class OrdenInterna extends Model
         'odt_numero',
         'cli_id',
         'are_codigo',
+        'sed_codigo',
         'oic_equipo_descripcion',
         'oic_componente',
         'oic_estado',
@@ -81,5 +82,11 @@ class OrdenInterna extends Model
     public function totalMateriales()
     {
         return $this->partes()->withCount('materiales')->get()->sum('materiales_count');
+    }
+
+    // metodo para mostrar la sede
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'sed_codigo')->selectFields();
     }
 }

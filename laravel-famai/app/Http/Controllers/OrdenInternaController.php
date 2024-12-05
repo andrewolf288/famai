@@ -35,6 +35,14 @@ class OrdenInternaController extends Controller
      */
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        if($trabajador){
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $odtNumero = $request->input('odt_numero', null);
@@ -44,7 +52,8 @@ class OrdenInternaController extends Controller
         $fecha_hasta = $request->input('fecha_hasta', null);
 
         $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'ordenTrabajo'])
-            ->where('oic_tipo', 'OI');
+            ->where('oic_tipo', 'OI')
+            ->where('sed_codigo', $sed_codigo);
 
         if ($odtNumero !== null) {
             $query->where('odt_numero', $odtNumero);
@@ -309,9 +318,14 @@ class OrdenInternaController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        $sed_codigo = "10";
         try {
             // iniciamos una transaccion
             DB::beginTransaction();
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+            if($trabajador){
+                $sed_codigo = $trabajador->sed_codigo;
+            }
 
             $validator = Validator::make($request->all(), [
                 'odt_numero' => 'required|string',
@@ -330,18 +344,10 @@ class OrdenInternaController extends Controller
 
             // ---------- MANEJO DE INFORMACION DEL CLIENTE ----------
             $cli_id = null;
-            // debemos buscar si el cliente existe en nuestra base de datos
             $clienteFound = Cliente::where('cli_nrodocumento', $request->input('cli_id'))->first();
             if ($clienteFound) {
                 $cli_id = $clienteFound->cli_id;
             } else {
-                // si no existe debemos crearlo
-                // debemos buscar la informacion correspondiente en la tabla secundaria
-                // $clienteSecondary = DB::connection('sqlsrv_secondary')
-                //     ->table('OCRD')
-                //     ->select('CardCode', 'CardName')
-                //     ->where('CardCode', $request->input('cli_id'))
-                //     ->first();
                 $clienteSecondary = DB::connection('sqlsrv_andromeda')
                     ->table('SAP_Cliente')
                     ->select('CardCode', 'CardName')
@@ -374,37 +380,6 @@ class OrdenInternaController extends Controller
             if ($odtFound) {
                 $odt_numero = $odtFound->odt_numero;
             } else {
-                // si no existe debemos crearlo
-                // debemos buscar la informacion correspondiente en la tabla secundaria
-                // $otSecondary = DB::connection('sqlsrv_secondary')
-                //     ->table('OWOR as OT')
-                //     ->select(
-                //         'OT.DocNum as odt_numero',
-                //         DB::raw('CAST(OT.PostDate AS DATE) as odt_fecha'),
-                //         'OT.ProdName as odt_equipo',
-                //         DB::raw("
-                //                 CASE 
-                //                     WHEN OT.U_EXX_TIPOSERV = 1 THEN 'Reparacion'
-                //                     WHEN OT.U_EXX_TIPOSERV = 2 THEN 'Fabricacion'
-                //                     WHEN OT.U_EXX_TIPOSERV = 3 THEN 'Compra/Venta'
-                //                     WHEN OT.U_EXX_TIPOSERV = 4 THEN 'Garantia Total'
-                //                     WHEN OT.U_EXX_TIPOSERV = 5 THEN 'Interno'
-                //                     WHEN OT.U_EXX_TIPOSERV = 6 THEN 'Garantia Parcial'
-                //                     WHEN OT.U_EXX_TIPOSERV = 7 THEN 'Sellos'
-                //                     ELSE 'Otro'
-                //                 END as odt_trabajo
-                //             "),
-                //         DB::raw("
-                //                 CASE 
-                //                     WHEN OT.Status = 'L' THEN 'Cerrado'
-                //                     WHEN OT.Status = 'R' THEN 'Abierto'
-                //                     ELSE 'Planificado'
-                //                 END as odt_estado
-                //             ")
-                //     )
-                //     ->where('OT.DocNum', $request->input('odt_numero'))
-                //     ->first();
-
                 $otSecondary = DB::connection('sqlsrv_andromeda')
                     ->table('OT_OrdenTrabajo as T1')
                     ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
@@ -460,6 +435,7 @@ class OrdenInternaController extends Controller
                 'oic_fecha' => $request->input('oic_fecha'),
                 'oic_fechaaprobacion' => $request->input('oic_fechaaprobacion'),
                 'oic_fechaentregaestimada' => $request->input('oic_fechaentregaestimada'),
+                'sed_codigo' => $sed_codigo,
                 'odt_numero' => $odt_numero,
                 'cli_id' => $cli_id,
                 'are_codigo' => $request->input('are_codigo'),
@@ -472,7 +448,7 @@ class OrdenInternaController extends Controller
                 'oic_estado' => 'INGRESO',
                 'oic_tipo' => 'OI',
                 'oic_usucreacion' => $user->usu_codigo,
-                'oic_fecmodificacion' => null, // para colocar que la fecha de modificacion no se setee al crearse el registro
+                'oic_fecmodificacion' => null,
             ]);
 
             $detallePartes = $request->input('detalle_partes');
@@ -759,7 +735,6 @@ class OrdenInternaController extends Controller
         $mpdf->WriteHTML($html);
 
         // Generar el PDF y enviarlo al navegador
-        // return $mpdf->Output('voucher.pdf', 'I');
         return response()->streamDownload(
             function () use ($mpdf) {
                 echo $mpdf->Output('voucher.pdf', 'I');
@@ -771,56 +746,6 @@ class OrdenInternaController extends Controller
             ]
         );
     }
-
-    // exportar orden interna
-    // public function exportOrdenInternaPDF2(Request $request)
-    // {
-    //     $reporte = new Reporte();
-    //     $idOIC = $request->input('oic_id');
-    //     $datosCabecera = $reporte->metobtenerCabecera($idOIC);
-    //     $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
-    //     $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
-
-    //     $datosPartes = $reporte->metobtenerPartes($idOIC);
-    //     foreach ($datosPartes as &$parte) {
-    //         $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
-    //         $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
-    //         $parte['detalle_procesos'] = $procesos;
-    //         $parte['detalle_materiales'] = $materiales;
-    //     }
-
-    //     // Configurar opciones de DOMPDF
-    //     $options = new Options();
-    //     $options->set('isHtml5ParserEnabled', true);
-    //     $options->set('isRemoteEnabled', true);
-    //     $options->set('isPhpEnabled', true);
-    //     $options->set('isJavascriptEnabled', true);
-
-    //     // Crear instancia de DOMPDF
-    //     $dompdf = new Dompdf($options);
-
-    //     // Cargar la vista Blade y pasar datos si es necesario
-    //     $html = View::make('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))->render();
-    //     $dompdf->loadHtml($html);
-
-    //     // Configurar el tamaño de papel y orientación
-    //     $dompdf->setPaper('A4', 'landscape');
-
-    //     // Renderizar el PDF
-    //     $dompdf->render();
-
-    //     // Mostrar el PDF en el navegador o descargar
-    //     return response()->streamDownload(
-    //         function () use ($dompdf) {
-    //             echo $dompdf->output();
-    //         },
-    //         'reporte.pdf',
-    //         [
-    //             'Content-Type' => 'application/pdf',
-    //             'Content-Disposition' => 'attachment; filename="reporte.pdf"'
-    //         ]
-    //     );
-    // }
 
     // --------- GENERAR PDF CON MPDF -----------------------
     public function exportOrdenInternaPDF(Request $request)
@@ -884,7 +809,6 @@ class OrdenInternaController extends Controller
         $mpdf->WriteHTML($html);
 
         // Generar el PDF y enviarlo al navegador
-        // return $mpdf->Output('voucher.pdf', 'I');
         return response()->streamDownload(
             function () use ($mpdf) {
                 echo $mpdf->Output('voucher.pdf', 'I');
@@ -896,30 +820,4 @@ class OrdenInternaController extends Controller
             ]
         );
     }
-
-    // --------- GENERAR PDF CON XKHTMLTOPDF -----------------
-    // public function exportOrdenInternaPDF(Request $request)
-    // {
-    //     $reporte = new Reporte();
-    //     $idOIC = $request->input('oic_id');
-    //     $datosCabecera = $reporte->metobtenerCabecera($idOIC);
-    //     $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
-    //     $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
-
-    //     $datosPartes = $reporte->metobtenerPartes($idOIC);
-    //     foreach ($datosPartes as &$parte) {
-    //         $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
-    //         $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
-    //         $parte['detalle_procesos'] = $procesos;
-    //         $parte['detalle_materiales'] = $materiales;
-    //     }
-
-    //     // Generar el PDF con Snappy usando la vista Blade
-    //     $pdf = PDF::loadView('orden-interna.ordeninterna', compact('datosCabecera', 'datosPartes'))
-    //         ->setPaper('a4')
-    //         ->setOrientation('landscape');
-
-    //     // Retornar el PDF para que se descargue
-    //     return $pdf->download('orden_interna_' . $idOIC . '.pdf');
-    // }
 }

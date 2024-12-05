@@ -18,6 +18,7 @@ class OrdenCompra extends Model
         'pvc_cuentabanconacion',
         'occ_fecha',
         'occ_fechaentrega',
+        'sed_codigo',
         'mon_codigo',
         'occ_tipocambio',
         'occ_referencia',
@@ -72,5 +73,10 @@ class OrdenCompra extends Model
     public function detalleOrdenCompra()
     {
         return $this->hasMany(OrdenCompraDetalle::class, 'occ_id', 'occ_id');
+    }
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'sed_codigo')->selectFields();
     }
 }

@@ -26,13 +26,22 @@ class CotizacionController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
 
         $coc_numero = $request->input('coc_numero', null);
         $coc_estado = $request->input('coc_estado', null);
 
-        $query = Cotizacion::with(['proveedor', 'moneda']);
+        $query = Cotizacion::with(['proveedor', 'moneda'])
+            ->where('sed_codigo', $sed_codigo);
 
         if ($coc_numero !== null) {
             $query->where('coc_numero', $coc_numero);
@@ -65,6 +74,12 @@ class CotizacionController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
         // iniciamos una transaccion
         DB::beginTransaction();
         try {
@@ -101,6 +116,7 @@ class CotizacionController extends Controller
 
             $cotizacion = Cotizacion::create([
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+                'sed_codigo' => $sed_codigo,
                 'prv_id' => $validatedData['prv_id'],
                 'coc_fechacotizacion' => $validatedData['coc_fechacotizacion'],
                 'coc_cotizacionproveedor' => $validatedData['coc_cotizacionproveedor'],
@@ -169,6 +185,11 @@ class CotizacionController extends Controller
     public function storeDespliegueMateriales(Request $request)
     {
         $user = auth()->user();
+        $sed_codigo = "10";
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
 
         try {
             DB::beginTransaction();
@@ -195,6 +216,7 @@ class CotizacionController extends Controller
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $proveedor['prv_id'],
                 'tra_solicitante' => $tra_solicitante,
+                'sed_codigo' => $sed_codigo,
                 'coc_usucreacion' => $user->usu_codigo,
                 'coc_fecmodificacion' => null,
                 'coc_estado' => 'SOL',
@@ -720,7 +742,7 @@ class CotizacionController extends Controller
     public function updateEstadoCotizacion($id)
     {
         $user = auth()->user();
-        try{
+        try {
             $validatedData = validator(request()->all(), [
                 'coc_estado' => 'required',
             ])->validate();
@@ -735,7 +757,7 @@ class CotizacionController extends Controller
             return response()->json([
                 'message' => 'Cotización actualizada',
             ]);
-        } catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

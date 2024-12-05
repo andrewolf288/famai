@@ -26,6 +26,15 @@ class OrdenInternaMaterialesController extends Controller
 
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $ordenTrabajo = $request->input('odt_numero', null);
         $tipoProceso = $request->input('oic_tipo', null);
         $responsable = $request->input('tra_nombre', null);
@@ -44,6 +53,9 @@ class OrdenInternaMaterialesController extends Controller
         )
             ->withCount('cotizaciones')
             ->withCount('ordenesCompra')
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            })
             ->whereNotIn('odm_tipo', [3, 4, 5])
             ->whereNotNull('odm_estado');
 
@@ -138,6 +150,15 @@ class OrdenInternaMaterialesController extends Controller
     // index resumido
     public function indexResumido(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $ordenTrabajo = $request->input('odt_numero', null);
         $tipoProceso = $request->input('oic_tipo', null);
         $responsable = $request->input('tra_nombre', null);
@@ -156,6 +177,9 @@ class OrdenInternaMaterialesController extends Controller
         )
             ->withCount('cotizaciones')
             ->withCount('ordenesCompra')
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            })
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'PROCESO');
             })
@@ -286,6 +310,15 @@ class OrdenInternaMaterialesController extends Controller
 
     public function indexValidacionCodigo(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $ordenTrabajo = $request->input('odt_numero', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
@@ -300,6 +333,9 @@ class OrdenInternaMaterialesController extends Controller
                 'ordenInternaParte.ordenInterna.area'
             ]
         )
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            })
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'ENVIADO')
                     ->orWhere('oic_estado', 'EVALUADO');

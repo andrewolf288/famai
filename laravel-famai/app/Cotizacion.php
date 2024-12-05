@@ -16,6 +16,7 @@ class Cotizacion extends Model
         'prv_id',
         'coc_fechacotizacion',
         'mon_codigo',
+        'sed_codigo',
         'coc_formapago',
         'tra_solicitante',
         'coc_notas',
@@ -57,5 +58,10 @@ class Cotizacion extends Model
     public function detalleCotizacionArchivos()
     {
         return $this->hasMany(CotizacionDetalleArchivos::class, 'coc_id', 'coc_id');
+    }
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'sed_codigo')->selectFields();
     }
 }

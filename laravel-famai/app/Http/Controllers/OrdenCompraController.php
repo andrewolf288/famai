@@ -18,10 +18,21 @@ class OrdenCompraController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
 
-        $query = OrdenCompra::with(['proveedor', 'moneda', 'autorizador', 'elaborador']);
+        $query = OrdenCompra::with(['proveedor', 'moneda', 'autorizador', 'elaborador'])
+            ->where('sed_codigo', $sed_codigo);
+
         $query->orderBy('occ_fecha', 'desc');
 
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
@@ -37,6 +48,13 @@ class OrdenCompraController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
         // iniciamos una transaccion
         DB::beginTransaction();
         try {
@@ -75,6 +93,7 @@ class OrdenCompraController extends Controller
             $ordencompra = OrdenCompra::create([
                 'occ_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $validatedData['prv_id'],
+                'sed_codigo' => $sed_codigo,
                 'pvc_cuentasoles' => $validatedData['pvc_cuentasoles'],
                 'pvc_cuentadolares' => $validatedData['pvc_cuentadolares'],
                 'pvc_cuentabanconacion' => $validatedData['pvc_cuentabanconacion'],
@@ -228,20 +247,20 @@ class OrdenCompraController extends Controller
         try {
             $occ_id = $request->input('occ_id');
             $ordenCompra = OrdenCompra::with([
-                'proveedor.cuentasBancarias.entidadBancaria', 
-                'moneda', 
-                'elaborador', 
-                'solicitador', 
-                'autorizador', 
+                'proveedor.cuentasBancarias.entidadBancaria',
+                'moneda',
+                'elaborador',
+                'solicitador',
+                'autorizador',
                 'detalleOrdenCompra.detalleMaterial.producto.unidad'
             ])->findOrFail($occ_id);
-            
+
             $cuentas_bancarias = $ordenCompra->proveedor->cuentasBancarias ?? [];
 
             $cuenta_banco_nacion = collect($cuentas_bancarias)->first(function ($cuenta) {
                 return UtilHelper::compareStringsIgnoreCaseAndAccents($cuenta->entidad_bancaria->eba_descripcion ?? '', 'Banco de la Nación');
             });
-        
+
             $cuenta_soles = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
                 if ($cuenta_banco_nacion) {
                     return $cuenta->mon_codigo === 'SOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
@@ -249,7 +268,7 @@ class OrdenCompraController extends Controller
                     return $cuenta->mon_codigo === 'SOL';
                 }
             });
-        
+
             $cuenta_dolares = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
                 if ($cuenta_banco_nacion) {
                     return $cuenta->mon_codigo === 'DOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
@@ -284,13 +303,13 @@ class OrdenCompraController extends Controller
             'clave' => 'required|string',
         ])->validate();
 
-        if($clave != $validatedData['clave']){
+        if ($clave != $validatedData['clave']) {
             return response()->json(['error' => 'La clave es incorrecta'], 400);
         }
 
         // buscamos el trabajador relacionado con el usuario
         $trabajador_aprobacion = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
-        if(!$trabajador_aprobacion){
+        if (!$trabajador_aprobacion) {
             return response()->json(['error' => 'No se encontro el trabajador relacionado con el usuario'], 400);
         }
 
