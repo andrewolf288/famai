@@ -400,12 +400,10 @@ class OrdenInternaMaterialesController extends Controller
             DB::beginTransaction();
             foreach ($materiales as $material) {
                 $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($material);
-                if($ordenInternaMaterial->pro_id != NULL){
-                    $ordenInternaMaterial->update([
-                        'odm_estado' => "REQ",
-                        'odm_usumodificacion' => $user->usu_codigo
-                    ]);
-                }
+                $ordenInternaMaterial->update([
+                    'odm_estado' => "REQ",
+                    'odm_usumodificacion' => $user->usu_codigo
+                ]);
             }
             DB::commit();
             return response()->json($materiales, 200);
