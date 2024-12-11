@@ -74,7 +74,9 @@ $(document).ready(() => {
     const dataTableOptionsCotizaciones = {
         destroy: true,
         responsive: true,
-        paging: false,
+        paging: true,
+        pageLength: 50,
+        lengthMenu: [50, 100, 250, 500],
         searching: true,
         info: true,
         language: {
@@ -103,7 +105,7 @@ $(document).ready(() => {
                 className: 'form-check-input'
             },
             { targets: [6, 7, 8], searchable: true },
-            { targets: [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17], searchable: false }
+            { targets: [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], searchable: false }
         ],
         select: {
             style: 'multi',
@@ -114,7 +116,9 @@ $(document).ready(() => {
     const dataTableOptionsRequerimientos = {
         destroy: true,
         responsive: true,
-        paging: false,
+        paging: true,
+        pageLength: 50,
+        lengthMenu: [50, 100, 250, 500],
         searching: true,
         info: true,
         language: {
@@ -172,7 +176,7 @@ $(document).ready(() => {
             const { data } = await client.get('/cotizacion-detalle-pendiente')
             $('#cotizaciones-container tbody').empty()
             data.forEach(detalle => {
-                const { cotizacion, detalle_material, cod_id, cod_tiempoentrega, cod_descripcion, cod_observacion, cod_cantidad, cod_preciounitario, cod_total, cod_usucreacion, cod_feccreacion } = detalle
+                const { cotizacion, detalle_material, cod_id, cod_tiempoentrega, cod_descripcion, cod_observacion, cod_cantidad, cod_preciounitario, cod_total, cod_usucreacion, cod_feccreacion, cod_parastock, cod_observacionproveedor, cod_cantidadcotizada } = detalle
                 const { producto, orden_interna_parte } = detalle_material
                 const { proveedor, moneda } = cotizacion
 
@@ -192,10 +196,12 @@ $(document).ready(() => {
                     <td>${proveedor.prv_nombre}</td>
                     <td>${escapeHTML(cod_descripcion)}</td>
                     <td class="text-center">${cod_cantidad || 'N/A'}</td>
+                    <td class="text-center">${cod_cantidadcotizada || 'N/A'}</td>
                     <td class="text-center">${moneda.mon_simbolo || ''} ${cod_preciounitario || 'N/A'}</td>
                     <td class="text-center">${moneda.mon_simbolo || ''} ${cod_total || 'N/A'}</td>
                     <td class="text-center">${cod_tiempoentrega ? `${cod_tiempoentrega} día(s)` : 'N/A'}</td>
                     <td>${escapeHTML(cod_observacion)}</td>
+                    <td>${escapeHTML(cod_observacionproveedor)}</td>
                     <td>
                         <span class="badge bg-primary">
                             ${cotizacion.coc_estado}
@@ -329,7 +335,7 @@ $(document).ready(() => {
                     <input type="text" class="form-control descripcion-input" value='${escapeHTML(detalle.cod_descripcion)}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control cantidad-input" value='${detalle.cod_cantidad}' readonly/>
+                    <input type="number" class="form-control cantidad-input" value='${detalle.cod_cantidadcotizada}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control precio-input" value='${detalle.cod_preciounitario}' readonly/>

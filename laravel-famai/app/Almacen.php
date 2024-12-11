@@ -14,6 +14,7 @@ class Almacen extends Model
         'alm_codigo',
         'alm_descripcion',
         'alm_tipo',
+        'sed_codigo',
         'alm_usucreacion',
         'alm_feccreacion',
         'alm_usumodificacion',
@@ -22,4 +23,9 @@ class Almacen extends Model
 
     const CREATED_AT = 'alm_feccreacion';
     const UPDATED_AT = 'alm_fecmodificacion';
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'sed_codigo');
+    }
 }

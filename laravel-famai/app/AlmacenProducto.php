@@ -12,13 +12,16 @@ class AlmacenProducto extends Model
 
     protected $fillable = [
         'alm_id',
+        'alm_codigo',
+        'alm_tipo',
         'pro_id',
         'alp_stock',
         'alp_ubicacion',
         'alp_usucreacion',
         'alp_feccreacion',
         'alp_usumodificacion',
-        'alp_fecmodificacion'
+        'alp_fecmodificacion',
+        'alp_activo',
     ];
 
     const CREATED_AT = 'alp_feccreacion';

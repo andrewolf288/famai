@@ -320,6 +320,7 @@ $(document).ready(function () {
 
     // funcion para guardar cotizacion
     $("#btn-guardar-cotizacion-proveedor").on('click', async function (e) {
+        console.log("entro aqui")
         e.preventDefault()
         // datos del proveedor
         const idProveedorInput = $("#idProveedorInput").val().trim()
@@ -377,7 +378,7 @@ $(document).ready(function () {
 
         try {
             const {validos, errores} = validarDetalleCotizacion(detalle_productos)
-            let confirmarCotizacion = false
+            let confirmarCotizacion = true
             
             if(errores.length > 0) {
                 const listaErrores = []

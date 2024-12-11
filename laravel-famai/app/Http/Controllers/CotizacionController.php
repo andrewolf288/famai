@@ -644,6 +644,7 @@ class CotizacionController extends Controller
                 'coc_formapago' => $validatedData['coc_formapago'],
                 'mon_codigo' => $validatedData['mon_codigo'],
                 'coc_fechavalidez' => $validatedData['coc_fechavalidez'],
+                'coc_fechacotizacion' => Carbon::now(),
                 'coc_notas' => $validatedData['coc_notas'],
                 'coc_total' => $validatedData['coc_total'],
                 'coc_conigv' => $validatedData['coc_conigv'],

@@ -148,3 +148,51 @@
         </div>
     </div>
 </div>
+<!-- DIALOG RESET PASSWORD -->
+<div class="modal fade" id="restablecerContrasenaModal" tabindex="-1" aria-labelledby="restablecerContrasenaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="restablecerContrasenaModalLabel">Restablecer contraseña</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body orange-form">
+                <form id="restablecerContrasenaForm">
+                    <!-- INPUT PRODUCTO ID -->
+                    <input type="hidden" id="usu_codigo_hidden_reset">
+                    <!-- Contraseña -->
+                    <div class="mb-3">
+                        <label for="usu_contrasena" class="form-label">Contraseña:</label>
+                        <div class="input-group">
+                            <input type="password" name="usu_contrasena" id="usu_contrasena_reset" class="form-control"
+                                maxlength="32" required>
+                            <span class="input-group-text toggle-password" style="cursor: pointer;">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Confirmar contraseña -->
+                    <div class="mb-3">
+                        <label for="usu_contrasena_confirmar" class="form-label">Confirmar contraseña:</label>
+                        <div class="input-group">
+                            <input type="password" name="usu_contrasena_confirmar" id="usu_contrasena_confirmar_reset"
+                                class="form-control" maxlength="32" required>
+                            <span class="input-group-text toggle-password" style="cursor: pointer;">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-eliminar" data-bs-dismiss="modal"><i
+                                class="fa-solid fa-xmark"></i> Cerrar</button>
+                        <button class="btn btn-agregar" id="btn-reset-password-usuario">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

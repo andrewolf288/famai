@@ -75,6 +75,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('usuario/{id}', [UsuarioController::class, 'show']);
     Route::put('usuario/{id}', [UsuarioController::class, 'update']);
     Route::post('usuarios', [UsuarioController::class, 'store']);
+    Route::put('usuarios/reset-password/{codigo}', [UsuarioController::class, 'resetPassword']);
 });
 
 // rutas de roles

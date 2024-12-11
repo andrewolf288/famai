@@ -13,7 +13,7 @@ class CotizacionDetalleController extends Controller
 
     public function findDetalleByEstadoPendiente()
     {
-        $cotizacionesDetalle = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda', 'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto.unidad'])
+        $cotizacionesDetalle = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda', 'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto'])
             ->whereHas('cotizacion', function ($query) {
                 $query->where('coc_estado', 'RPR');
             })

@@ -13,11 +13,13 @@ class OrdenCompraDetalle extends Model
     protected $fillable = [
         'occ_id',
         'odm_id',
+        'pro_id',
         'ocd_orden',
         'ocd_descripcion',
         'ocd_cantidad',
         'ocd_preciounitario',
         'ocd_total',
+        'ocd_observacion',
         'ocd_activo',
         'ocd_usucreacion',
         'ocd_feccreacion',
@@ -38,5 +40,11 @@ class OrdenCompraDetalle extends Model
     public function ordenCompra()
     {
         return $this->belongsTo(OrdenCompra::class, 'occ_id', 'occ_id');
+    }
+
+    // detalle de producto
+    public function producto()
+    {
+        return $this->belongsTo(Producto::class, 'pro_id');
     }
 }

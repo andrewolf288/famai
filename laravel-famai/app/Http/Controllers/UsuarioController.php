@@ -148,4 +148,24 @@ class UsuarioController extends Controller
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
+
+    // reset password usuario
+    public function resetPassword(Request $request, $codigo)
+    {
+        $user = User::where('usu_codigo', $codigo)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        $user->update([
+            'usu_contrasena' => bcrypt($request->usu_contrasena),
+            'usu_usumodificacion' => auth()->user()->usu_codigo,
+        ]);
+
+        return response()->json([
+            'message' => 'Contraseña actualizada correctamente',
+            'data' => $user
+        ]);
+    }
 }
