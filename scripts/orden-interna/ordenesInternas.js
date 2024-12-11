@@ -36,11 +36,12 @@ $(document).ready(() => {
             const habilitadoEditar = ordenInterna.oic_estado === "INGRESO" || ordenInterna.oic_estado === "REABIERTO" ? true : false
             content += `
                 <tr>
-                    <td>${ordenInterna.orden_trabajo?.odt_numero ?? 'No aplica'}</td>
-                    <td>${ordenInterna.orden_trabajo?.odt_estado ?? 'No aplica'}</td>
-                    <td>${ordenInterna.cliente?.cli_nombre ?? 'No aplica'}</td>
-                    <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'No aplica'}</td>
-                    <td>${ordenInterna.area?.are_descripcion ?? 'No aplica'}</td>
+                    <td>${ordenInterna.orden_trabajo?.odt_numero ?? 'N/A'}</td>
+                    <td>${ordenInterna.orden_trabajo?.odt_estado ?? 'N/A'}</td>
+                    <td>${ordenInterna.cliente?.cli_nombre ?? 'N/A'}</td>
+                    <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'N/A'}</td>
+                    <td>${ordenInterna.oic_fechaaprobacion !== null ? parseDateSimple(ordenInterna.oic_fechaaprobacion) : 'N/A'}</td>
+                    <td>${ordenInterna.area?.are_descripcion ?? 'N/A'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
                     <td>
                         <button class="btn btn-sm btn-primary btn-orden-interna-change-estado" data-orden-interna="${ordenInterna.oic_id}" ${rol > 3 ? 'disabled' : ''}>${ordenInterna.oic_estado}</button>
@@ -65,10 +66,10 @@ $(document).ready(() => {
                             </button>
                         </div>
                     </td>
-                    <td>${ordenInterna.oic_feccreacion === null ? 'No aplica' : parseDate(ordenInterna.oic_feccreacion)}</td>
-                    <td>${ordenInterna.oic_usucreacion === null ? 'No aplica' : ordenInterna.oic_usucreacion}</td>
-                    <td>${ordenInterna.oic_fecmodificacion === null ? 'No aplica' : parseDate(ordenInterna.oic_fecmodificacion)}</td>
-                    <td>${ordenInterna.oic_usumodificacion === null ? 'No aplica' : ordenInterna.oic_usumodificacion}</td>
+                    <td>${ordenInterna.oic_feccreacion === null ? 'N/A' : parseDate(ordenInterna.oic_feccreacion)}</td>
+                    <td>${ordenInterna.oic_usucreacion === null ? 'N/A' : ordenInterna.oic_usucreacion}</td>
+                    <td>${ordenInterna.oic_fecmodificacion === null ? 'N/A' : parseDate(ordenInterna.oic_fecmodificacion)}</td>
+                    <td>${ordenInterna.oic_usumodificacion === null ? 'N/A' : ordenInterna.oic_usumodificacion}</td>
                 </tr>
             `
         })
