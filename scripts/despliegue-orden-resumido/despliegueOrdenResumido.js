@@ -891,18 +891,50 @@ $(document).ready(() => {
         }
     }))
 
+    $('#proveedoresSUNAT').keypress(function(e) {
+        var key = e.which
+        if(key == 13){
+            const query = $('#proveedoresSUNAT').val().trim()
+            buscarProveedorBySUNAT(query)
+        }
+    })
+
     // al momento de presionar enter
     $('#searchProveedorSUNAT').on('click', async function (event) {
         const query = $('#proveedoresSUNAT').val().trim()
-        // si es la tecla de enter
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            await buscarProveedorBySUNAT(query)
-        }
+        buscarProveedorBySUNAT(query)
     });
 
     async function buscarProveedorBySUNAT(documento) {
         console.log(documento)
+        if(documento.length < 8){
+            alert('El documento debe tener más de 8 dígitos')
+            return
+        }
+
+        try {
+            const {data} = await client.get(`/padronSunat?nrodocumento=${documento}`)
+            const { xps_nrodocumento, xps_nombre} = data
+            const formatData = {
+                prv_id: null,
+                prv_nrodocumento: xps_nrodocumento,
+                prv_nombre: xps_nombre,
+                prv_direccion: '',
+                tdo_codigo: 'RUC',
+                prv_telefono: '', 
+                prv_whatsapp: '', 
+                prv_contacto: '', 
+                prv_correo: ''
+            }
+            seleccionarProveedor(formatData)
+        } catch(error) {
+            const {data, status} = error.response
+            if(status === 404) {
+                alert(data.error)
+            } else {
+                alert('Error al realizar la búsqueda')
+            }
+        }
     }
 
     async function buscarProveedores(query) {
@@ -947,9 +979,11 @@ $(document).ready(() => {
         const $rows = $('#tbl-cotizaciones-proveedores tbody tr')
 
         const array_prov = $rows.map(function () {
-            return $(this).data('id-proveedor')
+            // return $(this).data('id-proveedor')
+            return $(this).find('.nrodocumento-proveedor').text()
         }).get()
-        const findElement = array_prov.find(element => element == prv_id)
+        // const findElement = array_prov.find(element => element == prv_id)
+        const findElement = array_prov.find(element => element == prv_nrodocumento)
 
         if (findElement) {
             alert('El proveedor ya fue agregado')
@@ -1109,6 +1143,7 @@ $(document).ready(() => {
             detalle_materiales: detalleMateriales
         }
 
+        // console.log(formatData)
         // return
         if (generarCotizacion) {
             try {

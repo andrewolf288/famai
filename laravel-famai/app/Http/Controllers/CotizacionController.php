@@ -212,9 +212,33 @@ class CotizacionController extends Controller
                 $tra_solicitante = $trabajador->tra_id;
             }
 
+            // debemos verificar si el proveedor existe
+            $id_proveedor = $proveedor['prv_id'];
+            if($id_proveedor == null){
+                // buscamos si el numero de documento ya se encuentra en nuestra base de datos
+                $proveedorByNumero = Proveedor::where('prv_nrodocumento', $proveedor['prv_nrodocumento'])->first();
+                if ($proveedorByNumero) {
+                    $id_proveedor = $proveedorByNumero->prv_id;
+                } else {
+                    $proveedor = Proveedor::create([
+                        'prv_nrodocumento' => $proveedor['prv_nrodocumento'],
+                        'prv_nombre' => $proveedor['prv_nombre'],
+                        'tdo_codigo' => $proveedor['tdo_codigo'],
+                        'prv_direccion' => $proveedor['prv_direccion'],
+                        'prv_contacto' => $proveedor['prv_contacto'],
+                        'prv_whatsapp' => $proveedor['prv_whatsapp'],
+                        'prv_telefono' => $proveedor['prv_telefono'],
+                        'prv_correo' => $proveedor['prv_correo'],
+                        'prv_usucreacion' => $user->usu_codigo,
+                        'prv_fecmodificacion' => null
+                    ]);
+                    $id_proveedor = $proveedor->prv_id;
+                }
+            }
+
             $cotizacion = Cotizacion::create([
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
-                'prv_id' => $proveedor['prv_id'],
+                'prv_id' => $id_proveedor,
                 'tra_solicitante' => $tra_solicitante,
                 'sed_codigo' => $sed_codigo,
                 'coc_usucreacion' => $user->usu_codigo,

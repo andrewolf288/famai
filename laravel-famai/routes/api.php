@@ -24,6 +24,7 @@ use App\Http\Controllers\OrdenCompraDetalleController;
 use App\Http\Controllers\OrdenInternaMaterialesAdjuntosController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
+use App\Http\Controllers\PadronSunatController;
 use App\Http\Controllers\ProductoProveedorController;
 use App\Http\Controllers\SubFamiliaController;
 use App\Http\Controllers\TrabajadorController;
@@ -251,6 +252,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('/previsualizarReporteOrdenTrabajo', [OrdenInternaController::class, 'previsualizarOrdenInternaPDF']);
 });
 
+// rutas padron SUNAT
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('/padronSunat', [PadronSunatController::class, 'showByQuery']);
+});
+
 // rutas de proveedores
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('proveedores', [ProveedorController::class, 'index']);
@@ -383,18 +389,4 @@ Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotiz
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 
 Route::get('script-update', function () {
-    // $ordenesInternas = OrdenInterna::where('oic_estado', 'PROCESO')->get();
-    // foreach ($ordenesInternas as $ordenInterna) {
-    //     $oic_id = $ordenInterna->oic_id;
-    //     $partesOrdenInterna = OrdenInternaPartes::where('oic_id', $oic_id)->get();
-    //     foreach ($partesOrdenInterna as $parte) {
-    //         $opd_id = $parte->opd_id;
-    //         $detalleMateriales = OrdenInternaMateriales::where('opd_id', $opd_id)->get();
-    //         foreach ($detalleMateriales as $detalleMaterial) {
-    //             $detalleMaterial->update([
-    //                 'odm_estado' => "REQ"
-    //             ]);
-    //         }
-    //     }
-    // }
 });
