@@ -255,35 +255,15 @@ class OrdenCompraController extends Controller
                 'detalleOrdenCompra.detalleMaterial.producto.unidad'
             ])->findOrFail($occ_id);
 
-            $cuentas_bancarias = $ordenCompra->proveedor->cuentasBancarias ?? [];
-
-            $cuenta_banco_nacion = collect($cuentas_bancarias)->first(function ($cuenta) {
-                return UtilHelper::compareStringsIgnoreCaseAndAccents($cuenta->entidad_bancaria->eba_descripcion ?? '', 'Banco de la Nación');
-            });
-
-            $cuenta_soles = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
-                if ($cuenta_banco_nacion) {
-                    return $cuenta->mon_codigo === 'SOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
-                } else {
-                    return $cuenta->mon_codigo === 'SOL';
-                }
-            });
-
-            $cuenta_dolares = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
-                if ($cuenta_banco_nacion) {
-                    return $cuenta->mon_codigo === 'DOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
-                } else {
-                    return $cuenta->mon_codigo === 'DOL';
-                }
-            });
+            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($ordenCompra->proveedor->cuentasBancarias ?? []);
 
             $data = array_merge(
                 $ordenCompra->toArray(),
                 [
                     'occ_fecha_formateada' => DateHelper::parserFechaActual(),
-                    'cuenta_banco_nacion' => $cuenta_banco_nacion,
-                    'cuenta_soles' => $cuenta_soles,
-                    'cuenta_dolares' => $cuenta_dolares
+                    'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+                    'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+                    'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares']
                 ]
             );
             $pdf = Pdf::loadView('orden-compra.ordencompra', $data);

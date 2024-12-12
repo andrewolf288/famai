@@ -197,19 +197,19 @@
             <td style="font-weight: bold;font-size: 10px">RUC:</td>
             <td colspan="2" style="font-size: 10px">{{ $proveedor['prv_nrodocumento'] ? $proveedor['prv_nrodocumento'] : '' }}</td>
             <td style="font-weight: bold;font-size: 10px">CTA S/:</td>
-            <td colspan="2" style="font-size: 10px"></td>
+            <td colspan="2" style="font-size: 10px">{{ $cuenta_soles ? $cuenta_soles['pvc_numerocuenta'] : '' }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold;font-size: 10px">DIRECCION:</td>
             <td colspan="2" style="font-size: 10px">{{ $proveedor['prv_direccion'] ? $proveedor['prv_direccion'] : '' }}</td>
             <td style="font-weight: bold;font-size: 10px">CTA $/:</td>
-            <td colspan="2" style="font-size: 10px"></td>
+            <td colspan="2" style="font-size: 10px">{{ $cuenta_dolares ? $cuenta_dolares['pvc_numerocuenta'] : '' }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold;font-size: 10px">CONTACTO:</td>
             <td colspan="2" style="font-size: 10px">{{ $proveedor['prv_contacto'] ? $proveedor['prv_contacto'] : '' }}</td>
             <td style="font-weight: bold;font-size: 10px">CTA BCO NACION S/:</td>
-            <td colspan="2" style="font-size: 10px"></td>
+            <td colspan="2" style="font-size: 10px">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</td>
         </tr>
     </table>
     {{-- table de cabecera de factura --}}
@@ -282,7 +282,7 @@
     </table>
 
     {{-- TOTAL EN FORMATO LETRAS --}}
-    {{-- <div style="font-size: 15px;font-weight: bold;margin-top: 10px;">TOTAL: {{ $cotizacion['total_format'] }}</div> --}}
+    <div style="font-size: 15px;font-weight: bold;margin-top: 10px;">TOTAL: {{ $total_format }}</div>
 
     {{-- NOTA DE COTIZACION --}}
     <div style="font-size: 15px;font-weight: bold;margin-top: 10px;">NOTA:</div>

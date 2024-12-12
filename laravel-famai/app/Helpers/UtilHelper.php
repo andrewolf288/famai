@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use NumberToWords\NumberToWords;
+
 class UtilHelper
 {
     public static function limpiarNombreProducto($nombreProducto)
@@ -14,74 +16,66 @@ class UtilHelper
         return $relation ?? $default;
     }
 
-    public static function compareStringsIgnoreCaseAndAccents($str1, $str2)
+    public static function normalizeString($input)
     {
-        $normalize = function ($str) {
-            // Convertir caracteres a minúsculas y eliminar diacríticos
-            $str = mb_strtolower($str);
-            return preg_replace('/\p{M}/u', '', \Normalizer::normalize($str, \Normalizer::FORM_D));
-        };
-        return $normalize($str1) === $normalize($str2);
+        $input = mb_strtolower($input, 'UTF-8');
+        $replacements = [
+            'á' => 'a',
+            'é' => 'e',
+            'í' => 'i',
+            'ó' => 'o',
+            'ú' => 'u',
+            'Á' => 'a',
+            'É' => 'e',
+            'Í' => 'i',
+            'Ó' => 'o',
+            'Ú' => 'u'
+        ];
+
+        return strtr($input, $replacements);
     }
 
-    
+    public static function compareStringsIgnoreCaseAndAccents($str1, $str2)
+    {
+        return UtilHelper::normalizeString($str1) == UtilHelper::normalizeString($str2);
+    }
+
+    public static function obtenerCuentasBancarias($cuentas_bancarias)
+    {
+        $cuenta_banco_nacion = collect($cuentas_bancarias)->first(function ($cuenta) {
+            return $cuenta->pvc_activo == 1 && UtilHelper::compareStringsIgnoreCaseAndAccents($cuenta->entidadBancaria->eba_descripcion ?? '', 'Banco de la Nación');
+        });
+
+        $cuenta_soles = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
+            if ($cuenta_banco_nacion) {
+                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'SOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
+            } else {
+                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'SOL';
+            }
+        });
+
+        $cuenta_dolares = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
+            if ($cuenta_banco_nacion) {
+                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'DOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
+            } else {
+                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'DOL';
+            }
+        });
+
+        return array(
+            "cuenta_banco_nacion" => $cuenta_banco_nacion,
+            "cuenta_soles" => $cuenta_soles,
+            "cuenta_dolares" => $cuenta_dolares
+        );
+    }
+
+
     public static function convertirNumeroALetras($numero)
     {
-        // Tablas de conversión
-        $unidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-        $decenas = ['', 'diez', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
-        $centenas = ['', 'cien', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
-
-        // Función interna para convertir la parte entera
-        $convertirEntero = function ($numero) use ($unidades, $decenas, $centenas) {
-            if ($numero == 0) {
-                return 'cero';
-            }
-
-            $resultado = '';
-
-            // Si es mayor o igual a mil, convertimos la parte de los miles
-            if ($numero >= 1000) {
-                $miles = intval($numero / 1000);
-                if ($miles == 1) {
-                    $resultado .= 'mil';
-                } else {
-                    $resultado .= $unidades[$miles] . ' mil';
-                }
-                $numero %= 1000;
-            }
-
-            // Convertir la parte de las centenas
-            if ($numero >= 100) {
-                $resultado .= ($resultado ? ' ' : '') . $centenas[intval($numero / 100)];
-                $numero %= 100;
-            }
-
-            // Convertir la parte de las decenas
-            if ($numero >= 20) {
-                $resultado .= ($resultado ? ' ' : '') . $decenas[intval($numero / 10)];
-                $numero %= 10;
-            }
-
-            // Convertir la parte de las unidades
-            if ($numero > 0) {
-                $resultado .= ($resultado ? ' y ' : '') . $unidades[$numero];
-            }
-
-            return $resultado;
-        };
-
-        // Separar parte entera y decimal
-        $partes = explode('.', number_format($numero, 2, '.', ''));
-        $parteEntera = intval($partes[0]);
-        $parteDecimal = intval($partes[1]);
-
-        // Convertir ambas partes
-        $letrasEntero = $convertirEntero($parteEntera);
-        $letrasDecimal = $convertirEntero($parteDecimal);
-
-        // Formatear el resultado
-        $resultado = ucfirst($letrasEntero) . ' soles' . ' con ' . $letrasDecimal . ' centavos';
-        return $resultado;
+        $numeroFormat = str_replace('.', '', strval($numero));
+        $numberToWords = new NumberToWords();
+        $currencyTransformer = $numberToWords->getCurrencyTransformer('es');
+        $formatString = $currencyTransformer->toWords($numeroFormat, 'PEN');
+        return strtoupper($formatString);
     }
 }

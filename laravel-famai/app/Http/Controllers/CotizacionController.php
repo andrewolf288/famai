@@ -214,7 +214,7 @@ class CotizacionController extends Controller
 
             // debemos verificar si el proveedor existe
             $id_proveedor = $proveedor['prv_id'];
-            if($id_proveedor == null){
+            if ($id_proveedor == null) {
                 // buscamos si el numero de documento ya se encuentra en nuestra base de datos
                 $proveedorByNumero = Proveedor::where('prv_nrodocumento', $proveedor['prv_nrodocumento'])->first();
                 if ($proveedorByNumero) {
@@ -292,6 +292,12 @@ class CotizacionController extends Controller
             }
             $agrupadosIndexado = array_values($agrupados);
 
+            // cuentas bancarias
+            $cuentasBancariasProveedor = ProveedorCuentaBanco::with('entidadBancaria')
+                ->where('prv_id', $id_proveedor)->get();
+
+            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cuentasBancariasProveedor ?? []);
+
             // retorna la generacion de un PDF
             $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
             $data = [
@@ -301,7 +307,10 @@ class CotizacionController extends Controller
                 'fechaActual' => DateHelper::parserFechaActual(),
                 'usuarioImpresion' => $user->usu_codigo,
                 'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id"
+                'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id",
+                'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+                'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+                'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares']
             ];
 
             $pdfOptions = [
@@ -428,7 +437,7 @@ class CotizacionController extends Controller
         $user = auth()->user();
         try {
             $coc_id = $request->input('coc_id');
-            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($coc_id);
+            $cotizacion = Cotizacion::with(['proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'solicitante'])->findOrFail($coc_id);
 
             $detalleCotizacion = CotizacionDetalle::with(['producto'])
                 ->where('coc_id', $cotizacion->coc_id)
@@ -439,6 +448,8 @@ class CotizacionController extends Controller
             $agrupado = $detalleCotizacion->filter(function ($detalle) {
                 return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
             });
+
+            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cotizacion->proveedor->cuentasBancarias ?? []);
 
             $agrupado_detalle = $agrupado
                 ->groupBy('cod_orden')
@@ -471,7 +482,10 @@ class CotizacionController extends Controller
                 'coc_fecha_formateada' => DateHelper::parserFecha($cotizacion->coc_fechacotizacion),
                 'usuarioImpresion' => $user->usu_codigo,
                 'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                // 'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
+                'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+                'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+                'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
+                'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
             ];
 
             $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\UtilHelper;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\AuthController;
@@ -36,9 +37,6 @@ use App\Http\Controllers\RequerimientoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
-use App\OrdenInterna;
-use App\OrdenInternaMateriales;
-use App\OrdenInternaPartes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -389,4 +387,6 @@ Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotiz
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 
 Route::get('script-update', function () {
+    $number = 142.67;
+    return UtilHelper::convertirNumeroALetras($number);
 });
