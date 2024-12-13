@@ -213,7 +213,7 @@ class ProductoController extends Controller
             ->selectRaw('T0.ItemCode as pro_id')
             ->where('T1.WhsCode', '=', $almID)
             // ->where('T2.Warehouse', '=', $almID)
-            ->where('T2.LocCode', '=', $almID)
+            //->where('T2.LocCode', '=', $almID)
             // ->where('T1.WhsCode', '=', $almID)
             ->where('T0.validFor', '=', 'Y')
             // ->whereDate('T2.CreateDate', '<=', now())
