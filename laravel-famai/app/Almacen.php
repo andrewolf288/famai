@@ -15,6 +15,7 @@ class Almacen extends Model
         'alm_descripcion',
         'alm_tipo',
         'sed_codigo',
+        'alm_esprincipal',
         'alm_usucreacion',
         'alm_feccreacion',
         'alm_usumodificacion',
