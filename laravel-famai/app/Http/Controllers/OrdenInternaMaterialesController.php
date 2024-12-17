@@ -179,7 +179,7 @@ class OrdenInternaMaterialesController extends Controller
         // multifilters
         $multifilter = $request->input('multifilter', null);
 
-        if($almacen_codigo !== null){
+        if($almacen_request !== null){
             $almacen_codigo = $almacen_request;
         }
 
@@ -301,7 +301,7 @@ class OrdenInternaMaterialesController extends Controller
                     'uni_codigo' => $producto->unidad->uni_codigo,
                     'cantidad' => $grupo->sum('odm_cantidad'),
                     'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
-                    'stock' => 0.00,
+                    // 'stock' => 0.00,
                     'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
                     'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
                     'detalle' => $grupo->values()
