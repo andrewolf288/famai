@@ -132,7 +132,7 @@ $(document).ready(() => {
                         <td>${material.pro_descripcion || 'N/A'}</td>
                         <td class="text-center">${material.uni_codigo || 'N/A'}</td>
                         <td class="text-center">${material.cantidad.toFixed(2) || 'N/A'}</td>
-                        <td class="text-center">${material.stock}</td>
+                        <td class="text-center">${material.stock.toFixed(2)}</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>
                         </td>
