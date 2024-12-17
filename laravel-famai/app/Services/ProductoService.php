@@ -15,8 +15,6 @@ class ProductoService
             ->table('OITM as T0')
             ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
             ->select([
-                'T0.ItemCode as pro_codigo',
-                'T0.ItemName as pro_descripcion',
                 DB::raw('MAX(T1.OnOrder) as alp_stock'),
             ])
             ->where('T1.WhsCode', '=', $alm_codigo)
