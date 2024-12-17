@@ -127,8 +127,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('producto/{id}', [ProductoController::class, 'show']);
     Route::post('productos', [ProductoController::class, 'store']);
     Route::put('producto/{id}', [ProductoController::class, 'update']);
-    Route::get('/productosByQuery2', [ProductoController::class, 'findProductoByQuery']);
-    Route::get('/productosByQuery', [ProductoController::class, 'findProductoByQuery3']);
+    Route::get('/productosByQuery', [ProductoController::class, 'findProductoByQuery']);
 });
 
 // rutas de almacenes
@@ -218,6 +217,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('detalleMaterialesOrdenInterna/findByNumeroOrdenTrabajo', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenTrabajo']);
     // Validar materiales
     Route::post('detalleMaterialesOrdenInterna/verificar-materiales', [OrdenInternaMaterialesController::class, 'validarMaterialesMasivo']);
+    // Materiales de orden de compra
+    Route::get('detalleMaterialesOrdenInterna-resumido-ordencompra', [OrdenInternaMaterialesController::class, 'indexOrdenCompraResumido']);
 });
 
 // rutas detalle de adjuntos detalle materiales
@@ -340,6 +341,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas de detalle de cotizacion
 Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('cotizacion-detalle-view/{id}', [CotizacionDetalleController::class, 'show']);
     Route::get('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'findDetalleByCotizacion']);
     Route::delete('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'destroy']);
     Route::put('cotizacion-detalle/{id}', [CotizacionDetalleController::class, 'update']);
@@ -371,6 +373,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::put('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'update']);
     Route::get('ordencompra-detalle-findByProducto', [OrdenCompraDetalleController::class, 'findOrdenCompraByProducto']);
     Route::post('ordencompra-detalle/ultimo-proveedor', [OrdenCompraDetalleController::class, 'findUltimoProveedorByProducto']);
+});
+
+// rutas almacenamiento
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('almacenes',[AlmacenController::class, 'index']);
 });
 
 // rutas de notificaciones

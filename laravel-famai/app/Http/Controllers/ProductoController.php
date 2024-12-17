@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Almacen;
 use App\AlmacenProducto;
 use App\Producto;
+use App\Trabajador;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,105 +75,79 @@ class ProductoController extends Controller
         ]);
     }
 
-    /**public function findProductoByQuery(Request $request)
+    public function findProductoByCodigoAlmacen(Request $request)
     {
-        $query = $request->input('query', null);
-        // Realiza la búsqueda de materiales por nombre o código
-        $materiales = Producto::where('pro_descripcion', 'like', '%' . $query . '%')
-            ->orWhere('pro_codigo', 'like', '%' . $query . '%')
-            ->where('pro_activo', 1)
-            ->select('pro_id', 'pro_codigo', 'pro_descripcion')
-            ->get();
+        $user = auth()->user();
+        $sed_codigo = "10";
+        $alm_codigo =  '01_AQPAG';
 
-        // Devuelve los materiales en formato JSON
-        return response()->json($materiales);
-    }**/
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-    public function findProductoByQuery(Request $request)
-    {
-        $query = $request->input('query', null);
-        $almID = $request->input('alm_id', '01_AQPAG');
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
 
-        if ($query === null) {
+        $almacen = Almacen::where('sed_codigo', $sed_codigo)
+            ->where('alm_esprincipal', 1)
+            ->first();
+
+        if ($almacen) {
+            $alm_codigo = $almacen->alm_codigo;
+        }
+
+        $pro_codigo = $request->input('pro_codigo', null);
+        if ($pro_codigo === null) {
             return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
         }
-        $symbol = '+';
-        $subqueries = explode($symbol, $query);
-        // Construir la consulta
-        $queryBuilder = DB::connection('sqlsrv_secondary')
+
+        $producto = DB::connection('sqlsrv_secondary')
             ->table('OITM as T0')
             ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
             ->select([
                 'T0.ItemCode as pro_codigo',
                 'T0.ItemName as pro_descripcion',
-                'T0.BuyUnitMsr as uni_codigo',
-                'T1.OnHand as alp_stock'
+                DB::raw('MAX(T1.OnOrder) as alp_stock'),
             ])
-            ->selectRaw('T0.ItemCode as pro_id')
-            ->where('T1.WhsCode', '=', $almID);
-
-        foreach ($subqueries as $term) {
-            $queryBuilder->where(function ($q) use ($term) {
-                $q->where('T0.ItemCode', 'like', '%' . $term . '%')
-                    ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
-            });
+            ->where('T1.WhsCode', '=', $alm_codigo)
+            ->where('T0.validFor', '=', 'Y')
+            ->where('T0.ItemCode', $pro_codigo)
+            ->first();
+        
+        if(!$producto){
+            return response()->json(['error' => 'Producto no encontrado'], 404);
         }
 
-        // Ejecutar la consulta y devolver los resultados
-        $results = $queryBuilder->get();
-
-        return response()->json($results);
+        return response()->json($producto);
     }
 
-    public function findProductoByQuery2(Request $request)
+    public function findProductoByQuery(Request $request)
     {
-        $query = $request->input('query', null);
-        $almID = $request->input('alm_id', '01_AQPAG');
+        $user = auth()->user();
+        $sed_codigo = "10";
+        $alm_codigo =  '01_AQPAG';
 
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
+        $almacen = Almacen::where('sed_codigo', $sed_codigo)
+            ->where('alm_esprincipal', 1)
+            ->first();
+
+        // $almID = $request->input('alm_id', '01_AQPAG');
+        if ($almacen) {
+            $alm_codigo = $almacen->alm_codigo;
+        }
+
+        $query = $request->input('query', null);
         if ($query === null) {
             return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
         }
+
         $symbol = '+';
         $subqueries = explode($symbol, $query);
-        // Construir la consulta
-        $queryBuilder = DB::connection('sqlsrv_secondary')
-            ->table('OITM as T0')
-            ->leftJoin('OITW as T1', function ($join) use ($almID) {
-                $join->on('T0.ItemCode', '=', 'T1.ItemCode')
-                    ->where('T1.WhsCode', '=', $almID);
-            })
-            ->select([
-                'T0.ItemCode as pro_codigo',
-                'T0.ItemName as pro_descripcion',
-                'T0.BuyUnitMsr as uni_codigo',
-                'T1.OnHand as alp_stock'
-            ])
-            ->selectRaw('T0.ItemCode as pro_id');
-
-        foreach ($subqueries as $term) {
-            $queryBuilder->where(function ($q) use ($term) {
-                $q->where('T0.ItemCode', 'like', '%' . $term . '%')
-                    ->orWhere('T0.ItemName', 'like', '%' . $term . '%');
-            });
-        }
-
-        // Ejecutar la consulta y devolver los resultados
-        $results = $queryBuilder->get();
-
-        return response()->json($results);
-    }
-
-    public function findProductoByQuery3(Request $request)
-    {
-        $query = $request->input('query', null);
-        $almID = $request->input('alm_id', '01_AQPAG');
-
-        if ($query === null) {
-            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
-        }
-        $symbol = '+';
-        $subqueries = explode($symbol, $query);
-        // Construir la consulta
         $queryBuilder = DB::connection('sqlsrv_secondary')
             ->table('OITM as T0')
             ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
@@ -180,7 +156,6 @@ class ProductoController extends Controller
                 'T0.ItemCode as pro_codigo',
                 'T0.ItemName as pro_descripcion',
                 'T1.WhsCode',
-                // DB::raw('SUM(T2.InQty - T2.OutQty) as alp_stock'),
                 DB::raw('MAX(T1.OnOrder) as alp_stock'),
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
@@ -211,12 +186,8 @@ class ProductoController extends Controller
                 )
             ])
             ->selectRaw('T0.ItemCode as pro_id')
-            ->where('T1.WhsCode', '=', $almID)
-            // ->where('T2.Warehouse', '=', $almID)
-            //->where('T2.LocCode', '=', $almID)
-            // ->where('T1.WhsCode', '=', $almID)
+            ->where('T1.WhsCode', '=', $alm_codigo)
             ->where('T0.validFor', '=', 'Y')
-            // ->whereDate('T2.CreateDate', '<=', now())
             ->groupBy(
                 'T0.ItemCode',
                 'T0.ItemName',
@@ -239,13 +210,8 @@ class ProductoController extends Controller
         $queryBuilder->orderBy('alp_stock', 'desc');
         $queryBuilder->orderBy('UltimaFechaIngreso', 'desc');
 
-        // Ejecutar la consulta y devolver los resultados
         $results = $queryBuilder->get();
-
         return response()->json($results);
-
-        // Devolver los resultados filtrados en formato JSON
-        return response()->json($filteredResults);
     }
 
     /**

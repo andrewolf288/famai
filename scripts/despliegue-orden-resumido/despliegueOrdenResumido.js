@@ -83,6 +83,16 @@ $(document).ready(() => {
     // gestion de multiselect
     $('select[multiple]').multiselect()
 
+    // traer informacion de almacenes
+    async function traerInformacionAlmacenes() {
+        const {data} = await client.get('/almacenes')
+        const $almacenes = $("#almacenStock")
+        data.forEach(almacen => {
+            const option = $('<option>').val(almacen["alm_codigo"]).text(almacen["alm_descripcion"])
+            $almacenes.append(option)
+        })
+    }
+
     // inicializacion de datatable
     async function initDataTable(URL = apiURL) {
         // verificamos que no se haya inicializado el datatable
@@ -215,14 +225,31 @@ $(document).ready(() => {
         }
     }
 
+    traerInformacionAlmacenes()
     initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`)
+
+    // ----------- GESTIONAR CAMBIO DE ALMACEN ------------
+    const getValueAlmacen = () => {
+        const almacenStockValue = $('#almacenStock').val()
+        if(almacenStockValue.length !== 0) {
+            return `&alm_codigo=${almacenStockValue}`
+        }
+        return ""
+    }
+
+    $('#almacenStock').on('change', () => {
+        const fechaDesde = transformarFecha($('#fechaDesde').val())
+        const fechaHasta = transformarFecha($('#fechaHasta').val())
+        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}${getValueAlmacen()}`
+        initDataTable(filteredURL)
+    })
 
     // ------------ ADMINISTRACION DE FILTROS ---------------
     // filter fechas
     filterFechas.on('click', () => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}${getValueAlmacen()}`
         initDataTable(filteredURL)
     })
 
@@ -231,11 +258,8 @@ $(document).ready(() => {
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
         let filteredURL = apiURL
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
         if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}${getValueAlmacen()}`
         }
         initDataTable(filteredURL)
     })
@@ -249,8 +273,7 @@ $(document).ready(() => {
         }
         const fecha_desde = transformarFecha($('#fechaDesde').val())
         const fecha_hasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}`
-
+        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}${getValueAlmacen()}`
         initDataTable(filteredURL)
     })
 

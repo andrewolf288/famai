@@ -76,6 +76,12 @@ class CotizacionDetalleController extends Controller
         return response()->json($data);
     }
 
+    public function show($id)
+    {
+        $detalleCotizacion = CotizacionDetalle::with('producto', 'cotizacion.proveedor', 'cotizacion.moneda')->findOrFail($id);
+        return response()->json($detalleCotizacion);
+    }
+
     public function update(Request $request, $id)
     {
         $user = auth()->user();

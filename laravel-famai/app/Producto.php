@@ -96,4 +96,16 @@ class Producto extends Model
     {
         return $this->hasOne(ProductoProveedor::class, 'pro_id')->latest('prp_fechaultimacompra');
     }
+
+    // cotizacion
+    public function cotizaciones()
+    {
+        return $this->hasMany(CotizacionDetalle::class, 'pro_id', 'pro_id');
+    }
+
+    // orden de compra
+    public function ordenesCompra()
+    {
+        return $this->hasMany(OrdenCompraDetalle::class, 'pro_id', 'pro_id');
+    }
 }

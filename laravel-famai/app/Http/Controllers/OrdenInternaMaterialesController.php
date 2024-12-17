@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Almacen;
 use App\CotizacionDetalle;
 use App\OrdenInterna;
 use App\Helpers\UtilHelper;
@@ -16,6 +17,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
 use App\OrdenCompraDetalle;
 use App\Producto;
+use App\Services\ProductoService;
 use App\Trabajador;
 use App\Unidad;
 use Carbon\Carbon;
@@ -31,7 +33,7 @@ class OrdenInternaMaterialesController extends Controller
 
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-        if($trabajador) {
+        if ($trabajador) {
             $sed_codigo = $trabajador->sed_codigo;
         }
 
@@ -155,17 +157,31 @@ class OrdenInternaMaterialesController extends Controller
 
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-        if($trabajador) {
+        if ($trabajador) {
             $sed_codigo = $trabajador->sed_codigo;
         }
+
+        $almacen = Almacen::where('sed_codigo', $sed_codigo)
+            ->where('alm_esprincipal', 1)
+            ->first();
+
+        $almacen_codigo = $almacen->alm_codigo;
+
+        // incializamos el servicio
+        $productoService = new ProductoService();
 
         $ordenTrabajo = $request->input('odt_numero', null);
         $tipoProceso = $request->input('oic_tipo', null);
         $responsable = $request->input('tra_nombre', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+        $almacen_request = $request->input('alm_codigo', null);
         // multifilters
         $multifilter = $request->input('multifilter', null);
+
+        if($almacen_codigo !== null){
+            $almacen_codigo = $almacen_request;
+        }
 
         // se necesita agregar informacion de procedimiento almacenado
         $query = OrdenInternaMateriales::with(
@@ -217,7 +233,6 @@ class OrdenInternaMaterialesController extends Controller
             $palabras = explode('OR', $request->input('multifilter'));
 
             // Agregar el grupo de condiciones OR
-            // $query->where(function ($q) use ($palabras, $almID) {
             foreach ($palabras as $palabra) {
                 // pendiente de emision de orden de compra
                 if ($palabra === 'pendiente_emitir_orden_compra') {
@@ -273,13 +288,20 @@ class OrdenInternaMaterialesController extends Controller
         $agrupados = $data
             ->whereNotNull('pro_id')
             ->groupBy('pro_id')
-            ->map(function ($grupo, $pro_id) {
+            ->map(function ($grupo, $pro_id) use($productoService, $almacen_codigo) {
+
+                $producto = $grupo->first()->producto;
+                $producto_codigo = $producto->pro_codigo;
+                $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
+
                 return [
-                    'pro_id' => (int) $pro_id,
-                    'pro_codigo' => $grupo->first()->producto->pro_codigo,
-                    'pro_descripcion' => $grupo->first()->producto->pro_descripcion,
-                    'uni_codigo' => $grupo->first()->producto->unidad->uni_codigo,
+                    'pro_id' => $pro_id,
+                    'pro_codigo' => $producto_codigo,
+                    'pro_descripcion' => $producto->pro_descripcion,
+                    'uni_codigo' => $producto->unidad->uni_codigo,
                     'cantidad' => $grupo->sum('odm_cantidad'),
+                    'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
+                    'stock' => 0.00,
                     'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
                     'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
                     'detalle' => $grupo->values()
@@ -315,7 +337,7 @@ class OrdenInternaMaterialesController extends Controller
 
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-        if($trabajador) {
+        if ($trabajador) {
             $sed_codigo = $trabajador->sed_codigo;
         }
 
@@ -407,7 +429,7 @@ class OrdenInternaMaterialesController extends Controller
             }
             DB::commit();
             return response()->json($materiales, 200);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
@@ -674,11 +696,11 @@ class OrdenInternaMaterialesController extends Controller
             $ordenTrabajo = $request->input('odt_numero', null);
 
             $findOrdenTrabajo = OrdenInterna::where('odt_numero', $ordenTrabajo)->first();
-            if(!$findOrdenTrabajo){
+            if (!$findOrdenTrabajo) {
                 return response()->json(['error' => 'No se encontro la orden de trabajo'], 404);
             } else {
                 $estadoOrdenTrabajo = $findOrdenTrabajo->oic_estado;
-                if($estadoOrdenTrabajo !== 'PROCESO'){
+                if ($estadoOrdenTrabajo !== 'PROCESO') {
                     return response()->json(['error' => 'La orden de trabajo no se encuentra en un estado PROCESO'], 404);
                 }
             }
@@ -1360,5 +1382,89 @@ class OrdenInternaMaterialesController extends Controller
         }
 
         return response()->json($detalleMaterialesCotizar);
+    }
+
+    // index para Orden de Compra
+    public function indexOrdenCompraResumido(Request $request)
+    {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
+        $proveedorCotizacion = $request->input('proveedor-cotizacion', null);
+        $proveedorOrdenCompra = $request->input('proveedor-orden-compra', null);
+        $producto = $request->input('producto', null);
+
+        $query = OrdenInternaMateriales::with('producto')
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            })
+            ->where('odm_estado', '!=', 'ODC');
+        // agregar filtro de reservado ->where();
+
+        // filtro de producto
+        if ($producto !== null) {
+            $query->whereHas('producto', function ($q) use ($producto) {
+                $q->where('pro_descripcion', 'like', "%$producto%");
+            });
+        }
+
+        $data = $query->get();
+
+        $agrupados = $data
+            ->whereNotNull('pro_id')
+            ->groupBy('pro_id')
+            ->map(function ($grupo, $pro_id) use ($proveedorCotizacion, $proveedorOrdenCompra) {
+                $producto = $grupo->first()->producto;
+
+                // consulta la cotizacion con el menor precio
+                $cotizacion = $producto->cotizaciones()
+                    ->with('cotizacion.proveedor', 'cotizacion.moneda')
+                    ->whereHas('cotizacion.proveedor', function ($q) use ($proveedorCotizacion) {
+                        if ($proveedorCotizacion) {
+                            $q->where('prv_nombre', 'like', "%$proveedorCotizacion%");
+                            $q->orWhere('prv_nrodocumento', $proveedorCotizacion);
+                        }
+                    })
+                    ->whereNotNull('cod_preciounitario')
+                    ->orderBy('cod_preciounitario', 'asc')
+                    ->first();
+
+                // consulta la orden de compra
+                $ultimaOrdenCompra = $producto->ordenesCompra()
+                    ->with('ordenCompra.proveedor', 'ordenCompra.moneda')
+                    ->whereHas('ordenCompra.proveedor', function ($q) use ($proveedorOrdenCompra) {
+                        if ($proveedorOrdenCompra) {
+                            $q->where('prv_nombre', 'like', "%$proveedorOrdenCompra%");
+                            $q->orWhere('prv_nrodocumento', $proveedorOrdenCompra);
+                        }
+                    })
+                    ->orderBy('ocd_feccreacion', 'desc')
+                    ->first();
+
+                return [
+                    'pro_id' => $pro_id,
+                    'pro_codigo' => $producto->pro_codigo,
+                    'pro_descripcion' => $producto->pro_descripcion,
+                    'uni_codigo' => $producto->uni_codigo,
+                    'cantidad' => $grupo->sum('odm_cantidad'),
+                    'cotizacion' => $cotizacion,
+                    'orden_compra' => $ultimaOrdenCompra,
+                    'detalle' => $grupo->values(),
+                ];
+            })
+            ->values();
+
+        $sinAgrupar = $data
+            ->whereNull('pro_id')
+            ->values();
+
+        $resultado = $agrupados->concat($sinAgrupar);
+        return response()->json($resultado);
     }
 }

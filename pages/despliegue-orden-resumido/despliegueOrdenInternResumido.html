@@ -59,8 +59,15 @@
 </div>
 
 <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
-    <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
-    <button class="btn btn-primary" id="btn-reservar-materiales">Reservar</button>
+    <div class="d-flex me-4">
+        <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
+        <button class="btn btn-primary" id="btn-reservar-materiales">Reservar</button>
+    </div>
+    <div>
+        <select name="almacen" id="almacenStock" class="form-select">
+            <option value="">Selecciona un almacén</option>
+        </select>
+    </div>
 </div>
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
