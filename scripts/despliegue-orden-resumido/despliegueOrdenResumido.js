@@ -69,7 +69,7 @@ $(document).ready(() => {
             style: 'multi',
             selector: 'td.form-check-input'
         },
-        order: [[3, 'asc']],
+        // order: [[3, 'asc']],
     }
 
     const dataTableOptionsHistorico = {
