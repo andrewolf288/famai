@@ -136,7 +136,6 @@ class ProductoController extends Controller
             ->where('alm_esprincipal', 1)
             ->first();
 
-        // $almID = $request->input('alm_id', '01_AQPAG');
         if ($almacen) {
             $alm_codigo = $almacen->alm_codigo;
         }

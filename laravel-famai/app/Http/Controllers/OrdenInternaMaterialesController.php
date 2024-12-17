@@ -281,6 +281,8 @@ class OrdenInternaMaterialesController extends Controller
                 }
             }
         }
+        // ordenamos la data demanera desc
+        $query->orderBy('odm_feccreacion', 'desc');
 
         $data = $query->get();
 
