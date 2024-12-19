@@ -179,7 +179,7 @@ class OrdenInternaMaterialesController extends Controller
         // multifilters
         $multifilter = $request->input('multifilter', null);
 
-        if($almacen_request !== null){
+        if ($almacen_request !== null) {
             $almacen_codigo = $almacen_request;
         }
 
@@ -290,11 +290,11 @@ class OrdenInternaMaterialesController extends Controller
         $agrupados = $data
             ->whereNotNull('pro_id')
             ->groupBy('pro_id')
-            ->map(function ($grupo, $pro_id) use($productoService, $almacen_codigo) {
+            ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo) {
 
                 $producto = $grupo->first()->producto;
                 $producto_codigo = $producto->pro_codigo;
-                $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
+                // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
 
                 return [
                     'pro_id' => $pro_id,
@@ -302,8 +302,8 @@ class OrdenInternaMaterialesController extends Controller
                     'pro_descripcion' => $producto->pro_descripcion,
                     'uni_codigo' => $producto->unidad->uni_codigo,
                     'cantidad' => $grupo->sum('odm_cantidad'),
-                    'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
-                    // 'stock' => 0.00,
+                    // 'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
+                    'stock' => 0.00,
                     'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
                     'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
                     'detalle' => $grupo->values()
@@ -1406,8 +1406,9 @@ class OrdenInternaMaterialesController extends Controller
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
                 $q->where('sed_codigo', $sed_codigo);
             })
-            ->where('odm_estado', '!=', 'ODC');
-        // agregar filtro de reservado ->where();
+            ->where('odm_estado', '!=', 'ODC')
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->whereNotNull('odm_estado');
 
         // filtro de producto
         if ($producto !== null) {

@@ -43,6 +43,12 @@ class OrdenCompraDetalleController extends Controller
         return response()->json($ordencompra, 200);
     }
 
+    public function show($id)
+    {
+        $detalleOrdenCompra = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda'])->findOrFail($id);
+        return response()->json($detalleOrdenCompra);
+    }
+
     // eliminamos un detalle de cotizacion
     public function destroy($id)
     {

@@ -367,6 +367,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas de ordendes de compra detalle
 Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('ordencompra-detalle-view/{id}', [OrdenCompraDetalleController::class, 'show']);
     Route::get('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'findDetalleByOrdenCompra']);
     Route::get('ordencompra-cotizacion/{id}', [OrdenCompraDetalleController::class, 'findCotizacionByOrdenCompraDetalle']);
     Route::delete('ordencompra-detalle/{id}', [OrdenCompraDetalleController::class, 'destroy']);

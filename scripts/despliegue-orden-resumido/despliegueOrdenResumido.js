@@ -775,12 +775,14 @@ $(document).ready(() => {
         // debemos ingresar la informacion de detalle a cotizar
         $('#tbl-cotizaciones-materiales tbody').empty()
         let content = ''
+        console.log(detalleCotizacion)
         detalleCotizacion.forEach((detalle, index) => {
             if (detalle.odm_id === undefined) {
                 const observacion = unionObservaciones(detalle.detalle)
                 const rowsObs = observacion.split('\n').length
                 content = `
                 <tr data-index="${index}">
+                    <td></td>
                     <td>${detalle.pro_codigo}</td>
                     <td>${detalle.pro_descripcion}</td>
                     <td>
@@ -817,6 +819,7 @@ $(document).ready(() => {
             } else {
                 content = `
                 <tr data-index="${index}">
+                    <td>${detalle.orden_interna_parte?.orden_interna?.odt_numero}</td>
                     <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
                     <td>${detalle.odm_descripcion}</td>
                     <td>

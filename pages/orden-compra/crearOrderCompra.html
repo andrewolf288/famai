@@ -283,11 +283,11 @@
 </div>
 
 <!-- Modal cotizaciones -->
-<div class="modal fade" id="cotizacionesModal" tabindex="-1" aria-labelledby="cotizacionesModalLabel" aria-hidden="true">
+<div class="modal fade" id="historicoCotizacionesModal" tabindex="-1" aria-labelledby="historicoCotizacionesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ordenMaterialesModalLabel">Cotizaciones</h5>
+                <h5 class="modal-title" id="historicoCotizacionesModalLabel">Histórico cotizaciones</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -321,16 +321,19 @@
 </div>
 
 <!-- Modal de ordenes de compra -->
-<div class="modal fade" id="ordenesCompraModal" tabindex="-1" aria-labelledby="ordenesCompraModalLabel" aria-hidden="true">
+<div class="modal fade" id="historicoOrdenesCompraModal" tabindex="-1" aria-labelledby="historicoOrdenesCompraModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ordenesCompraModalLabel">Ordenes de Compra</h5>
+                <h5 class="modal-title" id="historicoOrdenesCompraModalLabel">Histórico Ordenes de Compra</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
-                    <table id="ordenes-compra-container" class="table table-striped nowrap" style="width:100%">
+                    <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+                        <div class="pagination-container" id="pagination-container-historico-ordenes-compra"></div>
+                    </div>
+                    <table id="historico-ordenes-compra-container" class="table table-striped nowrap" style="width:100%">
                         <thead>
                             <tr>
                                 <th></th>
@@ -342,7 +345,7 @@
                                 <th>Ver detalles</th>
                             </tr>
                         </thead>
-                        <tbody id="ordenes-compra-container-body">
+                        <tbody id="historico-ordenes-compra-container-body">
                         </tbody>
                     </table>
                 </div>
@@ -357,14 +360,36 @@
 
 <!-- Modal ingresar información de proveedor y precio -->
 <div class="modal fade" id="nuevoProveedorModal" tabindex="-1" aria-labelledby="nuevoProveedorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="nuevoProveedorModalLabel">Ingresar nuevo proveedor</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
+                <div>
+                    <div class="row">
+                        <input id="proveedorIdInput" value="" hidden>
+                        <div class="col-md-9 mb-3 position-relative">
+                            <label for="agregarProveedoresInput" class="form-label">
+                                Razón Social
+                            </label>
+                            <input type="text" id="agregarProveedoresInput" class="form-control"
+                                placeholder="Ingrese razón social..." autocomplete="off">
+                            <ul id="resultadosLista" class="list-group mt-2 position-absolute"
+                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
+                            </ul>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="agregarPrecioProveedorInput" class="form-label">
+                                Precio
+                            </label>
+                            <div class="input-group">
+                                <input type="number" id="agregarPrecioProveedorInput" class="form-control" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
