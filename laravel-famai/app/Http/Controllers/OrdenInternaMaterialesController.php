@@ -294,7 +294,7 @@ class OrdenInternaMaterialesController extends Controller
 
                 $producto = $grupo->first()->producto;
                 $producto_codigo = $producto->pro_codigo;
-                // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
+                $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
 
                 return [
                     'pro_id' => $pro_id,
@@ -302,8 +302,8 @@ class OrdenInternaMaterialesController extends Controller
                     'pro_descripcion' => $producto->pro_descripcion,
                     'uni_codigo' => $producto->unidad->uni_codigo,
                     'cantidad' => $grupo->sum('odm_cantidad'),
-                    // 'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
-                    'stock' => 0.00,
+                    'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
+                    // 'stock' => 0.00,
                     'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
                     'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
                     'detalle' => $grupo->values()
