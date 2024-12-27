@@ -19,7 +19,8 @@ class Almacen extends Model
         'alm_usucreacion',
         'alm_feccreacion',
         'alm_usumodificacion',
-        'alm_fecmodificacion'
+        'alm_fecmodificacion',
+        'alm_activo'
     ];
 
     const CREATED_AT = 'alm_feccreacion';

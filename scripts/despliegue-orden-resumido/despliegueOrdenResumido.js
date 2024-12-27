@@ -85,7 +85,7 @@ $(document).ready(() => {
 
     // traer informacion de almacenes
     async function traerInformacionAlmacenes() {
-        const {data} = await client.get('/almacenes')
+        const { data } = await client.get('/almacenes')
         const $almacenes = $("#almacenStock")
         data.forEach(almacen => {
             const option = $('<option>').val(almacen["alm_codigo"]).text(almacen["alm_descripcion"])
@@ -120,100 +120,56 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(URL)
+            console.log(data)
             despliegueMaterialesResumido = data
             let content = ''
             data.forEach((material, index) => {
-                if (material.detalle !== undefined) {
-                    content += `
-                    <tr data-index="${index}">
-                        <td></td>
-                        <td></td>
-                        <td>${material.pro_codigo || 'N/A'}</td>
-                        <td>${material.pro_descripcion || 'N/A'}</td>
-                        <td class="text-center">${material.uni_codigo || 'N/A'}</td>
-                        <td class="text-center">${material.cantidad.toFixed(2) || 'N/A'}</td>
-                        <td class="text-center">${parseFloat(material.stock).toFixed(2)}</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-primary btn-historico" data-historico="${material.pro_id}">Ver histórico</button>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
-                                ${material.detalle[0].responsable?.tra_nombre || 'Sin responsable'}
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary position-relative btn-cotizado" data-index-detalle="${index}">
-                                Cotizaciones
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${material.cotizaciones_count}
-                                </span>
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary position-relative btn-ordenado" data-index-detalle="${index}">
-                                Ordenes de compra
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${material.ordenes_compra_count}
-                                </span>
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary btn-reservado">0.00</button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary btn-atendido">0.00</button>
-                        </td>
-                    </tr>
-                    `
-                } else {
-                    content += `
-                    <tr data-index="${index}">
-                        <td></td>
-                        <td></td>
-                        <td>N/A</td>
-                        <td>${material.odm_descripcion || 'N/A'}</td>
-                        <td class="text-center">N/A</td>
-                        <td class="text-center">${material.odm_cantidad}</td>
-                        <td class="text-center">0.00</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-secondary" disabled>Ver detalle</button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-secondary" disabled>Ver histórico</button>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
-                                ${material.responsable?.tra_nombre || 'Sin responsable'}
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary position-relative btn-cotizado" data-detalle="${material.odm_id}">
-                                Cotizaciones
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${material.cotizaciones_count}
-                                </span>
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary position-relative btn-ordenado" data-detalle="${material.odm_id}">
-                                Ordenes de compra
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    ${material.ordenes_compra_count}
-                                </span>
-                            </button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary btn-reservado">0.00</button>
-                        </td>
-                        <td class="text-center">
-                            <button class="btn btn-primary btn-atendido">0.00</button>
-                        </td>
-                    </tr>
-                    `
-                }
+                // if (material.detalle !== undefined) {
+                const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle } = material
+                content += `
+                <tr data-index="${index}">
+                    <td></td>
+                    <td></td>
+                    <td>${pro_codigo || 'N/A'}</td>
+                    <td>${pro_descripcion || 'N/A'}</td>
+                    <td class="text-center">${uni_codigo || 'N/A'}</td>
+                    <td class="text-center">${parseFloat(cantidad).toFixed(2) || 'N/A'}</td>
+                    <td class="text-center">${parseFloat(stock).toFixed(2)}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>Ver histórico</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
+                            ${detalle[0].responsable?.tra_nombre || 'Sin responsable'}
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary position-relative btn-cotizado" data-index-detalle="${index}">
+                            Cotizaciones
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                ${cotizaciones_count}
+                            </span>
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary position-relative btn-ordenado" data-index-detalle="${index}">
+                            Ordenes de compra
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                ${ordenes_compra_count}
+                            </span>
+                        </button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary btn-reservado">0.00</button>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-primary btn-atendido">0.00</button>
+                    </td>
+                </tr>
+                `
             })
 
             $('#data-container-body').html(content)
@@ -231,7 +187,7 @@ $(document).ready(() => {
     // ----------- GESTIONAR CAMBIO DE ALMACEN ------------
     const getValueAlmacen = () => {
         const almacenStockValue = $('#almacenStock').val()
-        if(almacenStockValue.length !== 0) {
+        if (almacenStockValue.length !== 0) {
             return `&alm_codigo=${almacenStockValue}`
         }
         return ""
@@ -303,7 +259,7 @@ $(document).ready(() => {
                 <td>${producto?.pro_codigo || 'N/A'}</td>
                 <td>${odm_descripcion || 'N/A'}</td>
                 <td>${odm_observacion || 'N/A'}</td>
-                <td class="text-center">${producto.unidad?.uni_codigo || 'N/A'}</td>
+                <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                 <td class="text-center">${odm_cantidad}</td>
                 <td>${odm_usucreacion}</td>
                 <td>${odm_fecmodificacion ? parseDate(odm_fecmodificacion) : 'N/A'}</td>
@@ -786,7 +742,7 @@ $(document).ready(() => {
                     <td>${detalle.pro_codigo}</td>
                     <td>${detalle.pro_descripcion}</td>
                     <td>
-                        <textarea class="form-control observacion-detalle" rows="${Math.max(1,rowsObs)}">${observacion}</textarea>
+                        <textarea class="form-control observacion-detalle" rows="${Math.max(1, rowsObs)}">${observacion}</textarea>
                     </td>
                     <td class="text-center">${detalle.uni_codigo}</td>
                     <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
@@ -838,7 +794,7 @@ $(document).ready(() => {
                                     <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
                                 </svg>
                             </button>
-                            <button class="btn btn-sm ${detalle.producto ? 'btn-primary': 'btn-secondary'} btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}" ${detalle.producto ? '': 'disabled'}>
+                            <button class="btn btn-sm ${detalle.producto ? 'btn-primary' : 'btn-secondary'} btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}" ${detalle.producto ? '' : 'disabled'}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
                                     <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
                                     <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
@@ -865,7 +821,7 @@ $(document).ready(() => {
     })
 
     // evento para escuchar cuando se cambie la cantidad pedida
-    $('#tbl-cotizaciones-materiales tbody').on('input', '.cantidad-pedida-detalle' ,function () {
+    $('#tbl-cotizaciones-materiales tbody').on('input', '.cantidad-pedida-detalle', function () {
         const row = $(this).closest('tr')
         const cantidadRequerida = parseFloat(row.find('.cantidad-requerida-detalle').text())
         const cantidadPedida = parseFloat($(this).val()) || 0
@@ -918,9 +874,9 @@ $(document).ready(() => {
         }
     }))
 
-    $('#proveedoresSUNAT').keypress(function(e) {
+    $('#proveedoresSUNAT').keypress(function (e) {
         var key = e.which
-        if(key == 13){
+        if (key == 13) {
             const query = $('#proveedoresSUNAT').val().trim()
             buscarProveedorBySUNAT(query)
         }
@@ -934,29 +890,29 @@ $(document).ready(() => {
 
     async function buscarProveedorBySUNAT(documento) {
         console.log(documento)
-        if(documento.length < 8){
+        if (documento.length < 8) {
             alert('El documento debe tener más de 8 dígitos')
             return
         }
 
         try {
-            const {data} = await client.get(`/padronSunat?nrodocumento=${documento}`)
-            const { xps_nrodocumento, xps_nombre} = data
+            const { data } = await client.get(`/padronSunat?nrodocumento=${documento}`)
+            const { xps_nrodocumento, xps_nombre } = data
             const formatData = {
                 prv_id: null,
                 prv_nrodocumento: xps_nrodocumento,
                 prv_nombre: xps_nombre,
                 prv_direccion: '',
                 tdo_codigo: 'RUC',
-                prv_telefono: '', 
-                prv_whatsapp: '', 
-                prv_contacto: '', 
+                prv_telefono: '',
+                prv_whatsapp: '',
+                prv_contacto: '',
                 prv_correo: ''
             }
             seleccionarProveedor(formatData)
-        } catch(error) {
-            const {data, status} = error.response
-            if(status === 404) {
+        } catch (error) {
+            const { data, status } = error.response
+            if (status === 404) {
                 alert(data.error)
             } else {
                 alert('Error al realizar la búsqueda')

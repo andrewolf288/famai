@@ -253,16 +253,16 @@ class OrdenInternaMaterialesController extends Controller
 
                     $data = $query->get();
                     $dataFiltrada = [];
-
+    
                     foreach ($data as $item) {
                         $productoCodigo = $item->producto->pro_codigo;
-
+    
                         $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
                             ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
                             ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
                             ->where('PDN1.ItemCode', '=', $productoCodigo)
                             ->first();
-
+    
                         // Comprobar si ultima_fecha_compra es null
                         if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
                             $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
@@ -270,54 +270,67 @@ class OrdenInternaMaterialesController extends Controller
                                 ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
                                 ->where('IGN1.ItemCode', '=', $productoCodigo)
                                 ->first();
-
+    
                             if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
                                 $dataFiltrada[] = $item;
                             }
                         }
                     }
-
+    
                     return response($dataFiltrada);
                 }
             }
         }
         // ordenamos la data demanera desc
         $query->orderBy('odm_feccreacion', 'desc');
-
+    
         $data = $query->get();
-
+    
         // debemos agrupar la información
         $agrupados = $data
             ->whereNotNull('pro_id')
             ->groupBy('pro_id')
             ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo) {
-
+    
                 $producto = $grupo->first()->producto;
                 $producto_codigo = $producto->pro_codigo;
-                $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
-
+                // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
+    
                 return [
                     'pro_id' => $pro_id,
                     'pro_codigo' => $producto_codigo,
                     'pro_descripcion' => $producto->pro_descripcion,
                     'uni_codigo' => $producto->unidad->uni_codigo,
                     'cantidad' => $grupo->sum('odm_cantidad'),
-                    'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
-                    // 'stock' => 0.00,
+                    // 'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
+                    'stock' => 0.00,
                     'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
                     'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
                     'detalle' => $grupo->values()
                 ];
             })
             ->values();
-
+    
         $sinAgrupar = $data
             ->whereNull('pro_id')
+            ->map(function ($item) {
+                return [
+                    'pro_id' => null,
+                    'pro_codigo' => null,
+                    'pro_descripcion' => $item->odm_descripcion,
+                    'uni_codigo' => null,
+                    'cantidad' => $item->odm_cantidad,
+                    'stock' => 0.00,
+                    'cotizaciones_count' => 0,
+                    'ordenes_compra_count' => 0,
+                    'detalle' => [$item]
+                ];
+            })
             ->values();
-
+    
         // Combinar los resultados
         $resultado = $agrupados->concat($sinAgrupar);
-
+    
         return response()->json($resultado);
     }
 

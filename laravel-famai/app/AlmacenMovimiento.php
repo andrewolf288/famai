@@ -11,9 +11,10 @@ class AlmacenMovimiento extends Model
     protected $primaryKey = 'amc_id';
 
     protected $fillable = [
+        'alm_id',
         'amc_numero',
-        'amc_fecha',
-        'amc_tipo',
+        'amc_fechamovimiento',
+        'amc_tipomovimiento',
         'amc_documentoreferenciatipo',
         'amc_documentoreferencianumero',
         'amc_documentoreferenciafecha',
@@ -27,4 +28,9 @@ class AlmacenMovimiento extends Model
 
     const CREATED_AT = 'amc_feccreacion';
     const UPDATED_AT = 'amc_fecmodificacion';
+
+    public function almacen()
+    {
+        return $this->belongsTo(Almacen::class, 'alm_id', 'alm_id');
+    }
 }

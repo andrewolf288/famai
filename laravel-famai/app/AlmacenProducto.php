@@ -12,8 +12,6 @@ class AlmacenProducto extends Model
 
     protected $fillable = [
         'alm_id',
-        'alm_codigo',
-        'alm_tipo',
         'pro_id',
         'alp_stock',
         'alp_ubicacion',
@@ -26,10 +24,6 @@ class AlmacenProducto extends Model
 
     const CREATED_AT = 'alp_feccreacion';
     const UPDATED_AT = 'alp_fecmodificacion';
-
-    protected $casts = [
-        'alp_stock' => 'decimal:2',
-    ];
 
     // almacen
     public function almacen()
