@@ -274,7 +274,8 @@
                                     <input type="checkbox" {{ $parte['detalle_procesos'][$i]['odp_ccalidad'] == 1 ? 'checked="checked"' : '' }} />
                                 </td>
                                 <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}">
-                                    {{ $parte['detalle_procesos'][$i]['odp_observacion'] }}</td>
+                                    {!! nl2br(e($parte['detalle_procesos'][$i]['odp_observacion'])) !!}</td>
+                                    {{-- {{ $parte['detalle_procesos'][$i]['odp_observacion'] }}</td> --}}
                             @elseif ($i == 0 && $countProcesos == 0)
                                 <td rowspan="{{ $maximoCount }}"></td>
                                 <td rowspan="{{ $maximoCount }}"></td>
@@ -295,7 +296,8 @@
                                 </td>
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
                                     style="background-color: {{ $colorObservacion }}; font-weight: {{ $fontWeight }};">
-                                    {{ $parte['detalle_materiales'][$i]['odm_observacion'] }}</td>
+                                    {!! nl2br(e($parte['detalle_materiales'][$i]['odm_observacion'])) !!} </td>
+                                    {{-- {{ $parte['detalle_materiales'][$i]['odm_observacion'] }}</td> --}}
                             @elseif ($i == 0 && $countMateriales == 0)
                                 <td rowspan="{{ $maximoCount }}"></td>
                                 <td rowspan="{{ $maximoCount }}"></td>
