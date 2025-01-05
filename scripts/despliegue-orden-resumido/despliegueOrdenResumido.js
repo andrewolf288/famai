@@ -120,7 +120,6 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(URL)
-            console.log(data)
             despliegueMaterialesResumido = data
             let content = ''
             data.forEach((material, index) => {
@@ -141,7 +140,7 @@ $(document).ready(() => {
                     <td class="text-center">
                         <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>Ver histórico</button>
                     </td>
-                    <td>
+                    <td>buscarProveedorBySUNAT
                         <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
                             ${detalle[0].responsable?.tra_nombre || 'Sin responsable'}
                         </button>
@@ -594,10 +593,6 @@ $(document).ready(() => {
     })
 
     // --------------- MANEJO DE COTIZACIONES --------------
-    function limpiarLista() {
-        $('#resultadosLista').empty()
-    }
-
     $("#btn-cotizar-materiales").on('click', async function () {
         // vaceamos la informacion de detalle de cotizacion cada vez que abrimos el modal
         detalleCotizacion = []
@@ -620,13 +615,9 @@ $(document).ready(() => {
         const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index))
         const dataSeleccionadaMateriales = []
         dataSeleccionada.forEach(detalle => {
-            if (detalle.odm_id == undefined) {
-                detalle.detalle.forEach(detalleElement => {
-                    dataSeleccionadaMateriales.push(detalleElement)
-                })
-            } else {
-                dataSeleccionadaMateriales.push(detalle)
-            }
+            detalle.detalle.forEach(detalleElement => {
+                dataSeleccionadaMateriales.push(detalleElement)
+            })
         })
 
         const dataSeleccionadaAgrupada = dataSeleccionadaMateriales.reduce((acc, item) => {
@@ -659,7 +650,6 @@ $(document).ready(() => {
 
         // detalleCotizacion = dataSeleccionada
         detalleCotizacion = dataSeleccionadaAgrupada
-        console.log(detalleCotizacion)
 
         // de la data seleccionada extraemos los productos para poder buscar sus proveedores de ordenes de compra correspondientes
         const productosCotizacion = dataSeleccionada.filter(detalle => detalle.odm_id === undefined).map(detalle => {
@@ -889,7 +879,6 @@ $(document).ready(() => {
     });
 
     async function buscarProveedorBySUNAT(documento) {
-        console.log(documento)
         if (documento.length < 8) {
             alert('El documento debe tener más de 8 dígitos')
             return

@@ -40,7 +40,7 @@ $(document).ready(() => {
                     <td class="text-center">${moneda?.mon_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_subtotal}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_impuesto}</td>
-                    <td class="text-center">${ordenCompra.occ_porcentajeimpuesto}</td>
+                    <td class="text-center">${ordenCompra.occ_igv}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_total}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary btn-ordencompra-detalle" data-ordencompra="${ordenCompra.occ_id}">
@@ -147,32 +147,34 @@ $(document).ready(() => {
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
     $('#data-container').on('click', '.btn-orden-compra-editar', function () {
         const id = $(this).data('ordencompra')
-        // localStorage.setItem('orden-compraId', id)
         window.location.href = `orden-compra/editar/${id}`
     })
 
     $('#data-container').on('click', '.btn-orden-compra-pdf', async function () {
         const id = $(this).data('ordencompra')
-        console.log("Generar pdf de ID ORDEN DE COMPRA: ", id)
+
+        const confirmar = confirm("¿Deseas imprimir la orden de compra de manera disgregada?")
+
         try {
-            const response = await client.get(`/ordenescompra/exportarPDF?occ_id=${id}`, {
+            const response = await client.get(`/ordenescompra/exportarPDF?occ_id=${id}&imprimir_disgregado=${confirmar ? 1 : 0}`, {
                 headers: {
                     'Accept': 'application/pdf'
                 },
                 responseType: 'blob'
             })
 
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `reporte_orden_compra_${id}.pdf`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            showModalPreview(pdfUrl)
         } catch (error) {
             console.log(error)
             alert('Error al generar el reporte')
         }
     })
+
+    function showModalPreview(pdfUrl) {
+        document.getElementById('pdf-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
 })

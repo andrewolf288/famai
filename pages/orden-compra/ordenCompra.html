@@ -74,32 +74,52 @@
 
 <!-- DETALLE DE ORDEN DE COMPRA -->
 <div class="modal fade" id="detalleOrdenCompraModal" tabindex="-1" aria-labelledby="detalleOrdenCompraModalLabel"
-aria-hidden="true">
-<div class="modal-dialog modal-fullscreen">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title" id="detalleOrdenCompraModalLabel">Detalle Orden de Compra</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-      <table id="tbl-ordencompra-detalle" class="table mt-3 table-striped nowrap">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>OT</th>
-            <th>Descripción</th>
-            <th class="text-center">Cantidad</th>
-            <th class="text-center">PRECIO s/IGV</th>
-            <th class="text-center">TOTAL s/IGV</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+  aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleOrdenCompraModalLabel">Detalle Orden de Compra</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table id="tbl-ordencompra-detalle" class="table mt-3 table-striped nowrap">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>OT</th>
+              <th>Descripción</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-center">PRECIO s/IGV</th>
+              <th class="text-center">TOTAL s/IGV</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- PREVIEW -->
+<div class="modal fade" id="previewPDFModal" tabindex="-1" aria-labelledby="previewPDFModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewPDFModalLabel">Previsualizar Orden Compra</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div style="height: 80vh;">
+          <iframe id="pdf-frame" width="100%" height="100%" style="border: none;"></iframe>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
 </div>

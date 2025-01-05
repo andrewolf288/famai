@@ -15,7 +15,7 @@ class MonedaController extends Controller
 
     public function indexSimple()
     {
-        $monedas = Moneda::where('mon_activo', 1)->select('mon_codigo', 'mon_descripcion')->get();
+        $monedas = Moneda::where('mon_activo', 1)->select('mon_simbolo', 'mon_codigo', 'mon_descripcion')->get();
         return response()->json($monedas);
     }
 }

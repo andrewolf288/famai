@@ -67,7 +67,7 @@ $(document).ready(function () {
                 if (cuenta_banco_nacion) {
                     return cuenta.mon_codigo === 'DOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
                 } else {
-                    cuenta.mon_codigo === 'DOL'
+                    return cuenta.mon_codigo === 'DOL'
                 }
             })
 

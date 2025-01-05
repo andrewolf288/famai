@@ -253,16 +253,16 @@ class OrdenInternaMaterialesController extends Controller
 
                     $data = $query->get();
                     $dataFiltrada = [];
-    
+
                     foreach ($data as $item) {
                         $productoCodigo = $item->producto->pro_codigo;
-    
+
                         $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
                             ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
                             ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
                             ->where('PDN1.ItemCode', '=', $productoCodigo)
                             ->first();
-    
+
                         // Comprobar si ultima_fecha_compra es null
                         if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
                             $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
@@ -270,38 +270,39 @@ class OrdenInternaMaterialesController extends Controller
                                 ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
                                 ->where('IGN1.ItemCode', '=', $productoCodigo)
                                 ->first();
-    
+
                             if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
                                 $dataFiltrada[] = $item;
                             }
                         }
                     }
-    
+
                     return response($dataFiltrada);
                 }
             }
         }
         // ordenamos la data demanera desc
         $query->orderBy('odm_feccreacion', 'desc');
-    
+
         $data = $query->get();
-    
+
         // debemos agrupar la información
         $agrupados = $data
             ->whereNotNull('pro_id')
             ->groupBy('pro_id')
             ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo) {
-    
+
                 $producto = $grupo->first()->producto;
                 $producto_codigo = $producto->pro_codigo;
                 // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
-    
+
                 return [
                     'pro_id' => $pro_id,
                     'pro_codigo' => $producto_codigo,
                     'pro_descripcion' => $producto->pro_descripcion,
                     'uni_codigo' => $producto->unidad->uni_codigo,
-                    'cantidad' => $grupo->sum('odm_cantidad'),
+                    'cantidad' => $grupo->sum('odm_cantidadpendiente'),
+                    // 'cantidad' => $grupo->sum('odm_cantidad'),
                     // 'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
                     'stock' => 0.00,
                     'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
@@ -310,7 +311,7 @@ class OrdenInternaMaterialesController extends Controller
                 ];
             })
             ->values();
-    
+
         $sinAgrupar = $data
             ->whereNull('pro_id')
             ->map(function ($item) {
@@ -319,7 +320,9 @@ class OrdenInternaMaterialesController extends Controller
                     'pro_codigo' => null,
                     'pro_descripcion' => $item->odm_descripcion,
                     'uni_codigo' => null,
-                    'cantidad' => $item->odm_cantidad,
+                    // 'cantidad' => $item->odm_cantidad,
+                    'cantidad' => $item->odm_cantidadpendiente,
+                    'cantidad_requerida' => $item->odm_cantidad,
                     'stock' => 0.00,
                     'cotizaciones_count' => 0,
                     'ordenes_compra_count' => 0,
@@ -327,10 +330,10 @@ class OrdenInternaMaterialesController extends Controller
                 ];
             })
             ->values();
-    
+
         // Combinar los resultados
         $resultado = $agrupados->concat($sinAgrupar);
-    
+
         return response()->json($resultado);
     }
 
@@ -1415,11 +1418,18 @@ class OrdenInternaMaterialesController extends Controller
         $proveedorOrdenCompra = $request->input('proveedor-orden-compra', null);
         $producto = $request->input('producto', null);
 
-        $query = OrdenInternaMateriales::with('producto')
+        $query = OrdenInternaMateriales::with(
+            'producto.unidad',
+            'ordenInternaParte.ordenInterna'
+        )
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
                 $q->where('sed_codigo', $sed_codigo);
             })
-            ->where('odm_estado', '!=', 'ODC')
+            // ->where('odm_estado', '!=', 'ODC')
+            ->where('odm_cantidadpendiente', '>', 0)
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('oic_estado', 'PROCESO');
+            })
             ->whereNotIn('odm_tipo', [3, 4, 5])
             ->whereNotNull('odm_estado');
 
@@ -1468,7 +1478,8 @@ class OrdenInternaMaterialesController extends Controller
                     'pro_codigo' => $producto->pro_codigo,
                     'pro_descripcion' => $producto->pro_descripcion,
                     'uni_codigo' => $producto->uni_codigo,
-                    'cantidad' => $grupo->sum('odm_cantidad'),
+                    // 'cantidad' => $grupo->sum('odm_cantidad'),
+                    'cantidad' => $grupo->sum('odm_cantidadpendiente'),
                     'cotizacion' => $cotizacion,
                     'orden_compra' => $ultimaOrdenCompra,
                     'detalle' => $grupo->values(),
@@ -1478,6 +1489,20 @@ class OrdenInternaMaterialesController extends Controller
 
         $sinAgrupar = $data
             ->whereNull('pro_id')
+            ->map(function ($item) {
+                return [
+                    'pro_id' => null,
+                    'pro_codigo' => null,
+                    'pro_descripcion' => $item["odm_descripcion"],
+                    'uni_codigo' => null,
+                    // 'cantidad' => $item->odm_cantidad,
+                    'cantidad' => $item->odm_cantidadpendiente,
+                    'cantidad_requerida' => $item->odm_cantidad,
+                    'cotizacion' => null,
+                    'orden_compra' => null,
+                    'detalle' => [$item],
+                ];
+            })
             ->values();
 
         $resultado = $agrupados->concat($sinAgrupar);

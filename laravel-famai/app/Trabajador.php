@@ -16,6 +16,7 @@ class Trabajador extends Model
         'usu_codigo',
         'are_codigo',
         'sed_codigo',
+        'tra_urlfirma',
         'tra_activo',
         'tra_usucreacion',
         'tra_feccreacion',

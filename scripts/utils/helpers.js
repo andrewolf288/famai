@@ -48,6 +48,11 @@ function esValorNumericoValidoYMayorQueCero(inputElement) {
     return !isNaN(numero) && numero > 0;
 }
 
+function obtenerValorNumerico(inputElement) {
+    const numero = parseFloat(inputElement);
+    return !isNaN(numero) && numero > 0 ? numero : 0;
+}
+
 function obtenerIdUnico() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 11)
 }
