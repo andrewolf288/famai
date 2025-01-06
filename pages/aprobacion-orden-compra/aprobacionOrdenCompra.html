@@ -71,6 +71,7 @@
                         <th class="text-center">Impuesto</th>
                         <th class="text-center">Total</th>
                         <th>Aprobado por</th>
+                        <th>Fec. Aprobado</th>
                         <th>Estado</th>
                         <th>Fec. Creación</th>
                         <th>Usu. Creador</th>
@@ -96,16 +97,16 @@
                 <table id="data-container-detalle" class="table table-striped nowrap" style="width:100%">
                     <thead>
                         <tr>
-                            <th>OT</th>
-                            <th class="text-start">Item</th>
-                            <th>Descripcion</th>
-                            <th class="text-center">Cantidad</th>
-                            <th class="text-center">Precio unitario</th>
-                            <th class="text-center">Total</th>
-                            <th>Fec. Creación</th>
-                            <th>Usu. Creador</th>
-                            <th>Fec. Modificación</th>
-                            <th>Usu. Modificador</th>
+                            <th class="text-center col-1">OT</th>
+                            <th class="col-3">Descripcion</th>
+                            <th class="col-1 text-center">Und.</th>
+                            <th class="text-center col-1">Cantidad</th>
+                            <th class="text-center col-1">Precio unitario</th>
+                            <th class="text-center col-1">Total</th>
+                            <th class="col-1">Fec. Creación</th>
+                            <th class="col-1">Usu. Creador</th>
+                            <th class="col-1">Fec. Modificación</th>
+                            <th class="col-1">Usu. Modificador</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -116,27 +117,27 @@
     </div>
 </div>
 
-<!-- DETALLE DE COTIZACIÓN -->
+<!-- DETALLE DE MATERIALES -->
 <div class="card mt-4">
     <div class="card-header">
-        <p class="fw-bold">Cotización asociada</p>
+        <p class="fw-bold">Detalle materiales</p>
     </div>
     <div class="card-body">
         <div class="overflow-auto" style="height: 150px;">
             <div class="table-responsive">
-                <table id="data-container-cotizacion" class="table table-striped nowrap" style="width:100%">
+                <table id="data-container-materiales" class="table table-striped nowrap" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-start">Fecha Cot.</th>
-                            <th>Nro Cot proveedor</th>
-                            <th>Doc. proveedor</th>
-                            <th>Raz. social proveedor</th>
-                            <th class="text-center">Total</th>
-                            <th>Estado</th>
-                            <th>Fec. Creación</th>
-                            <th>Usu. Creador</th>
-                            <th>Fec. Actualización</th>
-                            <th>Usu. Actualizador</th>
+                            <th class="text-center col-1">OT</th>
+                            <th class="col-2">Descripción</th>
+                            <th class="col-3">Observación</th>
+                            <th class="col-1 text-center">Und.</th>
+                            <th class="text-center col-1">Can. Req</th>
+                            <th class="text-center col-1">Can. Pen</th>
+                            <th class="col-1">Fec. Creación</th>
+                            <th class="col-1">Usu. Creador</th>
+                            <th class="col-1">Fec. Actualización</th>
+                            <th class="col-1">Usu. Actualizador</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -177,7 +178,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-aprobar-orden-compra">Guardar</button>
+                <button type="button" class="btn btn-primary" id="btn-aprobar-orden-compra">Aprobar</button>
             </div>
         </div>
     </div>

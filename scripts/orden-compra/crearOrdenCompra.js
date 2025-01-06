@@ -599,7 +599,6 @@ $(document).ready(() => {
         $("#direccionProveedorInput").val(prv_direccion)
 
         // establecemos información de las cuentas bancarias
-        console.log(cuentas_bancarias)
         const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => compareStringsIgnoreCaseAndAccents(cuenta.entidad_bancaria?.eba_descripcion, 'Banco de la Nación'))
         const cuenta_soles = cuentas_bancarias.find(cuenta => {
             if (cuenta_banco_nacion) {

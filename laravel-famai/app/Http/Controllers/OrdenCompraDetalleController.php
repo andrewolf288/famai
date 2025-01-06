@@ -11,7 +11,7 @@ class OrdenCompraDetalleController extends Controller
 {
     public function findDetalleByOrdenCompra($id)
     {
-        $detalleCotizacion = OrdenCompraDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'ordenCompra.moneda'])
+        $detalleCotizacion = OrdenCompraDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'ordenCompra.moneda', 'producto'])
             ->where('occ_id', $id)->get();
         return response()->json($detalleCotizacion);
     }

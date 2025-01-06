@@ -43,7 +43,7 @@ $(document).ready(() => {
         // recorremos la lista
         data.forEach((ordecompra, index) => {
             // obtenemos los datos
-            const { occ_id, occ_numero, proveedor, occ_fecha, occ_total, occ_subtotal, occ_impuesto, occ_estado, occ_feccreacion, occ_usucreacion, occ_fecmodificacion, occ_usumodificacion, autorizador, tra_autorizado } = ordecompra
+            const { occ_id, occ_numero, proveedor, occ_fecha, occ_total, occ_subtotal, occ_impuesto, occ_estado, occ_fecautorizacion, occ_feccreacion, occ_usucreacion, occ_fecmodificacion, occ_usumodificacion, autorizador, tra_autorizado } = ordecompra
 
             const rowItem = document.createElement('tr')
             rowItem.classList.add('row-orden-compra')
@@ -57,17 +57,18 @@ $(document).ready(() => {
             <td>${occ_numero}</td>
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
-            <td>${occ_subtotal}</td>
-            <td>${occ_impuesto}</td>
-            <td>${occ_total}</td>
+            <td class="text-center">${occ_subtotal}</td>
+            <td class="text-center">${occ_impuesto}</td>
+            <td class="text-center">${occ_total}</td>
             <td>${tra_autorizado ? autorizador.tra_nombre : 'Aún no aprobado'}</td>
+            <td>${occ_fecautorizacion === null ? 'N/A' : parseDate(occ_fecautorizacion)}</td>
             <td class="text-center">
                 <span class="badge bg-primary">${occ_estado}</span>
             </td>
-            <td>${occ_feccreacion === null ? 'No aplica' : parseDate(occ_feccreacion)}</td>
-            <td>${occ_usucreacion === null ? 'No aplica' : occ_usucreacion}</td>
-            <td>${occ_fecmodificacion === null ? 'No aplica' : parseDate(occ_fecmodificacion)}</td>
-            <td>${occ_usumodificacion === null ? 'No aplica' : occ_usumodificacion}</td>
+            <td>${occ_feccreacion === null ? 'N/A' : parseDate(occ_feccreacion)}</td>
+            <td>${occ_usucreacion === null ? 'N/A' : occ_usucreacion}</td>
+            <td>${occ_fecmodificacion === null ? 'N/A' : parseDate(occ_fecmodificacion)}</td>
+            <td>${occ_usumodificacion === null ? 'N/A' : occ_usumodificacion}</td>
             `
             // Añadimos el evento `change` al checkbox
             const checkbox = rowItem.querySelector('.row-select');
@@ -127,71 +128,83 @@ $(document).ready(() => {
     const traerInformacionDetalleOrdenCompra = async (id) => {
         const { data } = await client.get(`/ordencompra-detalle/${id}`)
         $("#data-container-detalle tbody").empty()
+        $("#data-container-materiales tbody").empty()
 
         data.forEach(detalle => {
-            const { detalle_material, ocd_id, odm_id, ocd_orden, ocd_descripcion, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_usucreacion, ocd_usumodificacion, ocd_feccreacion, ocd_fecmodificacion } = detalle
+            const { detalle_material, ocd_id, odm_id, ocd_descripcion, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_usucreacion, ocd_usumodificacion, ocd_feccreacion, ocd_fecmodificacion, producto } = detalle
 
+            // creamos el row para la tabla de detalle de orden de compra
             const rowItem = document.createElement('tr')
             rowItem.className = 'row-orden-compra-detalle'
             rowItem.setAttribute('data-id', ocd_id)
 
             rowItem.innerHTML = `
-            <td>${detalle_material.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
-            <td>${ocd_orden}</td>
+            <td class="text-center">${detalle_material.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
             <td>${ocd_descripcion}</td>
-            <td>${ocd_cantidad}</td>
-            <td>${ocd_preciounitario}</td>
-            <td>${ocd_total}</td>
+            <td class="text-center">${producto?.uni_codigo || 'N/A'}</td>
+            <td class="text-center">${ocd_cantidad}</td>
+            <td class="text-center">${ocd_preciounitario}</td>
+            <td class="text-center">${ocd_total}</td>
             <td>${ocd_feccreacion === null ? 'No aplica' : parseDate(ocd_feccreacion)}</td>
             <td>${ocd_usucreacion === null ? 'No aplica' : ocd_usucreacion}</td>
             <td>${ocd_fecmodificacion === null ? 'No aplica' : parseDate(ocd_fecmodificacion)}</td>
             <td>${ocd_usumodificacion === null ? 'No aplica' : ocd_usumodificacion}</td>
             `
-            rowItem.addEventListener('click', function () {
-                traerInformacionCotizacionAsociada(odm_id)
-            })
+            // rowItem.addEventListener('click', function () {
+            //     traerInformacionCotizacionAsociada(odm_id)
+            // })
 
             $('#data-container-detalle tbody').append(rowItem)
+
+            // creamos el row para la tabla de materiales
+            if(detalle_material) {
+                const rowMaterial = document.createElement('tr')
+                rowMaterial.className = 'row-detalle-material'
+                rowMaterial.setAttribute('data-id', odm_id)
+
+                const {odm_descripcion, odm_cantidad, odm_cantidadpendiente, odm_observacion, odm_usucreacion, odm_feccreacion, odm_usumodificacion, odm_fecmodificacion} = detalle_material
+
+                rowMaterial.innerHTML = `
+                <td class="text-center">${detalle_material.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                <td>${odm_descripcion || 'N/A'}</td>
+                <td>${odm_observacion || 'N/A'}</td>
+                <td class="text-center">${producto?.uni_codigo || 'N/A'}</td>
+                <td>${odm_cantidad}</td>
+                <td>${odm_cantidadpendiente || ''}</td>
+                <td>${odm_feccreacion === null ? 'No aplica' : parseDate(odm_feccreacion)}</td>
+                <td>${odm_usucreacion === null ? 'No aplica' : odm_usucreacion}</td>
+                <td>${odm_fecmodificacion === null ? 'No aplica' : parseDate(odm_fecmodificacion)}</td>
+                <td>${odm_usumodificacion === null ? 'No aplica' : odm_usumodificacion}</td>
+                `
+                $("#data-container-materiales tbody").append(rowMaterial)
+            }
         })
     }
 
-    const traerInformacionCotizacionAsociada = async (id) => {
-        console.log(id)
-        const { data } = await client.get(`/ordencompra-cotizacion/${id}`)
-        console.log(data)
-        $("#data-container-cotizacion tbody").empty()
-
-        data.forEach(detalle => {
-            const { cotizacion } = detalle
-            const { proveedor } = cotizacion
-            const rowItem = document.createElement('tr')
-
-            rowItem.innerHTML = `
-            <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
-            <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
-            <td>${proveedor.prv_nrodocumento}</td>
-            <td>${proveedor.prv_nombre}</td>
-            <td>${cotizacion.coc_total}</td>
-            <td>
-                <span class="badge bg-primary">
-                    ${cotizacion.coc_estado}
-                </span>
-            </td>
-            <td>${cotizacion.coc_feccreacion === null ? 'No aplica' : parseDate(cotizacion.coc_feccreacion)}</td>
-            <td>${cotizacion.coc_usucreacion === null ? 'No aplica' : cotizacion.coc_usucreacion}</td>
-            <td>${cotizacion.coc_fecmodificacion === null ? 'No aplica' : parseDate(cotizacion.coc_fecmodificacion)}</td>
-            <td>${cotizacion.coc_usumodificacion === null ? 'No aplica' : cotizacion.coc_usumodificacion}</td>
-            `
-            $('#data-container-cotizacion tbody').append(rowItem)
+    // validacion que ordenes de compra seleccionadas no hayan sido ya aprobadas
+    function validarOrdenesCompra(){
+        let handleError = ""
+        selectedRows.forEach((value, key) => {
+            if(value.occ_estado == 'APR'){
+                handleError += `- La orden de compra ${value.occ_numero} ya fué aprobada\n`
+            }
         })
+        return handleError
     }
 
-    // gestion de aprobaciones
+    // gestion de aprobaciones, se debe seleccionar
     $("#btn-aprobar-ordenes-compra").on('click', function () {
-        console.log(selectedRows)
+        $("#tbl-aprobaciones-orden-compra tbody").empty()
         // si no hay ninguno seleccionado hacer validacion
         if (selectedRows.size === 0) {
             alert('Debe seleccionar al menos un registro para aprobar')
+            return
+        }
+
+        // validamos que no se agregen ordenes de compra ya aprobadas
+        const messagesError = validarOrdenesCompra()
+        if(messagesError.length !== 0){
+            alert(messagesError)
             return
         }
 
@@ -218,21 +231,19 @@ $(document).ready(() => {
         dialogAprobacionOrdenCompra.show()
     })
 
+    // accion al momento de apretar boton de aprobar
     $("#btn-aprobar-orden-compra").on('click', function () {
         const dialogModalValidacionClave = new bootstrap.Modal(document.getElementById('confirmarClavePresupuestoModal'))
         dialogModalValidacionClave.show()
-
         // vaceamos el input de clave
         $("#inputClaveValidacion").val('')
     })
 
+    // validación de clave
     $("#btn-validar-clave").on('click', async function () {
         const clave = $("#inputClaveValidacion").val().trim()
-
-        const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8}$/;
-
-        if (!regex.test(clave)) {
-            alert('La clave debe contener al menos 8 caracteres, una letra y un numero')
+        if(clave.length === 0){
+            alert("La clave no puede estar vacia")
             return
         }
 
@@ -245,8 +256,8 @@ $(document).ready(() => {
             formatData.ordenesCompra.push(value.occ_id)
         })
 
-        console.log(formatData)
         try {
+            console.log(formatData)
             await client.post('/ordencompra/aprobar-masivo', formatData)
             // cerramos el modal de clave
             const dialogModalValidacionClave = bootstrap.Modal.getInstance(document.getElementById('confirmarClavePresupuestoModal'))
@@ -273,7 +284,7 @@ $(document).ready(() => {
 
     // limpiar tablas
     function limpiarTablas() {
-        $('#data-container-cotizacion tbody').empty()
+        $('#data-container-materiales tbody').empty()
         $("#data-container-detalle tbody").empty()
     }
 })

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use App\Helpers\UtilHelper;
 use App\Proveedor;
 use App\ProveedorCuentaBanco;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class OrdenCompraController extends Controller
 {
@@ -427,15 +429,15 @@ class OrdenCompraController extends Controller
     public function aprobarMasivo(Request $request)
     {
         $user = auth()->user();
-        $clave = 'admin123';
 
         $validatedData = validator($request->all(), [
             'ordenesCompra' => 'required|array|min:1',
             'clave' => 'required|string',
         ])->validate();
 
-        if ($clave != $validatedData['clave']) {
-            return response()->json(['error' => 'La clave es incorrecta'], 400);
+        // validamos que la clave ingresada corresponde al usuario que realizó la petición
+        if(!Hash::check($request["clave"], $user->usu_contrasena)){
+            return response()->json(['error' => 'Clave: ' . $request["clave"] . 'La clave es incorrecta: ' . $user->usu_contrasena], 400);
         }
 
         // buscamos el trabajador relacionado con el usuario
@@ -449,6 +451,8 @@ class OrdenCompraController extends Controller
             $ordencompra = OrdenCompra::findOrFail($ordencompra);
             $ordencompra->update([
                 'tra_autorizado' => $trabajador_aprobacion->tra_id,
+                'occ_fecautorizacion' => Carbon::now(),
+                'occ_estado' => 'APR'
             ]);
         }
 

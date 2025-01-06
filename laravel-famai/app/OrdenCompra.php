@@ -23,6 +23,7 @@ class OrdenCompra extends Model
         'occ_formapago',
         'tra_solicitado',
         'tra_autorizado',
+        'occ_fecautorizacion',
         'occ_notas',
         'occ_total',
         'occ_subtotal',
