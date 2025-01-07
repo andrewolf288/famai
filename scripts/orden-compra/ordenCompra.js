@@ -110,7 +110,7 @@ $(document).ready(() => {
     // inicializamos la paginacion con datatable
     initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
 
-    // FUNCION PARA VER DETALLE DE COTIZACION
+    // FUNCION PARA VER DETALLE DE ORDEN DE COMPRA
     $('#data-container').on('click', '.btn-ordencompra-detalle', async function () {
         const id = $(this).data('ordencompra')
         try {
@@ -118,7 +118,7 @@ $(document).ready(() => {
             // llenamos la tabla con los datos
             $('#tbl-ordencompra-detalle tbody').empty()
             data.forEach(detalle => {
-                const {orden_compra} = detalle
+                const {orden_compra, producto} = detalle
                 const {moneda} = orden_compra
                 const {detalle_material} = detalle
                 const {orden_interna_parte} = detalle_material
@@ -128,6 +128,7 @@ $(document).ready(() => {
                         <td>${detalle.ocd_orden}</td>
                         <td>${orden_interna_parte.orden_interna?.odt_numero || 'N/A'}</td>
                         <td>${detalle.ocd_descripcion}</td>
+                        <td class="text-center">${producto ? producto.uni_codigo : 'N/A'}</td>
                         <td class="text-center">${detalle.ocd_cantidad || 'N/A'}</td>
                         <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_preciounitario || 'N/A'}</td>
                         <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_total || 'N/A'}</td>

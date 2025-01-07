@@ -167,11 +167,13 @@
                                 20134690080</td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">ORDEN DE COMPRA
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">ORDEN DE
+                                COMPRA
                             </td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">L- {{$ordencompra["occ_numero"]}}
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">L-
+                                {{ $ordencompra['occ_numero'] }}
                             </td>
                         </tr>
                     </table>
@@ -179,7 +181,7 @@
             </tr>
         </table>
         <hr style="margin-top: 5px">
-        <p style="font-size: 12px">Arequipa, {{$occ_fecha_formateada}}</p>
+        <p style="font-size: 12px">Arequipa, {{ $occ_fecha_formateada }}</p>
     </header>
     <div class="section-title">DATOS DEL PROVEEDOR</div>
     {{-- Table de datos del proveedor --}}
@@ -192,7 +194,8 @@
                 </div>
                 <div class="info-row">
                     <span class="label">RUC:</span>
-                    <span class="value">{{ $proveedor['prv_nrodocumento'] ? $proveedor['prv_nrodocumento'] : '' }}</span>
+                    <span
+                        class="value">{{ $proveedor['prv_nrodocumento'] ? $proveedor['prv_nrodocumento'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">DIRECCION:</span>
@@ -207,7 +210,8 @@
             <td>
                 <div class="info-row">
                     <span class="label">TLF:</span>
-                    <span class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}/{{ $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
+                    <span
+                        class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}/{{ $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CTA S/:</span>
@@ -219,7 +223,8 @@
                 </div>
                 <div class="info-row">
                     <span class="label">CTA BCO NACION S/:</span>
-                    <span class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</span>
+                    <span
+                        class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</span>
                 </div>
             </td>
         </tr>
@@ -230,31 +235,35 @@
             <td>
                 <div class="info-row">
                     <span class="label">FEC. ENTREGA:</span>
-                    <span class="value">{{$ordencompra["occ_fechaentrega"] ? DateTime::createFromFormat('Y-m-d', $ordencompra["occ_fechaentrega"])->format('d/m/Y'): ''}}</span>
+                    <span
+                        class="value">{{ $ordencompra['occ_fechaentrega'] ? DateTime::createFromFormat('Y-m-d', $ordencompra['occ_fechaentrega'])->format('d/m/Y') : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">ELABORADO POR:</span>
-                    <span class="value">{{$ordencompra["elaborador"] ? $ordencompra['elaborador']['tra_nombre'] : ''}}</span>
+                    <span
+                        class="value">{{ $ordencompra['elaborador'] ? $ordencompra['elaborador']['tra_nombre'] : '' }}</span>
                 </div>
             </td>
             <td>
                 <div class="info-row">
                     <span class="label">Moneda</span>
-                    <span class="value">{{$ordencompra['moneda']['mon_descripcion']}}</span>
+                    <span class="value">{{ $ordencompra['moneda']['mon_descripcion'] }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">FORMA DE PAGO</span>
-                    <span class="value">{{$ordencompra["occ_formapago"] ? $ordencompra["occ_formapago"] : '' }}</span>
+                    <span
+                        class="value">{{ $ordencompra['occ_formapago'] ? $ordencompra['occ_formapago'] : '' }}</span>
                 </div>
             </td>
             <td>
                 <div class="info-row">
                     <span class="label">REFERENCIA</span>
-                    <span class="value">{{$ordencompra["occ_referencia"] ? $ordencompra["occ_referencia"] : ''}}</span>
+                    <span
+                        class="value">{{ $ordencompra['occ_referencia'] ? $ordencompra['occ_referencia'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">ACTIVO:</span>
-                    <span class="value">{{$ordencompra["occ_activo"] == 1 ? 'Activo' : 'Inactivo'}}</span>
+                    <span class="value">{{ $ordencompra['occ_activo'] == 1 ? 'Activo' : 'Inactivo' }}</span>
                 </div>
             </td>
         </tr>
@@ -278,8 +287,8 @@
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
                     <td class="col-und">{{ $detalle['uni_codigo'] ? $detalle['uni_codigo'] : '' }}</td>
-                    <td class="col-precio">{{$detalle['ocd_preciounitario']}}</td>
-                    <td class="col-total">{{$detalle['ocd_total']}}</td>
+                    <td class="col-precio">{{ $detalle['ocd_preciounitario'] }}</td>
+                    <td class="col-total">{{ $detalle['ocd_total'] }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -291,14 +300,31 @@
                     <tr>
                         <td
                             style="width: 25%;height: 110px;font-size: 12px; font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;">
-                            SOLICITADO POR: {{$ordencompra["solicitador"] ? $ordencompra["solicitador"]['tra_nombre'] : ''}}</td>
+                            SOLICITADO POR:
+                            {{ $ordencompra['solicitador'] ? $ordencompra['solicitador']['tra_nombre'] : '' }}</td>
                         <td
-                            style="width: 75%;height: 110px;font-size: 12px; font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;">
-                            AUTORIZADO POR: {{$ordencompra["autorizador"] ? $ordencompra["autorizador"]['tra_nombre'] : ''}}</td>
+                            style="width: 75%; height: 110px; font-size: 12px; font-weight: bold; border: 1px solid #000000; vertical-align: top; padding: 5px; text-align: center;">
+                            <table style="width: 100%; height: 110px; border-collapse: collapse;">
+                                <tr>
+                                    @if ($ordencompra['elaborador'] && $ordencompra['elaborador']['tra_urlfirma'])
+                                        <td style="width: 50%; text-align: center; vertical-align: middle;">
+                                            <img src="{{ public_path('storage/' . $ordencompra['elaborador']['tra_urlfirma']) }}"
+                                                style="width: 120px; height: 100px;" alt="Firma Andrew" />
+                                        </td>
+                                    @endif
+                                    @if ($ordencompra['autorizador'] && $ordencompra['autorizador']['tra_urlfirma'])
+                                        <td style="width: 50%; text-align: center; vertical-align: middle;">
+                                            <img src="{{ public_path('storage/' . $ordencompra['autorizador']['tra_urlfirma']) }}"
+                                                style="width: 120px; height: 100px;" alt="Firma Andrew" />
+                                        </td>
+                                    @endif
+                                </tr>
+                            </table>
+                        </td>
                     </tr>
                     <tr>
                         <td style="font-size: 12px;height: 50px;font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;"
-                            colspan="2">NOTAS: {{$ordencompra["occ_notas"] ? $ordencompra["occ_notas"] : ''}}</td>
+                            colspan="2">NOTAS: {{ $ordencompra['occ_notas'] ? $ordencompra['occ_notas'] : '' }}</td>
                     </tr>
                     <tr>
                         <td style="font-size: 9px;height: 50px;border: 1px solid #000000;padding-left: 1px;"
@@ -319,12 +345,14 @@
                             style="height: 55px;border: 1px solid #000000;font-size: 12px;font-weight: bold;vertical-align: top;padding: 0px 1px 0px 1px">
                             <table style="border-collapse: collapse; width: 100%;">
                                 <tr>
-                                    <td style="text-align: left; padding: 0;">SUBTOT {{$ordencompra["moneda"]["mon_simbolo"]}}</td>
-                                    <td style="text-align: right; padding: 0;">{{$ordencompra["occ_subtotal"]}}</td>
+                                    <td style="text-align: left; padding: 0;">SUBTOT
+                                        {{ $ordencompra['moneda']['mon_simbolo'] }}</td>
+                                    <td style="text-align: right; padding: 0;">{{ $ordencompra['occ_subtotal'] }}</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align: left; padding: 0;">I.G.V. {{$ordencompra["occ_porcentajeimpuesto"]}}%</td>
-                                    <td style="text-align: right; padding: 0;">{{$ordencompra["occ_impuesto"]}}</td>
+                                    <td style="text-align: left; padding: 0;">I.G.V.
+                                        {{ $ordencompra['occ_porcentajeimpuesto'] }}%</td>
+                                    <td style="text-align: right; padding: 0;">{{ $ordencompra['occ_impuesto'] }}</td>
                                 </tr>
                             </table>
                         </td>
@@ -332,14 +360,15 @@
                     <tr>
                         <td
                             style="height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
-                            <span style="float: left;">TOTAL {{$ordencompra["moneda"]["mon_simbolo"]}}</span>
-                            <span style="float: right;">{{$ordencompra["occ_total"]}}</span>
+                            <span style="float: left;">TOTAL {{ $ordencompra['moneda']['mon_simbolo'] }}</span>
+                            <span style="float: right;">{{ $ordencompra['occ_total'] }}</span>
                         </td>
                     </tr>
                     <tr>
                         <td
                             style="height: 85px;border: 1px solid #000000;vertical-align: top;font-weight: bold;padding: 0px 2px 0px 2px;">
-                            <span style="font-size:10px;">Observación de Pago: {{$ordencompra["occ_observacionpago"] ? $ordencompra["occ_observacionpago"] : ''}}</span>
+                            <span style="font-size:10px;">Observación de Pago:
+                                {{ $ordencompra['occ_observacionpago'] ? $ordencompra['occ_observacionpago'] : '' }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -348,12 +377,14 @@
                             <table style="border-collapse: collapse; width: 100%;">
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Adelanto:</td>
-                                    <td style="text-align: right; padding: 0;">{{$ordencompra["occ_adelanto"] ? $ordencompra["occ_adelanto"] : ''}}</td>
+                                    <td style="text-align: right; padding: 0;">
+                                        {{ $ordencompra['occ_adelanto'] ? $ordencompra['occ_adelanto'] : '' }}</td>
                                 </tr>
                                 <br>
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Saldo:</td>
-                                    <td style="text-align: right; padding: 0;">{{$ordencompra["occ_saldo"] ? $ordencompra["occ_saldo"] : ''}}</td>
+                                    <td style="text-align: right; padding: 0;">
+                                        {{ $ordencompra['occ_saldo'] ? $ordencompra['occ_saldo'] : '' }}</td>
                                 </tr>
                             </table>
                         </td>

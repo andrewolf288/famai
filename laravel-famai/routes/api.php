@@ -22,6 +22,7 @@ use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\OrdenCompraDetalleController;
+use App\Http\Controllers\OrdenCompraExportController;
 use App\Http\Controllers\OrdenInternaMaterialesAdjuntosController;
 use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
@@ -396,7 +397,9 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 
-Route::get('script-update', function () {
-    $number = 142.67;
-    return UtilHelper::convertirNumeroALetras($number);
-});
+// Route::get('script-update', function () {
+//     $number = 142.67;
+//     return UtilHelper::convertirNumeroALetras($number);
+// });
+
+Route::get('script', [OrdenCompraExportController::class, 'export']);
