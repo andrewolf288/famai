@@ -47,6 +47,77 @@ class OrdenCompraController extends Controller
 
     public function findByNumero($numero) {}
 
+    private function generarPDF($occ_id, $imprimir_disgregado = false, $user)
+    {
+        // consultamos la orden de compra --- aqui necesito un id para consultar la orden de compra
+        $ordencomprafind = OrdenCompra::with('proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'elaborador', 'solicitador', 'autorizador')
+            ->where('occ_id', $occ_id)->first();
+
+        // consultamos el detalle de orden de compra
+        $detalleordencomprafind = OrdenCompraDetalle::with('producto', 'detalleMaterial.usuarioCreador', 'detalleMaterial.ordenInternaParte.ordenInterna')
+            ->where('occ_id', $occ_id)->get();
+
+        // cuentas bancarias
+        $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($ordencomprafind->proveedor->cuentasBancarias ?? []);
+
+        // aqui debemos hacer la logica para imprimir
+        $data = array();
+
+        if ($imprimir_disgregado) {
+            $data = [
+                'ordencompra' => $ordencomprafind,
+                'proveedor' => $ordencomprafind->proveedor,
+                'detalle_ordencompra' => $detalleordencomprafind->map(function ($detalle) {
+                    return [
+                        'pro_id' => $detalle->pro_id,
+                        'ocd_descripcion' => $detalle->ocd_descripcion,
+                        'ocd_preciounitario' => $detalle->ocd_preciounitario,
+                        'ocd_cantidad' => $detalle->ocd_cantidad,
+                        'ocd_total' => $detalle->ocd_total,
+                        'uni_codigo' => $detalle->producto ? $detalle->producto->uni_codigo : '',
+                        'odt_numero' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->odt_numero ?? null,
+                        'usu_nombre' => $detalle->detalleMaterial->usuarioCreador->usu_nombre ?? null
+                    ];
+                }),
+                'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
+                'usuarioImpresion' => $user->usu_codigo,
+                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+                'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+                'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+                'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
+                'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
+            ];
+
+            return Pdf::loadView('orden-compra.ordencompradisgregado', $data);
+        } else {
+            $data = [
+                'ordencompra' => $ordencomprafind,
+                'proveedor' => $ordencomprafind->proveedor,
+                'detalle_ordencompra' => $detalleordencomprafind->groupBy(function ($item) {
+                    return $item->pro_id . '-' . $item->ocd_preciounitario;
+                })->map(function ($group) {
+                    return [
+                        'pro_id' => $group->first()->pro_id,
+                        'ocd_descripcion' => $group->first()->ocd_descripcion,
+                        'ocd_preciounitario' => $group->first()->ocd_preciounitario,
+                        'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
+                        'ocd_cantidad' => $group->sum('ocd_cantidad'),
+                        'ocd_total' => $group->sum('ocd_total'),
+                    ];
+                })->values(),
+                'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
+                'usuarioImpresion' => $user->usu_codigo,
+                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+                'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+                'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+                'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
+                'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
+            ];
+
+            return Pdf::loadView('orden-compra.ordencompra', $data);
+        }
+    }
+
     public function store(Request $request)
     {
         $user = auth()->user();
@@ -182,76 +253,10 @@ class OrdenCompraController extends Controller
 
             DB::commit();
 
-            // debemos exportar en PDF
-            $imprimir_disgregado = $validatedData['imprimir_disgregado'];
-
-            // consultamos la orden de compra --- aqui necesito un id para consultar la orden de compra
-            $ordencomprafind = OrdenCompra::with('proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'elaborador', 'solicitador', 'autorizador')
-                ->where('occ_id', $ordencompra->occ_id)->first();
-
-            // consultamos el detalle de orden de compra
-            $detalleordencomprafind = OrdenCompraDetalle::with('producto')
-                ->where('occ_id', $ordencompra->occ_id)->get();
-
-            // cuentas bancarias
-            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($ordencomprafind->proveedor->cuentasBancarias ?? []);
-
-            // aqui debemos hacer la logica para imprimir
-            $data = array();
-
-            if ($imprimir_disgregado) {
-                $data = [
-                    'ordencompra' => $ordencomprafind,
-                    'proveedor' => $ordencomprafind->proveedor,
-                    'detalle_ordencompra' => $detalleordencomprafind->map(function ($detalle) {
-                        return [
-                            'pro_id' => $detalle->pro_id,
-                            'ocd_descripcion' => $detalle->ocd_descripcion,
-                            'ocd_preciounitario' => $detalle->ocd_preciounitario,
-                            'ocd_cantidad' => $detalle->ocd_cantidad,
-                            'ocd_total' => $detalle->ocd_total,
-                            'uni_codigo' => $detalle->producto ? $detalle->producto->uni_codigo : '',
-                        ];
-                    }),
-                    'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
-                    'usuarioImpresion' => $user->usu_codigo,
-                    'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                    'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-                    'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-                    'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-                    'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
-                ];
-            } else {
-                $data = [
-                    'ordencompra' => $ordencomprafind,
-                    'proveedor' => $ordencomprafind->proveedor,
-                    'detalle_ordencompra' => $detalleordencomprafind->groupBy(function ($item) {
-                        return $item->pro_id . '-' . $item->ocd_preciounitario;
-                    })->map(function ($group) {
-                        return [
-                            'pro_id' => $group->first()->pro_id,
-                            'ocd_descripcion' => $group->first()->ocd_descripcion,
-                            'ocd_preciounitario' => $group->first()->ocd_preciounitario,
-                            'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
-                            'ocd_cantidad' => $group->sum('ocd_cantidad'),
-                            'ocd_total' => $group->sum('ocd_total'),
-                        ];
-                    })->values(),
-                    'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
-                    'usuarioImpresion' => $user->usu_codigo,
-                    'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                    'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-                    'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-                    'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-                    'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
-                ];
-            }
-
-            $pdf = Pdf::loadView('orden-compra.ordencompra', $data);
-
+            // exportamos el PDF de la orden de compra generada
+            $pdf = $this->generarPDF($ordencompra->occ_id, $validatedData['imprimir_disgregado'], $user);
             return $pdf->download('ordencompra.pdf');
         } catch (Exception $e) {
-            // hacemos rollback y devolvemos el error
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
@@ -356,70 +361,7 @@ class OrdenCompraController extends Controller
             $occ_id = $request->input('occ_id');
             $imprimir_disgregado = $request->input('imprimir_disgregado');
 
-            // consultamos la orden de compra --- aqui necesito un id para consultar la orden de compra
-            $ordencomprafind = OrdenCompra::with('proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'elaborador', 'solicitador', 'autorizador')
-                ->where('occ_id', $occ_id)->first();
-
-            // consultamos el detalle de orden de compra
-            $detalleordencomprafind = OrdenCompraDetalle::with('producto')
-                ->where('occ_id', $occ_id)->get();
-
-            // cuentas bancarias
-            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($ordencomprafind->proveedor->cuentasBancarias ?? []);
-
-            // aqui debemos hacer la logica para imprimir
-            $data = array();
-
-            if ($imprimir_disgregado) {
-                $data = [
-                    'ordencompra' => $ordencomprafind,
-                    'proveedor' => $ordencomprafind->proveedor,
-                    'detalle_ordencompra' => $detalleordencomprafind->map(function ($detalle) {
-                        return [
-                            'pro_id' => $detalle->pro_id,
-                            'ocd_descripcion' => $detalle->ocd_descripcion,
-                            'ocd_preciounitario' => $detalle->ocd_preciounitario,
-                            'ocd_cantidad' => $detalle->ocd_cantidad,
-                            'ocd_total' => $detalle->ocd_total,
-                            'uni_codigo' => $detalle->producto ? $detalle->producto->uni_codigo : '',
-                        ];
-                    }),
-                    'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
-                    'usuarioImpresion' => $user->usu_codigo,
-                    'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                    'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-                    'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-                    'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-                    'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
-                ];
-            } else {
-                $data = [
-                    'ordencompra' => $ordencomprafind,
-                    'proveedor' => $ordencomprafind->proveedor,
-                    'detalle_ordencompra' => $detalleordencomprafind->groupBy(function ($item) {
-                        return $item->pro_id . '-' . $item->ocd_preciounitario;
-                    })->map(function ($group) {
-                        return [
-                            'pro_id' => $group->first()->pro_id,
-                            'ocd_descripcion' => $group->first()->ocd_descripcion,
-                            'ocd_preciounitario' => $group->first()->ocd_preciounitario,
-                            'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
-                            'ocd_cantidad' => $group->sum('ocd_cantidad'),
-                            'ocd_total' => $group->sum('ocd_total'),
-                        ];
-                    })->values(),
-                    'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
-                    'usuarioImpresion' => $user->usu_codigo,
-                    'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                    'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-                    'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-                    'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-                    'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
-                ];
-            }
-
-            $pdf = Pdf::loadView('orden-compra.ordencompra', $data);
-
+            $pdf = $this->generarPDF($occ_id, $imprimir_disgregado, $user);
             return $pdf->download('ordencompra.pdf');
         } catch (Exception $e) {
             return response()->json(["error" => $e->getMessage()], 500);
@@ -436,7 +378,7 @@ class OrdenCompraController extends Controller
         ])->validate();
 
         // validamos que la clave ingresada corresponde al usuario que realizó la petición
-        if(!Hash::check($request["clave"], $user->usu_contrasena)){
+        if (!Hash::check($request["clave"], $user->usu_contrasena)) {
             return response()->json(['error' => 'Clave: ' . $request["clave"] . 'La clave es incorrecta: ' . $user->usu_contrasena], 400);
         }
 

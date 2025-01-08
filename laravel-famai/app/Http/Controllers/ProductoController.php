@@ -75,6 +75,20 @@ class ProductoController extends Controller
         ]);
     }
 
+    public function findProductoByCodigo(Request $request)
+    {
+        $pro_codigo = $request->input('pro_codigo', null);
+        if ($pro_codigo === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+        $producto = Producto::where('pro_codigo', $pro_codigo)->first();
+        if ($producto) {
+            return response()->json($producto);
+        } else {
+            return response()->json(['error' => 'Producto no encontrado'], 404);
+        }
+    }
+
     public function findProductoByCodigoAlmacen(Request $request)
     {
         $user = auth()->user();
@@ -154,6 +168,7 @@ class ProductoController extends Controller
             ->select([
                 'T0.ItemCode as pro_codigo',
                 'T0.ItemName as pro_descripcion',
+                'T0.BuyUnitMsr as uni_codigo',
                 'T1.WhsCode',
                 DB::raw('MAX(T1.OnOrder) as alp_stock'),
                 'T0.CntUnitMsr',

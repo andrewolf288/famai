@@ -45,7 +45,7 @@ class OrdenCompraDetalleController extends Controller
 
     public function show($id)
     {
-        $detalleOrdenCompra = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda'])->findOrFail($id);
+        $detalleOrdenCompra = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda', 'detalleMaterial'])->findOrFail($id);
         return response()->json($detalleOrdenCompra);
     }
 

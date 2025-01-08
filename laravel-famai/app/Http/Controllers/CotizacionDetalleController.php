@@ -78,7 +78,7 @@ class CotizacionDetalleController extends Controller
 
     public function show($id)
     {
-        $detalleCotizacion = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])->findOrFail($id);
+        $detalleCotizacion = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda', 'detalleMaterial'])->findOrFail($id);
         return response()->json($detalleCotizacion);
     }
 

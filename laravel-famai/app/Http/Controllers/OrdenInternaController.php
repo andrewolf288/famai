@@ -22,9 +22,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use App\Reporte;
 use App\Trabajador;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DateTime;
-
-// use PDF;
 
 class OrdenInternaController extends Controller
 {
@@ -39,7 +38,7 @@ class OrdenInternaController extends Controller
         $sed_codigo = "10";
 
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
-        if($trabajador){
+        if ($trabajador) {
             $sed_codigo = $trabajador->sed_codigo;
         }
 
@@ -324,7 +323,7 @@ class OrdenInternaController extends Controller
             // iniciamos una transaccion
             DB::beginTransaction();
             $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
-            if($trabajador){
+            if ($trabajador) {
                 $sed_codigo = $trabajador->sed_codigo;
             }
 
@@ -773,12 +772,15 @@ class OrdenInternaController extends Controller
             'mode' => 'utf-8',
             'format' => 'A4',
             'orientation' => 'L',
-            'setAutoBottomMargin' => 'pad',
+            //'setAutoBottomMargin' => 'stretch',
+			'setAutoBottomMargin' => 'pad',
             'margin_left' => 1,
             'margin_right' => 1,
             'margin_top' => 1,
-            'margin-footer' => 1,
-            'margin_bottom' => 0,
+            //'margin_footer' => 15,
+			//'margin_bottom' => 15,
+			'margin_bottom' => 35,
+			'margin_footer' => 1
         ]);
 
         $footer = '

@@ -32,7 +32,6 @@ $(document).ready(() => {
     const cargarTipoMonedas = async () => {
         try {
             const { data } = await client.get('/monedasSimple')
-            console.log(data)
             const $monedaSelect = $('#monedaOrdenCompraInput')
 
             data.forEach((moneda) => {
@@ -185,7 +184,6 @@ $(document).ready(() => {
     }
 
     // ------- GESTION DE COTZACIONES DESPLEGABLE PARA CREACION DE ORDEN DE COMPRA -------
-
     async function initDetalleMateriales() {
         const modalDetalleMateriales = new bootstrap.Modal(document.getElementById('ordenMaterialesModal'))
         modalDetalleMateriales.show()
@@ -233,10 +231,10 @@ $(document).ready(() => {
                         </td>
                         <td>
                             <select class="form-select form-select-md seleccion-origen" data-indice="${index}">
-                                <option selected value="">Elige una opción</option>
+                                <option value="">Elige una opción</option>
                                 <option value="cotizacion">Cotización</option>
                                 <option value="orden_compra">Orden de Compra</option>
-                                <option value="nuevo_proveedor">Nuevo proveedor</option>
+                                <option selected value="nuevo_proveedor">Nuevo proveedor</option>
                             </select>
                         </td>
                         <td class="origen_cotizacion">
@@ -309,7 +307,35 @@ $(document).ready(() => {
     }
 
     // Abrir modal de cotizaciones y traer cotizaciones relacionadas a producto
-    $('#orden-materiales-container tbody').on('click', '.btn-cotizacion', function () {
+    $('#agrupadoDetalleOrdenCompraBody').on('click', '.btn-cotizacion', function () {
+        const row = $(this)
+        const producto = row.data('producto')
+        try {
+            const params = new URLSearchParams({
+                pro_id: producto
+            })
+            const urlCotizacion = `/cotizacion-detalle-findByProducto?${params.toString()}`
+
+            initPagination(
+                urlCotizacion,
+                initHistoricoCotizaciones,
+                dataTableOptionsHistorico,
+                10,
+                "#historico-cotizaciones-container",
+                "#historico-cotizaciones-container-body",
+                "#pagination-container-historico-cotizaciones"
+            )
+
+        } catch (error) {
+            console.log(error)
+            alert("Ocurrio un error al obtener la información de históricos")
+        }
+
+        const modalCotizaciones = new bootstrap.Modal(document.getElementById('historicoCotizacionesModal'))
+        modalCotizaciones.show()
+    })
+
+    $('#orden-materiales-container-body').on('click', '.btn-cotizacion', function () {
         const row = $(this)
         const index = row.data('indice')
         indiceSeleccionado = index
@@ -348,12 +374,10 @@ $(document).ready(() => {
     $("#btn-seleccionar-cotizacion").on('click', async function () {
         const dataTableCotizaciones = $("#historico-cotizaciones-container").DataTable()
         const filaSeleccionada = dataTableCotizaciones.rows({ selected: true }).nodes()
-
         let idDetalleCotizacion = null
 
-        if (filaSeleccionada) {
+        if (filaSeleccionada.length > 0) {
             idDetalleCotizacion = $(filaSeleccionada).data('detalle')
-            console.log(idDetalleCotizacion)
         }
 
         if (idDetalleCotizacion === null) {
@@ -363,13 +387,14 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(`/cotizacion-detalle-view/${idDetalleCotizacion}`)
-            console.log(data)
-            const detalle = detalleMateriales[indiceSeleccionado]
-            detalle["cotizacion"] = data
+            replicarPrecioUnitario(data.cod_preciounitario, data.detalle_material.pro_id)
 
-            // actualizamos el dom del detalle
-            const textButton = `${data.cotizacion?.proveedor?.prv_nombre || 'N/A'} - ${data.cotizacion?.moneda?.mon_simbolo || ''} ${data.cod_preciounitario || 'N/A'}`
-            $(`.btn-cotizacion[data-indice="${indiceSeleccionado}"]`).text(textButton);
+            // const detalle = detalleMateriales[indiceSeleccionado]
+            // detalle["cotizacion"] = data
+
+            // // actualizamos el dom del detalle
+            // const textButton = `${data.cotizacion?.proveedor?.prv_nombre || 'N/A'} - ${data.cotizacion?.moneda?.mon_simbolo || ''} ${data.cod_preciounitario || 'N/A'}`
+            // $(`.btn-cotizacion[data-indice="${indiceSeleccionado}"]`).text(textButton);
 
             const modalCotizaciones = bootstrap.Modal.getInstance(document.getElementById('historicoCotizacionesModal'))
             modalCotizaciones.hide()
@@ -404,7 +429,48 @@ $(document).ready(() => {
     }
 
     // Abrir modal de cotizaciones y traer cotizaciones relacionadas a producto
-    $('#orden-materiales-container tbody').on('click', '.btn-ordencompra', function () {
+    function replicarPrecioUnitario(precio_unitario, producto){
+        detallesOrdenCompra.forEach(detalle => {
+            if (detalle.pro_id == producto) {
+                const preciounitario = obtenerValorNumerico(precio_unitario)
+                const cantidad = obtenerValorNumerico(detalle.ocd_cantidad)
+                detalle["ocd_preciounitario"] = preciounitario
+                detalle["ocd_total"] = cantidad * preciounitario
+            }
+        })
+        renderizarVista()
+    }
+
+    $('#agrupadoDetalleOrdenCompraBody').on('click', '.btn-ordencompra', function () {
+        const row = $(this)
+        const producto = row.data('producto')
+
+        try {
+            const params = new URLSearchParams({
+                pro_id: producto
+            })
+            const urlOrdenCompra = `/ordencompra-detalle-findByProducto?${params.toString()}`
+
+            initPagination(
+                urlOrdenCompra,
+                initHistoricoOrdenesCompra,
+                dataTableOptionsHistorico,
+                10,
+                "#historico-ordenes-compra-container",
+                "#historico-ordenes-compra-container-body",
+                "#pagination-container-historico-ordenes-compra"
+            )
+
+        } catch (error) {
+            console.log(error)
+            alert("Ocurrio un error al obtener la información de históricos")
+        }
+
+        const modalOrdenesCompra = new bootstrap.Modal(document.getElementById('historicoOrdenesCompraModal'))
+        modalOrdenesCompra.show()
+    })
+
+    $('#orden-materiales-container-body').on('click', '.btn-ordencompra', function () {
         const row = $(this)
         const index = row.data('indice')
         indiceSeleccionado = index
@@ -457,18 +523,44 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(`/ordencompra-detalle-view/${idDetalleOrdenCompra}`)
-            const detalle = detalleMateriales[indiceSeleccionado]
-            detalle["orden_compra"] = data
+            replicarPrecioUnitario(data.ocd_preciounitario, data.detalle_material.pro_id)
 
-            // actualizamos el dom del detalle
-            const textButton = `${data.orden_compra?.proveedor?.prv_nombre || 'N/A'} - ${data.orden_compra?.moneda?.mon_simbolo || ''} ${data.ocd_preciounitario || 'N/A'}`
-            $(`.btn-ordencompra[data-indice="${indiceSeleccionado}"]`).text(textButton);
+            // const detalle = detalleMateriales[indiceSeleccionado]
+            // detalle["orden_compra"] = data
+
+            // // actualizamos el dom del detalle
+            // const textButton = `${data.orden_compra?.proveedor?.prv_nombre || 'N/A'} - ${data.orden_compra?.moneda?.mon_simbolo || ''} ${data.ocd_preciounitario || 'N/A'}`
+            // $(`.btn-ordencompra[data-indice="${indiceSeleccionado}"]`).text(textButton);
 
             const modalOrdenesCompra = bootstrap.Modal.getInstance(document.getElementById('historicoOrdenesCompraModal'))
             modalOrdenesCompra.hide()
         } catch (error) {
             console.log(error)
         }
+    })
+    // ---------------- GESTION DE NUEVO PRECIO UNITARIO ---------------
+    $('#agrupadoDetalleOrdenCompraBody').on('click', '.btn-precionuevo', function() {
+        const row = $(this)
+        const producto = row.data('producto')
+        $("#producto-id").val(producto)
+
+        const modalPrecioUnitarioModal = new bootstrap.Modal(document.getElementById('precioProductoModal'))
+        modalPrecioUnitarioModal.show()
+    })
+
+    $("#btn-replicar-precio-unitario").on('click', function() {
+        const id_producto = $("#producto-id").val()
+        const precio_unitario_input = $("#precio-unitario-input-modal").val().trim()
+
+        if(!esValorNumericoValidoYMayorQueCero(precio_unitario_input)){
+            alert("Debes ingresat un valor numérico mayor a 0")
+            return
+        }
+        replicarPrecioUnitario(precio_unitario_input, id_producto)
+        $("#precio-unitario-input-modal").val("")
+
+        const modalPrecioUnitarioModal = bootstrap.Modal.getInstance(document.getElementById('precioProductoModal'))
+        modalPrecioUnitarioModal.hide()
     })
 
     // ----------- GESTION DE CAMBIO DE OPCION ------------
@@ -751,12 +843,14 @@ $(document).ready(() => {
                     </div>
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm ${pro_id == null ? 'btn-secondary' : 'btn-primary'} detalle-historico" data-producto="${pro_id}" ${pro_id == null ? 'disabled' : ''}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-bookmark-fill" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M6 1h6v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8z"/>
-                            <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
-                            <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
-                        </svg>
+                    <button class="btn btn-sm ${pro_id == null ? 'btn-secondary' : 'btn-primary'} btn-cotizacion me-2" data-producto="${pro_id}" ${pro_id == null ? 'disabled' : ''}>
+                        CT
+                    </button>
+                    <button class="btn btn-sm ${pro_id == null ? 'btn-secondary' : 'btn-primary'} btn-ordencompra me-2" data-producto="${pro_id}" ${pro_id == null ? 'disabled' : ''}>
+                        OC
+                    </button>
+                    <button class="btn btn-sm ${pro_id == null ? 'btn-secondary' : 'btn-primary'} btn-precionuevo" data-producto="${pro_id}" ${pro_id == null ? 'disabled' : ''}>
+                        NP
                     </button>
                 </td>
             </tr>
@@ -768,7 +862,7 @@ $(document).ready(() => {
     // funcion para renderizar detalle agrupado de materiales
     function renderizarDisgregadoOrdenCompra() {
         $("#disgregadoDetalleOrdenCompraBody").empty()
-
+        console.log(detallesOrdenCompra)
         // recorremos el detalle material para completar la información
         detallesOrdenCompra.forEach((material, index) => {
             const { odm_id, producto, orden_interna_parte, odm_descripcion, odm_observacion, odm_feccreacion, odm_cantidadpendiente, ocd_cantidad, ocd_preciounitario, ocd_total } = material
@@ -892,6 +986,240 @@ $(document).ready(() => {
 
         return handleError;
     }
+
+    // -------- GESTIONAMOS EL INGRESO DE PRODUCTOS ADICIONALES ----------
+    function limpiarListaMateriales() {
+        $("#resultadosListaMateriales").empty()
+    }
+    // funcion cargar modal de productos
+    $('#addProductBtn').on('click', async (event) => {
+        // reseteamos el modal
+        $('#productosInput').val('')
+        limpiarListaMateriales()
+        $('#tbl-orden-compra-productos tbody').empty()
+        // mostramos el modal
+        $('#addProductModal').modal('show')
+    })
+
+    // al momento de ir ingresando valores en el input
+    $('#productosInput').on('input', debounce(async function () {
+        const query = $(this).val().trim()
+        if (query.length >= 3) {
+            await buscarMateriales(query)
+        } else {
+            limpiarListaMateriales()
+        }
+    }))
+
+    // al momento de presionar enter
+    // $('#productosInput').on('keydown', function (event) {
+    //     // si es la tecla de enter
+    //     if (event.keyCode === 13) {
+    //         event.preventDefault();
+    //         const isChecked = $('#checkAsociarProducto').is(':checked')
+    //         // si se desea agregar un producto sin código
+    //         if (isChecked) {
+    //             ingresarProductoSinCodigo()
+    //         } else {
+    //             return
+    //         }
+    //     }
+    // });
+
+    async function buscarMateriales(query) {
+        if (abortController) {
+            abortController.abort();
+        }
+        abortController = new AbortController();
+        const signal = abortController.signal;
+
+        try {
+            const queryEncoded = encodeURIComponent(query)
+            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
+            // Limpiamos la lista
+            limpiarListaMateriales()
+            // formamos la lista
+            data.forEach(material => {
+                const listItem = document.createElement('li')
+                listItem.className = 'list-group-item list-group-item-action'
+                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - Stock: ${material.alp_stock || '0.000000'} - Fec. Ult. Ingreso: ${material["UltimaFechaIngreso"] ? parseDateSimple(material["UltimaFechaIngreso"]) : 'No Aplica'}`
+                listItem.dataset.id = material.pro_id
+                listItem.addEventListener('click', () => seleccionarMaterial(material))
+                // agregar la lista completa
+                $('#resultadosLista').append(listItem)
+            })
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Petición abortada'); // Maneja el error de la petición abortada
+            } else {
+                console.error('Error al buscar materiales:', error);
+                alert('Error al buscar materiales. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
+            }
+        }
+    }
+
+    // function ingresarProductoSinCodigo() {
+    //     const pro_codigo = ""
+    //     const pro_descripcion = $.trim($('#productosInput').val())
+
+    //     if (pro_descripcion.length < 3) {
+    //         alert('La descripción debe tener al menos 3 caracteres')
+    //     } else {
+    //         $('#productosInput').val('')
+    //         const rowItem = document.createElement('tr')
+    //         rowItem.innerHTML = `
+    //             <td class="producto-codigo">${pro_codigo}</td>
+    //             <td>
+    //                 <input type="text" class="form-control descripcion-input" value='${pro_descripcion}'/>
+    //             </td>
+    //             <td class="text-center unidad-codigo">N/A</td>
+    //             <td class="text-center">
+    //                 <input type="number" class="form-control cantidad-input" value='1.00'/>
+    //             </td>
+    //             <td class="text-center">
+    //                 <input type="number" class="form-control precio-input" value=''/>
+    //             </td>
+    //             <td class="text-center total-input"></td>
+    //          `
+    //         const cantidad = rowItem.querySelector('.cantidad-input')
+    //         const precio = rowItem.querySelector('.precio-input')
+
+    //         cantidad.addEventListener('input', function () {
+    //             const total = parseFloat(cantidad.value) * parseFloat(precio.value);
+    //             if (!isNaN(total)) {
+    //                 rowItem.querySelector('.total-input').textContent = total.toFixed(2);
+    //             } else {
+    //                 rowItem.querySelector('.total-input').textContent = '';
+    //             }
+    //         })
+
+    //         precio.addEventListener('input', function () {
+    //             const total = parseFloat(cantidad.value) * parseFloat(precio.value);
+    //             if (!isNaN(total)) {
+    //                 rowItem.querySelector('.total-input').textContent = total.toFixed(2);
+    //             } else {
+    //                 rowItem.querySelector('.total-input').textContent = '';
+    //             }
+    //         });
+    //         $('#tbl-orden-compra-productos tbody').html(rowItem)
+    //     }
+    // }
+
+    async function seleccionarMaterial(material) {
+        const { pro_codigo, pro_descripcion, uni_codigo } = material
+        let producto
+
+        // consultamos si el material ya existe en nuestra base de datos
+        try {
+            const {data} = await client.get(`/productoByCodigo?pro_codigo=${pro_codigo}`)
+            producto = data
+        } catch (error) {
+            producto = null
+        }
+
+        // limpiamos el input
+        limpiarListaMateriales()
+        $('#productosInput').val('')
+
+        const rowItem = document.createElement('tr')
+        rowItem.innerHTML = `
+        <input class="producto-id" value="${producto ? producto.pro_id : null}" type="hidden"/>
+        <td class="producto-codigo">${producto ? producto.pro_codigo : pro_codigo}</td>
+        <td class="descripcion-input">${producto ? producto.pro_descripcion : pro_descripcion}</td>
+        <td class="text-center unidad-codigo">${producto ? producto.uni_codigo : uni_codigo}</td>
+        <td class="text-center">
+            <input type="number" class="form-control cantidad-input" value='1.00'/>
+        </td>
+        <td class="text-center">
+            <input type="number" class="form-control precio-input" value=''/>
+        </td>
+        <td class="text-center total-input"></td>
+        `
+
+        const cantidad = rowItem.querySelector('.cantidad-input')
+        const precio = rowItem.querySelector('.precio-input')
+
+        cantidad.addEventListener('input', function () {
+            const total = parseFloat(cantidad.value) * parseFloat(precio.value);
+            if (!isNaN(total)) {
+                rowItem.querySelector('.total-input').textContent = total.toFixed(2);
+            } else {
+                rowItem.querySelector('.total-input').textContent = '';
+            }
+        })
+
+        precio.addEventListener('input', function () {
+            const total = parseFloat(cantidad.value) * parseFloat(precio.value);
+            if (!isNaN(total)) {
+                rowItem.querySelector('.total-input').textContent = total.toFixed(2);
+            } else {
+                rowItem.querySelector('.total-input').textContent = '';
+            }
+        });
+
+        $('#tbl-orden-compra-productos tbody').html(rowItem)
+    }
+
+    // boton de agregar producto
+    $('#btn-agregar-producto').on('click', function () {
+        const productos = $('#tbl-orden-compra-productos tbody tr')
+        let handleError = ''
+        if (productos.length > 0) {
+            let fila = $(productos[0])
+
+            const pro_id = fila.find('.producto-id').val()
+            const uni_codigo = fila.find('.unidad-codigo').text()
+            const pro_codigo = fila.find('.producto-codigo').text()
+            const descripcion = fila.find('.descripcion-input').text().trim()
+            const precio_unitario = fila.find('.precio-input').val().trim()
+            const cantidad = fila.find('.cantidad-input').val().trim()
+            const total = fila.find('.total-input').text()
+
+            if (!esValorNumericoValidoYMayorQueCero(cantidad) || !esValorNumericoValidoYMayorQueCero(precio_unitario) || descripcion.length < 3) {
+                if (!esValorNumericoValidoYMayorQueCero(cantidad)) {
+                    handleError += '- La cantidad debe ser un valor numérico mayor a 0\n'
+                }
+                if (!esValorNumericoValidoYMayorQueCero(precio_unitario)) {
+                    handleError += '- El precio debe ser un valor numérico mayor a 0\n'
+                }
+            }
+
+            if (handleError.length > 0) {
+                alert(handleError)
+                return
+            } else {
+                const formatData = {
+                    odm_id: null,
+                    producto: {
+                        pro_id: pro_id,
+                        pro_codigo: pro_codigo,
+                        uni_codigo: uni_codigo
+                    },
+                    odm_descripcion: descripcion,
+                    odm_observacion: null,
+                    odm_feccreacion: null,
+                    odm_cantidadpendiente: obtenerValorNumerico(cantidad),
+                    orden_interna_parte: {
+                        orden_interna: {
+                            odt_numero: null,
+                        }
+                    },
+                    ocd_cantidad: obtenerValorNumerico(cantidad),
+                    ocd_preciounitario: obtenerValorNumerico(precio_unitario),
+                    ocd_total: obtenerValorNumerico(total),
+                }
+
+                detallesOrdenCompra.push(formatData)
+                renderizarVista()
+
+                // ocultamos el modal de ingreso de información de producto
+                const getInstanceModal = bootstrap.Modal.getInstance(modalAgregarProducto)
+                getInstanceModal.hide()
+            }
+        } else {
+            alert('Por favor, agregue un producto')
+        }
+    })
 
     async function crearOrdenCompra() {
         // datos del proveedor
@@ -1058,7 +1386,7 @@ $(document).ready(() => {
         }
 
         console.log(formatDataOrdenCompra)
-        
+
         try {
             const response = await client.post('ordenescompra', formatDataOrdenCompra, {
                 headers: {

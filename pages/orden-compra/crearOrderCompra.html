@@ -1,8 +1,4 @@
 <div class="row">
-    <!-- Columna para jalar de cotizacion -->
-    <!-- <div class="col-12 d-flex flex-row justify-content-center mb-3">
-        <button class="btn btn-success" id="btn-cotizaciones">Cotizaciones</button>
-    </div> -->
     <!-- Columna para Proveedor -->
     <div class="col-md-6 col-12">
         <div class="card">
@@ -191,13 +187,13 @@
                 <thead>
                     <tr>
                         <th class="text-center col-1">Item</th>
-                        <th class="col-5">Descripción</th>
+                        <th class="col-4">Descripción</th>
                         <th class="text-center col-1">Unidad</th>
                         <th class="text-center col-1">Cant. req.</th>
                         <th class="text-center col-1">Cant. ped.</th>
                         <th class="text-center col-1">Prec. unitario s/IGV</th>
                         <th class="text-center col-1">Prec. total s/IGV</th>
-                        <th class="text-center col-1">Acciones</th>
+                        <th class="text-center col-2">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="agrupadoDetalleOrdenCompraBody">
@@ -212,6 +208,13 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title">Disgregado detalle orden</h5>
+            <button class="btn btn-success" id="addProductBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                    <path
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                </svg>
+            </button>
         </div>
         <div class="card-body">
             <table class="table" id="disgregadoDetalleOrdenCompraTable">
@@ -319,7 +322,7 @@
 </div>
 
 <!-- Modal cotizaciones -->
-<!-- <div class="modal fade" id="historicoCotizacionesModal" tabindex="-1" aria-labelledby="historicoCotizacionesModalLabel" aria-hidden="true">
+<div class="modal fade" id="historicoCotizacionesModal" tabindex="-1" aria-labelledby="historicoCotizacionesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
@@ -354,10 +357,10 @@
             </div>
         </div>
     </div>
-</div> -->
+</div>
 
 <!-- Modal de ordenes de compra -->
-<!-- <div class="modal fade" id="historicoOrdenesCompraModal" tabindex="-1" aria-labelledby="historicoOrdenesCompraModalLabel" aria-hidden="true">
+<div class="modal fade" id="historicoOrdenesCompraModal" tabindex="-1" aria-labelledby="historicoOrdenesCompraModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
@@ -392,7 +395,30 @@
             </div>
         </div>
     </div>
-</div> -->
+</div>
+
+<!-- Modal para ingresar precio de producto -->
+ <div class="modal fade" id="precioProductoModal" tabindex="-1" aria-labelledby="precioProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="precioProductoModalLabel">Precio unitario producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="text" id="producto-id" value="" hidden>
+                    <label for="precio-unitario-input-modal">Precio unitario s/igv</label>
+                    <input type="number" class="form-control" id="precio-unitario-input-modal">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-replicar-precio-unitario">Replicar precio</button>
+            </div>
+        </div>
+    </div>
+ </div>
 
 <!-- Modal ingresar información de proveedor y precio -->
 <!-- <div class="modal fade" id="nuevoProveedorModal" tabindex="-1" aria-labelledby="nuevoProveedorModalLabel" aria-hidden="true">
@@ -435,36 +461,33 @@
     </div>
 </div> -->
 
-<!-- DIALOG DE DETALLE DE MATERIALES -->
-<div class="modal fade" id="modalDetalleMaterialModal" tabindex="-1" aria-labelledby="modalDetalleMaterialModalLabel">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content" style="z-index: 1056;">
+<!-- DIALOG AGREGAR PRODUCTOS -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalDetalleMaterialModalLabel">Detalle de materiales orden interna</h5>
+                <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>
-                    <table id="tbl-despliegue-materiales" class="table mt-3 table-striped nowrap">
-                        <thead>
-                            <tr>
-                                <th>Agrupar</th>
-                                <th class="col-1">OT</th>
-                                <th class="col-1">Fec. Creación</th>
-                                <th class="col-2">Producto</th>
-                                <th class="col-2">Obs Producto</th>
-                                <th class="text-center col-1">Und.</th>
-                                <th class="text-center col-1">Cant. Req.</th>
-                                <th class="text-center col-1">Cant. Ped.</th>
-                                <th class="text-center col-1">Precio s/IGV</th>
-                                <th class="text-center col-1">Total s/IGV</th>
-                                <th class="text-center col-1">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbl-despliegue-materiales-body">
-                        </tbody>
-                    </table>
-                </div>
+                <table id="tbl-orden-compra-productos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-1">Código</th>
+                            <th class="col-4">Descripción</th>
+                            <th class="col-1 text-center">Und.</th>
+                            <th class="col-2 text-center">Cantidad</th>
+                            <th class="col-2 text-center">Precio unitario s/IGV</th>
+                            <th class="col-2 text-center">Total s/IGV</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
             </div>
         </div>
     </div>

@@ -131,6 +131,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('productos', [ProductoController::class, 'store']);
     Route::put('producto/{id}', [ProductoController::class, 'update']);
     Route::get('/productosByQuery', [ProductoController::class, 'findProductoByQuery']);
+    Route::get('/productoByCodigo', [ProductoController::class, 'findProductoByCodigo']);
 });
 
 // rutas de almacenes
