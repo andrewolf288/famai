@@ -7,6 +7,8 @@ $(document).ready(() => {
 
     // variables para el manejo de datatable
     let dataTable;
+    let dataTableCotizaciones;
+    let dataTableOrdenesCompra;
     const dataContainer = $('#data-container')
 
     // URL ENDPOINT
@@ -69,7 +71,6 @@ $(document).ready(() => {
             style: 'multi',
             selector: 'td.form-check-input'
         },
-        // order: [[3, 'asc']],
     }
 
     const dataTableOptionsHistorico = {
@@ -78,6 +79,88 @@ $(document).ready(() => {
         paging: false,
         searching: false,
         info: true,
+    }
+
+    const dataTableOptionsCotizaciones = {
+        detroy: true,
+        reponsive: true,
+        paging: true,
+        pageLength: 50,
+        lengthMenu: [50, 100, 250, 500],
+        searching: false,
+        info: true,
+        language: {
+            lengthMenu: "Mostrar _MENU_ registros por página",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            search: "Buscar:",
+            zeroRecords: "No se encontraron resultados",
+            select: {
+                rows: {
+                    _: " - %d filas seleccionadas",
+                    0: " - Ninguna fila seleccionada",
+                    1: " - 1 fila seleccionada"
+                }
+            },
+        },
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false,
+            },
+            {
+                orderable: false,
+                render: DataTable.render.select(),
+                targets: 1,
+                className: 'form-check-input'
+            }
+        ],
+        select: {
+            style: 'single',
+            selector: 'td.form-check-input'
+        },
+    }
+
+    const dataTableOptionsOrdenesCompra = {
+        detroy: true,
+        reponsive: true,
+        paging: true,
+        pageLength: 50,
+        lengthMenu: [50, 100, 250, 500],
+        searching: false,
+        info: true,
+        language: {
+            lengthMenu: "Mostrar _MENU_ registros por página",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            search: "Buscar:",
+            zeroRecords: "No se encontraron resultados",
+            select: {
+                rows: {
+                    _: " - %d filas seleccionadas",
+                    0: " - Ninguna fila seleccionada",
+                    1: " - 1 fila seleccionada"
+                }
+            },
+        },
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false,
+            },
+            {
+                orderable: false,
+                render: DataTable.render.select(),
+                targets: 1,
+                className: 'form-check-input'
+            }
+        ],
+        select: {
+            style: 'single',
+            selector: 'td.form-check-input'
+        },
     }
 
     // gestion de multiselect
@@ -120,11 +203,12 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(URL)
+            console.log(data)
             despliegueMaterialesResumido = data
             let content = ''
             data.forEach((material, index) => {
                 // if (material.detalle !== undefined) {
-                const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle } = material
+                const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada } = material
                 content += `
                 <tr data-index="${index}">
                     <td></td>
@@ -140,14 +224,14 @@ $(document).ready(() => {
                     <td class="text-center">
                         <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>Ver histórico</button>
                     </td>
-                    <td>buscarProveedorBySUNAT
+                    <td>
                         <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
                             ${detalle[0].responsable?.tra_nombre || 'Sin responsable'}
                         </button>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-primary position-relative btn-cotizado" data-index-detalle="${index}">
-                            Cotizaciones
+                            ${cotizacion_seleccionada ? `${cotizacion_seleccionada.cotizacion.proveedor.prv_nombre} - ${cotizacion_seleccionada.cotizacion.moneda.mon_simbolo} ${cotizacion_seleccionada.cod_preciounitario}` : 'Selecciona una cotización'}
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 ${cotizaciones_count}
                             </span>
@@ -414,34 +498,36 @@ $(document).ready(() => {
         loadModalAtendido.show()
     })
 
-    // ------------ DETALLE DE COTIZACIONES ------------
+    // ------------ DETALLE DE COTIZACIONES DE LOS MATERIALES AGRUPADOS------------
     $("#data-container-body").on('click', '.btn-cotizado', async function () {
         const indexDetalle = $(this).data('index-detalle')
-        let params
-        if (indexDetalle === undefined) {
-            params = new URLSearchParams({
-                param: [$(this).data('detalle')].join(','),
-            })
-        } else {
-            const detalleMaterial = despliegueMaterialesResumido[indexDetalle]
-            params = new URLSearchParams({
-                param: detalleMaterial.detalle.map(detalle => detalle.odm_id).join(','),
-            })
-        }
 
+        // obtenemos los ids de los detalles correspondientes
+        const params = obtenerIdDetallesMaterialByIndex(indexDetalle)
+
+        // debemos destruir el datatable si existe relacionado al datacontainer
+        const dataContainer = $("#data-container-cotizacion")
+        detroyDataTable(dataContainer)
+
+        // realizamos la llamada API
         const { data } = await client.get(`/ordeninternamateriales/cotizacion?${params.toString()}`)
         $("#data-container-cotizacion tbody").empty()
 
         data.forEach(detalle => {
-            const { cotizacion } = detalle
+            const { cotizacion, producto } = detalle
             const { proveedor, moneda } = cotizacion
             const rowItem = document.createElement('tr')
+            rowItem.classList.add(`${detalle.cod_estado !== null ? 'table-success' : 'table-light'}`)
 
             rowItem.innerHTML = `
+            <td>
+                <input type="text" class="id-detalle-cotizacion" value="${detalle.cod_id}" hidden>
+            </td>
+            <td></td>
             <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
             <td>${cotizacion.coc_numero}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
-            <td>
+            <td class="text-center">
                 <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : cotizacion.coc_estado === 'RPR' ? 'bg-primary' : 'bg-success'}">
                     ${cotizacion.coc_estado}
                 </span>
@@ -449,34 +535,63 @@ $(document).ready(() => {
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
             <td>${detalle.cod_descripcion}</td>
-            <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
+            <td>${moneda?.mon_descripcion || ''}</td>
             <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_preciounitario || 'N/A'}</td>
-            <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_total || 'N/A'}</td>
-            <td class="text-center">${detalle.cod_tiempoentrega ? `${detalle.cod_tiempoentrega} día(s)` : 'N/A'}</td>
             `
             $('#data-container-cotizacion tbody').append(rowItem)
         })
 
+        // inicializamos el datatable
+        dataTableCotizaciones = dataContainer.DataTable(dataTableOptionsCotizaciones)
+
+        // abrimos el modal de cotizaciones
         const loadModalCotizado = new bootstrap.Modal(document.getElementById('cotizadoModal'))
         loadModalCotizado.show()
+    })
+
+    // funcion para seleccionar cotizacion
+    $("#btn-seleccionar-cotizacion").on('click', async function () {
+        const filasSeleccionadas = dataTableCotizaciones.rows({ selected: true }).nodes();
+        const valoresSeleccionados = [];
+
+        // recolectamos las cotizaciones
+        $(filasSeleccionadas).each(function (index, node) {
+            const valor = $(node).find('.id-detalle-cotizacion').val();
+            valoresSeleccionados.push(valor);
+        });
+
+        if (valoresSeleccionados.length === 0) {
+            alert('Debe seleccionar una cotización')
+            return
+        }
+
+        try {
+            const {data} = await client.put(`/cotizacion-detalle/seleccionar/${valoresSeleccionados[0]}`)
+
+            // actualizamos el DOM
+
+            // cerramos el modal de cotizaciones
+            const loadModalCotizaciones = bootstrap.Modal.getInstance(document.getElementById('cotizadoModal'))
+            loadModalCotizaciones.hide()
+
+        } catch(error) {
+            console.log(error)
+            alert("Ocurrio un error al seleccionar la cotización")
+        }
     })
 
     // ------------- DETALLE DE ORDEN DE COMPRAS --------------
     $("#data-container-body").on('click', '.btn-ordenado', async function () {
         const indexDetalle = $(this).data('index-detalle')
-        let params
-        if (indexDetalle === undefined) {
-            params = new URLSearchParams({
-                param: [$(this).data('detalle')].join(','),
-            })
-        } else {
-            const detalleMaterial = despliegueMaterialesResumido[indexDetalle]
-            params = new URLSearchParams({
-                param: detalleMaterial.detalle.map(detalle => detalle.odm_id).join(','),
-            })
-        }
-        const { data } = await client.get(`/ordeninternamateriales/ordencompra?${params.toString()}`)
 
+        // obtenemos los ids de los detalles correspondientes
+        const params = obtenerIdDetallesMaterialByIndex(indexDetalle)
+
+        // debemos destruir el datatable si existe relacionado al datacontainer
+        const dataContainer = $("#data-container-ordencompra")
+        detroyDataTable(dataContainer)
+
+        const { data } = await client.get(`/ordeninternamateriales/ordencompra?${params.toString()}`)
         $("#data-container-ordencompra tbody").empty()
 
         data.forEach(detalle => {
@@ -485,6 +600,8 @@ $(document).ready(() => {
             const rowItem = document.createElement('tr')
 
             rowItem.innerHTML = `
+            <td></td>
+            <td></td>
             <td>${parseDateSimple(orden_compra.occ_fecha)}</td>
             <td>${orden_compra.occ_numero}</td>
             <td>
@@ -502,6 +619,10 @@ $(document).ready(() => {
             $('#data-container-ordencompra tbody').append(rowItem)
         })
 
+        // inicializamos el datatable
+        dataTableOrdenesCompra = dataContainer.DataTable(dataTableOptionsOrdenesCompra)
+
+        // abrimos el modal de ordendes de compra
         const loadModalOrdenado = new bootstrap.Modal(document.getElementById('ordenadoModal'))
         loadModalOrdenado.show()
     })
@@ -660,7 +781,7 @@ $(document).ready(() => {
         const formatData = {
             productos: productosCotizacion
         }
-        const { data } = await client.post('/ordencompra-detalle/ultimo-proveedor', formatData)
+        const { data } = await client.post('/ultimas-compras/producto', formatData)
 
         // reset de los valores de ingreso
         limpiarLista()
@@ -670,6 +791,7 @@ $(document).ready(() => {
         $('#tbl-cotizaciones-materiales tbody').empty()
 
         // debemos agregar a la información de proveedores
+        console.log(data)
         data.forEach(proveedor => {
             const { prv_id, prv_nrodocumento, prv_direccion, prv_nombre, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto, prv_correo } = proveedor
             const row = `
@@ -721,7 +843,6 @@ $(document).ready(() => {
         // debemos ingresar la informacion de detalle a cotizar
         $('#tbl-cotizaciones-materiales tbody').empty()
         let content = ''
-        console.log(detalleCotizacion)
         detalleCotizacion.forEach((detalle, index) => {
             if (detalle.odm_id === undefined) {
                 const observacion = unionObservaciones(detalle.detalle)
@@ -765,7 +886,7 @@ $(document).ready(() => {
             } else {
                 content = `
                 <tr data-index="${index}">
-                    <td>${detalle.orden_interna_parte?.orden_interna?.odt_numero}</td>
+                    <td>${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
                     <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
                     <td>${detalle.odm_descripcion}</td>
                     <td>
@@ -1088,8 +1209,9 @@ $(document).ready(() => {
             } else {
                 detalleMateriales.push({
                     cod_orden: cod_orden,
+                    pro_id: detalleIndex.pro_id,
                     odm_id: detalleIndex.odm_id,
-                    uni_codigo: '',
+                    uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
                     cod_descripcion: detalleIndex.odm_descripcion,
                     cod_observacion: observacion,
                     cod_cantidad: detalleIndex.odm_cantidad
@@ -1099,7 +1221,8 @@ $(document).ready(() => {
                 if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
                     detalleMateriales.push({
                         cod_orden: cod_orden,
-                        uni_codigo: '',
+                        pro_id: detalleIndex.pro_id,
+                        uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
                         cod_descripcion: detalleIndex.odm_descripcion,
                         cod_observacion: observacion,
                         cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
@@ -1115,7 +1238,7 @@ $(document).ready(() => {
             detalle_materiales: detalleMateriales
         }
 
-        // console.log(formatData)
+        console.log(formatData)
         // return
         if (generarCotizacion) {
             try {
@@ -1178,12 +1301,6 @@ $(document).ready(() => {
             }
         }
     })
-
-    function showModalPreview(pdfUrl) {
-        document.getElementById('pdf-frame').src = pdfUrl;
-        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
-        modal.show();
-    }
 
     // Funcion para exportar en txt
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-text', async (event) => {
@@ -1252,9 +1369,29 @@ $(document).ready(() => {
         }
     })
 
+    // -------- FUNCIONES UTILITARIAS PARA ESTE SCRIPT -------------
+
+    // obtener ids de detalle de materiales segun indice de agrupado
+    function obtenerIdDetallesMaterialByIndex(indexDetalle){
+        const detalleMaterial = despliegueMaterialesResumido[indexDetalle]
+        return params = new URLSearchParams({
+            param: detalleMaterial.detalle.map(detalle => detalle.odm_id).join(','),
+        })
+    }
+
+    // mostrar modal previsualizacion de txt
     function showModalPreviewText(pdfUrl) {
         document.getElementById('txt-frame').src = pdfUrl;
         const modal = new bootstrap.Modal(document.getElementById("previewTXTModal"));
         modal.show();
     }
+
+    // mostrar modal previsualizacion de pdf
+    function showModalPreview(pdfUrl) {
+        document.getElementById('pdf-frame').src = pdfUrl;
+        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
+        modal.show();
+    }
+
+
 })

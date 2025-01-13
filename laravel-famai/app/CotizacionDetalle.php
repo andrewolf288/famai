@@ -26,6 +26,7 @@ class CotizacionDetalle extends Model
         'cod_cotizar',
         'cod_activo',
         'cod_parastock',
+        'cod_estado',
         'cod_usucreacion',
         'cod_feccreacion',
         'cod_usumodificacion',

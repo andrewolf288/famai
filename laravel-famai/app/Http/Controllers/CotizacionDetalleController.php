@@ -35,7 +35,7 @@ class CotizacionDetalleController extends Controller
         )
             ->where('coc_id', $id)
             ->get();
-        
+
         // Filtrar agrupados y no agrupados
         $agrupado = $detalleCotizacion->filter(function ($detalle) {
             return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
@@ -200,5 +200,36 @@ class CotizacionDetalleController extends Controller
             'data' => $cotizacionDetalle->items(),
             'count' => $cotizacionDetalle->total()
         ]);
+    }
+
+    // funcion para seleccionar cotizacion detalle
+    public function seleccionarCotizacionDetalle($id)
+    {
+        $cotizacionDetalle = CotizacionDetalle::findOrFail($id);
+
+        $arreglo_identificadores = [];
+
+        if ($cotizacionDetalle->pro_id !== null) {
+            $cotizacionesDetalleRelacionadas = CotizacionDetalle::where('coc_id', $cotizacionDetalle->coc_id)
+                ->where('pro_id', $cotizacionDetalle->pro_id)
+                ->get();
+
+            $arreglo_identificadores = $cotizacionesDetalleRelacionadas->pluck('odm_id')->toArray();
+        } else {
+            $arreglo_identificadores = [$cotizacionDetalle->odm_id];
+        }
+
+        // buscamos todos los registros de cotizacion detalle con los identificadores obtenidos
+        CotizacionDetalle::whereIn('odm_id', $arreglo_identificadores)
+            ->update([
+            'cod_estado' => null
+        ]);
+
+        // actualizamos el detalle de cotizacion con el estado de "SELECCIONANDO MANUALMENTE"
+        $cotizacionDetalle->update([
+            'cod_estado' => 'SML'
+        ]);
+
+        return response()->json(['success' => 'Cotizacion seleccionada correctamente.'], 200);
     }
 }

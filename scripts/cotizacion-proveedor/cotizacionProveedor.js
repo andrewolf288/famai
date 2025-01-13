@@ -320,7 +320,6 @@ $(document).ready(function () {
 
     // funcion para guardar cotizacion
     $("#btn-guardar-cotizacion-proveedor").on('click', async function (e) {
-        console.log("entro aqui")
         e.preventDefault()
         // datos del proveedor
         const idProveedorInput = $("#idProveedorInput").val().trim()
@@ -465,6 +464,7 @@ $(document).ready(function () {
                         }
                     }
                     console.log(formatData)
+                    // return
                     const response = await axios.put(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`, formatData, {
                         headers: {
                             'Accept': 'application/pdf'

@@ -38,6 +38,6 @@ class ProductoProveedor extends Model
     // proveedor
     public function proveedor()
     {
-        return $this->belongsTo(Proveedor::class, 'prv_id')->selectFields();
+        return $this->belongsTo(Proveedor::class, 'prv_id');
     }
 }

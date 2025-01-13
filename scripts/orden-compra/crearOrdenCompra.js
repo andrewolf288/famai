@@ -798,7 +798,8 @@ $(document).ready(() => {
         // agrupamos de la siguiente manera
         const formatDataAgrupada = Object.values(
             detallesOrdenCompra.reduce((acumulador, item) => {
-                const key = `${item.pro_id}-${item.ocd_preciounitario}`
+
+                const key = item.pro_id !== null ? `${item.pro_id}-${item.ocd_preciounitario}` : obtenerIdUnico()
 
                 if (!acumulador[key]) {
                     acumulador[key] = {

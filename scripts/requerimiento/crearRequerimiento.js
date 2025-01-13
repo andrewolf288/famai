@@ -89,7 +89,7 @@ $(document).ready(function () {
 
     const initInformacion = async () => {
         try {
-            showLoaderModal()
+            // showLoaderModal()
             await Promise.all([
                 cargarAreas(),
                 cargarResponsables(),
@@ -99,7 +99,7 @@ $(document).ready(function () {
             console.log(error)
             alert("Error al cargar los datos")
         } finally {
-            hideLoaderModal()
+            // hideLoaderModal()
 
         }
     }
@@ -520,7 +520,7 @@ $(document).ready(function () {
 
         // formar data
         console.log(formatData)
-
+        // return
         const formData = new FormData()
         formData.append('data', JSON.stringify(formatData))
 

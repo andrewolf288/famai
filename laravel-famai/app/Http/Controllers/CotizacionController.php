@@ -432,65 +432,70 @@ class CotizacionController extends Controller
         return response()->json($cotizacion);
     }
 
+    // generar PDF
+    private function generarPDF($coc_id, $user = null)
+    {
+        $cotizacion = Cotizacion::with(['proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'solicitante'])->findOrFail($coc_id);
+
+        $detalleCotizacion = CotizacionDetalle::with(['producto'])
+            ->where('coc_id', $cotizacion->coc_id)
+            ->where('cod_cotizar', 1)
+            ->get();
+
+        // Filtrar agrupados y no agrupados
+        $agrupado = $detalleCotizacion->filter(function ($detalle) {
+            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+        });
+
+        $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cotizacion->proveedor->cuentasBancarias ?? []);
+
+        $agrupado_detalle = $agrupado
+            ->groupBy('cod_orden')
+            ->map(function ($detalle, $cod_orden) {
+                return [
+                    'pro_id' => $detalle->first()->pro_id,
+                    'cod_orden' => $cod_orden,
+                    'cod_descripcion' => $detalle->first()->cod_descripcion,
+                    'cod_observacion' => $detalle->first()->cod_observacion,
+                    'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
+                    'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
+                    'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
+                    'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
+                    'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                    'cod_total' => $detalle->sum('cod_total'),
+                    'flag_selecto' => true
+                ];
+            })
+            ->values();
+
+        $pdfOptions = [
+            'paper' => 'a4',
+            'orientation' => 'landscape',
+        ];
+
+        $data = [
+            'cotizacion' => $cotizacion,
+            'proveedor' => $cotizacion->proveedor,
+            'detalle_cotizacion' => $agrupado_detalle,
+            'coc_fecha_formateada' => DateHelper::parserFecha($cotizacion->coc_fechacotizacion),
+            'usuarioImpresion' => $user ? $user->usu_codigo : null,
+            'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+            'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+            'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+            'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
+            'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
+        ];
+
+        return Pdf::loadView('cotizacion.cotizacionformal', $data)
+            ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+    }
+
+    // funcion para exportar PDF de cotizacion
     public function exportarPDF(Request $request)
     {
         $user = auth()->user();
         try {
-            $coc_id = $request->input('coc_id');
-            $cotizacion = Cotizacion::with(['proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'solicitante'])->findOrFail($coc_id);
-
-            $detalleCotizacion = CotizacionDetalle::with(['producto'])
-                ->where('coc_id', $cotizacion->coc_id)
-                ->where('cod_cotizar', 1)
-                ->get();
-
-            // Filtrar agrupados y no agrupados
-            $agrupado = $detalleCotizacion->filter(function ($detalle) {
-                return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
-            });
-
-            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cotizacion->proveedor->cuentasBancarias ?? []);
-
-            $agrupado_detalle = $agrupado
-                ->groupBy('cod_orden')
-                ->map(function ($detalle, $cod_orden) {
-                    return [
-                        'pro_id' => $detalle->first()->pro_id,
-                        'cod_orden' => $cod_orden,
-                        'cod_descripcion' => $detalle->first()->cod_descripcion,
-                        'cod_observacion' => $detalle->first()->cod_observacion,
-                        'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
-                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
-                        'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
-                        'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
-                        'cod_preciounitario' => $detalle->first()->cod_preciounitario,
-                        'cod_total' => $detalle->sum('cod_total'),
-                        'flag_selecto' => true
-                    ];
-                })
-                ->values();
-
-            $pdfOptions = [
-                'paper' => 'a4',
-                'orientation' => 'landscape',
-            ];
-
-            $data = [
-                'cotizacion' => $cotizacion,
-                'proveedor' => $cotizacion->proveedor,
-                'detalle_cotizacion' => $agrupado_detalle,
-                'coc_fecha_formateada' => DateHelper::parserFecha($cotizacion->coc_fechacotizacion),
-                'usuarioImpresion' => $user->usu_codigo,
-                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-                'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-                'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-                'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
-            ];
-
-            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data)
-                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
-
+            $pdf = $this->generarPDF($request->input('coc_id'), $user);
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             return response()->json([
@@ -548,8 +553,6 @@ class CotizacionController extends Controller
             return response()->json(['error' => 'Error al eliminar la cotización: ' . $e->getMessage()], 500);
         }
     }
-
-    // CONTROLADOR PARA COTIZACION PROVEEDOR
 
     // funcion para mostrar cotizacion para proveedor
     public function showCotizacionProveedor($id)
@@ -610,6 +613,71 @@ class CotizacionController extends Controller
             "agrupado_detalle" => $agrupado_detalle,
             "detalle_marcas" => $detalle_marcas
         ]);
+    }
+
+    private function seleccionarCotizacionDetalleProducto($coc_id)
+    {
+        // obtenemos el detalle de cotizacion de acuerdo al id de cotizacion y ademas estos detalles deben estar cotizados
+        $cotizacionDetalle = CotizacionDetalle::where('coc_id', $coc_id)
+            ->where('cod_cotizar', 1)
+            ->where('cod_parastock', 0)
+            ->get();
+
+        // agrupo por productos los odm_id correspondientes para los registro que tiene producto asignado
+        $identificadores_by_producto = $cotizacionDetalle
+            ->whereNotNull('pro_id')
+            ->groupBy('pro_id')
+            ->map(function ($detalle) {
+                return [
+                    'identificadores' => $detalle->pluck('odm_id')->toArray(),
+                ];
+            });
+
+        // agrupo por productos los odm_id correspondientes para los registro que no tiene producto asignado
+        $identificadores_by_no_producto = $cotizacionDetalle
+            ->whereNull('pro_id')
+            ->map(function ($detalle) {
+                return [
+                    'identificadores' => [$detalle->odm_id]
+                ];
+            });
+
+        $identificadores_union = $identificadores_by_producto->concat($identificadores_by_no_producto);
+
+        # recorremos los identificadores por producto
+        foreach ($identificadores_union as $identificador) {
+            $identificadores_id = $identificador['identificadores'];
+            $cotizacionesDetalle = CotizacionDetalle::whereIn('odm_id', $identificadores_id)
+                ->distinct()
+                ->count('coc_id');
+            # si existe mas de una cotizacion
+            if ($cotizacionesDetalle > 1) {
+                # si no fue seleccionado un detalle de cotizacion
+                if (CotizacionDetalle::whereIn('odm_id', $identificadores_id)
+                    ->where('cod_estado', 'SML')
+                    ->count() == 0
+                ) {
+                    // deseleccionamos cualquier detalle de cotizacion con un estado SAT
+                    CotizacionDetalle::whereIn('odm_id', $identificadores_id)
+                        ->where('cod_estado', 'SAT')
+                        ->update(['cod_estado' => null]);
+                }
+            }
+            # si existe una cotizacion
+            else {
+                # si no fue seleccionado un detalle de cotizacion de manera automatica
+                if (
+                    CotizacionDetalle::whereIn('odm_id', $identificadores_id)
+                    ->where('cod_estado', 'SAT')
+                    ->count() == 0
+                ) {
+                    // seleccionamos cualquier detalle de cotizacion como seleccionado automaticamente
+                    CotizacionDetalle::whereIn('odm_id', $identificadores_id)
+                        ->first()
+                        ->update(['cod_estado' => 'SAT']);
+                }
+            }
+        }
     }
 
     // funcion para editar cotizacion para proveedor
@@ -721,56 +789,11 @@ class CotizacionController extends Controller
 
             DB::commit();
 
-            // proveedor
-            $cotizacion = Cotizacion::with(['proveedor', 'moneda', 'solicitante'])->findOrFail($id);
+            // actualizamos la cotizacion seleccionada
+            $this->seleccionarCotizacionDetalleProducto($id);
 
-            $detalleCotizacion = CotizacionDetalle::with(['producto'])
-                ->where('coc_id', $cotizacion->coc_id)
-                ->where('cod_cotizar', 1)
-                ->get();
-
-            // Filtrar agrupados y no agrupados
-            $agrupado = $detalleCotizacion->filter(function ($detalle) {
-                return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
-            });
-
-            $agrupado_detalle = $agrupado
-                ->groupBy('cod_orden')
-                ->map(function ($detalle, $cod_orden) {
-                    return [
-                        'pro_id' => $detalle->first()->pro_id,
-                        'cod_orden' => $cod_orden,
-                        'cod_descripcion' => $detalle->first()->cod_descripcion,
-                        'cod_observacion' => $detalle->first()->cod_observacion,
-                        'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
-                        'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
-                        'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
-                        'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
-                        'cod_preciounitario' => $detalle->first()->cod_preciounitario,
-                        'cod_total' => $detalle->sum('cod_total'),
-                        'flag_selecto' => true
-                    ];
-                })
-                ->values();
-
-            $pdfOptions = [
-                'paper' => 'a4',
-                'orientation' => 'landscape',
-            ];
-
-            $data = [
-                'cotizacion' => $cotizacion,
-                'proveedor' => $cotizacion->proveedor,
-                'detalle_cotizacion' => $agrupado_detalle,
-                'coc_fecha_formateada' => DateHelper::parserFecha($cotizacion->coc_fechacotizacion),
-                'usuarioImpresion' => $proveedor->prv_nombre,
-                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                // 'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
-            ];
-
-            $pdf = Pdf::loadView('cotizacion.cotizacionformal', $data)
-                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
-
+            // debemos obtener el pdf correspondiente
+            $pdf = $this->generarPDF($id);
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();

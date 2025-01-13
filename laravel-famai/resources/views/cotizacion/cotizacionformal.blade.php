@@ -165,7 +165,7 @@
         <table class="table-encabezado">
             <tr>
                 <td style="text-align: left" style="font-size: 12px;"><span style="font-weight: bold;">Usu.
-                        impresión:</span> {{ $usuarioImpresion }}</td>
+                        impresión:</span> {{ $usuarioImpresion ? $usuarioImpresion : '' }}</td>
             </tr>
             <tr>
                 <td style="text-align: left" style="font-size: 12px;"><span style="font-weight: bold;">Fecha y hora

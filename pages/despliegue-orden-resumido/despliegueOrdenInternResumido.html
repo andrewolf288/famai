@@ -221,6 +221,8 @@
                         <table id="data-container-cotizacion" class="table" style="width:100%">
                             <thead>
                                 <tr>
+                                    <th></th>
+                                    <th></th>
                                     <th class="text-start">Fecha Cot.</th>
                                     <th>Nro cotización</th>
                                     <th>Nro Cot proveedor</th>
@@ -228,10 +230,8 @@
                                     <th>Doc. proveedor</th>
                                     <th>Raz. social proveedor</th>
                                     <th>Descripción</th>
-                                    <th class="text-center">Cantidad</th>
+                                    <th>Moneda</th>
                                     <th class="text-center">Precio unitario</th>
-                                    <th class="text-center">Total</th>
-                                    <th>Tmp. entrega</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -241,6 +241,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="btn-seleccionar-cotizacion">Guardar</button>
                 </div>
             </div>
         </div>
@@ -259,6 +260,8 @@
                     <table id="data-container-ordencompra" class="table mt-3" style="width:100%">
                         <thead>
                             <tr>
+                                <th></th>
+                                <th></th>
                                 <th class="text-start">Fecha Ord. Compra</th>
                                 <th>Num. Ord. Compra</th>
                                 <th>Estado</th>

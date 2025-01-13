@@ -170,11 +170,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('trabajadorByUsuario/{usuario}', [TrabajadorController::class, 'findByUsuario']);
 });
 
-// rutas de compras
-Route::group(['middleware' => ['auth.jwt']], function () {
-    Route::post('comprasByProducto', [ProductoProveedorController::class, 'comprasByProducto']);
-});
-
 // rutas de ordenes de trabajo
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordenestrabajos', [OrdenTrabajoController::class, 'index']);
@@ -352,6 +347,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacion-detalle-pendiente', [CotizacionDetalleController::class, 'findDetalleByEstadoPendiente']);
     Route::post('cotizacion-detalle-masivo', [CotizacionDetalleController::class, 'informacionMaterialesMasivo']);
     Route::get('cotizacion-detalle-findByProducto', [CotizacionDetalleController::class, 'findCotizacionByProducto']);
+    Route::put('cotizacion-detalle/seleccionar/{id}', [CotizacionDetalleController::class, 'seleccionarCotizacionDetalle']);
 });
 
 // rutas de detalle de archivo de cotizacion
@@ -380,6 +376,12 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordencompra-detalle/ultimo-proveedor', [OrdenCompraDetalleController::class, 'findUltimoProveedorByProducto']);
 });
 
+// rutas orde de compras productos proveedores
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::post('comprasByProducto', [ProductoProveedorController::class, 'comprasByProducto']);
+    Route::post('ultimas-compras/producto', [ProductoProveedorController::class, 'findByProductoUltimaCompra']);
+});
+
 // rutas almacenamiento
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('almacenes',[AlmacenController::class, 'index']);
@@ -403,4 +405,4 @@ Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCot
 //     return UtilHelper::convertirNumeroALetras($number);
 // });
 
-Route::get('script', [OrdenCompraExportController::class, 'export']);
+Route::get('script', [ProductoProveedorController::class, 'importarData']);

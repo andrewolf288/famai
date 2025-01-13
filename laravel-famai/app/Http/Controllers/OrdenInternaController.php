@@ -99,6 +99,7 @@ class OrdenInternaController extends Controller
         // traemos informacion de las areas
         $areas = Area::where('are_codigo', 'CAR')
             ->orWhere('are_codigo', 'HID')
+            ->orWhere('are_codigo', 'MAE')
             ->get();
         // traemos informacion de las partes involucradas
         $partes = [];

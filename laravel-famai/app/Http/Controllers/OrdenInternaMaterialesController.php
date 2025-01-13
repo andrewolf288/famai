@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
+use App\OrdenCompra;
 use App\OrdenCompraDetalle;
 use App\Producto;
 use App\Services\ProductoService;
@@ -83,7 +84,8 @@ class OrdenInternaMaterialesController extends Controller
 
         // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
-            $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
+                ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
         }
 
 
@@ -191,8 +193,8 @@ class OrdenInternaMaterialesController extends Controller
                 'ordenInternaParte.ordenInterna'
             ]
         )
-            ->withCount('cotizaciones')
-            ->withCount('ordenesCompra')
+            // ->withCount('cotizaciones')
+            // ->withCount('ordenesCompra')
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
                 $q->where('sed_codigo', $sed_codigo);
             })
@@ -224,8 +226,10 @@ class OrdenInternaMaterialesController extends Controller
 
         // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
-            $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
+                ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
         }
+
 
         // Procesar el parámetro multiselect
         if ($multifilter !== null) {
@@ -296,6 +300,24 @@ class OrdenInternaMaterialesController extends Controller
                 $producto_codigo = $producto->pro_codigo;
                 // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
 
+                $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
+                $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)
+                    ->where('cod_cotizar', 1)
+                    ->distinct()
+                    ->count('coc_id');
+
+                $ordenes_compra_count = OrdenCompraDetalle::whereIn('odm_id', $identificadores_materiales)
+                    ->distinct()
+                    ->count('occ_id');
+
+                $cotizacion_seleccionada = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
+                    ->whereIn('odm_id', $identificadores_materiales)
+                    ->where(function ($query) {
+                        $query->where('cod_estado', "SAT")
+                            ->orWhere('cod_estado', "SML");
+                    })
+                    ->first();
+
                 return [
                     'pro_id' => $pro_id,
                     'pro_codigo' => $producto_codigo,
@@ -305,8 +327,9 @@ class OrdenInternaMaterialesController extends Controller
                     // 'cantidad' => $grupo->sum('odm_cantidad'),
                     // 'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
                     'stock' => 0.00,
-                    'cotizaciones_count' => $grupo->sum('cotizaciones_count'),
-                    'ordenes_compra_count' => $grupo->sum('ordenes_compra_count'),
+                    'cotizaciones_count' => $cotizaciones_count,
+                    'ordenes_compra_count' => $ordenes_compra_count,
+                    'cotizacion_seleccionada' => $cotizacion_seleccionada,
                     'detalle' => $grupo->values()
                 ];
             })
@@ -315,6 +338,26 @@ class OrdenInternaMaterialesController extends Controller
         $sinAgrupar = $data
             ->whereNull('pro_id')
             ->map(function ($item) {
+
+                $identificadores_materiales = [$item->odm_id];
+                $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)
+                    ->where('cod_cotizar', 1)
+                    ->distinct()
+                    ->count('coc_id');
+
+                $ordenes_compra_count = OrdenCompraDetalle::whereIn('odm_id', $identificadores_materiales)
+                    ->distinct()
+                    ->count('occ_id');
+
+                // debemos buscar alguna cotizacion detalle que haya sido seleccionada de manera manual o automatica
+                $cotizacion_seleccionada = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
+                    ->where('odm_id', $item->odm_id)
+                    ->where(function ($query) {
+                        $query->where('cod_estado', "SAT")
+                            ->orWhere('cod_estado', "SML");
+                    })
+                    ->first();
+
                 return [
                     'pro_id' => null,
                     'pro_codigo' => null,
@@ -324,8 +367,9 @@ class OrdenInternaMaterialesController extends Controller
                     'cantidad' => $item->odm_cantidadpendiente,
                     'cantidad_requerida' => $item->odm_cantidad,
                     'stock' => 0.00,
-                    'cotizaciones_count' => 0,
-                    'ordenes_compra_count' => 0,
+                    'cotizaciones_count' => $cotizaciones_count,
+                    'ordenes_compra_count' => $ordenes_compra_count,
+                    'cotizacion_seleccionada' => $cotizacion_seleccionada,
                     'detalle' => [$item]
                 ];
             })
@@ -390,7 +434,8 @@ class OrdenInternaMaterialesController extends Controller
 
         // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
-            $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+            $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
+                ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
         }
 
         // Procesar el parámetro multiselect
@@ -1264,10 +1309,22 @@ class OrdenInternaMaterialesController extends Controller
             $detalleMaterialesFilter = explode(',', $detalleMaterialesFilter);
         }
 
-        $detalleCotizacion = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
-            ->whereIn('odm_id', $detalleMaterialesFilter)
+        // el detalle debe estar cotizado
+        $detalleCotizacion = CotizacionDetalle::whereIn('odm_id', $detalleMaterialesFilter)
+            ->where('cod_cotizar', 1)
+            ->select('coc_id', DB::raw('MIN(cod_id) as min_id'))
+            ->groupBy('coc_id')
             ->get();
-        return response()->json($detalleCotizacion);
+
+        $detalleCotizacionCompleta = CotizacionDetalle::with([
+            'cotizacion.proveedor',
+            'cotizacion.moneda',
+            'producto'
+        ])
+            ->whereIn('cod_id', $detalleCotizacion->pluck('min_id'))
+            ->get();
+
+        return response()->json($detalleCotizacionCompleta);
     }
 
     // detalle material - orden compra
@@ -1279,10 +1336,16 @@ class OrdenInternaMaterialesController extends Controller
             $detalleMaterialesFilter = explode(',', $detalleMaterialesFilter);
         }
 
-        $detalleOrdenCompra = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda'])
-            ->whereIn('odm_id', $detalleMaterialesFilter)
+        $detalleOrdenCompra = OrdenCompraDetalle::whereIn('odm_id', $detalleMaterialesFilter)
+            ->select('occ_id', DB::raw('MIN(ocd_id) as min_id'))
+            ->groupBy('occ_id')
             ->get();
-        return response()->json($detalleOrdenCompra);
+
+        $detalleOrdenCompraCompleta = OrdenCompraDetalle::with(['ordenCompra.proveedor', 'ordenCompra.moneda'])
+            ->whereIn('ocd_id', $detalleOrdenCompra->pluck('min_id'))
+            ->get();
+
+        return response()->json($detalleOrdenCompraCompleta);
     }
 
     // funcion para asignar nuevo codigo de producto

@@ -75,6 +75,7 @@ class OrdenInternaMateriales extends Model
     // relacion con cotizaciones
     public function cotizaciones()
     {
+        // debemos relacionar las cotizaciones
         return $this->hasMany(CotizacionDetalle::class, 'odm_id');
     }
 

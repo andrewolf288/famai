@@ -118,3 +118,10 @@ function unionObservaciones(detalleMateriales) {
 
     return observacion.trimEnd()
 }
+
+// funcion para comprobar si un datatable esta inicializado, si es asi lo destruye
+function detroyDataTable(dataContainer) {
+    if ($.fn.DataTable.isDataTable(dataContainer)) {
+        dataContainer.DataTable().destroy();
+    }
+}

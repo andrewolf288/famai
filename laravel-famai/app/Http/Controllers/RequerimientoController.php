@@ -8,6 +8,7 @@ use App\OrdenInternaMaterialesAdjuntos;
 use App\OrdenInternaPartes;
 use App\Parte;
 use App\Producto;
+use App\Trabajador;
 use App\Unidad;
 use Exception;
 use Illuminate\Http\Request;
@@ -78,6 +79,7 @@ class RequerimientoController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
+        $sed_codigo = "10";
         // Valida la solicitud JSON y el FormData
         $validator = Validator::make($request->all(), [
             'data' => 'required|json'
@@ -104,10 +106,15 @@ class RequerimientoController extends Controller
 
         try {
             DB::beginTransaction();
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+            if ($trabajador) {
+                $sed_codigo = $trabajador->sed_codigo;
+            }
 
             // primero creamos una orden interna
             $requerimiento = OrdenInterna::create([
                 'oic_fecha' => $data['oic_fecha'],
+                'sed_codigo' => $sed_codigo,
                 'oic_fechaentregaestimada' => $data['oic_fechaentregaestimada'],
                 'are_codigo' => $data['are_codigo'],
                 'tra_idorigen' => $data['tra_idorigen'],
@@ -122,7 +129,7 @@ class RequerimientoController extends Controller
             $parteRequerimiento = Parte::where('oip_descripcion', 'REQUERIMIENTO')->first();
 
             if (!$parteRequerimiento) {
-                return response()->json(['error' => 'No se encontro el parte requerimiento'], 400);
+                return response()->json(['error' => 'No se encontro la parte requerimiento'], 400);
             }
 
             $detalleParte = OrdenInternaPartes::create([
@@ -200,9 +207,10 @@ class RequerimientoController extends Controller
                     'odm_item' => $material['odm_item'],
                     'odm_descripcion' => $material['odm_descripcion'],
                     'odm_cantidad' => $material['odm_cantidad'],
+                    'odm_cantidadpendiente' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
-                    'odm_estado' => 'REQ',
+                    // 'odm_estado' => 'REQ',
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
                 ]);

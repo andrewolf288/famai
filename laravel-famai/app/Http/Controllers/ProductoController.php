@@ -164,7 +164,6 @@ class ProductoController extends Controller
         $queryBuilder = DB::connection('sqlsrv_secondary')
             ->table('OITM as T0')
             ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
-            ->join('OILM as T2', 'T0.ItemCode', '=', 'T2.ItemCode')
             ->select([
                 'T0.ItemCode as pro_codigo',
                 'T0.ItemName as pro_descripcion',
@@ -174,37 +173,44 @@ class ProductoController extends Controller
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
                 'T0.validFor',
-                'T0.InvntItem',
-                DB::raw('MAX(T2.DocDate) as UltimaFechaMovimiento'),
-                DB::raw(
-                    "(CASE 
-                        WHEN (
-                            SELECT MAX(OPDN.DocDate) 
-                            FROM OPDN 
-                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                            WHERE PDN1.ItemCode = T0.ItemCode
-                        ) IS NULL 
-                        THEN (
-                            SELECT MAX(OIGN.DocDate) 
-                            FROM OIGN 
-                            JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-                            WHERE IGN1.ItemCode = T0.ItemCode
-                        )
-                        ELSE (
-                            SELECT MAX(OPDN.DocDate) 
-                            FROM OPDN 
-                            JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-                            WHERE PDN1.ItemCode = T0.ItemCode
-                        )
-                        END) as UltimaFechaIngreso"
-                )
+                'T0.InvntItem'
             ])
+            ->selectRaw(
+                "(SELECT MAX(T2.DocDate) 
+                  FROM OILM T2 
+                  WHERE T2.ItemCode = T0.ItemCode 
+                  AND T2.LocCode = ?) as UltimaFechaMovimiento", 
+                [$alm_codigo]
+            )
+            ->selectRaw(
+                "(CASE 
+                    WHEN (
+                        SELECT MAX(OPDN.DocDate) 
+                        FROM OPDN 
+                        JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                        WHERE PDN1.ItemCode = T0.ItemCode
+                    ) IS NULL 
+                    THEN (
+                        SELECT MAX(OIGN.DocDate) 
+                        FROM OIGN 
+                        JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
+                        WHERE IGN1.ItemCode = T0.ItemCode
+                    )
+                    ELSE (
+                        SELECT MAX(OPDN.DocDate) 
+                        FROM OPDN 
+                        JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
+                        WHERE PDN1.ItemCode = T0.ItemCode
+                    )
+                 END) as UltimaFechaIngreso"
+            )
             ->selectRaw('T0.ItemCode as pro_id')
             ->where('T1.WhsCode', '=', $alm_codigo)
             ->where('T0.validFor', '=', 'Y')
             ->groupBy(
                 'T0.ItemCode',
                 'T0.ItemName',
+				'T0.BuyUnitMsr',
                 'T1.WhsCode',
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
