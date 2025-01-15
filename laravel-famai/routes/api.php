@@ -206,7 +206,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordeninternamateriales/export-excel-presupuesto', [OrdenInternaMaterialesController::class, 'exportExcelPresupuesto']);
     Route::get('ordeninternamateriales/export-excel-almacen', [OrdenInternaMaterialesController::class, 'exportExcelAlmacen']);
     Route::post('ordeninternamateriales/export-cotizacion', [OrdenInternaMaterialesController::class, 'exportPDFCotizacion']);
-    Route::post('ordeninternamateriales/export-cotizacion-text', [OrdenInternaMaterialesController::class, 'exportTXTCotizacion']);
     Route::get('detalleMaterialesByNumero', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenInterna']);
     Route::get('ordeninternamateriales/cotizacion', [OrdenInternaMaterialesController::class, 'findCotizacionByMaterial']);
     Route::get('ordeninternamateriales/ordencompra', [OrdenInternaMaterialesController::class, 'findOrdenCompraByMaterial']);
@@ -332,6 +331,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('cotizacionesByDespliegue', [CotizacionController::class, 'storeDespliegueMateriales']);
     Route::get('cotizacionByNumero', [CotizacionController::class, 'findByNumero']);
     Route::get('cotizaciones/exportarPDF', [CotizacionController::class, 'exportarPDF']);
+    Route::get('cotizacion/exportarTXT/{id}', [CotizacionController::class, 'exportTXTCotizacion']);
+    Route::get('cotizacion/exportarExcel/{id}', [CotizacionController::class, 'exportExcelCotizacion']);
     Route::get('cotizacion/{id}', [CotizacionController::class, 'show']);
     Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
@@ -380,6 +381,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('comprasByProducto', [ProductoProveedorController::class, 'comprasByProducto']);
     Route::post('ultimas-compras/producto', [ProductoProveedorController::class, 'findByProductoUltimaCompra']);
+    Route::get('comrpasaByProductoProveedor', [ProductoProveedorController::class, 'findOrdenCompraByProveedorProducto']);
 });
 
 // rutas almacenamiento

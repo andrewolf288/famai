@@ -25,6 +25,7 @@ class Cotizacion extends Model
         'coc_fechavalidez',
         'coc_correocontacto',
         'coc_lugarentrega',
+        'coc_proveedorunico',
         'coc_usucreacion',
         'coc_feccreacion',
         'coc_usumodificacion',

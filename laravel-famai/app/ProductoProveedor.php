@@ -13,6 +13,7 @@ class ProductoProveedor extends Model
     protected $fillable = [
         'pro_id',
         'prv_id',
+        'prp_nroordencompra',
         'prp_fechaultimacompra',
         'prp_preciounitario',
         'prp_observaciones',

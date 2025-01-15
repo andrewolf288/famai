@@ -154,4 +154,18 @@ class ProductoProveedorController extends Controller
 
         return response()->json($dataProveedores);
     }
+
+    public function findOrdenCompraByProveedorProducto(Request $request)
+    {
+        $productos = $request->input('productos', []);
+        $proveedor = $request->input('proveedor', null);
+
+        $data = ProductoProveedor::with('producto', 'proveedor')
+            ->whereIn('pro_id', $productos)
+            ->where('prv_id', $proveedor)
+            ->orderBy('prp_fechaultimacompra', 'desc')
+            ->get();
+
+        return response()->json($data);
+    }
 }

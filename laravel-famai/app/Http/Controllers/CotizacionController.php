@@ -9,9 +9,7 @@ use App\EntidadBancaria;
 use App\Helpers\DateHelper;
 use App\Helpers\UtilHelper;
 use App\Moneda;
-use App\OrdenCompraDetalle;
 use App\OrdenInternaMateriales;
-use App\Producto;
 use App\Proveedor;
 use App\ProveedorCuentaBanco;
 use App\Trabajador;
@@ -21,6 +19,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class CotizacionController extends Controller
 {
@@ -194,8 +194,19 @@ class CotizacionController extends Controller
         try {
             DB::beginTransaction();
 
-            $proveedor = $request->input('proveedor');
-            $detalleMateriales = $request->input('detalle_materiales');
+            $request->validate([
+                'cotizacion' => 'required|string',
+            ]);
+
+            $data = json_decode($request->input('cotizacion'), true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['error' => 'El campo data contiene un JSON inválido.'], 400);
+            }
+
+            $proveedor = $data['proveedor'];
+            $detalleMateriales = $data['detalle_materiales'];
+            $proveedor_unico = $data['proveedor_unico'];
 
             $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
             if (!$lastCotizacion) {
@@ -239,11 +250,13 @@ class CotizacionController extends Controller
             $cotizacion = Cotizacion::create([
                 'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $id_proveedor,
+                'coc_fechacotizacion' => date('Y-m-d'),
                 'tra_solicitante' => $tra_solicitante,
                 'sed_codigo' => $sed_codigo,
+                'coc_proveedorunico' => $proveedor_unico ? 1 : 0,
                 'coc_usucreacion' => $user->usu_codigo,
                 'coc_fecmodificacion' => null,
-                'coc_estado' => 'SOL',
+                'coc_estado' => $proveedor_unico ? 'RPR' : 'SOL',
             ]);
 
             foreach ($detalleMateriales as $detalle) {
@@ -266,6 +279,7 @@ class CotizacionController extends Controller
                     'cod_observacion' => $detalle['cod_observacion'],
                     'cod_cantidad' => $detalle['cod_cantidad'],
                     'cod_parastock' => isset($detalle['cod_parastock']) ? $detalle['cod_parastock'] : 0,
+                    'cod_preciounitario' => $detalle['cod_preciounitario'],
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null
@@ -275,53 +289,85 @@ class CotizacionController extends Controller
                 $detalleMaterial->save();
             }
 
-            DB::commit();
-
-            $agrupados = [];
-            foreach ($detalleMateriales as $detalle) {
-                $cod_orden = $detalle['cod_orden'];
-
-                if (!isset($agrupados[$cod_orden])) {
-                    // Si no existe el grupo, inicializamos con el primer elemento
-                    $agrupados[$cod_orden] = $detalle;
-                    $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
-                } else {
-                    // Si ya existe el grupo, sumamos la cantidad
-                    $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+            // adjuntamos los archivos
+            if($proveedor_unico){
+                if ($request->hasFile('files')) {
+                    // Obtenemos todos los archivos
+                    $files = $request->file('files');
+                    $countArray = 0;
+                    foreach ($files as $file) {
+                        // obtenemos la extension
+                        $extension = $file->getClientOriginalExtension();
+                        // Generamos un nombre único para el archivo, conservando la extensión original
+                        $fileName = uniqid() . '.' . $extension;
+    
+                        // Guardamos el archivo con la extensión correcta
+                        $path = $file->storeAs('cotizacion-adjuntos', $fileName, 'public');
+    
+                        CotizacionDetalleArchivos::create([
+                            'coc_id' => $cotizacion->coc_id,
+                            // 'cda_descripcion' => $detalle_descripcion[$countArray],
+                            'cda_url' => $path,
+                            'cda_activo' => 1,
+                            'cda_usucreacion' => $user->usu_codigo,
+                            'cda_fecmodificacion' => null
+                        ]);
+                        $countArray++;
+                    }
                 }
             }
-            $agrupadosIndexado = array_values($agrupados);
+            
+            DB::commit();
+            // actualizamos la cotizacion seleccionada
+            $this->seleccionarCotizacionDetalleProducto($cotizacion->coc_id);
 
-            // cuentas bancarias
-            $cuentasBancariasProveedor = ProveedorCuentaBanco::with('entidadBancaria')
-                ->where('prv_id', $id_proveedor)->get();
+            return response()->json($cotizacion, 200);
 
-            $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cuentasBancariasProveedor ?? []);
+            // $agrupados = [];
+            // foreach ($detalleMateriales as $detalle) {
+            //     $cod_orden = $detalle['cod_orden'];
 
-            // retorna la generacion de un PDF
-            $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
-            $data = [
-                'proveedor' => $proveedor,
-                'trabajador' => $tra_solicitante,
-                'detalleMateriales' => $agrupadosIndexado,
-                'fechaActual' => DateHelper::parserFechaActual(),
-                'usuarioImpresion' => $user->usu_codigo,
-                'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-                'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id",
-                'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-                'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-                'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares']
-            ];
+            //     if (!isset($agrupados[$cod_orden])) {
+            //         // Si no existe el grupo, inicializamos con el primer elemento
+            //         $agrupados[$cod_orden] = $detalle;
+            //         $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
+            //     } else {
+            //         // Si ya existe el grupo, sumamos la cantidad
+            //         $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
+            //     }
+            // }
+            // $agrupadosIndexado = array_values($agrupados);
 
-            $pdfOptions = [
-                'paper' => 'a4',
-                'orientation' => 'landscape',
-            ];
+            // // cuentas bancarias
+            // $cuentasBancariasProveedor = ProveedorCuentaBanco::with('entidadBancaria')
+            //     ->where('prv_id', $id_proveedor)->get();
 
-            $pdf = Pdf::loadView('cotizacion.cotizacion', $data)
-                ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+            // $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cuentasBancariasProveedor ?? []);
 
-            return $pdf->download('cotizacion.pdf');
+            // // retorna la generacion de un PDF
+            // $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
+            // $data = [
+            //     'proveedor' => $proveedor,
+            //     'trabajador' => $tra_solicitante,
+            //     'detalleMateriales' => $agrupadosIndexado,
+            //     'fechaActual' => DateHelper::parserFechaActual(),
+            //     'usuarioImpresion' => $user->usu_codigo,
+            //     'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+            //     'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id",
+            //     'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
+            //     'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
+            //     'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares']
+            // ];
+
+            // $pdfOptions = [
+            //     'paper' => 'a4',
+            //     'orientation' => 'landscape',
+            // ];
+
+            // $pdf = Pdf::loadView('cotizacion.cotizacion', $data)
+            //     ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+
+            // return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500, ['Content-Type' => 'application/json']);
@@ -619,7 +665,7 @@ class CotizacionController extends Controller
     {
         // obtenemos el detalle de cotizacion de acuerdo al id de cotizacion y ademas estos detalles deben estar cotizados
         $cotizacionDetalle = CotizacionDetalle::where('coc_id', $coc_id)
-            ->where('cod_cotizar', 1)
+            // ->where('cod_cotizar', 1)
             ->where('cod_parastock', 0)
             ->get();
 
@@ -653,7 +699,8 @@ class CotizacionController extends Controller
             # si existe mas de una cotizacion
             if ($cotizacionesDetalle > 1) {
                 # si no fue seleccionado un detalle de cotizacion
-                if (CotizacionDetalle::whereIn('odm_id', $identificadores_id)
+                if (
+                    CotizacionDetalle::whereIn('odm_id', $identificadores_id)
                     ->where('cod_estado', 'SML')
                     ->count() == 0
                 ) {
@@ -822,5 +869,165 @@ class CotizacionController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function exportTXTCotizacion($id)
+    {
+        // vamos a consultar la cotizacion
+        $cotizacion = Cotizacion::with('proveedor', 'moneda')
+            ->findOrFail($id);
+        // vamos a consultar su detalle
+        $cotizacion_detalle = CotizacionDetalle::where('coc_id', $id)
+            ->get();
+
+        $agrupados = [];
+        foreach ($cotizacion_detalle as $detalle) {
+            $cod_orden = $detalle->cod_orden;
+
+            if (!isset($agrupados[$cod_orden])) {
+                // Si no existe el grupo, inicializamos con el primer elemento
+                $agrupados[$cod_orden] = $detalle->toArray();
+                $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle->cod_cantidad);
+            } else {
+                // Si ya existe el grupo, sumamos la cantidad
+                $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle->cod_cantidad);
+            }
+        }
+        $agrupadosIndexado = array_values($agrupados);
+
+
+        $ruc = "20134690080";
+        $razon_social = "FAMAI SEAL JET S.A.C.";
+        $fecha = date('d') . ' de ' . date('F') . ' ' . date('Y');
+
+        $txt_content = "Estimado proveedor\n";
+        $txt_content .= "Por la presente sírvase cotizar lo siguiente a nombre de:\n";
+        $txt_content .= "RUC: " .  $ruc . "\n";
+        $txt_content .= "Razón Social: " . $razon_social . "\n";
+        $txt_content .= "=========\n";
+        $txt_content .= "   PRODUCTO   CANTIDAD\n";
+
+        // Agregar los productos
+        foreach ($agrupadosIndexado as $index => $item) {
+            $txt_content .= ($index + 1) . ". " . $item["cod_descripcion"] . "     " . $item["cod_cantidad"] . "\n";
+        }
+
+        $txt_content .= "======\n";
+        $txt_content .= "Contacto: " . ($cotizacion->proveedor->prv_contacto ?? '') . "\n";
+        $txt_content .= "Nombre: " . ($cotizacion->proveedor->prv_nombre ?? '') . "\n";
+        $txt_content .= "Correo: " . ($cotizacion->proveedor->prv_correo ?? '') . "\n";
+        $txt_content .= "Celular/Whatsapp: " . ($cotizacion->proveedor->prv_telefono ?? '') . "/" . ($cotizacion->proveedor->prv_whatsapp ?? '') . "\n\n";
+        $txt_content .= "Arequipa, $fecha\n";
+
+
+        return response()->streamDownload(function () use ($txt_content) {
+            echo $txt_content;
+        }, 'cotizacion_proveedor.txt', ['Content-Type' => 'text/plain']);
+    }
+
+    public function exportExcelCotizacion($id)
+    {
+        $detalleCotizacion = CotizacionDetalle::with(['producto'])
+            ->where('coc_id', $id)
+            ->get();
+
+        // Filtrar agrupados y no agrupados
+        $agrupado = $detalleCotizacion->filter(function ($detalle) {
+            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+        });
+
+        $agrupado_detalle = $agrupado
+            ->groupBy('cod_orden')
+            ->map(function ($detalle, $cod_orden) {
+                return [
+                    'pro_id' => $detalle->first()->pro_id,
+                    'cod_orden' => $cod_orden,
+                    'cod_descripcion' => $detalle->first()->cod_descripcion,
+                    'cod_observacion' => $detalle->first()->cod_observacion,
+                    'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
+                    'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
+                    'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
+                    'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
+                    'cod_preciounitario' => $detalle->first()->cod_preciounitario,
+                    'cod_total' => $detalle->sum('cod_total'),
+                    'flag_selecto' => true
+                ];
+            })
+            ->values();
+
+        $columns = [
+            ['header' => "Item", 'field' => 'cod_orden', 'type' => 'string'],
+            ['header' => "Descripción", 'field' => 'cod_descripcion', 'type' => 'string'],
+            ['header' => "Observación", 'field' => 'cod_observacion', 'type' => 'string'],
+            ['header' => "Observacion Proveedor", 'field' => 'cod_observacionproveedor', 'type' => 'string'],
+            ['header' => "Tiempo entrega", 'field' => 'cod_tiempoentrega', 'type' => 'string'],
+            ['header' => "Unidad", 'field' => 'uni_codigo', 'type' => 'string'],
+            ['header' => "Cantidad", 'field' => 'cod_cantidadcotizada', 'type' => 'number'],
+            ['header' => "Precio Unitario", 'field' => 'cod_preciounitario', 'type' => 'number'],
+            ['header' => "Total", 'field' => 'cod_total', 'type' => 'number'],
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // agregar encabezados
+        foreach ($columns as $index => $column) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+            $sheet->setCellValue("{$columnLetter}1", $column['header']);
+            $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
+
+            $sheet->getStyle("{$columnLetter}1")
+                ->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('ffcd57');
+
+            $sheet->getStyle("{$columnLetter}1")
+                ->getFont()
+                ->getColor()->setRGB('000000');
+        }
+
+        $rowIndex = 2;
+        foreach ($agrupado_detalle as $detalle) {
+            foreach ($columns as $index => $column) {
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
+
+                $fieldPath = explode('.', $column['field']);
+                $value = $detalle;
+                foreach ($fieldPath as $path) {
+                    $value = $value[$path] ?? null;
+                }
+
+                switch ($column['type']) {
+                    case 'string':
+                        $sheet->setCellValueExplicit("{$columnLetter}{$rowIndex}", (string)$value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                        break;
+                    case 'date':
+                        if ($value !== null) {
+                            $formattedDate = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($value));
+                            $sheet->setCellValue("{$columnLetter}{$rowIndex}", $formattedDate);
+                            $sheet->getStyle("{$columnLetter}{$rowIndex}")
+                                ->getNumberFormat()
+                                ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);  // Solo fecha
+                        } else {
+                            $sheet->setCellValue("{$columnLetter}{$rowIndex}", '');
+                        }
+                        break;
+                    case 'number':
+                        $sheet->setCellValue("{$columnLetter}{$rowIndex}", (float)$value);
+                        $sheet->getStyle("{$columnLetter}{$rowIndex}")
+                            ->getNumberFormat()
+                            ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_NUMBER_00);
+                        break;
+                    default:
+                        $sheet->setCellValue("{$columnLetter}{$rowIndex}", $value ?? 'N/A');
+                }
+            }
+            $rowIndex++;
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, "cotizacion-$id.xlsx", ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
 }

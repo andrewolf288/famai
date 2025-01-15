@@ -1,104 +1,439 @@
-<div class="row">
-    <!-- Columna para Proveedor -->
-    <div class="col-md-6 col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Proveedor</h5>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+    <h2 class="mb-3 fs-4">Crear Orden de Compra</h2>
+</div>
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <th>RUC</th>
+        <th>Proveedor</th>
+        <th class="text-center">Items</th>
+        <th class="text-center">Total</th>
+        <th class="text-center">Acciones</th>
+    </thead>
+    <tbody id="data-container-body">
+        <tr>
+            <td>20100028698</td>
+            <td>FERREYROS S.A.</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-primary btn-detalle">3 items</button>
+            </td>
+            <td class="text-center">S/. 1890.50</td>
+            <td class="text-center">
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-sm btn-primary btn-crear-orden-compra">Crear</button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>20559294757</td>
+            <td>SERVICIOS MULTIPLES DOñA EMILIANA EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-primary btn-detalle">2 items</button>
+            </td>
+            <td class="text-center">S/. 2890.50</td>
+            <td class="text-center">
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-sm btn-primary btn-crear-orden-compra">Crear</button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>10004637092</td>
+            <td>FLORES PAYE, VIRGINIA INES</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-primary btn-detalle">4 items</button>
+            </td>
+            <td class="text-center">S/. 890.50</td>
+            <td class="text-center">
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-sm btn-primary btn-crear-orden-compra">Crear</button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- MODAL PARA DETALLE DE ORDEN DE COMPRA -->
+<div class="modal fade" id="crearOrdenCompraModal" tabindex="-1" aria-labelledby="crearOrdenCompraModallLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="crearOrdenCompraModallLabel">Crear Orden de Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
+            <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-4">
-                        <label for="proveedoresSUNAT">
-                            RUC/DNI
-                        </label>
-                        <div class="input-group">
-                            <input type="text" id="proveedoresSUNAT" class="form-control"
-                                placeholder="Ingrese Nro. documento..." autocomplete="off">
-                            <button id="searchProveedorSUNAT" class="btn btn-primary">
+                    <!-- Columna para Proveedor -->
+                    <div class="col-md-6 col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Proveedor</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="proveedoresSUNAT">
+                                            RUC/DNI
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" id="proveedoresSUNAT" class="form-control"
+                                                placeholder="Ingrese Nro. documento..." autocomplete="off">
+                                            <button id="searchProveedorSUNAT" class="btn btn-primary">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 position-relative">
+                                        <label for="proveedoresInput">
+                                            Razón Social
+                                        </label>
+                                        <input type="text" id="proveedoresInput" class="form-control"
+                                            placeholder="Ingrese razón social..." autocomplete="off">
+                                        <ul id="resultadosLista" class="list-group mt-2 position-absolute"
+                                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
+                                    <div class="col-md-3">
+                                        <label for="documentoProveedorInput">Documento</label>
+                                        <input type="text" id="documentoProveedorInput" class="form-control" readonly
+                                            disabled />
+                                    </div>
+                                    <div class="col-md-9">
+                                        <label for="razonSocialProveedorInput">Nombre</label>
+                                        <input type="text" id="razonSocialProveedorInput" class="form-control" readonly
+                                            disabled />
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <label for="correoProveedorInput">Correo</label>
+                                        <input type="email" id="correoProveedorInput" class="form-control" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="contactoProveedorInput">Contacto</label>
+                                        <input type="text" id="contactoProveedorInput" class="form-control" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="whatsappProveedorInput">Whatsapp</label>
+                                        <input type="text" id="whatsappProveedorInput" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label for="direccionProveedorInput">Dirección</label>
+                                        <textarea id="direccionProveedorInput" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label for="cuentaSolesProveedorLabel">Cuenta Soles</label>
+                                        <div class="row">
+                                            <input type="text" id="idCuentaBancariaSoles" value="" hidden>
+                                            <div class="col-md-6">
+                                                <select class="form-select" id="cuentaSolesProveedorSelect"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input class="form-control" type="text" id="cuentaSolesProveedorInput">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mt-1">
+                                        <label for="cuentaDolaresProveedorLabel">Cuenta Dolares</label>
+                                        <div class="row">
+                                            <input type="text" id="idCuentaBancariaDolares" value="" hidden>
+                                            <div class="col-md-6">
+                                                <select class="form-select" id="cuentaDolaresProveedorSelect"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input class="form-control" type="text"
+                                                    id="cuentaDolaresProveedorInput">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mt-1">
+                                        <label for="cuentaBancoNacionProveedorLabel">Cuenta Banco de la Nación</label>
+                                        <div class="row">
+                                            <input type="text" id="idCuentaBancariaBancoNacion" value="" hidden>
+                                            <div class="col-md-6">
+                                                <select class="form-select"
+                                                    id="cuentaBancoNacionProveedorSelect"></select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input class="form-control" type="text"
+                                                    id="cuentaBancoNacionProveedorInput">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Columna para Datos cotización -->
+                    <div class="col-md-6 col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Datos orden de compra</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="monedaOrdenCompraInput">Moneda</label>
+                                        <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
+                                        <select id="formaDePagoOrdenCompraInput" class="form-select">
+                                            <option value="CONTADO" selected>CONTADO</option>
+                                            <option value="CREDITO">CREDITO</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <label for="adelantoOrdenCompraInput">Adelanto:</label>
+                                        <input type="number" id="adelantoOrdenCompraInput" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="saldoOrdenCompraInput">Saldo:</label>
+                                        <input type="number" id="saldoOrdenCompraInput" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label for="observacionPagoOrdenCompraInput">Observación de pago</label>
+                                        <textarea id="observacionPagoOrdenCompraInput" class="form-control"
+                                            rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <label for="fechaOrdenCompraPicker">Fecha orden de compra</label>
+                                        <input type="text" id="fechaOrdenCompraPicker" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="fechaEntregaOrdenCompraPicker">Fecha entrega</label>
+                                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <label for="referenciaOrdenCompraInput">Referencia</label>
+                                        <input type="text" id="referenciaOrdenCompraInput" class="form-control">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label for="elaboradoOrdenCompraInput">Elaborado por:</label>
+                                        <select id="elaboradoOrdenCompraInput" class="form-select">
+                                            <option value="" selected>Seleccione un trabajador</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label for="notaOrdenCompraInput">Nota</label>
+                                        <textarea id="notaOrdenCompraInput" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Agrupado Detalle Materiales -->
+                <div class="card mt-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Agrupado detalle orden</h5>
+                        </div>
+                        <div class="card-body">
+
+                            <table class="table" id="agrupadoDetalleOrdenCompraTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center col-1">Item</th>
+                                        <th class="col-4">Descripción</th>
+                                        <th class="text-center col-1">Unidad</th>
+                                        <th class="text-center col-1">Cant. req.</th>
+                                        <th class="text-center col-1">Cant. ped.</th>
+                                        <th class="text-center col-1">Prec. unitario s/IGV</th>
+                                        <th class="text-center col-1">Prec. total s/IGV</th>
+                                        <!-- <th class="text-center col-2">Acciones</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody id="agrupadoDetalleOrdenCompraBody">
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                                        <td class="text-center">VLL</td>
+                                        <td class="text-center">4</td>
+                                        <td class="text-center">4</td>
+                                        <td class="text-center">S/. 89.76</td>
+                                        <td class="text-center">S/. 359.04</td>
+                                        <!-- <td class="text-center"></td> -->
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2</td>
+                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
+                                        <td class="text-center">PZ</td>
+                                        <td class="text-center">10</td>
+                                        <td class="text-center">10</td>
+                                        <td class="text-center">S/. 15.96</td>
+                                        <td class="text-center">S/. 159.6</td>
+                                        <!-- <td class="text-center"></td> -->
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disgregado Detalle Materiales -->
+                <div class="card mt-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Disgregado detalle orden</h5>
+                            <button class="btn btn-success" id="addProductBtn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-search" viewBox="0 0 16 16">
+                                    class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
                                     <path
-                                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
                                 </svg>
                             </button>
                         </div>
-                    </div>
-                    <div class="col-md-8 position-relative">
-                        <label for="proveedoresInput">
-                            Razón Social
-                        </label>
-                        <input type="text" id="proveedoresInput" class="form-control"
-                            placeholder="Ingrese razón social..." autocomplete="off">
-                        <ul id="resultadosLista" class="list-group mt-2 position-absolute"
-                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
-                        </ul>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
-                    <div class="col-md-3">
-                        <label for="documentoProveedorInput">Documento</label>
-                        <input type="text" id="documentoProveedorInput" class="form-control" readonly disabled />
-                    </div>
-                    <div class="col-md-9">
-                        <label for="razonSocialProveedorInput">Nombre</label>
-                        <input type="text" id="razonSocialProveedorInput" class="form-control" readonly disabled />
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-4">
-                        <label for="correoProveedorInput">Correo</label>
-                        <input type="email" id="correoProveedorInput" class="form-control" />
-                    </div>
-                    <div class="col-md-4">
-                        <label for="contactoProveedorInput">Contacto</label>
-                        <input type="text" id="contactoProveedorInput" class="form-control" />
-                    </div>
-                    <div class="col-md-4">
-                        <label for="whatsappProveedorInput">Whatsapp</label>
-                        <input type="text" id="whatsappProveedorInput" class="form-control" />
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-12">
-                        <label for="direccionProveedorInput">Dirección</label>
-                        <textarea id="direccionProveedorInput" class="form-control"></textarea>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-12">
-                        <label for="cuentaSolesProveedorLabel">Cuenta Soles</label>
-                        <div class="row">
-                            <input type="text" id="idCuentaBancariaSoles" value="" hidden>
-                            <div class="col-md-6">
-                                <select class="form-select" id="cuentaSolesProveedorSelect"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <input class="form-control" type="text" id="cuentaSolesProveedorInput">
-                            </div>
+                        <div class="card-body">
+                            <table class="table" id="disgregadoDetalleOrdenCompraTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center col-1">Item</th>
+                                        <th class="text-center col-1">OT</th>
+                                        <th class="col-1">Fec. Creación</th>
+                                        <th class="col-2">Producto</th>
+                                        <th class="col-2">Obs Producto</th>
+                                        <th class="text-center col-1">Und.</th>
+                                        <th class="text-center col-1">Cant. Req.</th>
+                                        <th class="text-center col-1">Cant. Ped.</th>
+                                        <th class="text-center col-1">Precio s/IGV</th>
+                                        <th class="text-center col-1">Total s/IGV</th>
+                                        <th class="text-center col-2">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="disgregadoDetalleOrdenCompraBody">
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">1045604</td>
+                                        <td class="">28/07/2024</td>
+                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                                        <td></td>
+                                        <td>VLL</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>S/. 89.76</td>
+                                        <td>S/. 179.52</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-trash-fill"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">1045624</td>
+                                        <td class="">28/07/2024</td>
+                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                                        <td></td>
+                                        <td>VLL</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>S/. 89.76</td>
+                                        <td>S/. 179.52</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-trash-fill"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">1045634</td>
+                                        <td class="">28/07/2024</td>
+                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
+                                        <td></td>
+                                        <td>VLL</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>S/. 89.76</td>
+                                        <td>S/. 179.52</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-trash-fill"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="col-md-12 mt-1">
-                        <label for="cuentaDolaresProveedorLabel">Cuenta Dolares</label>
-                        <div class="row">
-                            <input type="text" id="idCuentaBancariaDolares" value="" hidden>
-                            <div class="col-md-6">
-                                <select class="form-select" id="cuentaDolaresProveedorSelect"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <input class="form-control" type="text" id="cuentaDolaresProveedorInput">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12 mt-1">
-                        <label for="cuentaBancoNacionProveedorLabel">Cuenta Banco de la Nación</label>
-                        <div class="row">
-                            <input type="text" id="idCuentaBancariaBancoNacion" value="" hidden>
-                            <div class="col-md-6">
-                                <select class="form-select" id="cuentaBancoNacionProveedorSelect"></select>
-                            </div>
-                            <div class="col-md-6">
-                                <input class="form-control" type="text" id="cuentaBancoNacionProveedorInput">
+                </div>
+
+                <!-- Resumen de OrdenCompra -->
+                <div class="d-flex justify-content-end mt-4">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Subtotal:</span>
+                                    <span>
+                                        <span class="moneda ms-1"></span>
+                                        <span id="subtotalOrdenCompra">2890.50</span>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="fw-bold me-2">IGV</span>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" id="porcentajeIGVOrdenCompra" class="form-control"
+                                                value="18" style="width: 70px;" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <span>
+                                        <span class="moneda ms-1"></span>
+                                        <span id="igvOrdenCompra">18.00</span>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">Total:</span>
+                                    <span>
+                                        <span class="moneda ms-1"></span>
+                                        <span id="totalOrdenCompra">3410.79</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -106,388 +441,128 @@
             </div>
         </div>
     </div>
-    <!-- Columna para Datos cotización -->
-    <div class="col-md-6 col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Datos orden de compra</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <label for="monedaOrdenCompraInput">Moneda</label>
-                        <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
-                        </select>
-                    </div>
-                    <div class="col-md-8">
-                        <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
-                        <select id="formaDePagoOrdenCompraInput" class="form-select">
-                            <option value="CONTADO" selected>CONTADO</option>
-                            <option value="CREDITO">CREDITO</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-6">
-                        <label for="adelantoOrdenCompraInput">Adelanto:</label>
-                        <input type="number" id="adelantoOrdenCompraInput" class="form-control">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="saldoOrdenCompraInput">Saldo:</label>
-                        <input type="number" id="saldoOrdenCompraInput" class="form-control">
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-12">
-                        <label for="observacionPagoOrdenCompraInput">Observación de pago</label>
-                        <textarea id="observacionPagoOrdenCompraInput" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-6">
-                        <label for="fechaOrdenCompraPicker">Fecha orden de compra</label>
-                        <input type="text" id="fechaOrdenCompraPicker" class="form-control">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="fechaEntregaOrdenCompraPicker">Fecha entrega</label>
-                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control">
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-4">
-                        <label for="referenciaOrdenCompraInput">Referencia</label>
-                        <input type="text" id="referenciaOrdenCompraInput" class="form-control">
-                    </div>
-                    <div class="col-md-8">
-                        <label for="elaboradoOrdenCompraInput">Elaborado por:</label>
-                        <select id="elaboradoOrdenCompraInput" class="form-select">
-                            <option value="" selected>Seleccione un trabajador</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-12">
-                        <label for="notaOrdenCompraInput">Nota</label>
-                        <textarea id="notaOrdenCompraInput" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
-<!-- Agrupado Detalle Materiales -->
-<div class="card mt-3">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title">Agrupado detalle orden</h5>
-        </div>
-        <div class="card-body">
-            <table class="table" id="agrupadoDetalleOrdenCompraTable">
-                <thead>
-                    <tr>
-                        <th class="text-center col-1">Item</th>
-                        <th class="col-4">Descripción</th>
-                        <th class="text-center col-1">Unidad</th>
-                        <th class="text-center col-1">Cant. req.</th>
-                        <th class="text-center col-1">Cant. ped.</th>
-                        <th class="text-center col-1">Prec. unitario s/IGV</th>
-                        <th class="text-center col-1">Prec. total s/IGV</th>
-                        <th class="text-center col-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="agrupadoDetalleOrdenCompraBody">
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Disgregado Detalle Materiales -->
-<div class="card mt-3">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title">Disgregado detalle orden</h5>
-            <button class="btn btn-success" id="addProductBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                    <path
-                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
-                </svg>
-            </button>
-        </div>
-        <div class="card-body">
-            <table class="table" id="disgregadoDetalleOrdenCompraTable">
-                <thead>
-                    <tr>
-                        <th class="text-center col-1">Item</th>
-                        <th class="text-center col-1">OT</th>
-                        <th class="col-1">Fec. Creación</th>
-                        <th class="col-2">Producto</th>
-                        <th class="col-2">Obs Producto</th>
-                        <th class="text-center col-1">Und.</th>
-                        <th class="text-center col-1">Cant. Req.</th>
-                        <th class="text-center col-1">Cant. Ped.</th>
-                        <th class="text-center col-1">Precio s/IGV</th>
-                        <th class="text-center col-1">Total s/IGV</th>
-                        <th class="text-center col-2">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="disgregadoDetalleOrdenCompraBody">
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Resumen de OrdenCompra -->
-<div class="d-flex justify-content-end mt-4">
-    <div class="col-md-6 col-lg-4">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="fw-bold">Subtotal:</span>
-                    <span>
-                        <span class="moneda ms-1"></span>
-                        <span id="subtotalOrdenCompra">0.00</span>
-                    </span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="d-flex align-items-center">
-                        <span class="fw-bold me-2">IGV</span>
-                        <div class="input-group input-group-sm">
-                            <input type="number" id="porcentajeIGVOrdenCompra" class="form-control" value="18"
-                                style="width: 70px;" />
-                            <span class="input-group-text">%</span>
-                        </div>
-                    </div>
-                    <span>
-                        <span class="moneda ms-1"></span>
-                        <span id="igvOrdenCompra">0.00</span>
-                    </span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">Total:</span>
-                    <span>
-                        <span class="moneda ms-1"></span>
-                        <span id="totalOrdenCompra">0.00</span>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="d-flex flex-row justify-content-end mt-3">
-    <button class="btn btn-secondary me-2" id="btn-cancelar-orden-compra">Cancelar</button>
-    <button class="btn btn-primary" id="btn-guardar-orden-compra">Guardar</button>
-</div>
-
-<!-- DIALOG DE ORDEN DE MATERIALES DESPLEGADO -->
-<div class="modal fade" id="ordenMaterialesModal" tabindex="-1" aria-labelledby="ordenMaterialesModalLabel"
-    aria-hidden="true">
+<!-- Modal para detalle de materiales de orden de compra -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ordenMaterialesModalLabel">Orden de materiales</h5>
+                <h5 class="modal-title" id="ordenMaterialesModalLabel">Detalle de materiales de orden de compra</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row mb-3">
-                    <table id="orden-materiales-container" class="table table-striped nowrap" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>Producto</th>
-                                <th>Unidad</th>
-                                <th>Cantidad</th>
-                                <th>Emitir orden de compra desde</th>
-                                <th>Cotización</th>
-                                <th>Orden compra</th>
-                                <th>Nuevo proveedor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orden-materiales-container-body">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-seleccionar-materiales-orden-compra">Seleccionar
-                    materiales</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal cotizaciones -->
-<div class="modal fade" id="historicoCotizacionesModal" tabindex="-1" aria-labelledby="historicoCotizacionesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="historicoCotizacionesModalLabel">Histórico cotizaciones</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-                        <div class="pagination-container" id="pagination-container-historico-cotizaciones"></div>
-                    </div>
-                    <table id="historico-cotizaciones-container" class="table table-striped nowrap" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>Rz. social Proveedor</th>
-                                <th>Nro documento Proveedor</th>
-                                <th>Precio</th>
-                                <th>Fecha cotización</th>
-                                <th>Ver detalles</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historico-cotizaciones-container-body">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-seleccionar-cotizacion">Seleccionar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de ordenes de compra -->
-<div class="modal fade" id="historicoOrdenesCompraModal" tabindex="-1" aria-labelledby="historicoOrdenesCompraModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="historicoOrdenesCompraModalLabel">Histórico Ordenes de Compra</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
-                        <div class="pagination-container" id="pagination-container-historico-ordenes-compra"></div>
-                    </div>
-                    <table id="historico-ordenes-compra-container" class="table table-striped nowrap" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>Rz. social Proveedor</th>
-                                <th>Nro documento Proveedor</th>
-                                <th>Precio</th>
-                                <th>Fecha orden de compra</th>
-                                <th>Ver detalles</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historico-ordenes-compra-container-body">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-seleccionar-orden-compra">Seleccionar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para ingresar precio de producto -->
- <div class="modal fade" id="precioProductoModal" tabindex="-1" aria-labelledby="precioProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="precioProductoModalLabel">Precio unitario producto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <input type="text" id="producto-id" value="" hidden>
-                    <label for="precio-unitario-input-modal">Precio unitario s/igv</label>
-                    <input type="number" class="form-control" id="precio-unitario-input-modal">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-replicar-precio-unitario">Replicar precio</button>
-            </div>
-        </div>
-    </div>
- </div>
-
-<!-- Modal ingresar información de proveedor y precio -->
-<!-- <div class="modal fade" id="nuevoProveedorModal" tabindex="-1" aria-labelledby="nuevoProveedorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="nuevoProveedorModalLabel">Ingresar nuevo proveedor</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <div class="row">
-                        <input id="proveedorIdInput" value="" hidden>
-                        <div class="col-md-9 mb-3 position-relative">
-                            <label for="agregarProveedoresInput" class="form-label">
-                                Razón Social
-                            </label>
-                            <input type="text" id="agregarProveedoresInput" class="form-control"
-                                placeholder="Ingrese razón social..." autocomplete="off">
-                            <ul id="resultadosLista" class="list-group mt-2 position-absolute"
-                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
-                            </ul>
+                <!-- Agrupado Detalle Materiales -->
+                <div class="card mt-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Agrupado detalle orden</h5>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="agregarPrecioProveedorInput" class="form-label">
-                                Precio
-                            </label>
-                            <div class="input-group">
-                                <input type="number" id="agregarPrecioProveedorInput" class="form-control" autocomplete="off">
-                            </div>
+                        <div class="card-body">
+
+                            <table class="table" id="agrupadoDetalleOrdenCompraTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center col-1">Item</th>
+                                        <th class="col-4">Descripción</th>
+                                        <th class="text-center col-1">Unidad</th>
+                                        <th class="text-center col-1">Cant. req.</th>
+                                        <th class="text-center col-1">Cant. ped.</th>
+                                        <th class="text-center col-1">Prec. unitario s/IGV</th>
+                                        <th class="text-center col-1">Prec. total s/IGV</th>
+                                        <!-- <th class="text-center col-2">Acciones</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody id="agrupadoDetalleOrdenCompraBody">
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                                        <td class="text-center">VLL</td>
+                                        <td class="text-center">4</td>
+                                        <td class="text-center">4</td>
+                                        <td class="text-center">S/. 89.76</td>
+                                        <td class="text-center">S/. 359.04</td>
+                                        <!-- <td class="text-center"></td> -->
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2</td>
+                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
+                                        <td class="text-center">PZ</td>
+                                        <td class="text-center">10</td>
+                                        <td class="text-center">10</td>
+                                        <td class="text-center">S/. 15.96</td>
+                                        <td class="text-center">S/. 159.6</td>
+                                        <!-- <td class="text-center"></td> -->
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-seleccionar-nuevo-proveedor">Agregar proveedor</button>
-            </div>
-        </div>
-    </div>
-</div> -->
 
-<!-- DIALOG AGREGAR PRODUCTOS -->
-<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <table id="tbl-orden-compra-productos" class="table mt-3">
-                    <thead>
-                        <tr>
-                            <th class="col-1">Código</th>
-                            <th class="col-4">Descripción</th>
-                            <th class="col-1 text-center">Und.</th>
-                            <th class="col-2 text-center">Cantidad</th>
-                            <th class="col-2 text-center">Precio unitario s/IGV</th>
-                            <th class="col-2 text-center">Total s/IGV</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
+                <!-- Disgregado Detalle Materiales -->
+                <div class="card mt-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Disgregado detalle orden</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table" id="disgregadoDetalleOrdenCompraTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center col-1">Item</th>
+                                        <th class="text-center col-1">OT</th>
+                                        <th class="col-1">Fec. Creación</th>
+                                        <th class="col-2">Producto</th>
+                                        <th class="col-2">Obs Producto</th>
+                                        <th class="text-center col-1">Und.</th>
+                                        <th class="text-center col-1">Cant. Req.</th>
+                                        <th class="text-center col-1">Cant. Ped.</th>
+                                        <th class="text-center col-1">Precio s/IGV</th>
+                                        <th class="text-center col-1">Total s/IGV</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="disgregadoDetalleOrdenCompraBody">
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">1045604</td>
+                                        <td class="">28/07/2024</td>
+                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                                        <td></td>
+                                        <td>VLL</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>S/. 89.76</td>
+                                        <td>S/. 179.52</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">1045624</td>
+                                        <td class="">28/07/2024</td>
+                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                                        <td></td>
+                                        <td>VLL</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>S/. 89.76</td>
+                                        <td>S/. 179.52</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td class="text-center">1045634</td>
+                                        <td class="">28/07/2024</td>
+                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
+                                        <td></td>
+                                        <td>VLL</td>
+                                        <td>2</td>
+                                        <td>2</td>
+                                        <td>S/. 89.76</td>
+                                        <td>S/. 179.52</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
