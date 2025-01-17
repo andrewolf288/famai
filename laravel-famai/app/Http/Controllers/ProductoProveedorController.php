@@ -37,15 +37,12 @@ class ProductoProveedorController extends Controller
 
     public function importarData()
     {
+        set_time_limit(1200);
         $filePath = storage_path('app/temp/ordenes_compra_proveedor_producto.csv');
 
         if (!file_exists($filePath)) {
             return response()->json(['error' => 'File not found.'], 404);
         }
-
-        $batchSize = 1000;
-        $records = [];
-        $record = array();
 
         // registros en cache
         $cachedProveedores = [];
@@ -70,6 +67,7 @@ class ProductoProveedorController extends Controller
                     } else {
                         $proveedor = Proveedor::where('prv_codigo', $prv_codigo)->first();
                         if (!$proveedor) {
+                            // continue;
                             // debemos consultar en la tabla
                             $proveedorFound = $conexion_SAP
                                 ->table('OCRD')
@@ -96,6 +94,7 @@ class ProductoProveedorController extends Controller
                     } else {
                         $producto = Producto::where('pro_codigo', $pro_codigo)->first();
                         if (!$producto) {
+                            // continue;
                             $productoFound = $conexion_SAP
                                 ->table('OITM as T0')
                                 ->select([
@@ -122,16 +121,6 @@ class ProductoProveedorController extends Controller
                         $cachedProductos[$pro_codigo] = $producto;
                     }
 
-                    // $record = [
-                    //     "prp_nroordencompra" => $prp_nroordencompra,
-                    //     "pro_id" => $producto->pro_id,
-                    //     "prv_id" => $proveedor->prv_id,
-                    //     "prp_fechaultimacompra" => $data['prp_fechaultimacompra'],
-                    //     "prp_preciounitario" => $data['prp_preciounitario'],
-                    //     "prp_usucreacion" => "ANDREWJA",
-                    //     "prp_feccreacion" => date('Y-m-d H:i:s'),
-                    // ];
-
                     ProductoProveedor::create([
                         "prp_nroordencompra" => $prp_nroordencompra,
                         "pro_id" => $producto->pro_id,
@@ -141,16 +130,7 @@ class ProductoProveedorController extends Controller
                         "prp_usucreacion" => "ANDREWJA",
                         "prp_feccreacion" => date('Y-m-d H:i:s'),
                     ]);
-                    // DB::table('tblproductosproveedores_prp')->insert($record);
-                    // if (count($records) == $batchSize) {
-                    //     DB::table('tblproductosproveedores_prp')->insert($records);
-                    //     $records = [];
-                    // }
                 }
-
-                // if (!empty($records)) {
-                //     DB::table('tblproductosproveedores_prp')->insert($records);
-                // }
 
                 DB::commit();
                 return response()->json(['success' => 'File processed successfully.']);

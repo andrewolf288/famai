@@ -406,5 +406,3 @@ Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCot
 //     $number = 142.67;
 //     return UtilHelper::convertirNumeroALetras($number);
 // });
-
-Route::get('script', [ProductoProveedorController::class, 'importarData']);
