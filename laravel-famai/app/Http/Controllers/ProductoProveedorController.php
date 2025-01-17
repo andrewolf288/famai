@@ -109,8 +109,13 @@ class ProductoProveedorController extends Controller
                                 "pro_codigo" => $productoFound->pro_codigo,
                                 "pro_descripcion" => $productoFound->pro_descripcion,
                                 "uni_codigo" => $productoFound->uni_codigo,
+                                'pgi_codigo' => 'SIN',
+                                'pfa_codigo' => 'SIN',
+                                'psf_codigo' => 'SIN',
+                                'pma_codigo' => 'SIN',
                                 "pro_usucreacion" => "ANDREWJA",
                                 "pro_feccreacion" => date('Y-m-d H:i:s'),
+                                'pro_fecmodificacion' => null,
                             ]);
                         }
                         $cachedProductos[$pro_codigo] = $producto;
