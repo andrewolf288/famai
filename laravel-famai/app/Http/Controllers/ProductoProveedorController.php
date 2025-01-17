@@ -54,73 +54,86 @@ class ProductoProveedorController extends Controller
             $headers = fgetcsv($handle, 1000, ',');
             DB::beginTransaction();
             try {
+                // abrimos una conexion a la base de datos secundaria
+                $conexion_SAP = DB::connection('sqlsrv_secondary');
+
                 while (($row = fgetcsv($handle, 1000, ',')) !== false) {
                     $data = array_combine($headers, $row);
-                    $numeroDocumento = ltrim(preg_replace('/^[A-Z]/', '', $data['cod_prov']), '0');
-                    $tipoDocumento = (strlen($numeroDocumento) >= 11) ? 'RUC' : 'DNI';
-                    $codigoProducto = $data['cod_prod'];
+                    $prv_codigo = $data['prv_codigo'];
+                    $pro_codigo = $data['pro_codigo'];
+                    $prp_nroordencompra = $data['prp_nroordencompra'];
 
                     // buscar el proveedor en la base de datos local
-                    if (isset($cachedProveedores[$numeroDocumento])) {
-                        $proveedor = $cachedProveedores[$numeroDocumento];
+                    if (isset($cachedProveedores[$prv_codigo])) {
+                        $proveedor = $cachedProveedores[$prv_codigo];
                     } else {
-                        $proveedor = Proveedor::where('prv_nrodocumento', $numeroDocumento)->first();
+                        $proveedor = Proveedor::where('prv_codigo', $prv_codigo)->first();
                         if (!$proveedor) {
+                            // debemos consultar en la tabla
+                            $proveedorFound = $conexion_SAP
+                                ->table('OCRD')
+                                ->where('CardCode', $prv_codigo)
+                                ->first();
+
+                            $numerodocumento = ltrim(preg_replace('/^[A-Z]/', '', $proveedorFound->CardCode), '0');
+
                             $proveedor = Proveedor::create([
-                                "tdo_codigo" => $tipoDocumento,
-                                "prv_nrodocumento" => $numeroDocumento,
-                                "prv_nombre" => $data['nom_prov'],
+                                "prv_codigo" => $proveedorFound->CardCode,
+                                "tdo_codigo" => (strlen($numerodocumento) >= 11) ? 'RUC' : 'DNI',
+                                "prv_nombre" => $proveedorFound->CardName,
+                                "prv_nrodocumento" => $numerodocumento,
                                 "prv_usucreacion" => "ANDREWJA",
                                 "prv_feccreacion" => date('Y-m-d H:i:s'),
                             ]);
                         }
-                        $cachedProveedores[$numeroDocumento] = $proveedor;
+                        $cachedProveedores[$prv_codigo] = $proveedor;
                     }
 
                     // buscamos el producto en la base de datos local
-                    if (isset($cachedProductos[$codigoProducto])) {
-                        $producto = $cachedProductos[$codigoProducto];
+                    if (isset($cachedProductos[$pro_codigo])) {
+                        $producto = $cachedProductos[$pro_codigo];
                     } else {
-                        $producto = Producto::where('pro_codigo', $codigoProducto)->first();
+                        $producto = Producto::where('pro_codigo', $pro_codigo)->first();
                         if (!$producto) {
-                            $productoSecondary = DB::connection('sqlsrv_secondary')
+                            $productoFound = $conexion_SAP
                                 ->table('OITM as T0')
                                 ->select([
                                     'T0.ItemCode as pro_codigo',
                                     'T0.ItemName as pro_descripcion',
                                     'T0.BuyUnitMsr as uni_codigo',
                                 ])
-                                ->where('T0.ItemCode', $data['cod_prod'])
+                                ->where('T0.ItemCode', $pro_codigo)
                                 ->first();
 
                             $producto = Producto::create([
-                                "pro_codigo" => $productoSecondary->pro_codigo,
-                                "pro_descripcion" => $productoSecondary->pro_descripcion,
-                                "uni_codigo" => $productoSecondary->uni_codigo,
+                                "pro_codigo" => $productoFound->pro_codigo,
+                                "pro_descripcion" => $productoFound->pro_descripcion,
+                                "uni_codigo" => $productoFound->uni_codigo,
                                 "pro_usucreacion" => "ANDREWJA",
                                 "pro_feccreacion" => date('Y-m-d H:i:s'),
                             ]);
                         }
-                        $cachedProductos[$codigoProducto] = $producto;
+                        $cachedProductos[$pro_codigo] = $producto;
                     }
 
                     $records[] = [
+                        "prp_nroordencompra" => $prp_nroordencompra,
                         "pro_id" => $producto->pro_id,
                         "prv_id" => $proveedor->prv_id,
-                        "prp_fechaultimacompra" => $data['fecha_orden'],
-                        "prp_preciounitario" => $data['val_uni'],
+                        "prp_fechaultimacompra" => $data['prp_fechaultimacompra'],
+                        "prp_preciounitario" => $data['prp_preciounitario'],
                         "prp_usucreacion" => "ANDREWJA",
                         "prp_feccreacion" => date('Y-m-d H:i:s'),
                     ];
 
                     if (count($records) == $batchSize) {
-                        DB::table('producto_proveedor')->insert($records);
+                        DB::table('tblproductosproveedores_prp')->insert($records);
                         $records = [];
                     }
                 }
 
                 if (!empty($records)) {
-                    DB::table('producto_proveedor')->insert($records);
+                    DB::table('tblproductosproveedores_prp')->insert($records);
                 }
 
                 DB::commit();

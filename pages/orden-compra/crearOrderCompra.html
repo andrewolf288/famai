@@ -70,7 +70,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <!-- <div class="col-md-4">
                                         <label for="proveedoresSUNAT">
                                             RUC/DNI
                                         </label>
@@ -85,8 +85,8 @@
                                                 </svg>
                                             </button>
                                         </div>
-                                    </div>
-                                    <div class="col-md-8 position-relative">
+                                    </div> -->
+                                    <!-- <div class="col-md-8 position-relative">
                                         <label for="proveedoresInput">
                                             Razón Social
                                         </label>
@@ -95,29 +95,29 @@
                                         <ul id="resultadosLista" class="list-group mt-2 position-absolute"
                                             style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
                                         </ul>
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <div class="row mt-2">
                                     <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
                                     <div class="col-md-3">
                                         <label for="documentoProveedorInput">Documento</label>
-                                        <input type="text" id="documentoProveedorInput" class="form-control" readonly
+                                        <input type="text" id="documentoProveedorInput" value="RUC - 20100028698" class="form-control" readonly
                                             disabled />
                                     </div>
                                     <div class="col-md-9">
                                         <label for="razonSocialProveedorInput">Nombre</label>
-                                        <input type="text" id="razonSocialProveedorInput" class="form-control" readonly
+                                        <input type="text" id="razonSocialProveedorInput" value="FERREYROS S.A." class="form-control" readonly
                                             disabled />
                                     </div>
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-4">
                                         <label for="correoProveedorInput">Correo</label>
-                                        <input type="email" id="correoProveedorInput" class="form-control" />
+                                        <input type="email" id="correoProveedorInput" class="form-control" value="ferreyros@gmail.com" />
                                     </div>
                                     <div class="col-md-4">
                                         <label for="contactoProveedorInput">Contacto</label>
-                                        <input type="text" id="contactoProveedorInput" class="form-control" />
+                                        <input type="text" id="contactoProveedorInput" class="form-control" value="Marco Sanabria"/>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="whatsappProveedorInput">Whatsapp</label>
@@ -127,7 +127,7 @@
                                 <div class="row mt-2">
                                     <div class="col-md-12">
                                         <label for="direccionProveedorInput">Dirección</label>
-                                        <textarea id="direccionProveedorInput" class="form-control"></textarea>
+                                        <textarea id="direccionProveedorInput" class="form-control" rows="4">Ctra. Panamericana Sur, La Joya 04405</textarea>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -136,10 +136,12 @@
                                         <div class="row">
                                             <input type="text" id="idCuentaBancariaSoles" value="" hidden>
                                             <div class="col-md-6">
-                                                <select class="form-select" id="cuentaSolesProveedorSelect"></select>
+                                                <select class="form-select" id="cuentaSolesProveedorSelect">
+                                                    <option value="bcp" selected>Banco Central del Perú</option>
+                                                </select>
                                             </div>
                                             <div class="col-md-6">
-                                                <input class="form-control" type="text" id="cuentaSolesProveedorInput">
+                                                <input class="form-control" type="text" id="cuentaSolesProveedorInput" value="10100202-1021020120-1212">
                                             </div>
                                         </div>
                                     </div>
@@ -185,6 +187,7 @@
                                     <div class="col-md-4">
                                         <label for="monedaOrdenCompraInput">Moneda</label>
                                         <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
+                                            <option value="SOL">Soles</option>
                                         </select>
                                     </div>
                                     <div class="col-md-8">
@@ -209,17 +212,17 @@
                                     <div class="col-md-12">
                                         <label for="observacionPagoOrdenCompraInput">Observación de pago</label>
                                         <textarea id="observacionPagoOrdenCompraInput" class="form-control"
-                                            rows="3"></textarea>
+                                            rows="3">Alguna observación de pago de orden de compra</textarea>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-6">
                                         <label for="fechaOrdenCompraPicker">Fecha orden de compra</label>
-                                        <input type="text" id="fechaOrdenCompraPicker" class="form-control">
+                                        <input type="text" id="fechaOrdenCompraPicker" class="form-control" value="16/01/2025">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="fechaEntregaOrdenCompraPicker">Fecha entrega</label>
-                                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control">
+                                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control" value="18/01/2025">
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -237,7 +240,7 @@
                                 <div class="row mt-2">
                                     <div class="col-md-12">
                                         <label for="notaOrdenCompraInput">Nota</label>
-                                        <textarea id="notaOrdenCompraInput" class="form-control" rows="3"></textarea>
+                                        <textarea id="notaOrdenCompraInput" class="form-control" rows="3">Alguna nota de Orden de Compra</textarea>
                                     </div>
                                 </div>
                             </div>

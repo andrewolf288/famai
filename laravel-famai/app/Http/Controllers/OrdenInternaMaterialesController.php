@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
-use App\OrdenCompra;
 use App\OrdenCompraDetalle;
 use App\Producto;
 use App\Services\ProductoService;

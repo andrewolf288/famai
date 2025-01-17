@@ -11,6 +11,7 @@ class Proveedor extends Model
     protected $primaryKey = 'prv_id';
 
     protected $fillable = [
+        'prv_codigo',
         'tdo_codigo',
         'prv_nrodocumento',
         'prv_nombre',
