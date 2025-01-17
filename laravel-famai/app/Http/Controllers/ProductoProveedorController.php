@@ -108,7 +108,7 @@ class ProductoProveedorController extends Controller
 
                             $producto = Producto::create([
                                 "pro_codigo" => $productoFound->pro_codigo,
-                                "pro_descripcion" => $productoFound->pro_descripcion,
+                                "pro_descripcion" => $productoFound->pro_descripcion ?? 'DESCRIPCION VACIA',
                                 "uni_codigo" => $productoFound->uni_codigo,
                                 'pgi_codigo' => 'SIN',
                                 'pfa_codigo' => 'SIN',
