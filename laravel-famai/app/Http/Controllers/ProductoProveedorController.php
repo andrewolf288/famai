@@ -45,6 +45,7 @@ class ProductoProveedorController extends Controller
 
         $batchSize = 1000;
         $records = [];
+        $record = array();
 
         // registros en cache
         $cachedProveedores = [];
@@ -121,7 +122,7 @@ class ProductoProveedorController extends Controller
                         $cachedProductos[$pro_codigo] = $producto;
                     }
 
-                    $records[] = [
+                    $record = [
                         "prp_nroordencompra" => $prp_nroordencompra,
                         "pro_id" => $producto->pro_id,
                         "prv_id" => $proveedor->prv_id,
@@ -131,15 +132,16 @@ class ProductoProveedorController extends Controller
                         "prp_feccreacion" => date('Y-m-d H:i:s'),
                     ];
 
-                    if (count($records) == $batchSize) {
-                        DB::table('tblproductosproveedores_prp')->insert($records);
-                        $records = [];
-                    }
+                    DB::table('tblproductosproveedores_prp')->insert($record);
+                    // if (count($records) == $batchSize) {
+                    //     DB::table('tblproductosproveedores_prp')->insert($records);
+                    //     $records = [];
+                    // }
                 }
 
-                if (!empty($records)) {
-                    DB::table('tblproductosproveedores_prp')->insert($records);
-                }
+                // if (!empty($records)) {
+                //     DB::table('tblproductosproveedores_prp')->insert($records);
+                // }
 
                 DB::commit();
                 return response()->json(['success' => 'File processed successfully.']);
