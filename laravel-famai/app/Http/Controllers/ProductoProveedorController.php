@@ -122,7 +122,17 @@ class ProductoProveedorController extends Controller
                         $cachedProductos[$pro_codigo] = $producto;
                     }
 
-                    $record = [
+                    // $record = [
+                    //     "prp_nroordencompra" => $prp_nroordencompra,
+                    //     "pro_id" => $producto->pro_id,
+                    //     "prv_id" => $proveedor->prv_id,
+                    //     "prp_fechaultimacompra" => $data['prp_fechaultimacompra'],
+                    //     "prp_preciounitario" => $data['prp_preciounitario'],
+                    //     "prp_usucreacion" => "ANDREWJA",
+                    //     "prp_feccreacion" => date('Y-m-d H:i:s'),
+                    // ];
+
+                    ProductoProveedor::create([
                         "prp_nroordencompra" => $prp_nroordencompra,
                         "pro_id" => $producto->pro_id,
                         "prv_id" => $proveedor->prv_id,
@@ -130,9 +140,8 @@ class ProductoProveedorController extends Controller
                         "prp_preciounitario" => $data['prp_preciounitario'],
                         "prp_usucreacion" => "ANDREWJA",
                         "prp_feccreacion" => date('Y-m-d H:i:s'),
-                    ];
-
-                    DB::table('tblproductosproveedores_prp')->insert($record);
+                    ]);
+                    // DB::table('tblproductosproveedores_prp')->insert($record);
                     // if (count($records) == $batchSize) {
                     //     DB::table('tblproductosproveedores_prp')->insert($records);
                     //     $records = [];
