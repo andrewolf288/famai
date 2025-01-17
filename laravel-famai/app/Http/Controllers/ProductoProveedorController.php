@@ -140,7 +140,7 @@ class ProductoProveedorController extends Controller
                 return response()->json(['success' => 'File processed successfully.']);
             } catch (Exception $e) {
                 DB::rollback();
-                return response()->json(['error' => 'Error processing file.'], 500);
+                return response()->json(['error' => 'Error processing file.', 'error_message' => $e->getMessage()], 500);
             }
 
             fclose($handle);
