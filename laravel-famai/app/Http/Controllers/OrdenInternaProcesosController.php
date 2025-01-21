@@ -20,7 +20,7 @@ class OrdenInternaProcesosController extends Controller
             $ordenInternaProceso = OrdenInternaProcesos::findOrFail($id);
             $request->validate([
                 'odp_descripcion' => 'required|string',
-                'odp_observacion' => 'nullable|string|max:250',
+                'odp_observacion' => 'nullable|string|max:500',
                 'odp_ccalidad' => 'required|boolean',
             ]);
 

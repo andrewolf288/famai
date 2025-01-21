@@ -125,3 +125,8 @@ function detroyDataTable(dataContainer) {
         dataContainer.DataTable().destroy();
     }
 }
+
+// funcion para obtener la observación parser
+function parserObservacion(observacion, texto) {
+    return `${texto} - ${observacion.split(" - ")[1] || observacion}`
+}

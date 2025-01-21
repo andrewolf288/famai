@@ -539,7 +539,7 @@ $(document).ready(async function () {
             <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary">
                 <td>${element.producto?.pro_codigo ?? '-'}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${element.odm_descripcion?.replace(/'/g, "&#39;")}' readonly/>
+                    <input type="text" class="form-control descripcion-input ${element.producto ? '' : 'editable-input'}" value='${element.odm_descripcion?.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value='${element.odm_cantidad}' readonly/>
@@ -677,7 +677,7 @@ $(document).ready(async function () {
             <tr class="row-editable table-warning" data-id-producto="${pro_id}" data-asociar="${checked}">
                 <td>${pro_codigo}</td>
                 <td>
-                    <input type="text" class="form-control descripcion-input" value='${pro_descripcion.replace(/'/g, "&#39;")}' readonly/>
+                    <input type="text" class="form-control descripcion-input editable-input" value='${pro_descripcion.replace(/'/g, "&#39;")}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control cantidad-input" value='1.00' readonly/>
@@ -788,8 +788,7 @@ $(document).ready(async function () {
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-proporcionado-cliente', async function () {
         const $row = $(this).closest('tr')
         const $observacionInput = $row.find('.observacion-input')
-        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
-        const textNota = 'proporcionado por cliente - ' + observacion
+        const textNota = parserObservacion($observacionInput.val().trim(), 'proporcionado por cliente')
 
         // accedemos a los estilos de los demas botones
         const $btnNopedir = $row.find('.btn-detalle-nopedir-cliente')
@@ -858,13 +857,11 @@ $(document).ready(async function () {
         $btnRecuperado.attr('disabled', false)
     })
 
-    // cambiar a tipo no pedir
+    // funcion de cambiar de tipo no pedir
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-nopedir-cliente', async function () {
         const $row = $(this).closest('tr')
         const $observacionInput = $row.find('.observacion-input')
-        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
-        // añadimos el texto
-        const textNota = 'no pedir - ' + observacion
+        const textNota = parserObservacion($observacionInput.val().trim(), 'no pedir')
 
         // accedemos a los estilos de los demas botones
         const $btnProporcionado = $row.find('.btn-detalle-proporcionado-cliente')
@@ -937,9 +934,7 @@ $(document).ready(async function () {
     $('#tbl-orden-interna-productos').on('click', '.btn-detalle-recuperado-cliente', async function () {
         const $row = $(this).closest('tr')
         const $observacionInput = $row.find('.observacion-input')
-        const observacion = ($observacionInput.val().trim().split(' - ')[1] || '')
-        // añadimos el texto
-        const textNota = '(R) - ' + observacion
+        const textNota = parserObservacion($observacionInput.val().trim(), '(R)')
 
         // accedemos a los estilos de los demas botones
         const $btnProporcionado = $row.find('.btn-detalle-proporcionado-cliente')
@@ -1015,7 +1010,9 @@ $(document).ready(async function () {
         const $observacionInput = $row.find('.observacion-input')
 
         // Habilitar los inputs
-        $descripcionInput.prop('readonly', false)
+        if ($descripcionInput.hasClass('editable-input')) {
+            $descripcionInput.prop('readonly', false)
+        }
         $cantidadInput.prop('readonly', false)
         $observacionInput.prop('readonly', false)
 
@@ -1146,10 +1143,10 @@ $(document).ready(async function () {
 
         // llamamos a la informacion del detalle
         try {
-            const {data} = await client.get(`/ordeninternamaterialesadjuntos/${odm_id}`)
+            const { data } = await client.get(`/ordeninternamaterialesadjuntos/${odm_id}`)
 
             data.forEach(element => {
-                const {oma_id, oma_descripcion, oma_url} = element
+                const { oma_id, oma_descripcion, oma_url } = element
                 const row = `
                     <tr data-id-adjunto="${oma_id}">
                         <td>
@@ -1168,7 +1165,7 @@ $(document).ready(async function () {
                 $('#tabla-archivos-adjuntos').append(row)
             })
 
-        } catch(error){
+        } catch (error) {
             console.log(error)
             alert("Error al cargar los archivos")
         }
@@ -1193,13 +1190,13 @@ $(document).ready(async function () {
             formData.append('odm_id', $("#id-detalle-material").val());
 
             try {
-                const {data} = await client.post('/ordeninternamaterialesadjuntos', formData, {
+                const { data } = await client.post('/ordeninternamaterialesadjuntos', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 })
 
-                const {oma_id, oma_descripcion, oma_url} = data
+                const { oma_id, oma_descripcion, oma_url } = data
                 // Crear una nueva fila en la tabla con un índice del array
                 const row = `
                     <tr data-id-adjunto="${oma_id}">
@@ -1217,7 +1214,7 @@ $(document).ready(async function () {
                     </tr>
                 `
                 $('#tabla-archivos-adjuntos').append(row)
-            } catch(error) {
+            } catch (error) {
                 console.log(error)
                 alert("Error al subir el archivo")
             }
@@ -1239,7 +1236,7 @@ $(document).ready(async function () {
             await client.delete(`/ordeninternamaterialesadjuntos/${oma_id}`)
             // Remover la fila de la tabla
             row.remove();
-        } catch(error){
+        } catch (error) {
             console.log(error)
             alert("Error al eliminar el archivo")
         }

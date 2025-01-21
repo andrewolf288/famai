@@ -78,4 +78,9 @@ class UtilHelper
         $formatString = $currencyTransformer->toWords($numeroFormat, 'PEN');
         return strtoupper($formatString);
     }
+
+    public static function formatDateExportSAP($date)
+    {
+        return str_replace('-', '', $date);
+    }
 }

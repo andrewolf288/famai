@@ -135,13 +135,12 @@ $(document).ready(function () {
                 // parseamos los materiales
                 parte.materiales.forEach(material => {
                     parteDetalle.detalle_materiales.push({
-                        // pro_id: material.producto === null ? obtenerIdUnico(): material.producto.pro_id,
                         pro_id: material.producto === null ? obtenerIdUnico() : material.producto.pro_codigo,
                         pro_codigo: material.producto === null ? '' : material.producto.pro_codigo,
                         odm_descripcion: material.odm_descripcion || '',
                         odm_cantidad: material.odm_cantidad || 1,
                         odm_observacion: material.odm_observacion || '',
-                        odm_tipo: 1,
+                        odm_tipo: material.odm_tipo != 2 ? material.odm_tipo : 1, // si no tiene un tipo ADICIONAL, se coloca el estado creado con anterioridad
                         odm_asociar: material.producto === null ? false : true
                     })
                 })

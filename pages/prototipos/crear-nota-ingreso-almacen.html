@@ -1,0 +1,291 @@
+<div>
+
+    <div class="row">
+        <!-- Columna para Proveedor -->
+        <div class="col-md-6 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Proveedor</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="proveedoresSUNAT">
+                                RUC/DNI
+                            </label>
+                            <div class="input-group">
+                                <input type="text" id="proveedoresSUNAT" class="form-control"
+                                    placeholder="Ingrese Nro. documento..." autocomplete="off">
+                                <button id="searchProveedorSUNAT" class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-search" viewBox="0 0 16 16">
+                                        <path
+                                            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-8 position-relative">
+                            <label for="proveedoresInput">
+                                Razón Social
+                            </label>
+                            <input type="text" id="proveedoresInput" class="form-control"
+                                placeholder="Ingrese razón social..." autocomplete="off">
+                            <ul id="resultadosLista" class="list-group mt-2 position-absolute"
+                                style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
+                        <div class="col-md-3">
+                            <label for="documentoProveedorInput">Documento</label>
+                            <input type="text" id="documentoProveedorInput" value="RUC - 20100028698"
+                                class="form-control" readonly disabled />
+                        </div>
+                        <div class="col-md-9">
+                            <label for="razonSocialProveedorInput">Nombre</label>
+                            <input type="text" id="razonSocialProveedorInput" value="FERREYROS S.A."
+                                class="form-control" readonly disabled />
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <label for="correoProveedorInput">Correo</label>
+                            <input type="email" id="correoProveedorInput" class="form-control"
+                                value="ferreyros@gmail.com" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="contactoProveedorInput">Contacto</label>
+                            <input type="text" id="contactoProveedorInput" class="form-control"
+                                value="Marco Sanabria" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="whatsappProveedorInput">Whatsapp</label>
+                            <input type="text" id="whatsappProveedorInput" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <label for="direccionProveedorInput">Dirección</label>
+                            <textarea id="direccionProveedorInput" class="form-control"
+                                rows="4">Ctra. Panamericana Sur, La Joya 04405</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Columna para Datos cotización -->
+        <div class="col-md-6 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Datos nota de ingreso</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="fechaOrdenCompraPicker">Fecha Documento</label>
+                            <input type="text" id="fechaOrdenCompraPicker" class="form-control" value="16/01/2025">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="monedaOrdenCompraInput">Moneda</label>
+                            <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
+                                <option value="SOL">Soles</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2">
+                            <label for="documentoInput">Documento:</label>
+                            <select name="moneda" id="documentoInput" class="form-select">
+                                <option value="SOL">FAC</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="serieDocumentoInput">Serie:</label>
+                            <input type="text" id="serieDocumentoInput" class="form-control" value="F001">
+                        </div>
+                        <div class="col-md-5">
+                            <label for="numeroDocumentoInput">Número:</label>
+                            <input type="number" id="numeroDocumentoInput" class="form-control" value="1245">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <label for="elaboradoOrdenCompraInput">Solicitado por:</label>
+                            <select id="elaboradoOrdenCompraInput" class="form-select">
+                                <option value="">Seleccione un trabajador</option>
+                                <option value="1" selected>Andrew Pold Jacobo Castillo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-12">
+                            <label for="notaOrdenCompraInput">Observación</label>
+                            <textarea id="notaOrdenCompraInput" class="form-control"
+                                rows="4">Observación de la nota de ingreso a almacén</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Detalle de nota de ingreso -->
+    <div class="card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Detalle nota de ingreso</h5>
+        </div>
+        <div class="card-body">
+            <!-- Agregar productos -->
+            <div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="numeroDocumentoInput">Artículo</label>
+                        <input type="number" id="numeroDocumentoInput" class="form-control" disabled>
+                    </div>
+                    <div class="col-8">
+                        <div class="mb-2">
+                            <input type="checkbox" class="form-check-input me-2" id="checkAsociarProducto">
+                            <label class="form-check-label" for="generaStockProductoEdit">Sin código</label>
+                        </div>
+                        <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
+                        <ul id="resultadosLista" class="list-group mt-2"></ul>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <label for="cantidadProductoInput">Cantidad</label>
+                        <input type="number" id="cantidadProductoInput" class="form-control">
+                    </div>
+                    <div class="col-3">
+                        <label for="precioUnitarioProductoInput">Precio unitario</label>
+                        <input type="number" id="precioUnitarioProductoInput" class="form-control">
+                    </div>
+                    <div class="col-3">
+                        <label for="totalProductoInput">Total</label>
+                        <input type="number" id="totalProductoInput" class="form-control">
+                    </div>
+                    <div class="col-3 d-flex align-items-end justify-content-end">
+                        <button class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                <path
+                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                            </svg>
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Detalle -->
+            <hr>
+            <!-- Buscar por OT -->
+            <div>
+                <form class="mb-3" id="formSearchOrdenInterna">
+                    <label for="ordenInternaInput" class="form-label">Número de Orden Interna</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="ordenInternaInput" value="1056789">
+                        <span class="input-group-text">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-search" viewBox="0 0 16 16">
+                                <path
+                                    d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                            </svg>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div>
+                <table class="table" id="disgregadoDetalleOrdenCompraTable">
+                    <thead>
+                        <tr>
+                            <th class="text-center col-1">Item</th>
+                            <th class="text-center col-1">OT</th>
+                            <th class="col-1">Fec. Creación</th>
+                            <th class="col-2">Producto</th>
+                            <th class="col-2">Obs Producto</th>
+                            <th class="text-center col-1">Und.</th>
+                            <th class="text-center col-1">Cant. Req.</th>
+                            <th class="text-center col-1">Cant. Ped.</th>
+                            <th class="text-center col-1">Precio s/IGV</th>
+                            <th class="text-center col-1">Total s/IGV</th>
+                            <th class="text-center col-2">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="disgregadoDetalleOrdenCompraBody">
+                        <tr>
+                            <td class="text-center">1</td>
+                            <td class="text-center">1045604</td>
+                            <td class="">28/07/2024</td>
+                            <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                            <td></td>
+                            <td>VLL</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>S/. 89.76</td>
+                            <td>S/. 179.52</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-danger">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">1</td>
+                            <td class="text-center">1045624</td>
+                            <td class="">28/07/2024</td>
+                            <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
+                            <td></td>
+                            <td>VLL</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>S/. 89.76</td>
+                            <td>S/. 179.52</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-danger">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">1</td>
+                            <td class="text-center">1045634</td>
+                            <td class="">28/07/2024</td>
+                            <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
+                            <td></td>
+                            <td>VLL</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>S/. 89.76</td>
+                            <td>S/. 179.52</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-sm btn-danger">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
