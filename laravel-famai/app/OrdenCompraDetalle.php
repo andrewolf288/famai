@@ -20,6 +20,10 @@ class OrdenCompraDetalle extends Model
         'ocd_cantidad',
         'ocd_preciounitario',
         'ocd_total',
+        'ocd_porcentajedescuento',
+        'imp_codigo',
+        'ocd_porcentajeimpuesto',
+        'ocd_fechaentrega',
         'ocd_activo',
         'ocd_usucreacion',
         'ocd_feccreacion',
@@ -46,5 +50,11 @@ class OrdenCompraDetalle extends Model
     public function producto()
     {
         return $this->belongsTo(Producto::class, 'pro_id');
+    }
+
+    // impuesto 
+    public function impuesto()
+    {
+        return $this->belongsTo(Impuesto::class, 'imp_codigo');
     }
 }

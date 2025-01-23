@@ -422,7 +422,8 @@ class OrdenInternaMaterialesController extends Controller
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'ENVIADO')
                     ->orWhere('oic_estado', 'EVALUADO');
-            });
+            })
+            ->whereNotIn('odm_tipo', [3, 4, 5]);
 
         // filtro por orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -1248,56 +1249,6 @@ class OrdenInternaMaterialesController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-    // EXPORTAR EN TXT COTIZACION
-    // public function exportTXTCotizacion(Request $request)
-    // {
-    //     $proveedor = $request->input('proveedor', null);
-    //     $detalleMateriales = $request->input('detalle_materiales', []);
-
-    //     $agrupados = [];
-    //     foreach ($detalleMateriales as $detalle) {
-    //         $cod_orden = $detalle['cod_orden'];
-
-    //         if (!isset($agrupados[$cod_orden])) {
-    //             // Si no existe el grupo, inicializamos con el primer elemento
-    //             $agrupados[$cod_orden] = $detalle;
-    //             $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
-    //         } else {
-    //             // Si ya existe el grupo, sumamos la cantidad
-    //             $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
-    //         }
-    //     }
-    //     $agrupadosIndexado = array_values($agrupados);
-
-    //     $ruc = "20134690080";
-    //     $razon_social = "FAMAI SEAL JET S.A.C.";
-    //     $fecha = date('d') . ' de ' . date('F') . ' ' . date('Y');
-
-    //     $txt_content = "Estimado proveedor\n";
-    //     $txt_content .= "Por la presente sírvase cotizar lo siguiente a nombre de:\n";
-    //     $txt_content .= "RUC: $ruc\n";
-    //     $txt_content .= "Razón Social: $razon_social\n";
-    //     $txt_content .= "=========\n";
-    //     $txt_content .= "   PRODUCTO   CANTIDAD\n";
-
-    //     // Agregar los productos
-    //     foreach ($agrupadosIndexado as $index => $item) {
-    //         $txt_content .= ($index + 1) . ". " . $item["cod_descripcion"] . "     " . $item["cod_cantidad"] . "\n";
-    //     }
-
-    //     $txt_content .= "======\n";
-    //     $txt_content .= "Contacto: " . ($proveedor['prv_contacto'] ?? '') . "\n";
-    //     $txt_content .= "Nombre: " . ($proveedor['prv_nombre'] ?? '') . "\n";
-    //     $txt_content .= "Correo: " . ($proveedor['prv_correo'] ?? '') . "\n";
-    //     $txt_content .= "Celular/Whatsapp: " . ($proveedor['prv_telefono'] ?? '') . "/" . ($proveedor['prv_whatsapp'] ?? '') . "\n\n";
-    //     $txt_content .= "Arequipa, $fecha\n";
-
-
-    //     return response()->streamDownload(function () use ($txt_content) {
-    //         echo $txt_content;
-    //     }, 'cotizacion_proveedor.txt', ['Content-Type' => 'text/plain']);
-    // }
 
     // detalle material - cotizacion
     public function findCotizacionByMaterial(Request $request)

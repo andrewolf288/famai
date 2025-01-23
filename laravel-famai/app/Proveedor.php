@@ -14,6 +14,7 @@ class Proveedor extends Model
         'prv_codigo',
         'tdo_codigo',
         'prv_nrodocumento',
+        'fpa_codigo',
         'prv_nombre',
         'prv_direccion',
         'ubi_codigo',
@@ -52,5 +53,11 @@ class Proveedor extends Model
     public function cuentasBancarias()
     {
         return $this->hasMany(ProveedorCuentaBanco::class, 'prv_id', 'prv_id');
+    }
+
+    // forma de pago
+    public function formaPago()
+    {
+        return $this->belongsTo(FormaPago::class, 'fpa_codigo');
     }
 }

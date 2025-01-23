@@ -290,7 +290,7 @@ class CotizacionController extends Controller
             }
 
             // adjuntamos los archivos
-            if($proveedor_unico){
+            if ($proveedor_unico) {
                 if ($request->hasFile('files')) {
                     // Obtenemos todos los archivos
                     $files = $request->file('files');
@@ -300,10 +300,10 @@ class CotizacionController extends Controller
                         $extension = $file->getClientOriginalExtension();
                         // Generamos un nombre único para el archivo, conservando la extensión original
                         $fileName = uniqid() . '.' . $extension;
-    
+
                         // Guardamos el archivo con la extensión correcta
                         $path = $file->storeAs('cotizacion-adjuntos', $fileName, 'public');
-    
+
                         CotizacionDetalleArchivos::create([
                             'coc_id' => $cotizacion->coc_id,
                             // 'cda_descripcion' => $detalle_descripcion[$countArray],
@@ -316,58 +316,13 @@ class CotizacionController extends Controller
                     }
                 }
             }
-            
+
             DB::commit();
+
             // actualizamos la cotizacion seleccionada
             $this->seleccionarCotizacionDetalleProducto($cotizacion->coc_id);
 
             return response()->json($cotizacion, 200);
-
-            // $agrupados = [];
-            // foreach ($detalleMateriales as $detalle) {
-            //     $cod_orden = $detalle['cod_orden'];
-
-            //     if (!isset($agrupados[$cod_orden])) {
-            //         // Si no existe el grupo, inicializamos con el primer elemento
-            //         $agrupados[$cod_orden] = $detalle;
-            //         $agrupados[$cod_orden]['cod_cantidad'] = floatval($detalle['cod_cantidad']);
-            //     } else {
-            //         // Si ya existe el grupo, sumamos la cantidad
-            //         $agrupados[$cod_orden]['cod_cantidad'] += floatval($detalle['cod_cantidad']);
-            //     }
-            // }
-            // $agrupadosIndexado = array_values($agrupados);
-
-            // // cuentas bancarias
-            // $cuentasBancariasProveedor = ProveedorCuentaBanco::with('entidadBancaria')
-            //     ->where('prv_id', $id_proveedor)->get();
-
-            // $cuentas_bancarias = UtilHelper::obtenerCuentasBancarias($cuentasBancariasProveedor ?? []);
-
-            // // retorna la generacion de un PDF
-            // $API_URL = env('DOMAIN_APPLICATION', 'http://192.168.2.3:8080/logistica');
-            // $data = [
-            //     'proveedor' => $proveedor,
-            //     'trabajador' => $tra_solicitante,
-            //     'detalleMateriales' => $agrupadosIndexado,
-            //     'fechaActual' => DateHelper::parserFechaActual(),
-            //     'usuarioImpresion' => $user->usu_codigo,
-            //     'fechaHoraImpresion' => date('Y-m-d H:i:s'),
-            //     'url_cotizacion' => $API_URL . "/cotizacion-proveedor.html?coc_id=$cotizacion->coc_id",
-            //     'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
-            //     'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
-            //     'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares']
-            // ];
-
-            // $pdfOptions = [
-            //     'paper' => 'a4',
-            //     'orientation' => 'landscape',
-            // ];
-
-            // $pdf = Pdf::loadView('cotizacion.cotizacion', $data)
-            //     ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
-
-            // return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500, ['Content-Type' => 'application/json']);
@@ -837,7 +792,7 @@ class CotizacionController extends Controller
             DB::commit();
 
             // actualizamos la cotizacion seleccionada
-            $this->seleccionarCotizacionDetalleProducto($id);
+            // $this->seleccionarCotizacionDetalleProducto($id);
 
             // debemos obtener el pdf correspondiente
             $pdf = $this->generarPDF($id);
@@ -1029,5 +984,69 @@ class CotizacionController extends Controller
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
         }, "cotizacion-$id.xlsx", ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+    }
+
+    // funcion para traer proveedores con cotizaciones
+    public function obtenerProveedoresCotizaciones(Request $request)
+    {
+        $detalleCotizaciones = CotizacionDetalle::whereHas('detalleMaterial', function ($query) {
+            $query->where('odm_estado', 'COT');
+        })
+            ->whereNotNull('cod_estado')
+            ->whereNotNull('pro_id')
+            ->get();
+
+        // debemos agrupar por proveedor
+        $proveedores = $detalleCotizaciones
+            ->groupBy('cotizacion.prv_id')
+            ->map(function ($grupo, $prv_id) {
+                // Contamos los grupos con pro_id único
+                // $uniqueProIdCount = $grupo->pluck('pro_id')->unique()->count();
+
+                return [
+                    'prv_id' => $prv_id,
+                    'proveedor' => $grupo->first()->cotizacion->proveedor,
+                    'items' => $grupo->values(),
+                    'total_items' => $grupo->count(),
+                ];
+            })
+            ->values();
+
+        return response()->json($proveedores);
+    }
+
+    public function obtenerDetallesProveedoresCotizaciones(Request $request)
+    {
+        // obtenemos las cotizaciones detalles
+        $detalles = $request["detalles"];
+        $proveedor = $request["proveedor"];
+        // buscamos informacion de proveedor
+        $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'formaPago'])
+            ->findOrFail($proveedor);
+        // buscamos las cotizaciones detalle correspondientes
+        $detallesCotizaciones = CotizacionDetalle::whereIn('cod_id', $detalles)
+            ->get();
+
+        $detalles = $detallesCotizaciones->map(function ($detalle) {
+            // debemos buscar los detalles relacionados en la cotizacion
+            $detallesRelacionados = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto'])
+                ->where('pro_id', $detalle->pro_id)
+                ->where('coc_id', $detalle->coc_id)
+                ->get();
+
+            return [
+                "producto" => $detalle->detalleMaterial->producto,
+                "detalles" => $detallesRelacionados,
+                "cantidad_requerida" => $detallesRelacionados->sum('detalleMaterial.odm_cantidadpendiente'),
+                "precio_unitario" => $detalle->cod_preciounitario,
+            ];
+        })->values();
+
+        $formatData = array(
+            "proveedor" => $proveedor,
+            "detalles" => $detalles,
+        );
+
+        return response()->json($formatData);
     }
 }

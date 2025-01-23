@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\CotizacionDetalle;
 use App\Helpers\DateHelper;
 use App\OrdenCompra;
 use App\OrdenCompraDetalle;

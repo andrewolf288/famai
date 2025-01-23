@@ -6,54 +6,15 @@
         <th>RUC</th>
         <th>Proveedor</th>
         <th class="text-center">Items</th>
-        <th class="text-center">Total</th>
         <th class="text-center">Acciones</th>
     </thead>
     <tbody id="data-container-body">
-        <tr>
-            <td>20100028698</td>
-            <td>FERREYROS S.A.</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-primary btn-detalle">3 items</button>
-            </td>
-            <td class="text-center">S/. 1890.50</td>
-            <td class="text-center">
-                <div class="d-flex justify-content-center">
-                    <button class="btn btn-sm btn-primary btn-crear-orden-compra">Crear</button>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td>20559294757</td>
-            <td>SERVICIOS MULTIPLES DOñA EMILIANA EMPRESA INDIVIDUAL DE RESPONSABILIDAD LIMITADA</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-primary btn-detalle">2 items</button>
-            </td>
-            <td class="text-center">S/. 2890.50</td>
-            <td class="text-center">
-                <div class="d-flex justify-content-center">
-                    <button class="btn btn-sm btn-primary btn-crear-orden-compra">Crear</button>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td>10004637092</td>
-            <td>FLORES PAYE, VIRGINIA INES</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-primary btn-detalle">4 items</button>
-            </td>
-            <td class="text-center">S/. 890.50</td>
-            <td class="text-center">
-                <div class="d-flex justify-content-center">
-                    <button class="btn btn-sm btn-primary btn-crear-orden-compra">Crear</button>
-                </div>
-            </td>
-        </tr>
     </tbody>
 </table>
 
 <!-- MODAL PARA DETALLE DE ORDEN DE COMPRA -->
-<div class="modal fade" id="crearOrdenCompraModal" tabindex="-1" aria-labelledby="crearOrdenCompraModallLabel" aria-hidden="true">
+<div class="modal fade" id="crearOrdenCompraModal" tabindex="-1" aria-labelledby="crearOrdenCompraModallLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
@@ -69,55 +30,27 @@
                                 <h5 class="card-title">Proveedor</h5>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <!-- <div class="col-md-4">
-                                        <label for="proveedoresSUNAT">
-                                            RUC/DNI
-                                        </label>
-                                        <div class="input-group">
-                                            <input type="text" id="proveedoresSUNAT" class="form-control"
-                                                placeholder="Ingrese Nro. documento..." autocomplete="off">
-                                            <button id="searchProveedorSUNAT" class="btn btn-primary">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                    fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div> -->
-                                    <!-- <div class="col-md-8 position-relative">
-                                        <label for="proveedoresInput">
-                                            Razón Social
-                                        </label>
-                                        <input type="text" id="proveedoresInput" class="form-control"
-                                            placeholder="Ingrese razón social..." autocomplete="off">
-                                        <ul id="resultadosLista" class="list-group mt-2 position-absolute"
-                                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
-                                        </ul>
-                                    </div> -->
-                                </div>
                                 <div class="row mt-2">
                                     <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
                                     <div class="col-md-3">
                                         <label for="documentoProveedorInput">Documento</label>
-                                        <input type="text" id="documentoProveedorInput" value="RUC - 20100028698" class="form-control" readonly
-                                            disabled />
+                                        <input type="text" id="documentoProveedorInput" value="" class="form-control"
+                                            readonly disabled />
                                     </div>
                                     <div class="col-md-9">
                                         <label for="razonSocialProveedorInput">Nombre</label>
-                                        <input type="text" id="razonSocialProveedorInput" value="FERREYROS S.A." class="form-control" readonly
-                                            disabled />
+                                        <input type="text" id="razonSocialProveedorInput" value="" class="form-control"
+                                            readonly disabled />
                                     </div>
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-4">
                                         <label for="correoProveedorInput">Correo</label>
-                                        <input type="email" id="correoProveedorInput" class="form-control" value="ferreyros@gmail.com" />
+                                        <input type="email" id="correoProveedorInput" class="form-control" />
                                     </div>
                                     <div class="col-md-4">
                                         <label for="contactoProveedorInput">Contacto</label>
-                                        <input type="text" id="contactoProveedorInput" class="form-control" value="Marco Sanabria"/>
+                                        <input type="text" id="contactoProveedorInput" class="form-control" />
                                     </div>
                                     <div class="col-md-4">
                                         <label for="whatsappProveedorInput">Whatsapp</label>
@@ -127,7 +60,7 @@
                                 <div class="row mt-2">
                                     <div class="col-md-12">
                                         <label for="direccionProveedorInput">Dirección</label>
-                                        <textarea id="direccionProveedorInput" class="form-control" rows="4">Ctra. Panamericana Sur, La Joya 04405</textarea>
+                                        <textarea id="direccionProveedorInput" class="form-control"></textarea>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -136,12 +69,10 @@
                                         <div class="row">
                                             <input type="text" id="idCuentaBancariaSoles" value="" hidden>
                                             <div class="col-md-6">
-                                                <select class="form-select" id="cuentaSolesProveedorSelect">
-                                                    <option value="bcp" selected>Banco Central del Perú</option>
-                                                </select>
+                                                <select class="form-select" id="cuentaSolesProveedorSelect"></select>
                                             </div>
                                             <div class="col-md-6">
-                                                <input class="form-control" type="text" id="cuentaSolesProveedorInput" value="10100202-1021020120-1212">
+                                                <input class="form-control" type="text" id="cuentaSolesProveedorInput">
                                             </div>
                                         </div>
                                     </div>
@@ -176,25 +107,22 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Columna para Datos cotización -->
+                    <!-- Columna para datos de Orden de Compra -->
                     <div class="col-md-6 col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h5 class="card-title">Datos orden de compra</h5>
+                                <h5 class="card-title">Cabecera orden de compra</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label for="monedaOrdenCompraInput">Moneda</label>
-                                        <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
-                                            <option value="SOL">Soles</option>
+                                        <select id="monedaOrdenCompraInput" class="form-select">
                                         </select>
                                     </div>
                                     <div class="col-md-8">
                                         <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
                                         <select id="formaDePagoOrdenCompraInput" class="form-select">
-                                            <option value="CONTADO" selected>CONTADO</option>
-                                            <option value="CREDITO">CREDITO</option>
                                         </select>
                                     </div>
                                 </div>
@@ -212,17 +140,17 @@
                                     <div class="col-md-12">
                                         <label for="observacionPagoOrdenCompraInput">Observación de pago</label>
                                         <textarea id="observacionPagoOrdenCompraInput" class="form-control"
-                                            rows="3">Alguna observación de pago de orden de compra</textarea>
+                                            rows="2"></textarea>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-6">
                                         <label for="fechaOrdenCompraPicker">Fecha orden de compra</label>
-                                        <input type="text" id="fechaOrdenCompraPicker" class="form-control" value="16/01/2025">
+                                        <input type="text" id="fechaOrdenCompraPicker" class="form-control">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="fechaEntregaOrdenCompraPicker">Fecha entrega</label>
-                                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control" value="18/01/2025">
+                                        <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control">
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -233,173 +161,101 @@
                                     <div class="col-md-8">
                                         <label for="elaboradoOrdenCompraInput">Elaborado por:</label>
                                         <select id="elaboradoOrdenCompraInput" class="form-select">
-                                            <option value="" selected>Seleccione un trabajador</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-12">
-                                        <label for="notaOrdenCompraInput">Nota</label>
-                                        <textarea id="notaOrdenCompraInput" class="form-control" rows="3">Alguna nota de Orden de Compra</textarea>
+                                        <label for="impuestoOrdenCompraInput">Impuesto:</label>
+                                        <select class="form-select" id="impuestoOrdenCompraInput">
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Agrupado Detalle Materiales -->
-                <div class="card mt-3">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title">Agrupado detalle orden</h5>
-                        </div>
-                        <div class="card-body">
-
-                            <table class="table" id="agrupadoDetalleOrdenCompraTable">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center col-1">Item</th>
-                                        <th class="col-4">Descripción</th>
-                                        <th class="text-center col-1">Unidad</th>
-                                        <th class="text-center col-1">Cant. req.</th>
-                                        <th class="text-center col-1">Cant. ped.</th>
-                                        <th class="text-center col-1">Prec. unitario s/IGV</th>
-                                        <th class="text-center col-1">Prec. total s/IGV</th>
-                                        <!-- <th class="text-center col-2">Acciones</th> -->
-                                    </tr>
-                                </thead>
-                                <tbody id="agrupadoDetalleOrdenCompraBody">
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
-                                        <td class="text-center">VLL</td>
-                                        <td class="text-center">4</td>
-                                        <td class="text-center">4</td>
-                                        <td class="text-center">S/. 89.76</td>
-                                        <td class="text-center">S/. 359.04</td>
-                                        <!-- <td class="text-center"></td> -->
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">2</td>
-                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
-                                        <td class="text-center">PZ</td>
-                                        <td class="text-center">10</td>
-                                        <td class="text-center">10</td>
-                                        <td class="text-center">S/. 15.96</td>
-                                        <td class="text-center">S/. 159.6</td>
-                                        <!-- <td class="text-center"></td> -->
-                                    </tr>
-                                </tbody>
-                            </table>
+                <!-- Nota de Orden de Compra -->
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Nota</h5>
+                            </div>
+                            <div class="card-body">
+                                <textarea id="notaOrdenCompraInput" class="form-control" rows="3"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Disgregado Detalle Materiales -->
-                <div class="card mt-3">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title">Disgregado detalle orden</h5>
-                            <button class="btn btn-success" id="addProductBtn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                                    <path
-                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
-                                </svg>
-                            </button>
+                <!-- Agrupado Detalle Materiales -->
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">Agrupado detalle orden</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table" id="agrupadoDetalleOrdenCompraTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center col-1">Item</th>
+                                            <th class="col-1">Código</th>
+                                            <th class="col-4">Descripción</th>
+                                            <th class="text-center col-1">Unidad</th>
+                                            <th class="text-center col-1">Cant. req.</th>
+                                            <th class="text-center col-1">Cant. ped.</th>
+                                            <th class="text-center col-1">Prec. unitario s/IGV</th>
+                                            <th class="text-center col-1">Prec. total s/IGV</th>
+                                            <th class="text-center col-1">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="agrupadoDetalleOrdenCompraBody">
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <table class="table" id="disgregadoDetalleOrdenCompraTable">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center col-1">Item</th>
-                                        <th class="text-center col-1">OT</th>
-                                        <th class="col-1">Fec. Creación</th>
-                                        <th class="col-2">Producto</th>
-                                        <th class="col-2">Obs Producto</th>
-                                        <th class="text-center col-1">Und.</th>
-                                        <th class="text-center col-1">Cant. Req.</th>
-                                        <th class="text-center col-1">Cant. Ped.</th>
-                                        <th class="text-center col-1">Precio s/IGV</th>
-                                        <th class="text-center col-1">Total s/IGV</th>
-                                        <th class="text-center col-2">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="disgregadoDetalleOrdenCompraBody">
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td class="text-center">1045604</td>
-                                        <td class="">28/07/2024</td>
-                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
-                                        <td></td>
-                                        <td>VLL</td>
-                                        <td>2</td>
-                                        <td>2</td>
-                                        <td>S/. 89.76</td>
-                                        <td>S/. 179.52</td>
-                                        <td>
-                                            <div class="d-flex justify-content-center">
-                                                <button class="btn btn-sm btn-danger">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-trash-fill"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td class="text-center">1045624</td>
-                                        <td class="">28/07/2024</td>
-                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
-                                        <td></td>
-                                        <td>VLL</td>
-                                        <td>2</td>
-                                        <td>2</td>
-                                        <td>S/. 89.76</td>
-                                        <td>S/. 179.52</td>
-                                        <td>
-                                            <div class="d-flex justify-content-center">
-                                                <button class="btn btn-sm btn-danger">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-trash-fill"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td class="text-center">1045634</td>
-                                        <td class="">28/07/2024</td>
-                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
-                                        <td></td>
-                                        <td>VLL</td>
-                                        <td>2</td>
-                                        <td>2</td>
-                                        <td>S/. 89.76</td>
-                                        <td>S/. 179.52</td>
-                                        <td>
-                                            <div class="d-flex justify-content-center">
-                                                <button class="btn btn-sm btn-danger">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-trash-fill"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                </div>
+                <!-- Disgregado Detalle Materiales -->
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">Disgregado detalle orden</h5>
+                                <!-- <button class="btn btn-success" id="addProductBtn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                        <path
+                                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                                    </svg>
+                                </button> -->
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container-sticky">
+                                    <table class="table table-sticky" id="disgregadoDetalleOrdenCompraTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width: 10px;">Item</th>
+                                                <th class="text-center" style="width: 50px;">OT</th>
+                                                <th class="text-center" style="width: 100px;">% Desc.</th>
+                                                <th style="width: 120px;">Fec. Entega</th>
+                                                <th style="width: 300px;">Producto</th>
+                                                <th class="text-center" style="width: 10px;">Und.</th>
+                                                <th class="text-center" style="width: 120px;">Cant. Req.</th>
+                                                <th class="text-center" style="width: 120px;">Cant. Ped.</th>
+                                                <th class="text-center" style="width: 120px;">Precio s/IGV</th>
+                                                <th class="text-center" style="width: 120px;">Total s/IGV</th>
+                                                <th style="width: 240px;">Obs. Detalle</th>
+                                                <th style="width: 240px;">Observación</th>
+                                                <th class="text-center" style="width: 20px;">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="disgregadoDetalleOrdenCompraBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -413,28 +269,21 @@
                                     <span class="fw-bold">Subtotal:</span>
                                     <span>
                                         <span class="moneda ms-1"></span>
-                                        <span id="subtotalOrdenCompra">2890.50</span>
+                                        <span id="subtotalOrdenCompra"></span>
                                     </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <span class="fw-bold me-2">IGV</span>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" id="porcentajeIGVOrdenCompra" class="form-control"
-                                                value="18" style="width: 70px;" />
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </div>
+                                    <span class="fw-bold">Impuesto:</span>
                                     <span>
                                         <span class="moneda ms-1"></span>
-                                        <span id="igvOrdenCompra">18.00</span>
+                                        <span id="impuestoOrdenCompra"></span>
                                     </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fw-bold">Total:</span>
                                     <span>
                                         <span class="moneda ms-1"></span>
-                                        <span id="totalOrdenCompra">3410.79</span>
+                                        <span id="totalOrdenCompra"></span>
                                     </span>
                                 </div>
                             </div>
@@ -442,15 +291,21 @@
                     </div>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button id="guardar-orden-compra" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+            </div>
         </div>
     </div>
 </div>
+
 <!-- Modal para detalle de materiales de orden de compra -->
 <div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ordenMaterialesModalLabel">Detalle de materiales de orden de compra</h5>
+                <h5 class="modal-title">Detalle de materiales</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -462,40 +317,18 @@
                         </div>
                         <div class="card-body">
 
-                            <table class="table" id="agrupadoDetalleOrdenCompraTable">
+                            <table class="table" id="agrupadoDetalleMaterialesTable">
                                 <thead>
                                     <tr>
                                         <th class="text-center col-1">Item</th>
-                                        <th class="col-4">Descripción</th>
+                                        <th class="col-2">Código</th>
+                                        <th class="col-6">Descripción</th>
                                         <th class="text-center col-1">Unidad</th>
-                                        <th class="text-center col-1">Cant. req.</th>
-                                        <th class="text-center col-1">Cant. ped.</th>
-                                        <th class="text-center col-1">Prec. unitario s/IGV</th>
-                                        <th class="text-center col-1">Prec. total s/IGV</th>
-                                        <!-- <th class="text-center col-2">Acciones</th> -->
+                                        <th class="text-center col-1">Cant. Req.</th>
+                                        <th class="text-center col-1">Prec. unitario</th>
                                     </tr>
                                 </thead>
-                                <tbody id="agrupadoDetalleOrdenCompraBody">
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
-                                        <td class="text-center">VLL</td>
-                                        <td class="text-center">4</td>
-                                        <td class="text-center">4</td>
-                                        <td class="text-center">S/. 89.76</td>
-                                        <td class="text-center">S/. 359.04</td>
-                                        <!-- <td class="text-center"></td> -->
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">2</td>
-                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
-                                        <td class="text-center">PZ</td>
-                                        <td class="text-center">10</td>
-                                        <td class="text-center">10</td>
-                                        <td class="text-center">S/. 15.96</td>
-                                        <td class="text-center">S/. 159.6</td>
-                                        <!-- <td class="text-center"></td> -->
-                                    </tr>
+                                <tbody id="agrupadoDetalleMaterialesBody">
                                 </tbody>
                             </table>
                         </div>
@@ -509,58 +342,19 @@
                             <h5 class="card-title">Disgregado detalle orden</h5>
                         </div>
                         <div class="card-body">
-                            <table class="table" id="disgregadoDetalleOrdenCompraTable">
+                            <table class="table" id="disgregadoDetalleMaterialesable">
                                 <thead>
                                     <tr>
                                         <th class="text-center col-1">Item</th>
                                         <th class="text-center col-1">OT</th>
                                         <th class="col-1">Fec. Creación</th>
-                                        <th class="col-2">Producto</th>
-                                        <th class="col-2">Obs Producto</th>
+                                        <th class="col-3">Producto</th>
+                                        <th class="col-4">Obs Producto</th>
                                         <th class="text-center col-1">Und.</th>
                                         <th class="text-center col-1">Cant. Req.</th>
-                                        <th class="text-center col-1">Cant. Ped.</th>
-                                        <th class="text-center col-1">Precio s/IGV</th>
-                                        <th class="text-center col-1">Total s/IGV</th>
                                     </tr>
                                 </thead>
-                                <tbody id="disgregadoDetalleOrdenCompraBody">
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td class="text-center">1045604</td>
-                                        <td class="">28/07/2024</td>
-                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
-                                        <td></td>
-                                        <td>VLL</td>
-                                        <td>2</td>
-                                        <td>2</td>
-                                        <td>S/. 89.76</td>
-                                        <td>S/. 179.52</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td class="text-center">1045624</td>
-                                        <td class="">28/07/2024</td>
-                                        <td>(01-//-//-//) SOLDADURA CELLOCORD AP 6011 - 3/32"</td>
-                                        <td></td>
-                                        <td>VLL</td>
-                                        <td>2</td>
-                                        <td>2</td>
-                                        <td>S/. 89.76</td>
-                                        <td>S/. 179.52</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td class="text-center">1045634</td>
-                                        <td class="">28/07/2024</td>
-                                        <td>(03-//-02-//) 228-7089 - O-RING * 033-6039 - CAT</td>
-                                        <td></td>
-                                        <td>VLL</td>
-                                        <td>2</td>
-                                        <td>2</td>
-                                        <td>S/. 89.76</td>
-                                        <td>S/. 179.52</td>
-                                    </tr>
+                                <tbody id="disgregadoDetalleMaterialesBody">
                                 </tbody>
                             </table>
                         </div>

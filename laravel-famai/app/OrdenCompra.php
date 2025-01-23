@@ -17,10 +17,10 @@ class OrdenCompra extends Model
         'occ_fechaentrega',
         'sed_codigo',
         'mon_codigo',
+        'fpa_codigo',
         'occ_tipocambio',
         'occ_referencia',
         'tra_elaborado',
-        'occ_formapago',
         'tra_solicitado',
         'tra_autorizado',
         'occ_fecautorizacion',
@@ -28,11 +28,11 @@ class OrdenCompra extends Model
         'occ_total',
         'occ_subtotal',
         'occ_impuesto',
-        'occ_igv',
         'occ_observacionpago',
         'occ_adelanto',
         'occ_saldo',
         'occ_estado',
+        'occ_importado',
         'occ_activo',
         'occ_usucreacion',
         'occ_feccreacion',
@@ -76,5 +76,10 @@ class OrdenCompra extends Model
     public function sede()
     {
         return $this->belongsTo(Sede::class, 'sed_codigo')->selectFields();
+    }
+
+    public function formaPago()
+    {
+        return $this->belongsTo(FormaPago::class, 'fpa_codigo');
     }
 }

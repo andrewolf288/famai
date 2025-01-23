@@ -1,6 +1,5 @@
 <?php
 
-use App\Helpers\UtilHelper;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\AlmacenController;
 use App\Http\Controllers\AuthController;
@@ -17,6 +16,8 @@ use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\CotizacionDetalleArchivoController;
 use App\Http\Controllers\CotizacionDetalleController;
 use App\Http\Controllers\EntidadBancariaController;
+use App\Http\Controllers\FormaPagoController;
+use App\Http\Controllers\ImpuestoController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\NotificacionController;
@@ -38,9 +39,7 @@ use App\Http\Controllers\RequerimientoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
-use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -324,6 +323,18 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('monedasSimple', [MonedaController::class, 'indexSimple']);
 });
 
+// rutas de formas de pago
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('formaspago', [FormaPagoController::class, 'index']);
+    Route::get('formaspagoSimple', [FormaPagoController::class, 'indexSimple']);
+});
+
+// rutas de impuestos
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('impuestos', [ImpuestoController::class, 'index']);
+    Route::get('impuestosSimple', [ImpuestoController::class, 'indexSimple']);
+});
+
 // rutas de cotizaciones
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizaciones', [CotizacionController::class, 'index']);
@@ -337,6 +348,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('cotizacion/{id}', [CotizacionController::class, 'updateCotizacion']);
     Route::delete('cotizacion/{id}', [CotizacionController::class, 'destroy']);
     Route::patch('cotizacion/update-estado/{id}', [CotizacionController::class, 'updateEstadoCotizacion']);
+    Route::get('cotizacion-proveedores', [CotizacionController::class, 'obtenerProveedoresCotizaciones']);
+    Route::post('cotizacion-proveedores-detalles', [CotizacionController::class, 'obtenerDetallesProveedoresCotizaciones']);
 });
 
 // rutas de detalle de cotizacion
