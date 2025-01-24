@@ -2,6 +2,15 @@ $(document).ready(() => {
     let dataInformacion = []
     let detallesOrdenCompra = []
     let impuestos = []
+    const cuentaConSeparadoresRegex = /^[\d\- ]{8,30}$/
+
+    $("#fechaOrdenCompraPicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+    }).datepicker("setDate", moment().toDate())
+
+    $("#fechaEntregaOrdenCompraPicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+    }).datepicker("setDate", moment().toDate())
 
     // funcion que inicializa la información de proveedores que tienen cotizaciones
     async function initDataInformacion() {
@@ -404,11 +413,7 @@ $(document).ready(() => {
 
     // funcion para actualizar resumen de orden de compra
     function renderizarResumenOrdenCompra() {
-        const impuestoValor = $("#impuestoOrdenCompraInput").val()
-        console.log(impuestoValor)
-        const impuestoObjeto = impuestos.find(impuesto => impuesto.imp_codigo === impuestoValor)
-        const impuestoPorcentaje = impuestoObjeto ? parseFloat(impuestoObjeto.imp_porcentaje) : 0.00
-        console.log(impuestoPorcentaje)
+        const impuestoPorcentaje = obtenerImpuestoPorcentaje()
         let subtotal = 0.00
         let impuesto = 0.00
         let total = 0.00
@@ -503,20 +508,155 @@ $(document).ready(() => {
     })
 
     // --------- CREACION DE ORDEN DE COMPRA ----------
-    /*
-        - Debe existir información de por lo menos una cuenta bancaria
-        - Debe seleccionarse una moneda
-        - Debe seleccionarse una forma de pago
-        - Debe ingresarse la fecha de orden de compra
-        - Debe ingresarse la fecha de entrega
-        - Debe ingresarse el trabajador que lo elaboró
-        - Debe ingresarse el impuesto
-        - El detalle de orden de compra no debe estar vacio
-        - La cantidad, el precio y el total de cada detalle deben ser mayor que 0
-    */
-    function crearOrdenCompra(){
-        console.log("Crear orden de compra")
+    $("#guardar-orden-compra").on('click', function () {
+        crearOrdenCompra()
+    })
 
+    async function crearOrdenCompra() {
+        // datos del proveedor
+        const idProveedorInput = $("#idProveedorOrdenCompraInput").val()
+        const razonsocialProveedorInput = $("#razonSocialProveedorInput").val().trim()
+        const documentoProveedorInput = $("#documentoProveedorInput").val().trim()
+        const correoProveedorInput = $("#correoProveedorInput").val().trim()
+        const contactoProveedorInput = $("#contactoProveedorInput").val().trim()
+        const whatsappProveedorInput = $("#whatsappProveedorInput").val().trim()
+        const direccionProveedorInput = $("#direccionProveedorInput").val().trim()
+        const entidadBancariaSolesInput = $("#cuentaSolesProveedorSelect").val().trim()
+        const cuentaBancariaSolesInput = $("#cuentaSolesProveedorInput").val().trim()
+        const idCuentaBancariaSolesInput = $("#idCuentaBancariaSoles").val().trim()
+        const entidadBancariaDolaresInput = $("#cuentaDolaresProveedorSelect").val().trim()
+        const cuentaBancariaDolaresInput = $("#cuentaDolaresProveedorInput").val().trim()
+        const idCuentaBancariaDolaresInput = $("#idCuentaBancariaDolares").val().trim()
+        const entidadBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorSelect").val().trim()
+        const cuentaBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorInput").val().trim()
+        const idCuentaBancariaBancoNacionInput = $("#idCuentaBancariaBancoNacion").val().trim()
+
+        // datos de la orden de compra
+        const moneda = $("#monedaOrdenCompraInput").val()
+        const forma_pago = $("#formaDePagoOrdenCompraInput").val()
+        const fecha_orden = $("#fechaOrdenCompraPicker").val()
+        const fecha_entrega = $("#fechaEntregaOrdenCompraPicker").val()
+        const referencia = $("#referenciaOrdenCompraInput").val()
+        const elaborante = $("#elaboradoOrdenCompraInput").val()
+        const notas = $("#notaOrdenCompraInput").val()
+        const adelanto = $("#adelantoOrdenCompraInput").val()
+        const saldo = $("#saldoOrdenCompraInput").val()
+        const observacion_pago = $("#observacionPagoOrdenCompraInput").val()
+        const impuestoOrdenCompra = $("#impuestoOrdenCompraInput").val()
+        const subtotal = $("#subtotalOrdenCompra").text()
+        const impuesto = $("#impuestoOrdenCompra").text()
+        const total = $("#totalOrdenCompra").text()
+
+        let handleError = ""
+        if (detallesOrdenCompra.length == 0) {
+            handleError += "- Debe ingresar un detalle de orden de compra\n"
+        }
+        if (moneda.length === 0) {
+            handleError += "- Debe seleccionar una moneda\n"
+        }
+        if (forma_pago.length === 0) {
+            handleError += "- Debe seleccionar una forma de pago\n"
+        }
+        if (fecha_orden.length === 0) {
+            handleError += "- Debe seleccionar una fecha de orden de compra\n"
+        }
+        if (fecha_entrega.length === 0) {
+            handleError += "- Debe seleccionar una fecha de entrega\n"
+        }
+        if (elaborante.length === 0) {
+            handleError += "- Debe ingresar el trabajador elaborador\n"
+        }
+        if (impuestoOrdenCompra.length === 0) {
+            handleError += "- Debe seleccionar un impuesto\n"
+        }
+
+        // manejar alerta de error
+        if (handleError.length > 0) {
+            alert(handleError)
+            return
+        }
+
+        // validamos la información de cuentas bancarias
+        const { cuentas_bancarias, handle_errors_cuentas_bancarias } = validarCuentasBancarias(
+            entidadBancariaSolesInput, cuentaBancariaSolesInput, idCuentaBancariaSolesInput,
+            entidadBancariaDolaresInput, cuentaBancariaDolaresInput, idCuentaBancariaDolaresInput,
+            entidadBancariaBancoNacionInput, cuentaBancariaBancoNacionInput, idCuentaBancariaBancoNacionInput)
+        
+        if (cuentas_bancarias.length === 0) {
+            const errorValidacionCuentasBancarias = 'No se pudo verificar correctamente la información de ninguna cuenta bancaria. Se presentan los siguientes errores:\n' + handle_errors_cuentas_bancarias.join('\n')
+            alert(errorValidacionCuentasBancarias)
+            return
+        }
+
+        // formamos la información de detalle de la orden de compra
+        const porcentajeImpuesto = obtenerImpuestoPorcentaje()
+        const formatDetalle = formatDetalleOrdenCompra(impuestoOrdenCompra, porcentajeImpuesto)
+        console.log(formatDetalle)
+
+        // validamos que todos los datos del detalle de orden de compra
+        const errorsDetalle = validarDetalleOrdenCompra(formatDetalle)
+
+        if (errorsDetalle.length > 0) {
+            alert(errorsDetalle)
+            return
+        }
+
+        // verificamos la forma de impresión
+        const confirmar = confirm('¿Deseas imprimir la orden de compra de manera disgregada?')
+
+        // formamos la informacion de la orden de compra
+        const formatData = {
+            occ_fecha: transformarFecha(fecha_orden),
+            occ_fechaentrega: transformarFecha(fecha_entrega),
+            mon_codigo: moneda,
+            occ_referencia: referencia || null,
+            fpa_codigo: forma_pago,
+            tra_elaborado: elaborante,
+            occ_notas: notas || null,
+            occ_adelanto: adelanto || null,
+            occ_saldo: saldo || null,
+            occ_observacionpago: observacion_pago || null,
+            occ_subtotal: subtotal,
+            occ_impuesto: impuesto,
+            occ_total: total,
+            detalle_productos: formatDetalle,
+            proveedor: {
+                prv_id: idProveedorInput,
+                prv_nombre: razonsocialProveedorInput,
+                prv_nrodocumento: documentoProveedorInput.split('-')[1].trim(),
+                prv_correo: correoProveedorInput,
+                prv_contacto: contactoProveedorInput,
+                prv_whatsapp: whatsappProveedorInput,
+                prv_direccion: direccionProveedorInput,
+                cuentas_bancarias: cuentas_bancarias
+            },
+            imprimir_disgregado: confirmar
+        }
+
+        console.log(formatData)
+        return
+        try {
+            const response = await client.post('ordenescompra', formatData, {
+                headers: {
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            })
+
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = `ordencompra.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(pdfUrl);
+            window.location.href = `orden-compra`
+        } catch (error) {
+            console.log(error)
+            alert("Hubo un error al crear la orden de compra")
+        }
     }
 
     // ----------- FUNCIONES UTILITARIAS ------------
@@ -546,5 +686,138 @@ $(document).ready(() => {
         const moneda = $("#monedaOrdenCompraInput").find('option:selected').text()
         const simboloMoneda = moneda.split(' ')[0]
         $('.moneda').text(simboloMoneda)
+    }
+
+    function obtenerImpuestoPorcentaje() {
+        const impuestoValor = $("#impuestoOrdenCompraInput").val()
+        const impuestoObjeto = impuestos.find(impuesto => impuesto.imp_codigo === impuestoValor)
+        const impuestoPorcentaje = impuestoObjeto ? parseFloat(impuestoObjeto.imp_porcentaje) : 0.00
+        return impuestoPorcentaje
+    }
+
+    function formatDetalleOrdenCompra(impuesto, porcentaje_impuesto) {
+        const formatDetalleOrdenCompra = []
+        detallesOrdenCompra.forEach((detalle, index) => {
+            const odm_id = detalle.odm_id
+            // buscamos en el dom del table disgregado
+            const row = $(`#disgregadoDetalleOrdenCompraBody tr[data-detalle="${odm_id}"]`)
+            const fecha_entrega = row.find('.fecha-entrega-input').val()
+            const observacion = row.find('.observacion-input').val()
+            const formatDetalle = {
+                ocd_orden: index + 1, // orden
+                odm_id: detalle.odm_id, // detalle material
+                pro_id: detalle.pro_id, // producto
+                ocd_descripcion: detalle.odm_descripcion, // descripcion
+                ocd_cantidad: detalle.ocd_cantidad, // cantidad
+                ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario
+                ocd_total: detalle.ocd_total, // total
+                ocd_porcentajedescuento: detalle.ocd_porcentajedescuento, // porcentaje descuento
+                ocd_fechaentrega: transformarFecha(fecha_entrega), // fecha de entrega
+                ocd_observacion: observacion, // observacion
+                imp_codigo: impuesto, // impuesto
+                ocd_porcentajeimpuesto: porcentaje_impuesto // porcentaje impuesto
+            }
+
+            formatDetalleOrdenCompra.push(formatDetalle)
+        })
+
+        return formatDetalleOrdenCompra
+    }
+
+    function validarDetalleOrdenCompra(detallesOrdenCompra) {
+        let handleError = []
+        detallesOrdenCompra.forEach(detalle => {
+            let messageErrorValidation = ""
+            // validacion de cantidad
+            if (!esValorNumericoValidoYMayorQueCero(detalle.ocd_cantidad)) {
+                messageErrorValidation += "- La cantidad pedida debe ser un número mayor que cero\n"
+            }
+            // validacion de precio unitario
+            if (!esValorNumericoValidoYMayorQueCero(detalle.ocd_preciounitario)) {
+                messageErrorValidation += "- El precio unitario debe ser un número mayor que cero\n"
+            }
+            // validacion de porcentaje de descuento
+            if (!esValorNumericoValidoMayorIgualQueCero(detalle.ocd_porcentajedescuento)) {
+                messageErrorValidation += "- El porcentaje de descuento debe ser un número mayor o igual que cero\n"
+            }
+            // validacion de fecha de entrega
+            if (!esFechaValida(detalle.ocd_fechaentrega)) {
+                messageErrorValidation += "- La fecha de entrega debe ser una fecha valida\n"
+            }
+
+            if (messageErrorValidation.length > 0) {
+                const messageError = `El item ${detalle.ocd_orden} presenta los siguientes errores:\n ${messageErrorValidation}`
+                handleError.push(messageError)
+            }
+        })
+
+        return handleError;
+    }
+
+    function validarCuentasBancarias(entidadBancariaSolesInput, cuentaBancariaSolesInput, idCuentaBancariaSolesInput,
+        entidadBancariaDolaresInput, cuentaBancariaDolaresInput, idCuentaBancariaDolaresInput,
+        entidadBancariaBancoNacionInput, cuentaBancariaBancoNacionInput, idCuentaBancariaBancoNacionInput
+    ) {
+        const cuentasBancarias = []
+        const handleErrorsCuentasBancarias = []
+
+        // validamos cuenta en soles
+        if (entidadBancariaSolesInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaSolesInput)) {
+            cuentasBancarias.push({
+                pvc_id: idCuentaBancariaSolesInput.length != 0 ? idCuentaBancariaSolesInput : null,
+                eba_id: entidadBancariaSolesInput,
+                pvc_numerocuenta: cuentaBancariaSolesInput,
+                mon_codigo: 'SOL'
+            })
+        } else {
+            if (entidadBancariaSolesInput.length == 0) {
+                handleErrorsCuentasBancarias.push('- No se ingreso una entidad bancaria para la cuenta en soles')
+            }
+
+            if (!cuentaConSeparadoresRegex.test(cuentaBancariaSolesInput)) {
+                handleErrorsCuentasBancarias.push('- La cuenta bancaria en soles es inválida')
+            }
+        }
+
+        // validamos cuenta en dolares
+        if (entidadBancariaDolaresInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaDolaresInput)) {
+            cuentasBancarias.push({
+                pvc_id: idCuentaBancariaDolaresInput.length != 0 ? idCuentaBancariaDolaresInput : null,
+                eba_id: entidadBancariaDolaresInput,
+                pvc_numerocuenta: cuentaBancariaDolaresInput,
+                mon_codigo: 'DOL'
+            })
+        } else {
+            if (entidadBancariaDolaresInput.length == 0) {
+                handleErrorsCuentasBancarias.push('- No se ingreso una entidad bancaria para la cuenta en dolares')
+            }
+
+            if (!cuentaConSeparadoresRegex.test(cuentaBancariaDolaresInput)) {
+                handleErrorsCuentasBancarias.push('- La cuenta bancaria en dolares es inválida')
+            }
+        }
+
+        // validamos cuenta del banco de la nacion
+        if (entidadBancariaBancoNacionInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaBancoNacionInput)) {
+            cuentasBancarias.push({
+                pvc_id: idCuentaBancariaBancoNacionInput.length != 0 ? idCuentaBancariaBancoNacionInput : null,
+                eba_id: entidadBancariaBancoNacionInput,
+                pvc_numerocuenta: cuentaBancariaBancoNacionInput,
+                mon_codigo: 'SOL'
+            })
+        } else {
+            if (entidadBancariaBancoNacionInput.length == 0) {
+                handleErrorsCuentasBancarias.push('- No se ingreso una entidad bancaria para la cuenta Banco de la Nación')
+            }
+
+            if (!cuentaConSeparadoresRegex.test(cuentaBancariaBancoNacionInput)) {
+                handleErrorsCuentasBancarias.push('- La cuenta bancaria Banco de la Nación es inválida')
+            }
+        }
+
+        return {
+            cuentas_bancarias: cuentasBancarias,
+            handle_errors_cuentas_bancarias: handleErrorsCuentasBancarias
+        }
     }
 })
