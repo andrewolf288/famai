@@ -210,7 +210,6 @@ $(document).ready(() => {
 
         try {
             const { data } = await client.get(URL)
-            console.log(data)
             despliegueMaterialesResumido = data
             let content = ''
             data.forEach((material, index) => {
@@ -552,8 +551,7 @@ $(document).ready(() => {
         dataTableCotizaciones = dataContainer.DataTable(dataTableOptionsCotizaciones)
 
         // abrimos el modal de cotizaciones
-        const loadModalCotizado = new bootstrap.Modal(document.getElementById('cotizadoModal'))
-        loadModalCotizado.show()
+        showModalCotizaciones()
     })
 
     // funcion para seleccionar cotizacion
@@ -573,14 +571,10 @@ $(document).ready(() => {
         }
 
         try {
-            const { data } = await client.put(`/cotizacion-detalle/seleccionar/${valoresSeleccionados[0]}`)
-
-            // actualizamos el DOM
-
+            await client.put(`/cotizacion-detalle/seleccionar/${valoresSeleccionados[0]}`)
             // cerramos el modal de cotizaciones
             const loadModalCotizaciones = bootstrap.Modal.getInstance(document.getElementById('cotizadoModal'))
             loadModalCotizaciones.hide()
-
         } catch (error) {
             console.log(error)
             alert("Ocurrio un error al seleccionar la cotización")
@@ -833,9 +827,17 @@ $(document).ready(() => {
         const dataSeleccionadaMateriales = []
         dataSeleccionada.forEach(detalle => {
             detalle.detalle.forEach(detalleElement => {
-                dataSeleccionadaMateriales.push(detalleElement)
+                if(detalleElement.odm_estado != 'ODC') {
+                    dataSeleccionadaMateriales.push(detalleElement)
+                }
             })
         })
+
+        // debemos hacer una validación
+        if(dataSeleccionadaMateriales.length === 0){
+            alert('Los materiales seleccionados ya fueron ordenados de compra')
+            return
+        }
 
         const dataSeleccionadaAgrupada = dataSeleccionadaMateriales.reduce((acc, item) => {
             if (item.pro_id != null && item.odm_observacion === null) {
@@ -1276,7 +1278,6 @@ $(document).ready(() => {
             })
         }
 
-        console.log(formatData)
         formData.append('cotizacion', JSON.stringify(formatData))
         // return
         try {
@@ -1285,7 +1286,6 @@ $(document).ready(() => {
                     'Content-Type': 'multipart/form-data'
                 }
             })
-            console.log(data)
 
             // debemos habilitar la exportacion de excel
             row.find('.btn-cotizacion-exportar-excel')
@@ -1362,7 +1362,6 @@ $(document).ready(() => {
     // Funcion para exportar en excel de la solicitud de cotizacion
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-exportar-excel', async function () {
         const id_cotizacion = $(this).data('cotizacion-id')
-        console.log(id_cotizacion)
         try {
             const response = await client.get(`/cotizacion/exportarExcel/${id_cotizacion}`, {
                 responseType: 'blob',
@@ -1383,14 +1382,12 @@ $(document).ready(() => {
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-compras-producto-proveedor', async function () {
         const row = $(this).closest('tr')
         const id_proveedor = row.data('id-proveedor')
-        console.log(id_proveedor)
 
         const formatData = {
             proveedor: id_proveedor,
             productos: obtenerIdDetallesProductos()
         }
 
-        console.log(formatData)
         try {
             const { data } = await client.get('comrpasaByProductoProveedor', { params: formatData })
             // vaciamos la tabla
@@ -1424,7 +1421,12 @@ $(document).ready(() => {
     // Gestionamos el cierre del modal
     $('#cotizacionesModal').on('hide.bs.modal', function (e) {
         const filteredURL = obtenerFiltrosActuales()
-        console.log(filteredURL)
+        initDataTable(filteredURL)
+    })
+
+    // Gestionamos el cierre del modal de seleccion de cotizaciones
+    $('#cotizadoModal').on('hide.bs.modal', function (e) {
+        const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
@@ -1562,6 +1564,17 @@ $(document).ready(() => {
     // mostrar modal de historico de cotizaciones y ordenes de compra
     function showModalHistoricoCotizacionesOrdenesCompra() {
         const modalElement = document.getElementById('historicoModal')
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        modal.show();
+    }
+
+    // mostrar modal de cotizaciones
+    function showModalCotizaciones(){
+        const modalElement = document.getElementById('cotizadoModal')
         const modal = new bootstrap.Modal(modalElement, {
             backdrop: 'static',
             keyboard: false

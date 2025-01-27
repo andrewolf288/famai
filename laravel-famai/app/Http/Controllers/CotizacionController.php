@@ -618,7 +618,7 @@ class CotizacionController extends Controller
 
     private function seleccionarCotizacionDetalleProducto($coc_id)
     {
-        // obtenemos el detalle de cotizacion de acuerdo al id de cotizacion y ademas estos detalles deben estar cotizados
+        // obtenemos el detalle de cotizacion de acuerdo al id de cotizacion
         $cotizacionDetalle = CotizacionDetalle::where('coc_id', $coc_id)
             // ->where('cod_cotizar', 1)
             ->where('cod_parastock', 0)

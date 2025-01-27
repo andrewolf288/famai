@@ -634,7 +634,7 @@ $(document).ready(() => {
         }
 
         console.log(formatData)
-        return
+        // return
         try {
             const response = await client.post('ordenescompra', formatData, {
                 headers: {

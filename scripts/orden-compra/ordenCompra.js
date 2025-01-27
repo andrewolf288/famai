@@ -40,7 +40,6 @@ $(document).ready(() => {
                     <td class="text-center">${moneda?.mon_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_subtotal}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_impuesto}</td>
-                    <td class="text-center">${ordenCompra.occ_igv}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_total}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary btn-ordencompra-detalle" data-ordencompra="${ordenCompra.occ_id}">

@@ -137,9 +137,9 @@ class OrdenCompraController extends Controller
             $validatedData = validator($request->all(), [
                 'occ_fecha' => 'required|date',
                 'occ_fechaentrega' => 'nullable|date',
-                'mon_codigo' => 'nullable|string|exists:tblmonedas_mon,mon_codigo',
+                'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
+                'fpa_codigo' => 'required|numeric|exists:tblformaspago_fpa,fpa_codigo',
                 'occ_referencia' => 'nullable|string',
-                'occ_formapago' => 'nullable|string',
                 'tra_elaborado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
                 'occ_notas' => 'nullable|string',
                 'occ_adelanto' => 'nullable|numeric|min:1',
@@ -148,7 +148,6 @@ class OrdenCompraController extends Controller
                 'occ_subtotal' => 'required|numeric|min:1',
                 'occ_impuesto' => 'required|numeric|min:1',
                 'occ_total' => 'required|numeric|min:1',
-                'occ_igv' => 'required|numeric|min:1',
                 'imprimir_disgregado' => 'required|boolean',
                 'detalle_productos' => 'required|array|min:1',
             ])->validate();
@@ -164,7 +163,6 @@ class OrdenCompraController extends Controller
                 'prv_whatsapp' => 'nullable|string',
                 'cuentas_bancarias' => 'required|array|min:1',
             ])->validate();
-
 
             // primero validamos que no exista un registro con el mismo numero de documento de proveedor
             $proveedor = Proveedor::where('prv_nrodocumento', $validatedDataProveedor['prv_nrodocumento'])->first();
@@ -220,14 +218,13 @@ class OrdenCompraController extends Controller
                 'occ_fecha' => $validatedData['occ_fecha'],
                 'occ_fechaentrega' => $validatedData['occ_fechaentrega'],
                 'mon_codigo' => $validatedData['mon_codigo'],
-                'occ_formapago' => $validatedData['occ_formapago'],
+                'fpa_codigo' => $validatedData['fpa_codigo'],
                 'occ_referencia' => $validatedData['occ_referencia'],
                 'tra_elaborado' => $validatedData['tra_elaborado'],
                 'occ_notas' => $validatedData['occ_notas'],
                 'occ_total' => $validatedData['occ_total'],
                 'occ_subtotal' => $validatedData['occ_subtotal'],
                 'occ_impuesto' => $validatedData['occ_impuesto'],
-                'occ_igv' => $validatedData['occ_igv'],
                 'occ_observacionpago' => $validatedData['occ_observacionpago'],
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
@@ -243,9 +240,13 @@ class OrdenCompraController extends Controller
                     'ocd_orden' => $detalle['ocd_orden'],
                     'pro_id' => $detalle['pro_id'],
                     'ocd_descripcion' => $detalle['ocd_descripcion'],
+                    'ocd_observacion' => $detalle['ocd_observacion'],
+                    'ocd_porcentajedescuento' => $detalle['ocd_porcentajedescuento'],
                     'ocd_cantidad' => $detalle['ocd_cantidad'],
                     'ocd_preciounitario' => $detalle['ocd_preciounitario'],
                     'ocd_total' => $detalle['ocd_total'],
+                    'imp_codigo' => $detalle['imp_codigo'],
+                    'ocd_porcentajeimpuesto' => $detalle['ocd_porcentajeimpuesto'],
                     'ocd_activo' => 1,
                     'ocd_usucreacion' => $user->usu_codigo,
                     'ocd_fecmodificacion' => null

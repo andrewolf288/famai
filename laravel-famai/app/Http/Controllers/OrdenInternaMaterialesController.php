@@ -192,8 +192,6 @@ class OrdenInternaMaterialesController extends Controller
                 'ordenInternaParte.ordenInterna'
             ]
         )
-            // ->withCount('cotizaciones')
-            // ->withCount('ordenesCompra')
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
                 $q->where('sed_codigo', $sed_codigo);
             })
@@ -284,7 +282,7 @@ class OrdenInternaMaterialesController extends Controller
                 }
             }
         }
-        // ordenamos la data demanera desc
+        // ordenamos la data de manera desc
         $query->orderBy('odm_feccreacion', 'desc');
 
         $data = $query->get();
