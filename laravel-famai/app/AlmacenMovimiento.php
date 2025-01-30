@@ -15,7 +15,9 @@ class AlmacenMovimiento extends Model
         'amc_numero',
         'amc_fechamovimiento',
         'amc_tipomovimiento',
-        'amc_documentoreferenciatipo',
+        'mtm_codigo',
+        'tdr_codigo',
+        'amc_documentoreferenciaserie',
         'amc_documentoreferencianumero',
         'amc_documentoreferenciafecha',
         'amc_documentoreferenciaentidad',
@@ -32,5 +34,15 @@ class AlmacenMovimiento extends Model
     public function almacen()
     {
         return $this->belongsTo(Almacen::class, 'alm_id', 'alm_id');
+    }
+
+    public function motivoMovimiento()
+    {
+        return $this->belongsTo(MotivoMovimiento::class, 'mtm_codigo', 'mtm_codigo');
+    }
+
+    public function tipoDocumentoReferencia()
+    {
+        return $this->belongsTo(TipoDocumentoReferencia::class, 'tdr_codigo', 'tdr_codigo');
     }
 }

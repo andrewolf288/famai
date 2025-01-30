@@ -13,6 +13,9 @@ class AlmacenMovimientoDetalle extends Model
     protected $fillable = [
         'amc_id',
         'pro_id',
+        'alm_id',
+        'ocd_id',
+        'amd_tipomovimiento',
         'amd_cantidad',
         'amd_ubicacion',
         'amd_serie',

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\AlmacenController;
+use App\Http\Controllers\AlmacenMovimientoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\GrupoInventarioController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\FormaPagoController;
 use App\Http\Controllers\ImpuestoController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
+use App\Http\Controllers\MotivoMovimientoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\OrdenCompraDetalleController;
@@ -39,6 +41,7 @@ use App\Http\Controllers\RequerimientoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\Http\Controllers\TipoDocumentoReferenciaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -335,6 +338,23 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('impuestosSimple', [ImpuestoController::class, 'indexSimple']);
 });
 
+// rutas de motivos de movimiento
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('motivosmovimiento', [MotivoMovimientoController::class, 'index']);
+    Route::get('motivosmovimientoSimple', [MotivoMovimientoController::class, 'indexSimple']);
+});
+
+// rutas de tipos de documentos referencia
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('tiposdocumentosreferencia', [TipoDocumentoReferenciaController::class, 'index']);
+    Route::get('tiposdocumentosreferenciaSimple', [TipoDocumentoReferenciaController::class, 'indexSimple']);
+});
+
+// rutas almacenamiento
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('almacenes',[AlmacenController::class, 'index']);
+});
+
 // rutas de cotizaciones
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizaciones', [CotizacionController::class, 'index']);
@@ -377,6 +397,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
     Route::put('ordencompra/{id}', [OrdenCompraController::class, 'update']);
     Route::post('ordencompra/aprobar-masivo', [OrdenCompraController::class, 'aprobarMasivo']);
+    Route::get('ordencompra-pendientes-ingresar', [OrdenCompraController::class, 'ordenesCompraPorEmitirNotaIngreso']);
+    Route::get('ordencompra-pendientes-entregar/{id}', [OrdenCompraController::class, 'ordenCompraDetallesPendientesById']);
 });
 
 // rutas de ordendes de compra detalle
@@ -397,9 +419,10 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('comrpasaByProductoProveedor', [ProductoProveedorController::class, 'findOrdenCompraByProveedorProducto']);
 });
 
-// rutas almacenamiento
+// rutas de movimientos de almacen
 Route::group(['middleware' => ['auth.jwt']], function () {
-    Route::get('almacenes',[AlmacenController::class, 'index']);
+    Route::post('almacen-movimiento/ingreso', [AlmacenMovimientoController::class, 'ingresoAlmacenMovimiento']);
+    Route::post('almacen-movimiento/salida', [AlmacenMovimientoController::class, 'salidaAlmacenMovimiento']);
 });
 
 // rutas de notificaciones

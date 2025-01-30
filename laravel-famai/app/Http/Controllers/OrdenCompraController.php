@@ -247,6 +247,7 @@ class OrdenCompraController extends Controller
                     'ocd_total' => $detalle['ocd_total'],
                     'imp_codigo' => $detalle['imp_codigo'],
                     'ocd_porcentajeimpuesto' => $detalle['ocd_porcentajeimpuesto'],
+                    'ocd_fechaentrega' => $detalle['ocd_fechaentrega'],
                     'ocd_activo' => 1,
                     'ocd_usucreacion' => $user->usu_codigo,
                     'ocd_fecmodificacion' => null
@@ -401,5 +402,58 @@ class OrdenCompraController extends Controller
         }
 
         return response()->json('Se aprobaron las ordenes de compra', 200);
+    }
+
+    // ordenes de compra por emitir nota de ingreso
+    public function ordenesCompraPorEmitirNotaIngreso()
+    {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
+        // solo mostramos las ordenes de compra con items pendientes por ingresar
+        $ordenesPendientes =  OrdenCompra::with(['moneda', 'proveedor', 'detalleOrdenCompra'])
+            ->whereHas('detalleOrdenCompra', function ($query) {
+                $query->whereColumn('ocd_cantidad', '>', 'ocd_cantidadingresada');
+            })
+            ->where('sed_codigo', $sed_codigo)
+            ->get()
+            ->map(function ($orden) {
+                $orden->items_pendientes = $orden->detalleOrdenCompra
+                    ->filter(function ($detalle) {
+                        return $detalle->ocd_cantidad > $detalle->ocd_cantidadingresada;
+                    })
+                    ->count();
+                return $orden;
+            });
+
+        return response()->json($ordenesPendientes);
+    }
+
+    // traemos los detalles pendientes de una orden de compra
+    public function ordenCompraDetallesPendientesById($occ_id)
+    {
+        $ordencompra = OrdenCompra::with('moneda', 'proveedor', 'sede', 'formaPago', 'elaborador')
+            ->findOrFail($occ_id);
+
+        $detalles = OrdenCompraDetalle::with('producto', 'impuesto', 'detalleMaterial.ordenInternaParte.ordenInterna')
+            ->where('occ_id', $occ_id)
+            ->whereColumn('ocd_cantidad', '>', 'ocd_cantidadingresada')
+            ->get();
+
+        $data = array(
+            "orden_compra" => $ordencompra,
+            "detalles" => $detalles->map(function ($detalle) {
+                $detalle->ocd_cantidadpendiente = $detalle->ocd_cantidad - $detalle->ocd_cantidadingresada;
+                return $detalle;
+            })
+        );
+
+        return response()->json($data);
     }
 }
