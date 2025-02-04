@@ -561,39 +561,91 @@ $(document).ready(() => {
     }
 
     function seleccionarMaterial(material) {
-        const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material
-
+        const { pro_codigo, pro_descripcion, uni_codigo } = material
         // limpiamos el input
         limpiarListaProductos()
         $('#productosInput').val('')
 
         const rowItem = document.createElement('tr')
         rowItem.innerHTML = `
-        <input class="producto-id" value="${pro_id}" type="hidden"/>
-        <input type="hidden" class="detalle-material-id" value=""/>
-        <td class="text-center">N/A</td>
-        <td>${pro_codigo}</td>
-        <td>${pro_descripcion}</td>
-        <td class="text-center">${uni_codigo}</td>
+        <input class="producto-id" value="${pro_codigo}" type="hidden"/>
+        <input class="detalle-material-id" value="" type="hidden"/>
+        <td class="text-center odt-numero">N/A</td>
+        <td class="codigo-producto">${pro_codigo}</td>
+        <td class="descripcion-producto">${pro_descripcion}</td>
+        <td class="text-center unidad-producto">${uni_codigo}</td>
+        <td class="text-center">
+            <input type="number" class="form-control precio-unitario-producto-input" value='1'/>
+        </td>
         <td class="text-center">
             <input type="number" class="form-control cantidad-producto-input" value='0'/>
         </td>
         <td class="text-center">
-            <input type="number" class="form-control precio-unitario-producto-input" value='1'/>
+            <button class="btn btn-sm btn-danger delete-detalle-producto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                </svg>
+            </button>
         </td>
         `
-        $('#tbl-orden-compra-productos-body').append(rowItem)
+        $('#tbl-detalle-productos-nota-ingreso-body').append(rowItem)
     }
 
     $('#btn-agregar-producto').on('click', function () {
-        const productos = $('#tbl-orden-compra-productos tbody tr')
+        const detalle = []
+        const identificadores = []
 
+        $("#tbl-detalle-productos-nota-ingreso-body tr").each(function () {
+            const odm_id = $(this).find('.detalle-material-id').val();
+            const pro_id = $(this).find('.producto-id').val();
+
+            identificadores.push(odm_id)
+
+            const content = `
+            <tr>
+                <input type="hidden" class="producto-id" value="${pro_id}"/>
+                <input type="hidden" class="orden-compra-detalle-id" value=""/>
+                <input type="hidden" class="detalle-material-id" value="${odm_id}"/>
+                <td>${$(this).find('.odt-numero').text()}</td>
+                <td>${$(this).find('.codigo-producto').text()}</td>
+                <td>${$(this).find('.descripcion-producto').text()}</td>
+                <td>
+                    <input type="text" class="form-control ubicacion-input"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control serie-input"/>
+                </td>
+                <td>
+                    <input type="number" class="form-control precio-unitario-input" value="${$(this).find('.precio-unitario-producto-input').val()}"/>
+                </td>
+                <td class="text-center">${$(this).find('.unidad-producto').text()}</td>
+                <td class="text-center cantidad-pendiente-input">${$(this).find('.cantidad-producto-input').val()}</td>
+                <td class="text-center">
+                    <input type="number" class="form-control cantidad-ingreso-input" value='${$(this).find('.cantidad-producto-input').val()}' max="${$(this).find('.cantidad-producto-input').val()}"/>
+                </td>
+            </tr>
+            `
+            detalle.push(content)
+        });
+
+        if(comprobarDetalleMaterialDuplicado(identificadores, $("#detalleNotaIngresoTableBody tr"))){
+            alert("Los detalles de materiales que tienen una OT deben ser únicos")
+            return
+        }
+
+        detalle.forEach(detalle => {
+            $("#detalleNotaIngresoTableBody").append(detalle)
+        })
+
+        // cerramos el modal de producto
+        const modalProductoDetalle = bootstrap.Modal.getInstance(document.getElementById('addProductModal'))
+        modalProductoDetalle.hide()
     })
 
     // -------------- GESTION DE MODAL DE OT -------------------
-    $("#btn-buscar-materiales-OT").on("click", function(){
+    $("#btn-buscar-materiales-OT").on("click", function () {
         const valueOT = $("#ordenInternaInput").val().trim()
-        if(valueOT.length === 0){
+        if (valueOT.length === 0) {
             alert("Por favor, ingrese un número de OT")
         } else {
             buscarMaterialesPendientesByOT(valueOT)
@@ -601,10 +653,10 @@ $(document).ready(() => {
     })
 
     async function buscarMaterialesPendientesByOT(numeroOT) {
-        const {data} = await client.post(`detalleMaterialesOrdenInterna-pendientes-by-orden-interna`, {
+        const { data } = await client.post(`detalleMaterialesOrdenInterna-pendientes-by-orden-interna`, {
             odt_numero: numeroOT
         })
-        if(data.length === 0){
+        if (data.length === 0) {
             alert("No hay materiales pendientes en la OT ingresada")
         } else {
             // verificamos que no se haya inicializado el datatable
@@ -616,18 +668,19 @@ $(document).ready(() => {
             data.forEach((detalle) => {
                 content += `
                 <tr>
-                    <input class="producto-id" value="${detalle.pro_id}" type="hidden"/>
-                    <input type="hidden" class="detalle-material-id" value=""/>
                     <td></td>
                     <td></td>
-                    <td class="text-center">${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
-                    <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
-                    <td>${detalle.odm_descripcion}</td>
-                    <td class="text-center">${detalle.producto?.uni_codigo}</td>
-                    <td class="text-center">${detalle.odm_cantidadpendiente}</td>
+                    <td class="text-center odt-numero">${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                    <td class="codigo-producto">${detalle.producto?.pro_codigo || 'N/A'}</td>
+                    <td class="descripcion-producto">${detalle.odm_descripcion}</td>
+                    <td class="text-center unidad-producto">${detalle.producto?.uni_codigo}</td>
+                    <td class="text-center cantidad-pendiente">${detalle.odm_cantidadpendiente}</td>
+                    <td class="producto-id d-none">${detalle.pro_id}</td>
+                    <td class="detalle-material-id d-none">${detalle.odm_id}</td>
                 </tr>
                 `
             })
+
             $("#tbl-detalles-materiales-OT-body").html(content)
 
             $("#tbl-detalles-materiales-OT").DataTable(dataTableOptionsMaterialesOrdenInterna)
@@ -636,8 +689,68 @@ $(document).ready(() => {
         }
     }
 
-    $("#btn-seleccionar-detalles-materiales").on('click', function(){
-        console.log("click")
+    $("#btn-seleccionar-detalles-materiales").on('click', function () {
+        const dataTableContainer = $("#tbl-detalles-materiales-OT").DataTable()
+        const filasSeleccionadas = dataTableContainer.rows({ selected: true }).nodes();
+        if (filasSeleccionadas.length === 0) {
+            alert('Debe seleccionar al menos un material')
+            return
+        }
+
+        const identificadores = []
+        const domDetalle = []
+
+        $(filasSeleccionadas).each(function (index, node) {
+            const $node = $(node)
+            const odm_id = $node.find('.detalle-material-id').text()
+            const pro_id = $node.find('.producto-id').text()
+
+            identificadores.push(odm_id)
+
+            const content = `
+            <tr>
+                <input class="producto-id" value="${pro_id}" type="hidden"/>
+                <input type="hidden" class="detalle-material-id" value="${odm_id}"/>
+                <td class="text-center odt-numero">${$node.find('.odt-numero').text()}</td>
+                <td class="codigo-producto">${$node.find('.codigo-producto').text()}</td>
+                <td class="descripcion-producto">${$node.find('.descripcion-producto').text()}</td>
+                <td class="text-center unidad-producto">${$node.find('.unidad-producto').text()}</td>
+                <td class="text-center">
+                    <input type="number" class="form-control precio-unitario-producto-input" value="0" />
+                </td>
+                <td class="text-center">
+                    <input type="number" class="form-control cantidad-producto-input" value="${$node.find('.cantidad-pendiente').text()}"/>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-danger delete-detalle-producto">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                        </svg>
+                    </button>
+                </td>
+            </tr>
+            `
+            domDetalle.push(content)
+        })
+
+        // realizamos la validacion de materiales unicos de materiales
+        if(comprobarDetalleMaterialDuplicado(identificadores, $("#tbl-detalle-productos-nota-ingreso-body"))){
+            alert("Los detalles de materiales que tienen una OT deben ser únicos")
+            return
+        }
+
+        // ingresamos los datos correspondientes
+        domDetalle.forEach((detalle) => {
+            $('#tbl-detalle-productos-nota-ingreso-body').append(detalle)
+        })
+
+        // ocultamos el modal
+        const modalOrdenInternaMateriales = bootstrap.Modal.getInstance(document.getElementById('detalleMaterialesOTModal'))
+        modalOrdenInternaMateriales.hide()
+    })
+
+    $("#tbl-detalle-productos-nota-ingreso-body").on('click', '.delete-detalle-producto', function () {
+        $(this).closest('tr').remove()
     })
 
     // ------------ CREACION DE NOTA DE INGRESO -----------------
@@ -876,8 +989,20 @@ $(document).ready(() => {
     function limpiarFormularioProducto() {
         $("#productosInput").val('')
         $("#resultadosListaProductos").empty()
-        $("#tbl-orden-compra-productos-body").empty()
+        $("#tbl-detalle-productos-nota-ingreso-body").empty()
         $("#ordenInternaInput").val('')
     }
 
+    // comprobar que el detalle de materiales sea unico
+    function comprobarDetalleMaterialDuplicado(identificadores, dom) {
+        let materialDuplicado = false;
+        dom.each(function () {
+            const odm_id = $(this).find('.detalle-material-id').val();
+            if (odm_id && identificadores.includes(odm_id)) {
+                materialDuplicado = true
+            }
+        });
+        return materialDuplicado;
+    }
+    
 })

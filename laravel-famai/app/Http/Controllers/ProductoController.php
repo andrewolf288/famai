@@ -255,7 +255,6 @@ class ProductoController extends Controller
             ->map(function ($producto) {
                 $producto["alp_stock"] = 0;
                 $producto["UltimaFechaIngreso"] = "2025-01-01";
-                $producto["pro_id"] = $producto["pro_codigo"];
                 return $producto;
             });
 
