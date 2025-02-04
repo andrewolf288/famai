@@ -15,10 +15,12 @@ class AlmacenMovimientoDetalle extends Model
         'pro_id',
         'alm_id',
         'ocd_id',
+        'odm_id',
         'amd_tipomovimiento',
         'amd_cantidad',
         'amd_ubicacion',
         'amd_serie',
+        'amd_preciounitario',
         'amd_usucreacion',
         'amd_feccreacion',
         'amd_usumodificacion',
@@ -37,5 +39,20 @@ class AlmacenMovimientoDetalle extends Model
     public function producto()
     {
         return $this->belongsTo(Producto::class, 'pro_id');
+    }
+
+    public function almacen()
+    {
+        return $this->belongsTo(Almacen::class, 'alm_id');
+    }
+
+    public function detalleOrdenCompra()
+    {
+        return $this->belongsTo(OrdenCompraDetalle::class, 'ocd_id');
+    }
+
+    public function detalleMaterial()
+    {
+        return $this->belongsTo(OrdenInternaMateriales::class, 'odm_id');
     }
 }

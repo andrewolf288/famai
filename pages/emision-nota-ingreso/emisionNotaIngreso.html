@@ -75,6 +75,25 @@
             </div>
             <div class="modal-body">
                 <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title text-center">Almacén</h5>
+                            </div>
+                            <div class="card-body d-flex justify-content-center align-items-center gap-2">
+                                <select id="almacenNotaIngresoInput" class="form-select w-auto" disabled></select>
+                                <button class="btn btn-warning" id="btn-cambiar-almacen">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                        <path
+                                            d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-2">
                     <!-- Columna para Proveedor -->
                     <div class="col-md-6 col-12">
                         <div class="card">
@@ -82,6 +101,34 @@
                                 <h5 class="card-title">Proveedor</h5>
                             </div>
                             <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="proveedoresSUNAT">
+                                            RUC/DNI
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" id="proveedoresSUNAT" class="form-control"
+                                                placeholder="Ingrese Nro. documento..." autocomplete="off">
+                                            <button id="searchProveedorSUNAT" class="btn btn-primary">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 position-relative">
+                                        <label for="proveedoresInput">
+                                            Razón Social
+                                        </label>
+                                        <input type="text" id="proveedoresInput" class="form-control"
+                                            placeholder="Ingrese razón social..." autocomplete="off">
+                                        <ul id="resultadosListaProveedores" class="list-group mt-2 position-absolute"
+                                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 99%;">
+                                        </ul>
+                                    </div>
+                                </div>
                                 <div class="row mt-2">
                                     <input type="text" id="idProveedorNotaIngresoInput" value="" hidden>
                                     <div class="col-md-3">
@@ -115,7 +162,7 @@
                                 <div class="row mt-2">
                                     <div class="col-md-12">
                                         <label for="direccionProveedorInput">Dirección</label>
-                                        <textarea id="direccionProveedorInput" class="form-control" readonly
+                                        <textarea id="direccionProveedorInput" class="form-control" rows="1" readonly
                                             disabled></textarea>
                                     </div>
                                 </div>
@@ -129,28 +176,20 @@
                                 <h5 class="card-title">Cabecera nota de ingreso</h5>
                             </div>
                             <div class="card-body">
-                                <div class="row mt-2">
-                                    <div class="col-md-4">
-                                        <label for="fechaDocumentoInput">Fecha Documento:</label>
-                                        <input type="text" id="fechaDocumentoInput" class="form-control" disabled
-                                            readonly>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="fechaDocumentoReferenciaPicker">Fecha Documento Referencia</label>
+                                        <input type="text" id="fechaDocumentoReferenciaPicker" class="form-control">
                                     </div>
-                                    <div class="col-md-8">
-                                        <label for="elaboradoOrdenCompraInput">Solicitado por:</label>
-                                        <input type="text" id="elaboradoOrdenCompraInput" class="form-control" disabled
-                                            readonly />
+                                    <div class="col-md-6">
+                                        <label for="fechaMovimientoNotaIngresoPicker">Fecha Movimiento</label>
+                                        <input type="text" id="fechaMovimientoNotaIngresoPicker" class="form-control" />
                                     </div>
                                 </div>
                                 <div class="row mt-2">
-                                    <div class="col-md-4">
-                                        <label for="monedaOrdenCompraInput">Moneda</label>
-                                        <input type="text" id="monedaOrdenCompraInput" class="form-control" disabled
-                                            readonly>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
-                                        <input type="text" id="formaDePagoOrdenCompraInput" class="form-control"
-                                            disabled readonly>
+                                    <div class="col-md-12">
+                                        <label for="monedaNotaIngresoInput">Moneda</label>
+                                        <select id="monedaNotaIngresoInput" class="form-select"></select>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -177,15 +216,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-8">
-                                        <label for="motivoMovimientoInput">Motivo movimiento:</label>
+                                        <label for="motivoMovimientoInput">Motivo movimiento</label>
                                         <select id="motivoMovimientoInput" class="form-select">
                                         </select>
-                                    </div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-12">
-                                        <label for="almacenNotaIngresoInput">Almacén ingreso</label>
-                                        <select id="almacenNotaIngresoInput" class="form-select"></select>
                                     </div>
                                 </div>
                             </div>
@@ -211,14 +244,14 @@
                                 <table class="table" id="detalleNotaIngresoTable">
                                     <thead>
                                         <tr>
-                                            <th class="text-center col-1">Item</th>
                                             <th class="text-center col-1">OT</th>
-                                            <th class="col-1">Fec. Entrega</th>
                                             <th class="col-1">Código</th>
                                             <th class="col-4">Descripción</th>
+                                            <th class="text-center col-1">Ubicación</th>
+                                            <th class="text-center col-1">Serie</th>
+                                            <th class="text-center col-1">Prec. unitario</th>
                                             <th class="text-center col-1">Unidad</th>
-                                            <th class="text-center col-1">Cant. Total</th>
-                                            <th class="text-center col-1">Cant. Ingresada.</th>
+                                            <th class="text-center col-1">Cantidad</th>
                                             <th class="text-center col-1">Cant. Ingreso</th>
                                         </tr>
                                     </thead>
@@ -250,24 +283,73 @@
                 <div>
                     <label for="productosInput">Producto:</label>
                     <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
-                    <ul id="resultadosLista" class="list-group mt-2"></ul>
+                    <ul id="resultadosListaProductos" class="list-group mt-2"></ul>
+                </div>
+                <div class="form-group">
+                    <label for="ordenInternaInput">OT:</label>
+                    <div class="input-group">
+                        <input type="text" id="ordenInternaInput" class="form-control" autocomplete="off">
+                        <button class="btn btn-primary" id="btn-buscar-materiales-OT">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-search" viewBox="0 0 16 16">
+                                <path
+                                    d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <table id="tbl-orden-compra-productos" class="table mt-3">
                     <thead>
                         <tr>
+                            <th class="col-1 text-center">OT</th>
                             <th class="col-2">Código</th>
-                            <th class="col-7">Descripción</th>
+                            <th class="col-4">Descripción</th>
                             <th class="col-1 text-center">Und.</th>
+                            <th class="col-2 text-center">Prec. unitario</th>
                             <th class="col-2 text-center">Cantidad</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tbl-orden-compra-productos-body">
                     </tbody>
                 </table>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL PARA BUSCAR Y SELECCIONAR MATERIALES DE ORDEN INTERNA MATERIAL PENDIENTE -->
+<div class="modal fade" id="detalleMaterialesOTModal" tabindex="-1" aria-labelledby="detalleMaterialesOTModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detalleMaterialesOTModalLabel">Detalles Materiales Pendientes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table id="tbl-detalles-materiales-OT" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th class="col-1 text-center">OT</th>
+                            <th class="col-2">Código</th>
+                            <th class="col-6">Descripción</th>
+                            <th class="col-1 text-center">Und.</th>
+                            <th class="col-2 text-center">Cant. Pendiente</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbl-detalles-materiales-OT-body">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary"
+                    id="btn-seleccionar-detalles-materiales">Seleccionar</button>
             </div>
         </div>
     </div>

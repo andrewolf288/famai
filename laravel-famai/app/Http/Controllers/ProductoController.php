@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Almacen;
-use App\AlmacenProducto;
 use App\Producto;
 use App\Trabajador;
 use Illuminate\Support\Facades\Validator;
@@ -126,8 +125,8 @@ class ProductoController extends Controller
             ->where('T0.validFor', '=', 'Y')
             ->where('T0.ItemCode', $pro_codigo)
             ->first();
-        
-        if(!$producto){
+
+        if (!$producto) {
             return response()->json(['error' => 'Producto no encontrado'], 404);
         }
 
@@ -179,7 +178,7 @@ class ProductoController extends Controller
                 "(SELECT MAX(T2.DocDate) 
                   FROM OILM T2 
                   WHERE T2.ItemCode = T0.ItemCode 
-                  AND T2.LocCode = ?) as UltimaFechaMovimiento", 
+                  AND T2.LocCode = ?) as UltimaFechaMovimiento",
                 [$alm_codigo]
             )
             ->selectRaw(
@@ -210,7 +209,7 @@ class ProductoController extends Controller
             ->groupBy(
                 'T0.ItemCode',
                 'T0.ItemName',
-				'T0.BuyUnitMsr',
+                'T0.BuyUnitMsr',
                 'T1.WhsCode',
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
@@ -232,6 +231,35 @@ class ProductoController extends Controller
 
         $results = $queryBuilder->get();
         return response()->json($results);
+    }
+
+    public function findProductoByQuery2(Request $request)
+    {
+        $query = $request->input('query', null);
+        if ($query === null) {
+            return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
+        }
+
+        $symbol = '+';
+        $subqueries = explode($symbol, $query);
+        $queryBuilder = Producto::query();
+
+        foreach ($subqueries as $term) {
+            $queryBuilder->where(function ($q) use ($term) {
+                $q->where('pro_codigo', 'like', '%' . $term . '%')
+                    ->orWhere('pro_descripcion', 'like', '%' . $term . '%');
+            });
+        }
+
+        $formatData = $queryBuilder->get()
+            ->map(function ($producto) {
+                $producto["alp_stock"] = 0;
+                $producto["UltimaFechaIngreso"] = "2025-01-01";
+                $producto["pro_id"] = $producto["pro_codigo"];
+                return $producto;
+            });
+
+        return response()->json($formatData);
     }
 
     /**

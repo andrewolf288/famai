@@ -214,6 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta de emision de nota de ingreso
+    router.on('/emision-nota-salida', () => {
+        privateRoute(() => {
+            loadContent('pages/emision-nota-salida/emisionNotaSalida.html', 'scripts/emision-nota-salida/emisionNotaSalida.js')
+        })
+    })
+
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {

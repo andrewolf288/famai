@@ -14,6 +14,7 @@ class MotivoMovimiento extends Model
     protected $fillable = [
         'mtm_codigo',
         'mtm_descripcion',
+        "mtm_tipomovimiento",
         'mtm_activo',
         'mtm_usucreacion',
         'mtm_feccreacion',

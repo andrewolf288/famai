@@ -133,6 +133,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('productos', [ProductoController::class, 'store']);
     Route::put('producto/{id}', [ProductoController::class, 'update']);
     Route::get('/productosByQuery', [ProductoController::class, 'findProductoByQuery']);
+    Route::get('/productosByQuery2', [ProductoController::class, 'findProductoByQuery2']);
     Route::get('/productoByCodigo', [ProductoController::class, 'findProductoByCodigo']);
 });
 
@@ -215,10 +216,9 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordeninternamateriales/validar-codigo', [OrdenInternaMaterialesController::class, 'asignarCodigoProducto']);
     Route::post('detalleMaterialesOrdenInterna/materiales-cotizar', [OrdenInternaMaterialesController::class, 'informacionMaterialesCotizar']);
     Route::post('detalleMaterialesOrdenInterna/findByNumeroOrdenTrabajo', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenTrabajo']);
-    // Validar materiales
     Route::post('detalleMaterialesOrdenInterna/verificar-materiales', [OrdenInternaMaterialesController::class, 'validarMaterialesMasivo']);
-    // Materiales de orden de compra
     Route::get('detalleMaterialesOrdenInterna-resumido-ordencompra', [OrdenInternaMaterialesController::class, 'indexOrdenCompraResumido']);
+    Route::post('detalleMaterialesOrdenInterna-pendientes-by-orden-interna', [OrdenInternaMaterialesController::class, 'findMaterialesPendientesByOT']);
 });
 
 // rutas detalle de adjuntos detalle materiales

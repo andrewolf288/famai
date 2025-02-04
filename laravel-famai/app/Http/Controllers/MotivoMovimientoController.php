@@ -3,12 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\MotivoMovimiento;
+use Illuminate\Http\Request;
 
 class MotivoMovimientoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $motivosmovimiento = MotivoMovimiento::get();
+        $tipomovimiento = $request->input('mtm_tipomovimiento', null);
+
+        $query = MotivoMovimiento::query();
+
+        if ($tipomovimiento !== null) {
+            $query->where('mtm_tipomovimiento', $tipomovimiento);
+        }
+
+        $motivosmovimiento = $query
+            ->where('mtm_activo', 1)
+            ->get();
+
         return response()->json($motivosmovimiento);
     }
 

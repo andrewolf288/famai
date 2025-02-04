@@ -1519,4 +1519,23 @@ class OrdenInternaMaterialesController extends Controller
         $resultado = $agrupados->concat($sinAgrupar);
         return response()->json($resultado);
     }
+
+    // encontrar materiales pendientes de una ot especifica
+    public function findMaterialesPendientesByOT(Request $request)
+    {
+        $numeroOT = $request->input('odt_numero', null);
+
+        $query = OrdenInternaMateriales::with('ordenInternaParte.ordenInterna', 'producto')
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($numeroOT) {
+                $q->where('odt_numero', $numeroOT)
+                ->where('oic_estado', 'PROCESO');
+            })
+            ->where('odm_cantidadpendiente', '>', 0)
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->whereNotNull('odm_estado')
+            ->whereNotNull('pro_id')
+            ->get();
+
+        return response()->json($query);
+    }
 }

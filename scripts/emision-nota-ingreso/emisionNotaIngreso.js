@@ -4,7 +4,14 @@ $(document).ready(() => {
     const dataContainer = $('#data-container')
     const apiURL = '/ordencompra-pendientes-ingresar'
     let flagEsTipoOrdenCompra = false
-    let detalleNotaIngreso = []
+
+    $("#fechaDocumentoReferenciaPicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+    }).datepicker("setDate", moment().toDate())
+
+    $("#fechaMovimientoNotaIngresoPicker").datepicker({
+        dateFormat: 'dd/mm/yy',
+    }).datepicker("setDate", moment().toDate())
 
     // configuracion de opciones de datatable
     const dataTableOptionsOrdenesCompraPendientes = {
@@ -44,6 +51,32 @@ $(document).ready(() => {
         ],
         select: {
             style: 'single',
+            selector: 'td.form-check-input'
+        },
+    }
+
+    const dataTableOptionsMaterialesOrdenInterna = {
+        detroy: true,
+        reponsive: true,
+        paging: true,
+        pageLength: 20,
+        lengthMenu: [20, 50, 100, 150],
+        searching: false,
+        info: false,
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false,
+            },
+            {
+                orderable: false,
+                render: DataTable.render.select(),
+                targets: 1,
+                className: 'form-check-input'
+            }
+        ],
+        select: {
+            style: 'multi',
             selector: 'td.form-check-input'
         },
     }
@@ -185,12 +218,19 @@ $(document).ready(() => {
         showModalCreacionNotaIngreso()
     })
 
-    // ------- GESTION DE INFORMACION DE MAESTROS NECESARIOS
+    // ------- ACCION DE EDICION DE ALMACEN -------
+    $("#btn-cambiar-almacen").on('click', function () {
+        $("#almacenNotaIngresoInput").prop('disabled', false)
+        $("#almacenNotaIngresoInput").focus()
+    })
+
+    // --------- GESTION DE INFORMACION DE MAESTROS NECESARIOS -----------
     // cargar motivos de movimiento
     async function cargarMotivoMovimiento() {
         try {
-            const { data } = await client.get('/motivosmovimientoSimple')
+            const { data } = await client.get('/motivosmovimiento?mtm_tipomovimiento=I')
             const $motivomovimiento = $("#motivoMovimientoInput")
+            $motivomovimiento.empty()
             // añadimos una opcion por defecto
             const defaultOptionMotivoMovimiento = $('<option>').val('').text('Seleccione un motivo de movimiento')
             $motivomovimiento.append(defaultOptionMotivoMovimiento)
@@ -209,12 +249,13 @@ $(document).ready(() => {
         try {
             const { data } = await client.get('/tiposdocumentosreferenciaSimple')
             const $tipodocumentoreferencia = $("#documentoReferenciaInput")
+            $tipodocumentoreferencia.empty()
             // añadimos una opcion por defecto
-            const defaultOptionTipoDocumentoReferencia = $('<option>').val('').text('Seleccione un tipo de documento de referencia')
+            const defaultOptionTipoDocumentoReferencia = $('<option selected>').val('').text('Seleccione un tipo de documento de referencia')
             $tipodocumentoreferencia.append(defaultOptionTipoDocumentoReferencia)
 
             data.forEach(tipoDocumentoReferencia => {
-                const option = $(`<option ${tipoDocumentoReferencia["tdr_codigo"] === 'FAC' ? 'selected' : ''}>`).val(tipoDocumentoReferencia["tdr_codigo"]).text(`${tipoDocumentoReferencia["tdr_descripcion"]}`)
+                const option = $(`<option>`).val(tipoDocumentoReferencia["tdr_codigo"]).text(`${tipoDocumentoReferencia["tdr_descripcion"]}`)
                 $tipodocumentoreferencia.append(option)
             })
         } catch (error) {
@@ -226,10 +267,27 @@ $(document).ready(() => {
     async function cargarAlmacenes() {
         const { data } = await client.get('/almacenes?alm_esprincipal=1')
         const $almacenes = $("#almacenNotaIngresoInput")
+        $almacenes.empty()
         data.forEach(almacen => {
             const option = $('<option data-sede="' + almacen["sed_codigo"] + '">').val(almacen["alm_id"]).text(almacen["alm_descripcion"])
             $almacenes.append(option)
         })
+    }
+
+    // cargar informacion de monedas
+    async function cargarMonedas() {
+        try {
+            const { data } = await client.get('/monedasSimple')
+            const $monedaSelect = $('#monedaNotaIngresoInput')
+            $monedaSelect.empty()
+
+            data.forEach((moneda) => {
+                const option = $(`<option ${moneda["mon_codigo"] === 'SOL' ? 'selected' : ''}>`).val(moneda["mon_codigo"]).text(`${moneda["mon_simbolo"]} ${moneda["mon_descripcion"]}`)
+                $monedaSelect.append(option)
+            })
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     // cargar información del trabajador logeado
@@ -249,6 +307,7 @@ $(document).ready(() => {
             cargarAlmacenes(),
             cargarMotivoMovimiento(),
             cargarTipoDocumentoReferencia(),
+            cargarMonedas(),
         ])
     }
 
@@ -262,15 +321,17 @@ $(document).ready(() => {
         $("#contactoProveedorInput").val(prv_contacto)
         $("#whatsappProveedorInput").val(prv_whatsapp)
         $("#direccionProveedorInput").val(prv_direccion)
+
+        // deshabilitar inputs de busqueda de proveedor
+        $("#proveedoresSUNAT").prop('disabled', true)
+        $("#searchProveedorSUNAT").prop('disabled', true)
+        $("#proveedoresInput").prop('disabled', true)
     }
 
     // incializar información de orden de compra
     function establecerInformacionOrdenCompra(ordenCompra) {
-        const { moneda, forma_pago, occ_fecha, elaborador } = ordenCompra
-        $("#monedaOrdenCompraInput").val(moneda.mon_descripcion)
-        $("#formaDePagoOrdenCompraInput").val(forma_pago.fpa_descripcion)
-        $("#fechaDocumentoInput").val(parseDateSimple(occ_fecha))
-        $("#elaboradoOrdenCompraInput").val(elaborador?.tra_nombre || 'N/A')
+        const { moneda, elaborador } = ordenCompra
+        $("#monedaNotaIngresoInput").val(moneda.mon_codigo)
 
         // obtenemos informacion de sede de trabajador Elaborador
         const { sed_codigo } = elaborador
@@ -284,20 +345,27 @@ $(document).ready(() => {
         $("#detalleNotaIngresoTableBody").empty()
 
         let content = ''
-        detalles.forEach((detalle, index) => {
-            const { ocd_id, detalle_material, ocd_fechaentrega, producto, ocd_descripcion, ocd_cantidad, ocd_cantidadpendiente, ocd_cantidadingresada } = detalle
+        detalles.forEach((detalle) => {
+            const { ocd_id, detalle_material, producto, ocd_descripcion, ocd_cantidadpendiente } = detalle
             content += `
-            <tr data-detalle="${ocd_id}">
+            <tr>
                 <input type="hidden" class="producto-id" value="${producto.pro_id}"/>
-                <input type="hidden" class="producto-codigo" value="${producto.pro_codigo}"/>
-                <td class="text-center">${index + 1}</td>
+                <input type="hidden" class="orden-compra-detalle-id" value="${ocd_id}"/>
+                <input type="hidden" class="detalle-material-id" value="${detalle_material?.odm_id}"/>
                 <td>${detalle_material?.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
-                <td>${parseDateSimple(ocd_fechaentrega)}</td>
                 <td>${producto?.pro_codigo || 'N/A'}</td>
                 <td>${ocd_descripcion}</td>
+                <td>
+                    <input type="text" class="form-control ubicacion-input"/>
+                </td>
+                <td>
+                    <input type="text" class="form-control serie-input"/>
+                </td>
+                <td>
+                    <input type="number" class="form-control precio-unitario-input" value="0"/>
+                </td>
                 <td class="text-center">${producto?.uni_codigo || 'N/A'}</td>
-                <td class="text-center">${ocd_cantidad}</td>
-                <td class="text-center">${ocd_cantidadingresada}</td>
+                <td class="text-center cantidad-pendiente-input">${ocd_cantidadpendiente}</td>
                 <td class="text-center">
                     <input type="number" class="form-control cantidad-ingreso-input" value='${ocd_cantidadpendiente}' max="${ocd_cantidadpendiente}"/>
                 </td>
@@ -308,18 +376,150 @@ $(document).ready(() => {
         $("#detalleNotaIngresoTableBody").html(content)
     }
 
-    // ------ GESTION DE MODAL DE PRODUCTO ------
-    function limpiarLista() {
-        $('#resultadosLista').empty()
+    // ------------ GESTION DE NUEVO PROVEEDOR -------------
+    function limpiarListaProveedores() {
+        $('#resultadosListaProveedores').empty()
     }
 
-    // al momento de ir ingresando valores en el input
+    $('#proveedoresInput').on('input', debounce(async function () {
+        const query = $(this).val().trim()
+        if (query.length >= 3) {
+            await buscarProveedores(query)
+        } else {
+            limpiarListaProveedores()
+        }
+    }))
+
+    $('#proveedoresSUNAT').keypress(function (e) {
+        var key = e.which
+        if (key == 13) {
+            const query = $('#proveedoresSUNAT').val().trim()
+            buscarProveedorBySUNAT(query)
+        }
+    })
+
+    $('#searchProveedorSUNAT').on('click', async function (event) {
+        const query = $('#proveedoresSUNAT').val().trim()
+        buscarProveedorBySUNAT(query)
+    });
+
+    async function buscarProveedorBySUNAT(documento) {
+        if (documento.length < 8) {
+            alert('El documento debe tener más de 8 dígitos')
+            return
+        }
+
+        try {
+            const { data } = await client.get(`/padronSunat?nrodocumento=${documento}`)
+            const { xps_nrodocumento, xps_nombre } = data
+            const formatData = {
+                prv_id: null,
+                prv_nrodocumento: xps_nrodocumento,
+                prv_nombre: xps_nombre,
+                prv_direccion: '',
+                tdo_codigo: 'RUC',
+                prv_telefono: '',
+                prv_whatsapp: '',
+                prv_contacto: '',
+                prv_correo: '',
+                cuentas_bancarias: []
+            }
+            seleccionarProveedor(formatData)
+        } catch (error) {
+            const { data, status } = error.response
+            if (status === 404) {
+                alert(data.error)
+            } else {
+                alert('Error al realizar la búsqueda')
+            }
+        }
+    }
+
+    async function buscarProveedores(query) {
+        if (abortController) {
+            abortController.abort();
+        }
+        abortController = new AbortController();
+        const signal = abortController.signal;
+
+        try {
+            const queryEncoded = encodeURIComponent(query)
+            const { data } = await client.get(`/proveedoresByQuery?query=${queryEncoded}`)
+            // Limpiamos la lista
+            limpiarListaProveedores()
+            // formamos la lista
+            data.forEach(proveedor => {
+                const listItem = document.createElement('li')
+                listItem.className = 'list-group-item list-group-item-action'
+                listItem.textContent = `${proveedor.prv_nrodocumento} - ${proveedor.prv_nombre}`
+                listItem.dataset.id = proveedor.prv_id
+                listItem.addEventListener('click', () => seleccionarProveedor(proveedor))
+                // agregar la lista completa
+                $('#resultadosListaProveedores').append(listItem)
+            })
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Petición abortada'); // Maneja el error de la petición abortada
+            } else {
+                console.error('Error al buscar proveedores:', error);
+                alert('Error al buscar proveedores. Inténtalo de nuevo.'); // Muestra un mensaje de error al usuario
+            }
+        }
+    }
+
+    function seleccionarProveedor(proveedor) {
+        const { prv_id, prv_nrodocumento, prv_direccion, prv_nombre, tdo_codigo, prv_whatsapp, prv_contacto, prv_correo, cuentas_bancarias } = proveedor
+
+        $("#idProveedorNotaIngresoInput").val(prv_id)
+        $("#documentoProveedorInput").val(`${tdo_codigo} - ${prv_nrodocumento}`)
+        $("#razonSocialProveedorInput").val(prv_nombre)
+        $("#correoProveedorInput").val(prv_correo)
+        $("#contactoProveedorInput").val(prv_contacto)
+        $("#whatsappProveedorInput").val(prv_whatsapp)
+        $("#direccionProveedorInput").val(prv_direccion)
+
+        // establecemos información de las cuentas bancarias
+        const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => compareStringsIgnoreCaseAndAccents(cuenta.entidad_bancaria?.eba_descripcion, 'Banco de la Nación'))
+        const cuenta_soles = cuentas_bancarias.find(cuenta => {
+            if (cuenta_banco_nacion) {
+                return cuenta.mon_codigo === 'SOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+            } else {
+                return cuenta.mon_codigo === 'SOL'
+            }
+        })
+        const cuenta_dolares = cuentas_bancarias.find(cuenta => {
+            if (cuenta_banco_nacion) {
+                return cuenta.mon_codigo === 'DOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+            } else {
+                return cuenta.mon_codigo === 'DOL'
+            }
+        })
+
+        $("#cuentaSolesProveedorSelect").val(cuenta_soles?.eba_id || '')
+        $("#cuentaSolesProveedorInput").val(cuenta_soles?.pvc_numerocuenta || '')
+        $("#idCuentaBancariaSoles").val(cuenta_soles?.pvc_id || '')
+        $("#cuentaDolaresProveedorSelect").val(cuenta_dolares?.eba_id || '')
+        $("#cuentaDolaresProveedorInput").val(cuenta_dolares?.pvc_numerocuenta || '')
+        $("#idCuentaBancariaDolares").val(cuenta_dolares?.pvc_id || '')
+        $("#cuentaBancoNacionProveedorSelect").val(cuenta_banco_nacion?.eba_id || '')
+        $("#cuentaBancoNacionProveedorInput").val(cuenta_banco_nacion?.pvc_numerocuenta || '')
+        $("#idCuentaBancariaBancoNacion").val(cuenta_banco_nacion?.pvc_id || '')
+
+        $('#resultadosListaProveedores').empty()
+        $('#proveedoresInput').val('')
+    }
+
+    // ------------ GESTION DE MODAL DE PRODUCTO ---------------
+    function limpiarListaProductos() {
+        $('#resultadosListaProductos').empty()
+    }
+
     $('#productosInput').on('input', debounce(async function () {
         const query = $(this).val().trim()
         if (query.length >= 3) {
             await buscarMateriales(query)
         } else {
-            limpiarLista()
+            limpiarListaProductos()
         }
     }))
 
@@ -336,9 +536,9 @@ $(document).ready(() => {
 
         try {
             const queryEncoded = encodeURIComponent(query)
-            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
+            const { data } = await client.get(`/productosByQuery2?query=${queryEncoded}`)
             // Limpiamos la lista
-            limpiarLista()
+            limpiarListaProductos()
             // formamos la lista
             data.forEach(material => {
                 const listItem = document.createElement('li')
@@ -348,7 +548,7 @@ $(document).ready(() => {
                 listItem.dataset.id = material.pro_id
                 listItem.addEventListener('click', () => seleccionarMaterial(material))
                 // agregar la lista completa
-                $('#resultadosLista').append(listItem)
+                $('#resultadosListaProductos').append(listItem)
             })
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -364,21 +564,25 @@ $(document).ready(() => {
         const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material
 
         // limpiamos el input
-        limpiarLista()
+        limpiarListaProductos()
         $('#productosInput').val('')
 
         const rowItem = document.createElement('tr')
         rowItem.innerHTML = `
         <input class="producto-id" value="${pro_id}" type="hidden"/>
+        <input type="hidden" class="detalle-material-id" value=""/>
+        <td class="text-center">N/A</td>
         <td>${pro_codigo}</td>
         <td>${pro_descripcion}</td>
-        <td>${uni_codigo}</td>
-        <td>
-            <input type="number" class="form-control cantidad-input" value='1.00'/>
+        <td class="text-center">${uni_codigo}</td>
+        <td class="text-center">
+            <input type="number" class="form-control cantidad-producto-input" value='0'/>
+        </td>
+        <td class="text-center">
+            <input type="number" class="form-control precio-unitario-producto-input" value='1'/>
         </td>
         `
-
-        $('#tbl-orden-compra-productos tbody').html(rowItem)
+        $('#tbl-orden-compra-productos-body').append(rowItem)
     }
 
     $('#btn-agregar-producto').on('click', function () {
@@ -386,12 +590,70 @@ $(document).ready(() => {
 
     })
 
-    // creacion de nota de ingreso
+    // -------------- GESTION DE MODAL DE OT -------------------
+    $("#btn-buscar-materiales-OT").on("click", function(){
+        const valueOT = $("#ordenInternaInput").val().trim()
+        if(valueOT.length === 0){
+            alert("Por favor, ingrese un número de OT")
+        } else {
+            buscarMaterialesPendientesByOT(valueOT)
+        }
+    })
+
+    async function buscarMaterialesPendientesByOT(numeroOT) {
+        const {data} = await client.post(`detalleMaterialesOrdenInterna-pendientes-by-orden-interna`, {
+            odt_numero: numeroOT
+        })
+        if(data.length === 0){
+            alert("No hay materiales pendientes en la OT ingresada")
+        } else {
+            // verificamos que no se haya inicializado el datatable
+            if ($.fn.DataTable.isDataTable("#tbl-detalles-materiales-OT")) {
+                $("#tbl-detalles-materiales-OT").DataTable().destroy();
+            }
+
+            let content = ''
+            data.forEach((detalle) => {
+                content += `
+                <tr>
+                    <input class="producto-id" value="${detalle.pro_id}" type="hidden"/>
+                    <input type="hidden" class="detalle-material-id" value=""/>
+                    <td></td>
+                    <td></td>
+                    <td class="text-center">${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                    <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
+                    <td>${detalle.odm_descripcion}</td>
+                    <td class="text-center">${detalle.producto?.uni_codigo}</td>
+                    <td class="text-center">${detalle.odm_cantidadpendiente}</td>
+                </tr>
+                `
+            })
+            $("#tbl-detalles-materiales-OT-body").html(content)
+
+            $("#tbl-detalles-materiales-OT").DataTable(dataTableOptionsMaterialesOrdenInterna)
+
+            showModalOTMateriales()
+        }
+    }
+
+    $("#btn-seleccionar-detalles-materiales").on('click', function(){
+        console.log("click")
+    })
+
+    // ------------ CREACION DE NOTA DE INGRESO -----------------
     $("#btn-guardar-nota-ingreso").on('click', function () {
         crearNotaIngreso()
     })
 
     async function crearNotaIngreso() {
+        // proveedor
+        const proveedorId = $("#idProveedorNotaIngresoInput").val().trim()
+        // fecha documento referencia
+        const fechaDocumentoReferencia = $("#fechaDocumentoReferenciaPicker").val().trim()
+        // fecha movimiento de almacen
+        const fechaMovimiento = $("#fechaMovimientoNotaIngresoPicker").val().trim()
+        // moneda
+        const moneda = $("#monedaNotaIngresoInput").val().trim()
         // documento de referencia
         const documentoReferencia = $("#documentoReferenciaInput").val().trim()
         // serie de documento
@@ -403,12 +665,22 @@ $(document).ready(() => {
         // motivo de movimiento
         const motivoMovimiento = $("#motivoMovimientoInput").val().trim()
         // almacen de ingreso
-        const almacenIngreso = $("#almacenNotaIngresoInput").val()
-        // fecha documento referencia
-        const fechaDocumentoInput = $("#fechaDocumentoInput").val().trim()
+        const almacenIngreso = $("#almacenNotaIngresoInput").val().trim()
 
         // realizamos las validaciones correspondientes
         let handleError = ''
+        if (proveedorId.length === 0) {
+            handleError += '- Se debe ingresar un proveedor\n'
+        }
+        if (fechaDocumentoReferencia.length === 0) {
+            handleError += '- Se debe ingresar una fecha de documento de referencia\n'
+        }
+        if (fechaMovimiento.length === 0) {
+            handleError += '- Se debe ingresar una fecha de movimiento\n'
+        }
+        if (moneda.length === 0) {
+            handleError += '- Se debe ingresar una moneda\n'
+        }
         if (documentoReferencia.length === 0) {
             handleError += '- Se debe ingresar un documento de referencia\n'
         }
@@ -445,18 +717,21 @@ $(document).ready(() => {
         }
 
         const formatData = {
-            mtm_codigo: motivoMovimiento, // motivo de movimiento
+            alm_id: almacenIngreso,
+            prv_id: proveedorId, // proveedor
+            mon_codigo: moneda, // moneda
             tdr_codigo: documentoReferencia, // documento de referencia
+            mtm_codigo: motivoMovimiento, // motivo de movimiento
+            amc_fechamovimiento: transformarFecha(fechaMovimiento),
+            amc_documentoreferenciafecha: transformarFecha(fechaDocumentoReferencia),
             amc_documentoreferenciaserie: serieNotaIngreso, // serie de documento
             amc_documentoreferencianumero: numeroNotaIngreso, // numero de documento
-            amc_documentoreferenciafecha: flagEsTipoOrdenCompra ? transformarFecha(fechaDocumentoInput) : null,
-            consumo_directo: consumoDirecto === "1" ? true : false,
-            alm_id: almacenIngreso,
+            amc_consumodirecto: consumoDirecto === "1" ? true : false,
             detalle: detalleFormatNotaIngreso
         }
 
         console.log(formatData)
-        // return
+        return
         try {
             const { data } = await client.post('almacen-movimiento/ingreso', formatData)
             alert('Nota de ingreso creada exitosamente')
@@ -469,13 +744,19 @@ $(document).ready(() => {
         }
     }
 
+    // ------- FUNCIONES UTILITARIAS PARA EL MODULO -------
+    // cerrar modal de nota de ingreso modal
     $('#crearNotaIngresoModal').on('hide.bs.modal', function (e) {
+        limpiarFormularioNotaIngreso()
         initDataTable(apiURL)
     })
 
-    // ------- Funciones utilitarias para el modulo -------
+    // cerrar modal de producto modal
+    $('#addProductModal').on('hide.bs.modal', function (e) {
+        limpiarFormularioProducto()
+    })
 
-    // funcion para mostrar el detall de pednientes de orden de compra
+    // funcion para mostrar el detalle de pendientes de orden de compra
     function showModalDetallesPendientesOrdenCompra() {
         const modal = new bootstrap.Modal(document.getElementById('detallePendienteModal'))
         modal.show()
@@ -501,6 +782,16 @@ $(document).ready(() => {
         modal.show();
     }
 
+    // funcion para modal de materiales pendientes por OT
+    function showModalOTMateriales() {
+        const modalElement = document.getElementById("detalleMaterialesOTModal");
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+    }
+
     // obtener detalle de nota de ingreso para creacion
     function obtenerDetalleNotaIngreso() {
         // referencia del cuerpo de la tabla
@@ -509,10 +800,14 @@ $(document).ready(() => {
         if (productos.length > 0) {
             productos.each(function (index, row) {
                 const formatData = {
-                    ocd_id: flagEsTipoOrdenCompra ? $(row).data('detalle') : null,
+                    ocd_id: flagEsTipoOrdenCompra ? $(row).find('.orden-compra-detalle-id').val() : null,
+                    odm_id: $(row).find('.detalle-material-id').val() || null,
                     pro_id: $(row).find('.producto-id').val(),
-                    pro_codigo: $(row).find('.producto-codigo').val(),
                     amd_cantidad: $(row).find('.cantidad-ingreso-input').val(),
+                    ocd_cantidadpendiente: $(row).find('.cantidad-pendiente-input').text(),
+                    amd_ubicacion: $(row).find('.ubicacion-input').val(),
+                    amd_serie: $(row).find('.serie-input').val(),
+                    amd_preciounitario: $(row).find('.precio-unitario-input').val(),
                 }
                 detalle.push(formatData)
             })
@@ -525,26 +820,64 @@ $(document).ready(() => {
     function validarDetalleNotaIngreso(detalle) {
         let handleError = ''
         detalle.forEach((detalle, index) => {
-            const {amd_cantidad} = detalle
+            const { amd_cantidad, amd_preciounitario, ocd_cantidadpendiente } = detalle
             // la cantidad debe ser un valor numerico
-            if(detalle.ocd_id){
-                if(!esValorNumericoValidoMayorIgualQueCero(amd_cantidad)){
+            if (detalle.ocd_id) {
+                if (!esValorNumericoValidoMayorIgualQueCero(amd_cantidad)) {
                     handleError += `El detalle ${index + 1} debe tener una cantidad mayor o igual que cero\n`
                 } else {
                     // buscamos en el arreglo de detalles
-                    const findDetalle = detalleNotaIngreso.find(d => d.ocd_id == detalle.ocd_id)
-                    const { ocd_cantidadpendiente } = findDetalle
-                    if(amd_cantidad > ocd_cantidadpendiente){
-                        handleError += `El detalle ${index + 1} debe tener una cantidad menor o igual a la cantidad pendiente\n`
+                    if (obtenerValorNumerico(amd_cantidad) > obtenerValorNumerico(ocd_cantidadpendiente)) {
+                        handleError += `El detalle ${index + 1} debe tener una cantidad menor o igual a la cantidad\n`
                     }
                 }
             } else {
-                if(!esValorNumericoValidoYMayorQueCero(amd_cantidad)){
+                if (!esValorNumericoValidoYMayorQueCero(amd_cantidad)) {
                     handleError += `El detalle ${index + 1} debe tener una cantidad mayor que cero\n`
                 }
+            }
+
+            // el precio unitario debe ser un valor numerico
+            if (!esValorNumericoValidoMayorIgualQueCero(amd_preciounitario)) {
+                handleError += `El detalle ${index + 1} debe tener un precio unitario mayor o igual que cero\n`
             }
         })
 
         return handleError
     }
+
+    // funcion para limpiar el formulario de creacion de nota de ingreso
+    function limpiarFormularioNotaIngreso() {
+        $("#proveedoresSUNAT").val('')
+        $("#proveedoresSUNAT").prop('disabled', false)
+        $("#searchProveedorSUNAT").prop('disabled', false)
+        $("#proveedoresInput").val('')
+        $("#proveedoresInput").prop('disabled', false)
+        $("#resultadosListaProveedores").empty()
+        $("#documentoProveedorInput").val('')
+        $("#razonSocialProveedorInput").val('')
+        $("#correoProveedorInput").val('')
+        $("#contactoProveedorInput").val('')
+        $("#whatsappProveedorInput").val('')
+        $("#direccionProveedorInput").val('')
+        $("#fechaDocumentoReferenciaPicker").datepicker({
+            dateFormat: 'dd/mm/yy',
+        }).datepicker("setDate", moment().toDate())
+        $("#fechaMovimientoNotaIngresoPicker").datepicker({
+            dateFormat: 'dd/mm/yy',
+        }).datepicker("setDate", moment().toDate())
+        $("#serieNotaIngresoInput").val('')
+        $("#numeroNotaIngresoInput").val('')
+        $("#consumoDirectoNotaIngresoInput").val('0')
+        $("#detalleNotaIngresoTableBody").empty()
+    }
+
+    // funcion para limpiar tabla de modal de agregar productos
+    function limpiarFormularioProducto() {
+        $("#productosInput").val('')
+        $("#resultadosListaProductos").empty()
+        $("#tbl-orden-compra-productos-body").empty()
+        $("#ordenInternaInput").val('')
+    }
+
 })

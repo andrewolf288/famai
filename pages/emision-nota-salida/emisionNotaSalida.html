@@ -1,0 +1,175 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+    <h2 class="mb-3 fs-4">Emisión notas de salida</h2>
+</div>
+<div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
+    <div class="d-flex me-4">
+        <button class="btn btn-success me-2" id="btn-crear-nota-ingreso">Realizar salida</button>
+    </div>
+</div>
+<table id="data-container" class="table table-striped nowrap" style="width:100%">
+    <thead>
+        <th></th>
+        <th></th>
+        <th>Fec. Creación</th>
+        <th class="text-start">OT</th>
+        <th class="text-start">Código</th>
+        <th>Descripción</th>
+        <th>Tipo</th>
+        <th class="text-center">Cantidad</th>
+    <tbody id="data-container-body">
+    </tbody>
+</table>
+
+<!-- MODAL PARA DETALLES PENDIENTES DE ORDEN DE COMPRA  -->
+<div class="modal fade" id="detallePendienteModal" tabindex="-1" aria-labelledby="detallePendienteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ordenadoModalLabel">Detalles pendientes de salida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table id="data-container-pendiente-detalle-ordencompra" class="table mt-3" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 10px;">Item</th>
+                                <th class="text-center" style="width: 50px;">OT</th>
+                                <th class="text-center" style="width: 100px;">% Desc.</th>
+                                <th style="width: 120px;">Fec. Entega</th>
+                                <th style="width: 300px;">Producto</th>
+                                <th class="text-center" style="width: 10px;">Und.</th>
+                                <th class="text-center" style="width: 120px;">Cant. Total</th>
+                                <th class="text-center" style="width: 120px;">Cant. Ingresada</th>
+                                <th class="text-center" style="width: 120px;">Precio s/IGV</th>
+                                <th class="text-center" style="width: 120px;">Total s/IGV</th>
+                                <th style="width: 240px;">Obs. Detalle</th>
+                                <th style="width: 240px;">Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DIALOGO PARA REALIZAR SALIDA -->
+<div class="modal fade" id="crearNotaIngresoModal" tabindex="-1" aria-labelledby="crearNotaIngresoModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ordenadoModalLabel">Emisión nota de salida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Columna para datos de cabecera de Nota de ingreso -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title">Cabecera nota de salida</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label for="motivoMovimientoInput">Motivo movimiento:</label>
+                                        <select id="motivoMovimientoInput" class="form-select">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label for="almacenNotaIngresoInput">Almacén salida</label>
+                                        <select id="almacenNotaIngresoInput" class="form-select"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Detalle de Nota de Ingreso -->
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">Detalle nota de salida</h5>
+                                <button class="btn btn-primary" id="agregarItemButton">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                        <path
+                                            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                                    </svg>
+                                    Agregar Producto
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table class="table" id="detalleNotaIngresoTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center col-1">Item</th>
+                                            <th class="text-center col-1">OT</th>
+                                            <th class="col-1">Fec. Creación</th>
+                                            <th class="col-1">Código</th>
+                                            <th class="col-6">Descripción</th>
+                                            <th class="text-center col-1">Unidad</th>
+                                            <th class="text-center col-1">Cant. Salida</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="detalleNotaIngresoTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button class="btn btn-primary" id="btn-guardar-nota-ingreso">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DIALOGO DE AGREGAR PRODUCTOS -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Agregar Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label for="productosInput">Producto:</label>
+                    <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
+                    <ul id="resultadosLista" class="list-group mt-2"></ul>
+                </div>
+                <table id="tbl-orden-compra-productos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-2">Código</th>
+                            <th class="col-7">Descripción</th>
+                            <th class="col-1 text-center">Und.</th>
+                            <th class="col-2 text-center">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-agregar-producto">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>

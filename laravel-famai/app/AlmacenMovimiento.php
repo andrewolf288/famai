@@ -11,12 +11,15 @@ class AlmacenMovimiento extends Model
     protected $primaryKey = 'amc_id';
 
     protected $fillable = [
-        'alm_id',
         'amc_numero',
-        'amc_fechamovimiento',
-        'amc_tipomovimiento',
+        'alm_id',
+        'sed_codigo',
+        'prv_id',
+        'mon_codigo',
         'mtm_codigo',
         'tdr_codigo',
+        'amc_fechamovimiento',
+        'amc_tipomovimiento',
         'amc_documentoreferenciaserie',
         'amc_documentoreferencianumero',
         'amc_documentoreferenciafecha',
@@ -44,5 +47,20 @@ class AlmacenMovimiento extends Model
     public function tipoDocumentoReferencia()
     {
         return $this->belongsTo(TipoDocumentoReferencia::class, 'tdr_codigo', 'tdr_codigo');
+    }
+
+    public function sede()
+    {
+        return $this->belongsTo(Sede::class, 'sed_codigo', 'sed_codigo');
+    }
+
+    public function proveedor()
+    {
+        return $this->belongsTo(Proveedor::class, 'prv_id', 'prv_id');
+    }
+
+    public function moenda()
+    {
+        return $this->belongsTo(Moneda::class, 'mon_codigo', 'mon_codigo');
     }
 }
