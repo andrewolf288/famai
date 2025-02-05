@@ -1528,14 +1528,39 @@ class OrdenInternaMaterialesController extends Controller
         $query = OrdenInternaMateriales::with('ordenInternaParte.ordenInterna', 'producto')
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($numeroOT) {
                 $q->where('odt_numero', $numeroOT)
-                ->where('oic_estado', 'PROCESO');
+                    ->where('oic_estado', 'PROCESO');
             })
             ->where('odm_cantidadpendiente', '>', 0)
             ->whereNotIn('odm_tipo', [3, 4, 5])
             ->whereNotNull('odm_estado')
+            ->where('odm_estado', '!=', 'OCD')
             ->whereNotNull('pro_id')
             ->get();
 
         return response()->json($query);
+    }
+
+    // mostrar detalles de materiales pendientes de emitir nota de salida
+    public function detalleMaterialesPorEmitirNotaSalida(Request $request)
+    {
+        $ordentrabajo = $request->input('odt_numero', null);
+
+        $query = OrdenInternaMateriales::with('ordenInternaParte.ordenInterna', 'producto')
+            ->whereRaw('
+            COALESCE(odm_cantidadreservada, 0) + COALESCE(odm_cantidadatendida, 0) > COALESCE(odm_cantidaddespachada, 0)
+        ');
+
+        if ($ordentrabajo !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordentrabajo) {
+                $q->where('odt_numero', $ordentrabajo);
+            });
+        }
+
+        $ordenesMateriales = $query->get()->map(function ($orden) {
+            $orden->total_reservado_atendido = ($orden->odm_cantidadreservada ?? 0) + ($orden->odm_cantidadatendida ?? 0);
+            return $orden;
+        });
+
+        return response()->json($ordenesMateriales);
     }
 }

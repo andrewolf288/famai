@@ -219,6 +219,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('detalleMaterialesOrdenInterna/verificar-materiales', [OrdenInternaMaterialesController::class, 'validarMaterialesMasivo']);
     Route::get('detalleMaterialesOrdenInterna-resumido-ordencompra', [OrdenInternaMaterialesController::class, 'indexOrdenCompraResumido']);
     Route::post('detalleMaterialesOrdenInterna-pendientes-by-orden-interna', [OrdenInternaMaterialesController::class, 'findMaterialesPendientesByOT']);
+    Route::get('detalleMaterialesOrdenInterna-pendientes-entregar', [OrdenInternaMaterialesController::class, 'detalleMaterialesPorEmitirNotaSalida']);
 });
 
 // rutas detalle de adjuntos detalle materiales

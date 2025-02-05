@@ -33,6 +33,9 @@ class AlmacenMovimientoController extends Controller
             ->where('alm_esprincipal', 0)
             ->first();
 
+        // definimos el servicio de producto
+        $productoService = new ProductoService();
+
         try {
             DB::beginTransaction();
             $validatedData = validator($request->all(), [
@@ -97,7 +100,6 @@ class AlmacenMovimientoController extends Controller
                         'amd_fecmodificacion' => null
                     ]);
                 } else {
-                    $productoService = new ProductoService();
                     $pro_id = $productoService->findProductoOrCreate($detalle['pro_id'], $user);
                     // el ingreso se almacena en almacen principal
                     AlmacenMovimientoDetalle::create([
@@ -175,5 +177,7 @@ class AlmacenMovimientoController extends Controller
     }
 
     // salida almacen movimiento
-    public function salidaAlmacenMovimiento(Request $request) {}
+    public function salidaAlmacenMovimiento(Request $request) {
+        
+    }
 }

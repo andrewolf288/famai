@@ -22,6 +22,8 @@ class OrdenInternaMateriales extends Model
         'odm_cantidadordenada',
         'odm_cantidadpendiente',
         'odm_cantidadatendida',
+        'odm_cantidaddespachada',
+        'odm_cantidadajuste',
         'odm_observacion',
         'odm_tipo',
         'odm_estado',

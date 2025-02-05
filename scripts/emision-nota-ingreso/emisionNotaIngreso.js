@@ -844,7 +844,6 @@ $(document).ready(() => {
         }
 
         console.log(formatData)
-        return
         try {
             const { data } = await client.post('almacen-movimiento/ingreso', formatData)
             alert('Nota de ingreso creada exitosamente')
@@ -913,7 +912,7 @@ $(document).ready(() => {
         if (productos.length > 0) {
             productos.each(function (index, row) {
                 const formatData = {
-                    ocd_id: flagEsTipoOrdenCompra ? $(row).find('.orden-compra-detalle-id').val() : null,
+                    ocd_id: $(row).find('.orden-compra-detalle-id').val() || null,
                     odm_id: $(row).find('.detalle-material-id').val() || null,
                     pro_id: $(row).find('.producto-id').val(),
                     amd_cantidad: $(row).find('.cantidad-ingreso-input').val(),
