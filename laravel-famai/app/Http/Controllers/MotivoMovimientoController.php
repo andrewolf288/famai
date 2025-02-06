@@ -19,6 +19,7 @@ class MotivoMovimientoController extends Controller
 
         $motivosmovimiento = $query
             ->where('mtm_activo', 1)
+            ->orWhere('mtm_tipomovimiento', 'A')
             ->get();
 
         return response()->json($motivosmovimiento);

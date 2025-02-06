@@ -220,6 +220,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('detalleMaterialesOrdenInterna-resumido-ordencompra', [OrdenInternaMaterialesController::class, 'indexOrdenCompraResumido']);
     Route::post('detalleMaterialesOrdenInterna-pendientes-by-orden-interna', [OrdenInternaMaterialesController::class, 'findMaterialesPendientesByOT']);
     Route::get('detalleMaterialesOrdenInterna-pendientes-entregar', [OrdenInternaMaterialesController::class, 'detalleMaterialesPorEmitirNotaSalida']);
+    Route::post('detalleMaterialesOrdenInterna-pendientes-entregar', [OrdenInternaMaterialesController::class, 'detalleMaterialesPorEmitirNotaSaliadByIds']);
 });
 
 // rutas detalle de adjuntos detalle materiales
@@ -443,3 +444,4 @@ Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCot
 //     $number = 142.67;
 //     return UtilHelper::convertirNumeroALetras($number);
 // });
+Route::get('exportar-SAP-orden-compra', [OrdenCompraExportController::class, 'export']);

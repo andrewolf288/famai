@@ -12,7 +12,9 @@ class OrdenCompraExportController extends Controller
 {
     public function export()
     {
+        // debemos buscar aquellas ordenes de compra que no se han importado aún
         $ordenescompra = OrdenCompra::with('proveedor', 'moneda')
+            ->where('occ_importacion', 0)
             ->get();
 
         $pathcsvCabeceraTemp = storage_path("app/temp/purchase-order.csv");
@@ -35,9 +37,8 @@ class OrdenCompraExportController extends Controller
             'Comments',
             'PaymentGroupCode',
             'TaxDate',
-            'Indicator',
-            'DocTotalFc',
-            'VatPercent',
+            // 'DocTotalFc',
+            // 'VatPercent',
         ]);
         $csvCabecera->insertOne([
             'DocNum',
@@ -54,9 +55,8 @@ class OrdenCompraExportController extends Controller
             'Comments',
             'GroupNum',
             'TaxDate',
-            'Indicator',
-            'DocTotalFC',
-            'VatPercent',
+            // 'DocTotalFC',
+            // 'VatPercent',
         ]);
 
         // creamos el detalle del csv
@@ -70,11 +70,12 @@ class OrdenCompraExportController extends Controller
             "ShipDate",
             "Price",
             "Currency",
-            "WarehouseCode",
-            "TaxCode",
+            "DiscountPercent",
+            // "TaxCode",
             "LineTotal",
             "TaxPercentagePerRow",
-            "TaxTotal"
+            // "GrossTotal"
+            // "TaxTotal"
         ]);
         $csvDetalle->insertOne([
             "DocNum",
@@ -85,11 +86,12 @@ class OrdenCompraExportController extends Controller
             "ShipDate",
             "Price",
             "Currency",
-            "WhsCode",
-            "TaxCode",
+            "DiscPrcnt",
+            // "TaxCode",
             "LineTotal",
             "VatPrcnt",
-            "VatSum"
+            // "GTotal"
+            // "VatSum"
         ]);
 
         $contador = 1;
@@ -108,11 +110,10 @@ class OrdenCompraExportController extends Controller
                 $orden->mon_codigo, // DocCur (Moneda)
                 $orden->occ_tipocambio || 1, // DocRate
                 $orden->occ_notas, // Comments (Comentarios)
-                -1, // GroupNum (Forma de pago)
+                $orden->fpa_codigo, // GroupNum (Forma de pago)
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // TaxDate (assuming the same as DocDate)
-                '01', // Indicator (Tipo de documento, FAC, BOL)
-                0, // DocTotalFC (Total en moneda extranjera)
-                0, // VatPercent 
+                // 0, // DocTotalFC (Total en moneda extranjera)
+                // 0, // VatPercent 
             ]);
 
             $ordenescompradetalle = OrdenCompraDetalle::with('producto')
@@ -125,17 +126,18 @@ class OrdenCompraExportController extends Controller
                 $csvDetalle->insertOne([
                     $contador, // DocNum
                     $contadorDetalle, // LineNum
-                    $detalle->producto ? $detalle->producto->pro_codigo : '', // ItemCode (de la relación con 'producto' si necesario)
+                    $detalle->producto->pro_codigo, // ItemCode (de la relación con 'producto' si necesario)
                     $detalle->ocd_descripcion, // Dscription
                     $detalle->ocd_cantidad, // Quantity
-                    $detalle->ocd_feccreacion->format('Y-m-d'), // ShipDate (asumiendo que es la fecha de creación)
+                    UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // ShipDate (asumiendo que es la fecha de creación)
                     $detalle->ocd_preciounitario, // Price
                     $orden->mon_codigo, // Currency (por definir)
-                    '', // WhsCode (por definir)
-                    '', // TaxCode (por definir)
+                    $detalle->ocd_porcentajedescuento,
+                    // $detalle->imp_codigo, // TaxCode (por definir)
                     $detalle->ocd_total, // LineTotal (por calcular o llenar según lógica)
-                    '', // VatPrcnt (por definir)
-                    '', // VatSum (por calcular o llenar según lógica)
+                    $detalle->ocd_porcentajeimpuesto, // VatPrcnt (porcentaje de impuesto)
+                    // $detalle->ocd_total, // GrossTotal
+                    // '', // VatSum (por calcular o llenar según lógica)
                 ]);
 
                 $contadorDetalle++;
@@ -143,6 +145,9 @@ class OrdenCompraExportController extends Controller
 
             $contador++;
         }
+
+        // al finalizar la importacion, cambiamos el flag de importacion
+        OrdenCompra::whereIn('occ_id', $ordenescompra->pluck('occ_id'))->update(['occ_importacion' => 1]);
 
         $zip = new \ZipArchive();
         $zipFilename = storage_path('app/temp/files.zip');

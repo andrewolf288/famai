@@ -1563,4 +1563,23 @@ class OrdenInternaMaterialesController extends Controller
 
         return response()->json($ordenesMateriales);
     }
+
+    // mostrar detalles de materiales pendientes por ids de materiales
+    public function detalleMaterialesPorEmitirNotaSaliadByIds(Request $request)
+    {
+        $detalles = $request->input('detalles', []);
+
+        $query = OrdenInternaMateriales::with('ordenInternaParte.ordenInterna', 'producto')
+            ->whereRaw('
+            COALESCE(odm_cantidadreservada, 0) + COALESCE(odm_cantidadatendida, 0) > COALESCE(odm_cantidaddespachada, 0)
+        ')
+        ->whereIn('odm_id', $detalles);
+
+        $ordenesMateriales = $query->get()->map(function ($orden) {
+            $orden->total_reservado_atendido = ($orden->odm_cantidadreservada ?? 0) + ($orden->odm_cantidadatendida ?? 0);
+            return $orden;
+        });
+
+        return response()->json($ordenesMateriales);
+    }
 }

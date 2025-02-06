@@ -3,7 +3,6 @@ $(document).ready(() => {
     let dataTable
     const dataContainer = $('#data-container')
     const apiURL = '/ordencompra-pendientes-ingresar'
-    let flagEsTipoOrdenCompra = false
 
     $("#fechaDocumentoReferenciaPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -185,7 +184,6 @@ $(document).ready(() => {
 
     // ------ GESTION DE EMISIÓN DE NOTA DE INGRESO -------
     $("#btn-crear-nota-ingreso").on('click', async function () {
-        flagTipoOrdenCompra = null
         // primero debemos verificar si se esta jalando de una orden de compra
         const filasSeleccionadas = dataTable.rows({ selected: true }).nodes()
         let valorSeleccionado = null
@@ -200,19 +198,15 @@ $(document).ready(() => {
         // debemos completar las 2 casuisticas
         if (!valorSeleccionado) {
             $("#agregarItemButton").removeClass('d-none')
-            cargarInformacionTrabajadorLogeado()
         } else {
             // si es de una orden de compra entonces habilitamos el boton de agregar productos de modal
             $("#agregarItemButton").addClass('d-none')
-            flagEsTipoOrdenCompra = true
             const { data } = await client.get(`ordencompra-pendientes-entregar/${valorSeleccionado}`)
             const { orden_compra, detalles } = data
 
             establecerInformacionProveedor(orden_compra.proveedor)
             establecerInformacionOrdenCompra(orden_compra)
             establecerInformacionDetalles(detalles)
-            // inicializamos la informacion de nota de ingreso
-            detalleNotaIngreso = detalles
         }
 
         showModalCreacionNotaIngreso()
@@ -265,11 +259,22 @@ $(document).ready(() => {
 
     // cargar informacion de almacenes
     async function cargarAlmacenes() {
+        // primero obtenemos informacion de la sede del trabajador que esta usando el sistema
+        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
+        let sed_codigo = "10" // por defecto almacen de Arequipa
+        try {
+            const { data } = await client.get(`/trabajadorByUsuario?usu_codigo=${usu_codigo}`)
+            sed_codigo = data.sed_codigo
+        } catch (error) {
+            alert("No se encontró un trabajador asignado a este usuario")
+        }
+
+        // establecemos los almacenes
         const { data } = await client.get('/almacenes?alm_esprincipal=1')
         const $almacenes = $("#almacenNotaIngresoInput")
         $almacenes.empty()
         data.forEach(almacen => {
-            const option = $('<option data-sede="' + almacen["sed_codigo"] + '">').val(almacen["alm_id"]).text(almacen["alm_descripcion"])
+            const option = $(`<option ${almacen["sed_codigo"] === sed_codigo ? 'selected' : ''}>`).val(almacen["alm_id"]).text(almacen["alm_descripcion"])
             $almacenes.append(option)
         })
     }
@@ -287,18 +292,6 @@ $(document).ready(() => {
             })
         } catch (error) {
             console.log(error)
-        }
-    }
-
-    // cargar información del trabajador logeado
-    async function cargarInformacionTrabajadorLogeado() {
-        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
-        let sed_codigo = "10" // por defecto almacen de Arequipa
-        try {
-            const { data } = await client.get(`/trabajadorByUsuario?usu_codigo=${usu_codigo}`)
-            sed_codigo = data.sed_codigo
-        } catch (error) {
-            alert("No se encontró un trabajador asignado a este usuario")
         }
     }
 
@@ -929,12 +922,12 @@ $(document).ready(() => {
     }
 
     // funcion para validar detalle de nota de ingreso
-    function validarDetalleNotaIngreso(detalle) {
+    function validarDetalleNotaIngreso(detalles) {
         let handleError = ''
-        detalle.forEach((detalle, index) => {
-            const { amd_cantidad, amd_preciounitario, ocd_cantidadpendiente } = detalle
+        detalles.forEach((detalle, index) => {
+            const { amd_cantidad, amd_preciounitario, ocd_cantidadpendiente, odm_id } = detalle
             // la cantidad debe ser un valor numerico
-            if (detalle.ocd_id) {
+            if (odm_id) {
                 if (!esValorNumericoValidoMayorIgualQueCero(amd_cantidad)) {
                     handleError += `El detalle ${index + 1} debe tener una cantidad mayor o igual que cero\n`
                 } else {

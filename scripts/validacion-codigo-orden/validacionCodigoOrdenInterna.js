@@ -20,10 +20,11 @@ $(document).ready(() => {
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", moment().toDate());
+    }).datepicker("setDate", moment().startOf('month').subtract(1, 'months').toDate());
+    
     $("#fechaHasta").datepicker({
         dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", moment().toDate());
+    }).datepicker("setDate", moment().endOf('month').add(1, 'months').toDate());
 
     // Opciones de DataTable
     const dataTableOptions = {
@@ -160,7 +161,7 @@ $(document).ready(() => {
         initDataTable(filteredURL)
     })
 
-    initDataTable(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}&multifilter=no_verificados`)
+    initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').subtract(1, 'months').format('YYYY-MM-DD')}&fecha_hasta=${moment().endOf('month').add(1, 'months').format('YYYY-MM-DD')}&multifilter=no_verificados`)
 
     // ------ GESTIÓN DE ASIGNACIÓN DE CÓDIGOS ------
     // al momento de ir ingresando valores en el input
