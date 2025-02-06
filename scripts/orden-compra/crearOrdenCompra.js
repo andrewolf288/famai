@@ -709,6 +709,7 @@ $(document).ready(() => {
                 pro_id: detalle.pro_id, // producto
                 ocd_descripcion: detalle.odm_descripcion, // descripcion
                 ocd_cantidad: detalle.ocd_cantidad, // cantidad
+                odm_cantidadpendiente: detalle.odm_cantidadpendiente,
                 ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario
                 ocd_total: detalle.ocd_total, // total
                 ocd_porcentajedescuento: detalle.ocd_porcentajedescuento, // porcentaje descuento
@@ -731,6 +732,10 @@ $(document).ready(() => {
             // validacion de cantidad
             if (!esValorNumericoValidoYMayorQueCero(detalle.ocd_cantidad)) {
                 messageErrorValidation += "- La cantidad pedida debe ser un número mayor que cero\n"
+            } else {
+                if (obtenerValorNumerico(detalle.ocd_cantidad) > obtenerValorNumerico(detalle.odm_cantidadpendiente)) {
+                    messageErrorValidation += "- La cantidad pedida debe ser menor o igual a la cantidad requerida\n"
+                }
             }
             // validacion de precio unitario
             if (!esValorNumericoValidoYMayorQueCero(detalle.ocd_preciounitario)) {
