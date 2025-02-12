@@ -83,4 +83,28 @@ class UtilHelper
     {
         return str_replace('-', '', $date);
     }
+
+    public static function cleanForCSV($string)
+    {
+        if (is_null($string)) {
+            return ''; // Manejo seguro de valores nulos
+        }
+
+        // Convertimos a UTF-8 para evitar problemas de codificación
+        $string = mb_convert_encoding($string, 'UTF-8', 'auto');
+
+        // Reemplazar caracteres problemáticos
+        $string = str_replace(["\r\n", "\r", "\n"], ' ', $string); // Evitar saltos de línea
+        $string = str_replace(["\"", "'"], '', $string); // Evitar comillas problemáticas
+
+        // Eliminar espacios en blanco al inicio y al final
+        $string = trim($string);
+
+        // Si la cadena contiene el delimitador CSV, encerrarla entre comillas dobles
+        if (strpos($string, ',') !== false || strpos($string, ';') !== false) {
+            $string = '"' . $string . '"';
+        }
+
+        return $string;
+    }
 }

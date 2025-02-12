@@ -36,7 +36,7 @@ class OrdenCompraExportController extends Controller
             'DocRate',
             'Comments',
             'PaymentGroupCode',
-            'TaxDate',
+            // 'TaxDate',
             // 'DocTotalFc',
             // 'VatPercent',
         ]);
@@ -54,7 +54,7 @@ class OrdenCompraExportController extends Controller
             'DocRate',
             'Comments',
             'GroupNum',
-            'TaxDate',
+            // 'TaxDate',
             // 'DocTotalFC',
             // 'VatPercent',
         ]);
@@ -74,6 +74,7 @@ class OrdenCompraExportController extends Controller
             // "TaxCode",
             "LineTotal",
             "TaxPercentagePerRow",
+            "U_FAM_FECINOC"
             // "GrossTotal"
             // "TaxTotal"
         ]);
@@ -90,6 +91,7 @@ class OrdenCompraExportController extends Controller
             // "TaxCode",
             "LineTotal",
             "VatPrcnt",
+            "U_FAM_FECINOC"
             // "GTotal"
             // "VatSum"
         ]);
@@ -104,12 +106,12 @@ class OrdenCompraExportController extends Controller
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                 $orden->proveedor->prv_codigo, // CardCode
-                $orden->proveedor->prv_nombre, // CardName
-                $orden->proveedor->prv_direccion, // Address 
+                UtilHelper::cleanForCSV($orden->proveedor->prv_nombre), // CardName
+                UtilHelper::cleanForCSV($orden->proveedor->prv_direccion), // Address 
                 $orden->occ_total, // DocTotal (Total)
                 $orden->mon_codigo, // DocCur (Moneda)
-                $orden->occ_tipocambio || 1, // DocRate
-                $orden->occ_notas, // Comments (Comentarios)
+                $orden->occ_tipocambio ?? 1, // DocRate
+                UtilHelper::cleanForCSV($orden->occ_notas), // Comments (Comentarios)
                 $orden->fpa_codigo, // GroupNum (Forma de pago)
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // TaxDate (assuming the same as DocDate)
                 // 0, // DocTotalFC (Total en moneda extranjera)
@@ -126,18 +128,19 @@ class OrdenCompraExportController extends Controller
                 $csvDetalle->insertOne([
                     $contador, // DocNum
                     $contadorDetalle, // LineNum
-                    $detalle->producto->pro_codigo, // ItemCode (de la relación con 'producto' si necesario)
-                    $detalle->ocd_descripcion, // Dscription
+                    $detalle->producto->pro_codigo, // ItemCode
+                    UtilHelper::cleanForCSV($detalle->ocd_descripcion), // Dscription
                     $detalle->ocd_cantidad, // Quantity
-                    UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // ShipDate (asumiendo que es la fecha de creación)
+                    UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // ShipDate
                     $detalle->ocd_preciounitario, // Price
-                    $orden->mon_codigo, // Currency (por definir)
+                    $orden->mon_codigo, // Currency
                     $detalle->ocd_porcentajedescuento,
-                    // $detalle->imp_codigo, // TaxCode (por definir)
-                    $detalle->ocd_total, // LineTotal (por calcular o llenar según lógica)
-                    $detalle->ocd_porcentajeimpuesto, // VatPrcnt (porcentaje de impuesto)
+                    // $detalle->imp_codigo, // TaxCode
+                    $detalle->ocd_total, // LineTotal
+                    $detalle->ocd_porcentajeimpuesto, // VatPrcnt
                     // $detalle->ocd_total, // GrossTotal
                     // '', // VatSum (por calcular o llenar según lógica)
+                    UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
                 ]);
 
                 $contadorDetalle++;
@@ -154,8 +157,8 @@ class OrdenCompraExportController extends Controller
 
         if ($zip->open($zipFilename, \ZipArchive::CREATE) === TRUE) {
             // Añadir los archivos CSV al ZIP
-            $zip->addFile($pathcsvCabeceraTemp, 'OPOR - Documents.csv');
-            $zip->addFile($pathcsvDetalleTemp, 'POR1 - Document_Lines.csv');
+            $zip->addFile($pathcsvCabeceraTemp, 'OPOR-Documents.csv');
+            $zip->addFile($pathcsvDetalleTemp, 'POR1-Document_Lines.csv');
             $zip->close();
         }
 
