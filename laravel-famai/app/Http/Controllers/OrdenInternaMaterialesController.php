@@ -1543,12 +1543,23 @@ class OrdenInternaMaterialesController extends Controller
     // mostrar detalles de materiales pendientes de emitir nota de salida
     public function detalleMaterialesPorEmitirNotaSalida(Request $request)
     {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
         $ordentrabajo = $request->input('odt_numero', null);
 
         $query = OrdenInternaMateriales::with('ordenInternaParte.ordenInterna', 'producto')
             ->whereRaw('
             COALESCE(odm_cantidadreservada, 0) + COALESCE(odm_cantidadatendida, 0) > COALESCE(odm_cantidaddespachada, 0)
-        ');
+        ')->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            });
 
         if ($ordentrabajo !== null) {
             $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordentrabajo) {
@@ -1573,7 +1584,7 @@ class OrdenInternaMaterialesController extends Controller
             ->whereRaw('
             COALESCE(odm_cantidadreservada, 0) + COALESCE(odm_cantidadatendida, 0) > COALESCE(odm_cantidaddespachada, 0)
         ')
-        ->whereIn('odm_id', $detalles);
+            ->whereIn('odm_id', $detalles);
 
         $ordenesMateriales = $query->get()->map(function ($orden) {
             $orden->total_reservado_atendido = ($orden->odm_cantidadreservada ?? 0) + ($orden->odm_cantidadatendida ?? 0);
