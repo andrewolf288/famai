@@ -221,6 +221,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta de reservacion de stock
+    router.on('/reservacion-stock', () => {
+        privateRoute(() => {
+            loadContent('pages/reservacion-stock/reservacionStock.html', 'scripts/reservacion-stock/reservacionStock.js')
+        })
+    })
+
     // Ruta para el perfil
     router.on('/perfil', () => {
         privateRoute(() => {

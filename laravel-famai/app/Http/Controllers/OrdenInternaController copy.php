@@ -10,6 +10,7 @@ use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
 use App\OrdenInternaProcesos;
+use App\OrdenTrabajo;
 use App\Parte;
 use App\Producto;
 use App\Unidad;
@@ -21,10 +22,16 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use App\Reporte;
 use App\Trabajador;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DateTime;
 
 class OrdenInternaController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -76,6 +83,7 @@ class OrdenInternaController extends Controller
         ]);
     }
 
+    // funcion que trae toda la informacion necesaria para la creación de orden interna
     public function informacionCreacionOrdenInterna(Request $request)
     {
         $usuario = $request->input('usu_codigo');
@@ -367,34 +375,57 @@ class OrdenInternaController extends Controller
             // ---------- MANEJO DE INFORMACION DE LA ORDEN DE TRABAJO ----------
             $flagErrors = '';
             $odt_numero = null;
+            // debemos buscar si existe la informacion de orden de trabajo en nuestra base de datos
+            // $odtFound = OrdenTrabajo::where('odt_numero', $request->input('odt_numero'))
+            //     ->first();
+            // if ($odtFound) {
+            //     $odt_numero = $odtFound->odt_numero;
+            // } else {
+                $otSecondary = DB::connection('sqlsrv_andromeda')
+                    ->table('OT_OrdenTrabajo as T1')
+                    ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
+                    ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', 'T1.IdTipoEstado')
+                    ->leftJoin('SAP_Cliente as T2', function ($join) {
+                        $join->on(DB::raw('T2.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'), '=', DB::raw('T1.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'));
+                    })
+                    ->leftJoin('OT_TipoServicio as T3', 'T3.IdTipoServicio', 'T1.IdTipoServicio')
+                    ->select(
+                        'T1.NumOTSAP as odt_numero',
+                        'T4.DesTipoEstado as odt_estado',
+                        'T2.CardName as cli_nombre',
+                        'T2.CardCode as cli_nrodocumento',
+                        'T8.NomEquipo as odt_equipo',
+                        'T1.FecIngreso as odt_fecha',
+                        'T1.FecAprobacion as odt_fechaaprobacion',
+                        'T1.FecEntregaEstimada as odt_fechaentregaestimada',
+                        'T3.DesTipoServicio as odt_trabajo'
+                    )
+                    ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $request->input('odt_numero'))
+                    ->first();
 
-            $otSecondary = DB::connection('sqlsrv_andromeda')
-                ->table('OT_OrdenTrabajo as T1')
-                ->leftJoin('OT_Equipo as T8', 'T8.IdEquipo', 'T1.IdEquipo')
-                ->leftJoin('OT_TipoEstadoOrdenTrabajo as T4', 'T4.IdTipoEstado', 'T1.IdTipoEstado')
-                ->leftJoin('SAP_Cliente as T2', function ($join) {
-                    $join->on(DB::raw('T2.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'), '=', DB::raw('T1.CardCode COLLATE SQL_Latin1_General_CP1_CI_AS'));
-                })
-                ->leftJoin('OT_TipoServicio as T3', 'T3.IdTipoServicio', 'T1.IdTipoServicio')
-                ->select(
-                    'T1.NumOTSAP as odt_numero',
-                    'T4.DesTipoEstado as odt_estado',
-                    'T2.CardName as cli_nombre',
-                    'T2.CardCode as cli_nrodocumento',
-                    'T8.NomEquipo as odt_equipo',
-                    'T1.FecIngreso as odt_fecha',
-                    'T1.FecAprobacion as odt_fechaaprobacion',
-                    'T1.FecEntregaEstimada as odt_fechaentregaestimada',
-                    'T3.DesTipoServicio as odt_trabajo'
-                )
-                ->where(DB::raw('T1.NumOTSAP COLLATE SQL_Latin1_General_CP1_CI_AS'), $request->input('odt_numero'))
-                ->first();
+                if ($otSecondary) {
+                    // $data = [
+                    //     'odt_numero' => $otSecondary->odt_numero,
+                    //     'odt_fecha' => $otSecondary->odt_fecha,
+                    //     'cli_id' => $cli_id,
+                    //     'odt_equipo' => $otSecondary->odt_equipo,
+                    //     'odt_trabajo' => $otSecondary->odt_trabajo,
+                    //     'odt_estado' => $otSecondary->odt_estado,
+                    //     'odt_usucreacion' => $user->usu_codigo,
+                    //     'odt_feccreacion' => Carbon::now(),
+                    // ];
+                    // DB::table('tblordenesdetrabajo_odt')->insert($data);
 
-            if ($otSecondary) {
-                $odt_numero = $otSecondary->odt_numero;
-            } else {
-                throw new Exception('La orden de trabajo no existe en la base de datos secundaria');
-            }
+                    // // Obtener el registro insertado
+                    // $odtCreated = DB::table('tblordenesdetrabajo_odt')
+                    //     ->where('odt_numero', $otSecondary->odt_numero) // Asumiendo que 'odt_numero' es único
+                    //     ->first();
+                    // $flagErrors .= "Se ha creado la orden interna con numero {$odtCreated->odt_numero}. De base de datos secundaria se obtiene: {$otSecondary->odt_numero} y cliente: {$cli_id} y fecha: {$otSecondary->odt_fecha} " . "toda la data fue: " . print_r($data, true);
+                    $odt_numero = $otSecondary->odt_numero;
+                } else {
+                    throw new Exception('La orden de trabajo no existe en la base de datos secundaria');
+                }
+            // }
 
             if (is_null($odt_numero) || $odt_numero === 0) {
                 throw new Exception('No se pudo encontrar un número de orden de trabajo válido para: ' . $odt_numero . ' Valor en la insercion: ' . $flagErrors);
@@ -438,7 +469,7 @@ class OrdenInternaController extends Controller
                 foreach ($detalle_procesos as $proceso) {
                     $validatorProceso = Validator::make($proceso, [
                         'opp_id' => 'required|integer|exists:tblordenesinternasprocesos_opp,opp_id',
-                        'odp_descripcion' => 'required|string',
+                        'odp_descripcion' => 'required|string', # se añadio el campo de descripcion
                         'odp_observacion' => 'nullable|string',
                         'odp_ccalidad' => 'required|boolean',
                     ])->validate();
@@ -743,14 +774,14 @@ class OrdenInternaController extends Controller
             'format' => 'A4',
             'orientation' => 'L',
             //'setAutoBottomMargin' => 'stretch',
-            'setAutoBottomMargin' => 'pad',
+			'setAutoBottomMargin' => 'pad',
             'margin_left' => 1,
             'margin_right' => 1,
             'margin_top' => 1,
             //'margin_footer' => 15,
-            //'margin_bottom' => 15,
-            'margin_bottom' => 35,
-            'margin_footer' => 1
+			//'margin_bottom' => 15,
+			'margin_bottom' => 35,
+			'margin_footer' => 1
         ]);
 
         $footer = '

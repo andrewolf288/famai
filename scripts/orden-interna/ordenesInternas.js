@@ -36,8 +36,7 @@ $(document).ready(() => {
             const habilitadoEditar = ordenInterna.oic_estado === "INGRESO" || ordenInterna.oic_estado === "REABIERTO" ? true : false
             content += `
                 <tr>
-                    <td>${ordenInterna.orden_trabajo?.odt_numero ?? 'N/A'}</td>
-                    <td>${ordenInterna.orden_trabajo?.odt_estado ?? 'N/A'}</td>
+                    <td>${ordenInterna?.odt_numero ?? 'N/A'}</td>
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'N/A'}</td>
                     <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'N/A'}</td>
                     <td>${ordenInterna.oic_fechaaprobacion !== null ? parseDateSimple(ordenInterna.oic_fechaaprobacion) : 'N/A'}</td>

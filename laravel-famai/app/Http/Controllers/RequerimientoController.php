@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\DateHelper;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaMaterialesAdjuntos;
 use App\OrdenInternaPartes;
 use App\Parte;
 use App\Producto;
+use App\Reporte;
 use App\Trabajador;
 use App\Unidad;
 use Exception;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -23,12 +26,17 @@ class RequerimientoController extends Controller
     {
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
+        $odtNumero = $request->input('odt_numero', null);
 
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
         $query = OrdenInterna::with(['area', 'trabajadorOrigen'])
             ->where('oic_tipo', 'REQ');
+
+        if ($odtNumero !== null) {
+            $query->where('odt_numero', $odtNumero);
+        }
 
         if ($fecha_desde !== null && $fecha_hasta !== null) {
             $query->whereBetween('oic_fecha', [$fecha_desde, $fecha_hasta]);
@@ -111,8 +119,20 @@ class RequerimientoController extends Controller
                 $sed_codigo = $trabajador->sed_codigo;
             }
 
+            // debemos buscar el numero de movimiento segun la sede
+            $lastRequerimientoCabecera = OrdenInterna::where('sed_codigo', $sed_codigo)
+                ->where('oic_tipo', 'REQ')
+                ->orderBy('oic_id', 'desc')
+                ->first();
+            if (!$lastRequerimientoCabecera) {
+                $numero = 1;
+            } else {
+                $numero = intval(substr($lastRequerimientoCabecera->odt_numero, 2)) + 1;
+            }
+
             // primero creamos una orden interna
             $requerimiento = OrdenInterna::create([
+                'odt_numero' => 'RQ' . str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'oic_fecha' => $data['oic_fecha'],
                 'sed_codigo' => $sed_codigo,
                 'oic_fechaentregaestimada' => $data['oic_fechaentregaestimada'],
@@ -240,6 +260,48 @@ class RequerimientoController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    // Funcion para generar el pdf
+    public function generarPDF($oic_id, $user = null)
+    {
+        $requerimiento = OrdenInterna::with(['area', 'trabajadorOrigen'])->findOrFail($oic_id);
+        $reporte = new Reporte();
+
+        $datosPartes = $reporte->metobtenerPartes($oic_id);
+        foreach ($datosPartes as &$parte) {
+            $materiales = $reporte->metobtenerMateriales($oic_id, $parte['oip_id']);
+            $parte['detalle_materiales'] = $materiales;
+        }
+
+        $pdfOptions = [
+            'paper' => 'a4',
+            'orientation' => 'landscape',
+        ];
+
+        $data = [
+            'requerimiento' => $requerimiento,
+            'detalleMateriales' => $datosPartes[0]['detalle_materiales'],
+            'fechaActual' => DateHelper::parserFechaActual(),
+            'usuarioImpresion' => $user ? $user->usu_codigo : null,
+            'fechaHoraImpresion' => date('Y-m-d H:i:s'),
+        ];
+
+        return Pdf::loadView('requerimiento.requerimiento', $data)
+            ->setPaper($pdfOptions['paper'], $pdfOptions['orientation']);
+    }
+    // Funcion para exportar en pdf
+    public function exportarPDF(Request $request) {
+        $user = auth()->user();
+        try {
+            $pdf = $this->generarPDF($request->input('oic_id'), $user);
+            return $pdf->download('requerimiento.pdf');
+        } catch (Exception $e) {
+            return response()->json([
+                "error" => $e->getMessage(),
+                "linea" => $e->getLine()
+            ], 500);
         }
     }
 }

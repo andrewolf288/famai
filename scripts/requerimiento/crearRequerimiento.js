@@ -153,7 +153,7 @@ $(document).ready(function () {
 
         try {
             const queryEncoded = encodeURIComponent(query)
-            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
+            const { data } = await client.get(`/productosByQuery2?query=${queryEncoded}`)
             // Limpiamos la lista
             limpiarLista()
             // formamos la lista

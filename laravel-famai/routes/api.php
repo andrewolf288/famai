@@ -240,6 +240,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('requerimientos', [RequerimientoController::class, 'index']);
     Route::post('requerimientos', [RequerimientoController::class, 'store']);
+    Route::get('requerimiento/exportarPDF', [RequerimientoController::class, 'exportarPDF']);
 });
 
 // rutas de requerimientos detalles

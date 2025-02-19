@@ -37,10 +37,10 @@ class OrdenInterna extends Model
     const UPDATED_AT = 'oic_fecmodificacion';
 
     // Orden de Trabajo
-    public function ordenTrabajo()
-    {
-        return $this->belongsTo(OrdenTrabajo::class, 'odt_numero');
-    }
+    // public function ordenTrabajo()
+    // {
+    //     return $this->belongsTo(OrdenTrabajo::class, 'odt_numero');
+    // }
 
     // Cliente
     public function cliente()
