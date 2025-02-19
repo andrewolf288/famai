@@ -196,7 +196,8 @@ class OrdenInternaMaterialesController extends Controller
                 $q->where('sed_codigo', $sed_codigo);
             })
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
-                $q->where('oic_estado', 'PROCESO');
+                $q->where('oic_estado', 'PROCESO')
+                ->orWhere('oic_tipo', 'REQ');
             })
             ->whereNotIn('odm_tipo', [3, 4, 5])
             ->whereNotNull('odm_estado');
