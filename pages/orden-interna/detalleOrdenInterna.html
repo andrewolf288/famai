@@ -1,0 +1,240 @@
+<div>
+    <div class="d-flex flex-row justify-content-end mb-3">
+        <button class="btn btn-secondary me-2" onclick="location.href='orden-interna'">
+            Volver
+        </button>
+    </div>
+    <div class="row mb-3 orange-form">
+        <!-- SELECCION DE ORDEN DE TRABAJO -->
+        <div class="col-12 col-md-3 mb-3 mb-md-0">
+            <div class="row g-3 align-items-center">
+                <div class="col-3 col-md-2">
+                    <label for="otInput" class="form-label">OT:</label>
+                </div>
+                <div class="col-9 col-md-10">
+                    <input type="text" id="otInput" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+        <!-- CLIENTE -->
+        <div class="col-12 col-md-9 mb-3 mb-md-0">
+            <div class="row g-3 align-items-center">
+                <div class="col-3 col-md-2">
+                    <label for="clienteInput" class="form-label">Cliente:</label>
+                </div>
+                <div class="col-9 col-md-10">
+                    <input type="text" id="clienteInput" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3 orange-form">
+        <!-- SELECCION DE FECHA -->
+        <div class="col-12 col-md-6 mb-3 mb-md-0">
+            <div class="row g-3 align-items-center">
+                <div class="col-3 col-md-2">
+                    <label for="fechaPicker" class="form-label">Fecha:</label>
+                </div>
+                <div class="col-9 col-md-10">
+                    <input type="text" id="fechaPicker" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+        <!-- SELECCION DE AREA -->
+        <div class="col-12 col-md-6 mb-3 mb-md-0">
+            <div class="row g-3 align-items-center">
+                <div class="col-3 col-md-2">
+                    <label for="areaSelect" class="form-label">Área:</label>
+                </div>
+                <div class="col-9 col-md-10">
+                    <input type="text" id="areaSelect" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3 orange-form">
+        <!-- EQUIPO DE TRABAJO -->
+        <div class="col-12">
+            <div class="row g-3 align-items-center">
+                <div class="col-3 col-md-1">
+                    <label for="equipoInput" class="form-label">Equipo:</label>
+                </div>
+                <div class="col-9 col-md-11">
+                    <input type="text" id="equipoInput" class="form-control" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3 orange-form">
+        <!-- COMPONENTE DE TRABAJO -->
+        <div class="col-12">
+            <div class="row g-3 align-items-center">
+                <div class="col-3 col-md-1">
+                    <label for="componenteInput" class="form-label">Componente:</label>
+                </div>
+                <div class="col-9 col-md-11">
+                    <input type="text" id="componenteInput" class="form-control" autocomplete="off" readonly>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3 orange-form d-flex justify-content-center align-items-center">
+        <!-- Columna para responsable origen -->
+        <div class="col-lg-4 col-md-12 mb-3">
+            <label for="responsableOrigen" class="form-label">Responsable Origen</label>
+            <input type="text" id="responsableOrigen" class="form-control" readonly>
+        </div>
+
+        <!-- Columna para responsable maestro -->
+        <div class="col-lg-4 col-md-12 mb-3">
+            <label for="responsableMaestro" class="form-label">Responsable Maestranza</label>
+            <input type="text" id="responsableMaestro" class="form-control" readonly>
+        </div>
+
+        <!-- Columna para responsable almacén -->
+        <div class="col-lg-3 col-md-12 mb-3">
+            <label for="responsableAlmacen" class="form-label">Responsable Almacén</label>
+            <input type="text" id="responsableAlmacen" class="form-control" readonly>
+        </div>
+        <!-- BOTON DE IMPRESION -->
+        <div class="col-1">
+            <button class="btn btn-danger me-2" id="btn-imprimir-orden-interna">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-file-earmark-pdf-fill" viewBox="0 0 16 16">
+                    <path
+                        d="M5.523 12.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.035.012a.3.3 0 0 1-.026-.044c-.056-.11-.054-.216.04-.36.106-.165.319-.354.647-.548m2.455-1.647q-.178.037-.356.078a21 21 0 0 0 .5-1.05 12 12 0 0 0 .51.858q-.326.048-.654.114m2.525.939a4 4 0 0 1-.435-.41q.344.007.612.054c.317.057.466.147.518.209a.1.1 0 0 1 .026.064.44.44 0 0 1-.06.2.3.3 0 0 1-.094.124.1.1 0 0 1-.069.015c-.09-.003-.258-.066-.498-.256M8.278 6.97c-.04.244-.108.524-.2.829a5 5 0 0 1-.089-.346c-.076-.353-.087-.63-.046-.822.038-.177.11-.248.196-.283a.5.5 0 0 1 .145-.04c.013.03.028.092.032.198q.008.183-.038.465z" />
+                    <path fill-rule="evenodd"
+                        d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2zM4.165 13.668c.09.18.23.343.438.419.207.075.412.04.58-.03.318-.13.635-.436.926-.786.333-.401.683-.927 1.021-1.51a11.7 11.7 0 0 1 1.997-.406c.3.383.61.713.91.95.28.22.603.403.934.417a.86.86 0 0 0 .51-.138c.155-.101.27-.247.354-.416.09-.181.145-.37.138-.563a.84.84 0 0 0-.2-.518c-.226-.27-.596-.4-.96-.465a5.8 5.8 0 0 0-1.335-.05 11 11 0 0 1-.98-1.686c.25-.66.437-1.284.52-1.794.036-.218.055-.426.048-.614a1.24 1.24 0 0 0-.127-.538.7.7 0 0 0-.477-.365c-.202-.043-.41 0-.601.077-.377.15-.576.47-.651.823-.073.34-.04.736.046 1.136.088.406.238.848.43 1.295a20 20 0 0 1-1.062 2.227 7.7 7.7 0 0 0-1.482.645c-.37.22-.699.48-.897.787-.21.326-.275.714-.08 1.103" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLA PARA MOSTRAR EL DETALLE DE CREACION -->
+    <table id="tbl-orden-interna" class="table table-striped nowrap w-100" style="width:100%">
+        <thead>
+            <tr>
+                <th>Partes</th>
+                <th>Actividades</th>
+                <th class="text-center">Cantidad</th>
+                <th>Materiales</th>
+                <th class="text-center">Cantidad total</th>
+                <th class="text-center">Regular</th>
+                <th class="text-center">Adicional</th>
+                <th class="text-center">Cliente</th>
+                <th class="text-center">No pedir</th>
+                <th class="text-center">Recuperar</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+<!-- MODALES DE PROCESOS Y PRODUCTOS -->
+<!-- Modal de Procesos -->
+<div class="modal fade" id="procesosModal" tabindex="-1" aria-labelledby="procesosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="procesosModalLabel">Procesos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- SECCION DE DATA -->
+                <table id="tbl-orden-interna-procesos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-1">Código</th>
+                            <th class="col-2">Proceso</th>
+                            <th class="col-1">C.Calidad</th>
+                            <th class="col-3">Observación</th>
+                            <th class="col-1">Usu. Act.</th>
+                            <th class="col-1">Fec. Act.</th>
+                            <th class="col-1">Usu. Cre.</th>
+                            <th class="col-1">Fec. Cre.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de productos -->
+<div class="modal fade" id="productosModal" tabindex="-1" aria-labelledby="productosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productosModalLabel">Materiales</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- SECCION DE DATA -->
+                <table id="tbl-orden-interna-productos" class="table mt-3">
+                    <thead>
+                        <tr>
+                            <th class="col-1">Código</th>
+                            <th class="col-2">Material</th>
+                            <th class="col-1">Cantidad</th>
+                            <th class="col-2">Observación</th>
+                            <th class="col-1">Usu. Act.</th>
+                            <th class="col-1">Fec. Act.</th>
+                            <th class="col-1">Usu. Cre.</th>
+                            <th class="col-1">Fec. Cre.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE CARGA -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Cargando, por favor espere...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PREVIEW -->
+<div class="modal fade" id="previewPDFModal" tabindex="-1" aria-labelledby="previewPDFModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewPDFModalLabel">Previsualizar Orden Interna</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div style="height: 80vh;">
+                    <iframe id="pdf-frame" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

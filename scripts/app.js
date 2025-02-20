@@ -99,6 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loadContent('pages/orden-interna/editarOrdenInterna.html', 'scripts/orden-interna/editarOrdenInterna.js')
         })
     })
+    // Ruta para el detalle de orden interna
+    router.on('/orden-interna/detalle/:id', () => {
+        privateRoute(() => {
+            loadContent('pages/orden-interna/detalleOrdenInterna.html', 'scripts/orden-interna/detalleOrdenInterna.js')
+        })
+    })
     // Ruta para despliegue orden interna
     router.on('/despliegue-orden', () => {
         privateRoute(() => {

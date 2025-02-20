@@ -545,4 +545,9 @@ $(document).ready(function () {
         }
     })
 
+    // Funcion de cancelar
+    $('#btn-cancelar-requerimiento').on('click', function () {
+        window.location.href = 'requerimiento'
+    })
+
 })

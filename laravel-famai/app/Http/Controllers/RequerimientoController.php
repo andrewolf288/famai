@@ -230,7 +230,6 @@ class RequerimientoController extends Controller
                     'odm_cantidadpendiente' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
-                    // 'odm_estado' => 'REQ',
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
                 ]);
