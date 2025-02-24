@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Almacen;
+use App\AlmacenProducto;
 use App\CotizacionDetalle;
 use App\OrdenInterna;
 use App\Helpers\UtilHelper;
@@ -197,7 +198,7 @@ class OrdenInternaMaterialesController extends Controller
             })
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'PROCESO')
-                ->orWhere('oic_tipo', 'REQ');
+                    ->orWhere('oic_tipo', 'REQ');
             })
             ->whereNotIn('odm_tipo', [3, 4, 5])
             ->whereNotNull('odm_estado');
@@ -1593,5 +1594,93 @@ class OrdenInternaMaterialesController extends Controller
         });
 
         return response()->json($ordenesMateriales);
+    }
+
+    // mostrar materiales para reservar
+    public function indexReservacion(Request $request)
+    {
+        $user = auth()->user();
+        $sed_codigo = "10";
+        $almacen_codigo = "01_AQPAG";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
+        $almacen = Almacen::where('sed_codigo', $sed_codigo)
+            ->where('alm_esprincipal', 1)
+            ->first();
+
+        if ($almacen) {
+            $almacen_codigo = $almacen->alm_codigo;
+        }
+
+        $ordenTrabajo = $request->input('odt_numero', null);
+        $fecha_desde = $request->input('fecha_desde', null);
+        $fecha_hasta = $request->input('fecha_hasta', null);
+
+        $query = OrdenInternaMateriales::with(
+            [
+                'producto',
+                'ordenInternaParte.ordenInterna'
+            ]
+        )
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            })
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('oic_estado', 'ENVIADO')
+                    ->orWhere('oic_estado', 'EVALUADO');
+            })
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->where('odm_estado', '=', 'REQ')
+            ->whereNotNull('pro_id');
+
+        // filtro por orden de trabajo
+        if ($ordenTrabajo !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                $q->where('odt_numero', $ordenTrabajo);
+            });
+        }
+
+        // filtro de fecha
+        if ($fecha_desde !== null && $fecha_hasta !== null) {
+            $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
+                ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
+        }
+
+        $resultado = $query->get();
+        $materiales_reserva = $resultado->map(function ($material) use ($almacen_codigo) {
+            $stock_total = 0;
+            $stock_almacen = 0;
+            $cantidad_reservada = 0;
+
+            if ($material->pro_id) {
+                $stock_total = AlmacenProducto::where('pro_id', $material->pro_id)
+                    ->sum('alp_stock');
+
+                $stock_almacen = AlmacenProducto::where('pro_id', $material->pro_id)
+                    ->where('alm_codigo', $almacen_codigo)
+                    ->value('alp_stock') ?? 0;
+
+                $cantidad_reservada = $material->odm_cantidadreservada <= $stock_almacen ? $material->odm_cantidadreservada : $stock_almacen;
+
+                return  [
+                    'odm_id' => $material->odm_id,
+                    'odm_tipo' => $material->odm_tipo,
+                    'odm_feccreacion' => $material->odm_feccreacion,
+                    'producto' => $material->producto,
+                    'odm_cantidadpendiente' => $material->odm_cantidadpendiente,
+                    'stock_total' => $stock_total,
+                    'stock_almacen' => $stock_almacen,
+                    'cantidad_reservada' => $cantidad_reservada,
+                    'detalle' => $material,
+                ];
+            }
+        })->values();
+
+        return response()->json($materiales_reserva);
     }
 }
