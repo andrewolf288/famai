@@ -1150,7 +1150,7 @@ $(document).ready(async function () {
                 const row = `
                     <tr data-id-adjunto="${oma_id}">
                         <td>
-                            <a target="_blank" href="${BACK_STORAGE_URL}${oma_url}">Ver recurso</a>
+                            <a target="_blank" href="${config.BACK_STORAGE_URL}${oma_url}">Ver recurso</a>
                         </td>
                         <td class="descripcion-file">${oma_descripcion}</td>
                         <td>
@@ -1201,7 +1201,7 @@ $(document).ready(async function () {
                 const row = `
                     <tr data-id-adjunto="${oma_id}">
                         <td>
-                            <a target="_blank" href="${BACK_STORAGE_URL}${oma_url}">Ver recurso</a>
+                            <a target="_blank" href="${config.BACK_STORAGE_URL}${oma_url}">Ver recurso</a>
                         </td>
                         <td class="descripcion-file">${oma_descripcion}</td>
                         <td>
