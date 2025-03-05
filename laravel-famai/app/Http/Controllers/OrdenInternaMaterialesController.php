@@ -154,6 +154,10 @@ class OrdenInternaMaterialesController extends Controller
     // index resumido
     public function indexResumido(Request $request)
     {
+        // lo primero que hacemos es ejecutar el procedimiento almacenado
+        DB::statement('EXEC dbo.ActualizarDetalleMaterialesOT');
+        
+        // ejecutamos lo demas del controlador
         $user = auth()->user();
         $sed_codigo = "10";
 
@@ -201,6 +205,7 @@ class OrdenInternaMaterialesController extends Controller
                     ->orWhere('oic_tipo', 'REQ');
             })
             ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->where('odm_cantidadpendiente', '>', 0)
             ->whereNotNull('odm_estado');
 
         // filtro de orden de trabajo

@@ -41,7 +41,7 @@ $(document).ready(() => {
         destroy: true,
         responsive: true,
         paging: true,
-        pageLength: 50,
+        pageLength: 100,
         lengthMenu: [50, 100, 250, 500],
         searching: true,
         info: true,
