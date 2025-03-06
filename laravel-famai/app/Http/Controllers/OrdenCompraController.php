@@ -51,7 +51,7 @@ class OrdenCompraController extends Controller
     private function generarPDF($occ_id, $imprimir_disgregado = false, $user)
     {
         // consultamos la orden de compra --- aqui necesito un id para consultar la orden de compra
-        $ordencomprafind = OrdenCompra::with('proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'elaborador', 'solicitador', 'autorizador')
+        $ordencomprafind = OrdenCompra::with('proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'elaborador', 'solicitador', 'autorizador', 'formaPago')
             ->where('occ_id', $occ_id)->first();
 
         // consultamos el detalle de orden de compra
@@ -123,12 +123,6 @@ class OrdenCompraController extends Controller
     {
         $user = auth()->user();
         $sed_codigo = "10";
-
-        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
-
-        if ($trabajador) {
-            $sed_codigo = $trabajador->sed_codigo;
-        }
         // iniciamos una transaccion
         try {
             DB::beginTransaction();
@@ -204,15 +198,22 @@ class OrdenCompraController extends Controller
             }
 
             // creacion de la orden de compra
-            $lastOrdenCompra = OrdenCompra::orderBy('occ_id', 'desc')->first();
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+            if ($trabajador) {
+                $sed_codigo = $trabajador->sed_codigo;
+            }
+
+            $lastOrdenCompra = OrdenCompra::where('sed_codigo', $sed_codigo)
+                ->orderBy('occ_id', 'desc')
+                ->first();
             if (!$lastOrdenCompra) {
                 $numero = 1;
             } else {
-                $numero = intval($lastOrdenCompra->occ_numero) + 1;
+                $numero = intval(substr($lastOrdenCompra->occ_numero, 1)) + 1;
             }
 
             $ordencompra = OrdenCompra::create([
-                'occ_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+                'occ_numero' => $sed_codigo == '10' ? 'A' : 'L' . str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $proveedor->prv_id,
                 'sed_codigo' => $sed_codigo,
                 'occ_fecha' => $validatedData['occ_fecha'],

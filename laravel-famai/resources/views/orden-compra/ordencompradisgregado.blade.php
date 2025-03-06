@@ -174,8 +174,8 @@
                             </td>
                         </tr>
                         <tr style="border: 1px solid black;">
-                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">L-
-                                {{ $ordencompra['occ_numero'] }}
+                            <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">
+                                {{ substr($ordencompra['occ_numero'], 0, 1) . '-' . substr($ordencompra['occ_numero'], 1) }}
                             </td>
                         </tr>
                     </table>
@@ -254,7 +254,7 @@
                 <div class="info-row">
                     <span class="label">FORMA DE PAGO</span>
                     <span
-                        class="value">{{ $ordencompra['occ_formapago'] ? $ordencompra['occ_formapago'] : '' }}</span>
+                        class="value">{{ $ordencompra['fpa_codigo'] ? $ordencompra['formaPago']['fpa_descripcion'] : '' }}</span>
                 </div>
             </td>
             <td>
