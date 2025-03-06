@@ -23,6 +23,7 @@ class OrdenInterna extends Model
         'tra_idorigen',
         'tra_idmaestro',
         'tra_idalmacen',
+        'mrq_codigo',
         'oic_fechaaprobacion',
         'oic_fechaentregaestimada',
         'oic_fechaevaluacion',
@@ -88,5 +89,11 @@ class OrdenInterna extends Model
     public function sede()
     {
         return $this->belongsTo(Sede::class, 'sed_codigo')->selectFields();
+    }
+
+    // motivo requerimiento
+    public function motivoRequerimiento()
+    {
+        return $this->belongsTo(MotivoRequerimiento::class, 'mrq_codigo')->selectFields();
     }
 }

@@ -39,6 +39,7 @@ $(document).ready(() => {
                     <td>${requerimiento.oic_fecha !== null ? parseDateSimple(requerimiento.oic_fecha) : 'No aplica'}</td>
                     <td>${requerimiento.oic_fechaentregaestimada !== null ? parseDateSimple(requerimiento.oic_fechaentregaestimada) : 'No aplica'}</td>
                     <td>${requerimiento.area?.are_descripcion ?? 'No aplica'}</td>
+                    <td>${requerimiento.motivo_requerimiento?.mrq_descripcion ?? 'No aplica'}</td>
                     <td class="text-center">${requerimiento.total_materiales}</td>
                     <td>${requerimiento.oic_estado}</td>
                     <td>

@@ -31,7 +31,7 @@ class RequerimientoController extends Controller
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
-        $query = OrdenInterna::with(['area', 'trabajadorOrigen'])
+        $query = OrdenInterna::with(['area', 'trabajadorOrigen', 'motivoRequerimiento'])
             ->where('oic_tipo', 'REQ');
 
         if ($odtNumero !== null) {
@@ -106,6 +106,7 @@ class RequerimientoController extends Controller
             'are_codigo' => 'required|exists:tblareas_are,are_codigo',
             'tra_idorigen' => 'required|exists:tbltrabajadores_tra,tra_id',
             'oic_equipo_descripcion' => 'nullable|string',
+            'mrq_codigo' => 'required|exists:tblmotivorequerimiento_mrq,mrq_codigo'
         ]);
 
         if ($validator->fails()) {
@@ -138,6 +139,7 @@ class RequerimientoController extends Controller
                 'oic_fechaentregaestimada' => $data['oic_fechaentregaestimada'],
                 'are_codigo' => $data['are_codigo'],
                 'tra_idorigen' => $data['tra_idorigen'],
+                'mrq_codigo' => $data['mrq_codigo'],
                 'oic_equipo_descripcion' => $data['oic_equipo_descripcion'],
                 'oic_tipo' => 'REQ',
                 'oic_estado' => 'ENVIADO',
@@ -265,7 +267,7 @@ class RequerimientoController extends Controller
     // Funcion para generar el pdf
     public function generarPDF($oic_id, $user = null)
     {
-        $requerimiento = OrdenInterna::with(['area', 'trabajadorOrigen'])->findOrFail($oic_id);
+        $requerimiento = OrdenInterna::with(['area', 'trabajadorOrigen', 'motivoRequerimiento'])->findOrFail($oic_id);
         $reporte = new Reporte();
 
         $datosPartes = $reporte->metobtenerPartes($oic_id);

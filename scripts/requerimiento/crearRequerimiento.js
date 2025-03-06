@@ -6,22 +6,22 @@ $(document).ready(function () {
         e.returnValue = '';
     }
 
-    const showLoaderModal = () => {
-        const loaderModal = new bootstrap.Modal(document.getElementById('loaderModal'), {
-            backdrop: 'static',
-            keyboard: false
-        })
-        loaderModal.show()
-    }
+    const detalle_requerimiento = []
 
-    const hideLoaderModal = () => {
-        const loaderModal = bootstrap.Modal.getInstance(document.getElementById('loaderModal'))
-        if (loaderModal) {
-            loaderModal.hide()
+    // cargar motivos requerimientos
+    const cargarMotivosRequerimientos = async () => {
+        try {
+            const { data } = await client.get('/motivosrequerimientoSimple')
+            const $motivoRequerimientoSelect = $('#motivoRequerimientoSelect')
+
+            data.forEach(motivo => {
+                const option = $('<option>').val(motivo["mrq_codigo"]).text(motivo["mrq_descripcion"])
+                $motivoRequerimientoSelect.append(option)
+            })
+        } catch (error) {
+            alert('Error al obtener los motivos de requerimientos')
         }
     }
-
-    const detalle_requerimiento = []
 
     // cargar areas
     const cargarAreas = async () => {
@@ -93,6 +93,7 @@ $(document).ready(function () {
             await Promise.all([
                 cargarAreas(),
                 cargarResponsables(),
+                cargarMotivosRequerimientos()
             ])
             cargarInformacionUsuario()
         } catch (error) {
@@ -458,9 +459,10 @@ $(document).ready(function () {
     $("#btn-guardar-requerimiento").click(async function () {
         let handleError = ''
         window.onbeforeunload = null;
-        
+
         const $oiValorEquipo = $('#equipoInput').val().trim()
         const $oiCodigoArea = $('#areaSelect').val()
+        const $motivoRequerimiento = $('#motivoRequerimientoSelect').val()
         const $oiFecha = $('#fechaPicker').val()
         const $oiFechaEntrega = $('#fechaEntregaPicker').val()
         const $oiEncargadoOrigen = $('#responsableOrigen').val()
@@ -470,6 +472,7 @@ $(document).ready(function () {
             $oiFechaEntrega.length === 0 ||
             $oiEncargadoOrigen.length === 0 ||
             $oiCodigoArea.length === 0 ||
+            $motivoRequerimiento.length === 0 ||
             detalle_requerimiento.length === 0
         ) {
             if ($oiCodigoArea.length === 0) {
@@ -483,6 +486,9 @@ $(document).ready(function () {
             }
             if ($oiEncargadoOrigen.length === 0) {
                 handleError += '- Se debe ingresar información de encargado origen\n'
+            }
+            if ($motivoRequerimiento.length === 0) {
+                handleError += '- Se debe ingresar información de motivo de requerimiento\n'
             }
             if (detalle_requerimiento.length === 0) {
                 handleError += '- Se debe ingresar información de detalle de requerimiento\n'
@@ -498,6 +504,7 @@ $(document).ready(function () {
             oic_fecha: transformarFecha($oiFecha),
             oic_fechaentregaestimada: transformarFecha($oiFechaEntrega),
             are_codigo: $oiCodigoArea,
+            mrq_codigo: $motivoRequerimiento,
             tra_idorigen: $oiEncargadoOrigen,
             oic_equipo_descripcion: $oiValorEquipo || null,
             detalle_requerimiento: []
@@ -526,20 +533,20 @@ $(document).ready(function () {
 
         // agregamos estructuradamente los archivos en el formdata
         detalle_requerimiento.forEach((detalle, indexDetalle) => {
-            const {detalle_adjuntos} = detalle
+            const { detalle_adjuntos } = detalle
             detalle_adjuntos.forEach((file, indexFile) => {
                 formData.append(`files[${indexDetalle}][${indexFile}]`, file.oma_file)
             })
         })
 
-        try{
+        try {
             await client.post('/requerimientos', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             })
             window.location.href = "requerimiento"
-        } catch(error){
+        } catch (error) {
             console.log(error)
             alert("Error al crear el requerimiento")
         }

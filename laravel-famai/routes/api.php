@@ -22,6 +22,7 @@ use App\Http\Controllers\ImpuestoController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\MonedaController;
 use App\Http\Controllers\MotivoMovimientoController;
+use App\Http\Controllers\MotivoRequerimientoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\OrdenCompraDetalleController;
@@ -42,6 +43,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\TipoDocumentoReferenciaController;
+use App\MotivoRequerimiento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -353,6 +355,12 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('tiposdocumentosreferenciaSimple', [TipoDocumentoReferenciaController::class, 'indexSimple']);
 });
 
+// rutas de motivos de requerimientos
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('motivosrequerimiento', [MotivoRequerimientoController::class, 'index']);
+    Route::get('motivosrequerimientoSimple', [MotivoRequerimientoController::class, 'indexSimple']);
+});
+
 // rutas almacenamiento
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('almacenes',[AlmacenController::class, 'index']);
@@ -438,6 +446,9 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 });
 
 // rutas publicas sin autenticación
+Route::get('pop', function() {
+    return response('OK SERVER', 200);
+});
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
 

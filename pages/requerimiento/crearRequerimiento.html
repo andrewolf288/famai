@@ -12,7 +12,7 @@
                             <label for="fechaPicker" class="form-label">Fecha:</label>
                         </div>
                         <div class="col-8 col-md-9">
-                            <input type="text" id="fechaPicker" class="form-control">
+                            <input type="text" id="fechaPicker" class="form-control" disabled readonly>
                         </div>
                     </div>
                 </div>
@@ -56,11 +56,24 @@
                         </div>
                     </div>
                 </div>
+                <!-- MOTIVO REQUERIMIENTO -->
+                 <div class="col-12 col-md-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-3 col-md-2">
+                            <label for="motivoRequerimientoSelect" class="form-label">Motivo:</label>
+                        </div>
+                        <div class="col-9 col-md-10">
+                            <select id="motivoRequerimientoSelect" class="form-select">
+                                <option value="">Seleccione un motivo</option>
+                            </select>
+                        </div>
+                    </div>
+                 </div>
                 <!-- OBSERVACIÓN -->
-                <div class="col-12 col-md-9">
+                <div class="col-12 col-md-6">
                     <div class="row g-3 align-items-center">
                         <div class="col-3 col-md-1">
-                            <label for="equipoInput" class="form-label">Observación:</label>
+                            <label for="equipoInput" class="form-label">Obs:</label>
                         </div>
                         <div class="col-9 col-md-11">
                             <textarea id="equipoInput" class="form-control nota-input" autocomplete="off"
