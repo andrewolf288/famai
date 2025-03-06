@@ -142,6 +142,37 @@
         .col-total {
             width: 10.20%;
         }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        .bold-underline {
+            font-weight: bold; /* Negrita */
+            text-decoration: underline; /* Subrayado */
+        }
+
+        .parrafo {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 11px;
+        }
+        .custom-list {
+            margin-left: 20px; /* Ajusta el margen izquierdo según necesites */
+            list-style-type: none; /* Quita los puntos predeterminados */
+        }
+        .custom-list li::before {
+            content: "- "; /* Agrega el guion antes del texto */
+        }
+
+        .parrafo-nota {
+            width: 100%;
+            font-size: 10px; 
+            font-weight: bold;
+            padding: 3px 40px 3px 10px;
+            border: 1px solid #000;
+        }
+
     </style>
 </head>
 
@@ -418,6 +449,93 @@
                 Teléfono: 053-481873 • <br>
                 Móvil: 964923629 / 976865311 / 959969107
             </td>
+        </tr>
+    </table>
+    {{-- BREAK PAGE --}}
+    <div class="page-break"></div>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">ACEPTACIÓN DEL PEDIDO</td>
+        </tr>
+        <tr>
+            <td>Confirmar al comprador responsable via correo electrónico la recepción y aceptación de la orden de compra.</td>
+        </tr>
+    </table>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">ENTREGA EN ALMACÉN</td>
+        </tr>
+        <tr>
+            <td>La entrega de los materiales y/o productos será en los almacenes de FAMAI Seal Jet SAC indicados por el comprador.</td>
+        </tr>
+    </table>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">DOCUMENTACIÓN REQUERIDA</td>
+        </tr>
+        <tr>
+            <td>Deberá presentarse:</td>
+        </tr>
+        <tr>
+            <td>
+                <ul class="custom-list">
+                    <li>Factura en Original y Copia.</li>
+                    <li>Guia de Remisión en Original y copia, está ultima será sellada por el personal del almacén como prueba de la recepción de los bienes.</li>
+                    <li>Copia de la Orden de Compra.</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">MATERIALES PELIGROSOS</td>
+        </tr>
+        <tr>
+            <td>Todo material y/o producto calificado como "Material Peligroso", de acuerdo al R.D N°2613-2013-MTC/15 del 26 de junio del 2023, deberá contar con la Hoja MSDS.</td>
+        </tr>
+        <tr>
+            <td>Al momento de la entrega, estos materiales deberán estar claramente identificados con rombos de seguridad y con el embalaje apropiado, según recomendación de su Ficha técnica.</td>
+        </tr>
+    </table>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">SEGURIDAD Y SALUDO OCUPACIONAL EN EL TRABAJO</td>
+        </tr>
+        <tr>
+            <td>De acuerdo a la Ley de Seguridad y Salud en el trabajo N°29783, el proveedor deberá presentar la siguiente documentación, previo a la descarga y entrega de la orden de compra.</td>
+        </tr>
+        <tr>
+            <ul class="custom-list">
+                <li>SCTR de todo el personal involucrado en la actividad.</li>
+                <li>Procedimiento de la actividad a realizar.</li>
+                <li>Matriz IPERC.</li>
+                <li>Matriz de Aspectos e Impactos Ambientales.</li>
+                <li>Uso correcto del EPP necesario para la actividad.</li>
+            </ul>
+        </tr>
+    </table>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">INSUMOS QUÍMICOS Y BIENES IQBF</td>
+        </tr>
+        <tr>
+            <td>El proveedor está obligado a informar al comprador responsable de FAMAI Seal Jet si los productos de la presente orden de compra, ya sea como producto final o insumo de los productos y/o materiales a entregar, han sido debidamente catalogados como IQBF por la SUNAT.</td>
+        </tr>
+    </table>
+    <table class="parrafo">
+        <tr>
+            <td class="bold-underline">CÓDIGO DE CONDUCTA</td>
+        </tr>
+        <tr>
+            <td>El proveedor declara conocer y aceptar plenamente el código de conducta de FAMAI Seal Jet SAC detallado en el sigiente link</td>
+        </tr>
+    </table>
+    <table class="parrafo-nota">
+        <tr>
+            <td>Nota:</td>
+        </tr>
+        <tr>
+            <td>Se hace de conocimiento de nuestros proveedores que FAMAI SEAL JET S.A.C., mediante RS Nro. 000229-2024/SUNAT ha sido designado como "AGENTE DE RETENCIÓN", a partir del 01 de enero de 2025, la retención y entrega del Comprobante de Retención se realizará en el momento en que se realice el pago, con prescindencia de la fecha en que se efectuó la operación gravada con el IGV.</td>
         </tr>
     </table>
 </body>

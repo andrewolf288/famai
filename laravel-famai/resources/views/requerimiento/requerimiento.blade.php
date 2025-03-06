@@ -177,7 +177,7 @@
         <tr>
             <td style="font-weight: bold;font-size: 10px">ELABORADO POR:</td>
             <td style="font-size: 10px">{{ $requerimiento['trabajadorOrigen'] ? $requerimiento['trabajadorOrigen']['tra_nombre']: '' }}</td>
-            <td style="font-weight: bold;font-size: 10px">MOTIVO::</td>
+            <td style="font-weight: bold;font-size: 10px">MOTIVO:</td>
             <td style="font-size: 10px">{{ $requerimiento['motivoRequerimiento'] ? $requerimiento['motivoRequerimiento']['mrq_descripcion'] : '' }}</td>
         </tr>
         <tr>

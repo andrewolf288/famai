@@ -140,6 +140,10 @@
             width: 10.20%;
             /* 2/12 */
         }
+
+        .page-break {
+            page-break-after: always;
+        }
     </style>
 </head>
 
@@ -414,6 +418,9 @@
             </td>
         </tr>
     </table>
+    {{-- BREAK PAGE --}}
+    <div class="page-break"></div>
+    
 </body>
 
 </html>
