@@ -1355,8 +1355,7 @@ $(document).ready(() => {
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-enlace', function () {
         const id_cotizacion = $(this).data('cotizacion-id')
         const url = `${config.FRONT_URL}/cotizacion-proveedor.html?coc_id=${id_cotizacion}`
-        navigator.clipboard.writeText(url)
-        alert('Copiado al portapapeles')
+        window.open(url, '_blank')
     })
 
     // Funcion para exportar en excel de la solicitud de cotizacion
