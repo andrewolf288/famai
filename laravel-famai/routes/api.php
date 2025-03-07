@@ -457,4 +457,3 @@ Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCot
 //     return UtilHelper::convertirNumeroALetras($number);
 // });
 Route::get('exportar-SAP-orden-compra', [OrdenCompraExportController::class, 'export']);
-Route::get('import-proveedor', [ProveedorController::class, 'importData']);
