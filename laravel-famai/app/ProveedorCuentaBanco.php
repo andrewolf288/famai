@@ -15,6 +15,8 @@ class ProveedorCuentaBanco extends Model
         'mon_codigo',
         'eba_id',
         'pvc_numerocuenta',
+        'prv_numerocuentainterbancaria',
+        'pvc_tipocuenta',
         'pvc_usucreacion',
         'pvc_feccreacion',
         'pvc_usumodificacion',

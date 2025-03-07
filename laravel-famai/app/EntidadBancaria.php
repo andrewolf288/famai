@@ -11,6 +11,7 @@ class EntidadBancaria extends Model
     protected $primaryKey = 'eba_id';
 
     protected $fillable = [
+        'eba_codigo',
         'eba_descripcion',
         'eba_usucreacion',
         'eba_feccreacion',
