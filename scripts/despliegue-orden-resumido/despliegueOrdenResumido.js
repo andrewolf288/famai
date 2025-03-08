@@ -214,7 +214,7 @@ $(document).ready(() => {
             let content = ''
             data.forEach((material, index) => {
                 // if (material.detalle !== undefined) {
-                const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada } = material
+                const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada, tiene_adjuntos } = material
                 content += `
                 <tr data-index="${index}">
                     <td></td>
@@ -225,7 +225,16 @@ $(document).ready(() => {
                     <td class="text-center">${parseFloat(cantidad).toFixed(2) || 'N/A'}</td>
                     <td class="text-center">${parseFloat(stock).toFixed(2)}</td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-primary btn-detalle" data-index-detalle="${index}">Ver detalle</button>
+                        <button class="btn btn-sm btn-primary position-relative btn-detalle" data-index-detalle="${index}">
+                            Ver detalle
+                            ${tiene_adjuntos ? `
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-files" viewBox="0 0 16 16">
+                                        <path d="M13 0H6a2 2 0 0 0-2 2 2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2 2 2 0 0 0 2-2V2a2 2 0 0 0-2-2m0 13V4a2 2 0 0 0-2-2H5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1M3 4a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                                    </svg>
+                                </span>
+                            ` : ''}
+                        </button>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>Ver histórico</button>
@@ -330,7 +339,7 @@ $(document).ready(() => {
 
         // recorremos el detalle material para completar la información
         data.forEach((material) => {
-            const { producto, orden_interna_parte, odm_cantidad, odm_descripcion, odm_observacion, odm_tipo, odm_estado, odm_feccreacion, odm_usucreacion, odm_fecmodificacion, odm_usumodificacion } = material
+            const { odm_id, producto, orden_interna_parte, odm_cantidad, odm_descripcion, odm_observacion, odm_tipo, odm_estado, odm_feccreacion, odm_usucreacion, odm_fecmodificacion, odm_usumodificacion, detalle_adjuntos } = material
             const { orden_interna } = orden_interna_parte
             const { odt_numero, oic_tipo } = orden_interna
 
@@ -350,6 +359,16 @@ $(document).ready(() => {
                 <td>${odm_observacion || 'N/A'}</td>
                 <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                 <td class="text-center">${odm_cantidad}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-primary position-relative btn-detalle btn-adjuntos" data-detalle="${odm_id}" ${detalle_adjuntos.length === 0 ? 'disabled' : ''}>
+                        Ver adjuntos
+                        ${detalle_adjuntos.length !== 0 ? `
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            ${detalle_adjuntos.length}
+                        </span>
+                        ` : ''}
+                    </button>
+                </td>
                 <td>${odm_usucreacion}</td>
                 <td>${odm_fecmodificacion ? parseDate(odm_fecmodificacion) : 'N/A'}</td>
                 <td>${odm_usumodificacion ? odm_usumodificacion : 'N/A'}</td>
@@ -371,6 +390,36 @@ $(document).ready(() => {
         // mostrar modal
         showModalDetalleCotizacionAgrupamiento()
     }
+
+    function initDetalleMaterialAdjuntos() {
+        showModalAdjuntos()
+    }
+
+    $('#tbl-despliegue-materiales-body').on('click', '.btn-adjuntos', async function () {
+        const detalleMaterial = $(this).data('detalle')
+        // llamamos a la informacion del detalle
+        try {
+            const { data } = await client.get(`/ordeninternamaterialesadjuntos/${detalleMaterial}`)
+            data.forEach((element, index) => {
+                const { oma_descripcion, oma_url } = element
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>
+                            <a target="_blank" href="${config.BACK_STORAGE_URL}${oma_url}">Ver recurso</a>
+                        </td>
+                        <td class="descripcion-file">${oma_descripcion}</td>
+                    </tr>
+                `
+                $('#tabla-archivos-adjuntos').append(row)
+            })
+
+            initDetalleMaterialAdjuntos()
+        } catch (error) {
+            console.log(error)
+            alert("Error al cargar los archivos")
+        }
+    })
 
     $('#data-container-body').on('click', '.btn-detalle', function () {
         const indexDetalle = $(this).data('index-detalle')
@@ -530,7 +579,7 @@ $(document).ready(() => {
                 <input type="text" class="id-detalle-cotizacion" value="${detalle.cod_id}" hidden>
             </td>
             <td></td>
-            <td>${cotizacion.coc_fechacotizacion ? parseDateSimple(cotizacion.coc_fechacotizacion): 'N/A'}</td>
+            <td>${cotizacion.coc_fechacotizacion ? parseDateSimple(cotizacion.coc_fechacotizacion) : 'N/A'}</td>
             <td>${cotizacion.coc_numero || 'N/A'}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'N/A'}</td>
             <td class="text-center">
@@ -827,14 +876,14 @@ $(document).ready(() => {
         const dataSeleccionadaMateriales = []
         dataSeleccionada.forEach(detalle => {
             detalle.detalle.forEach(detalleElement => {
-                if(detalleElement.odm_estado != 'ODC') {
+                if (detalleElement.odm_estado != 'ODC') {
                     dataSeleccionadaMateriales.push(detalleElement)
                 }
             })
         })
 
         // debemos hacer una validación
-        if(dataSeleccionadaMateriales.length === 0){
+        if (dataSeleccionadaMateriales.length === 0) {
             alert('Los materiales seleccionados ya fueron ordenados de compra')
             return
         }
@@ -1193,10 +1242,10 @@ $(document).ready(() => {
             const observacion = $(this).find('.observacion-detalle').val().trim()
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val().trim()
             const cantidadRequerida = $(this).find('.cantidad-requerida-detalle').text().trim()
-            let precioUnitario = proveedor_unico 
-                                    ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2) 
-                                    : 0.00
-            if(isNaN(precioUnitario)) precioUnitario = 0.00
+            let precioUnitario = proveedor_unico
+                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2)
+                : 0.00
+            if (isNaN(precioUnitario)) precioUnitario = 0.00
 
             if (esValorNumericoValidoYMayorQueCero(cantidadPedida)) {
                 if (parseFloat(cantidadRequerida) > parseFloat(cantidadPedida)) {
@@ -1272,8 +1321,8 @@ $(document).ready(() => {
         }
 
         const formData = new FormData()
-        if(proveedor_unico){
-            $.each(archivosAdjuntos, function(index, file){
+        if (proveedor_unico) {
+            $.each(archivosAdjuntos, function (index, file) {
                 formData.append('files[]', file)
             })
         }
@@ -1430,10 +1479,10 @@ $(document).ready(() => {
     })
 
     // -------- GESTIÓN DE ARCHIVOS --------------
-    $('#file-input').on('change', function() {
+    $('#file-input').on('change', function () {
         const files = this.files;
 
-        $.each(files, function(index, file) {
+        $.each(files, function (index, file) {
             archivosAdjuntos.push(file)
             const listItem = $('<div></div>').addClass('alert alert-secondary d-flex justify-content-between align-items-center')
                 .text(`${file.name} (${file.size} bytes)`)
@@ -1441,7 +1490,7 @@ $(document).ready(() => {
             const deleteButton = $('<button></button>')
                 .addClass('btn btn-danger btn-sm')
                 .text('Eliminar')
-                .on('click', function() {
+                .on('click', function () {
                     const fileIndex = archivosAdjuntos.indexOf(file)
                     if (fileIndex > -1) {
                         archivosAdjuntos.splice(fileIndex, 1)
@@ -1459,7 +1508,7 @@ $(document).ready(() => {
     // -------- FUNCIONES UTILITARIAS PARA ESTE SCRIPT -------------
 
     // limpiar datos para nuevas cotizaciones
-    function clearDataCotizacion(){
+    function clearDataCotizacion() {
         // deshabilitamos la opción de proveedor único
         $("#checkProveedorUnico").prop('checked', false)
         // vaceamos la variable de archivos adjuntos
@@ -1487,7 +1536,7 @@ $(document).ready(() => {
             const fecha_desde = transformarFecha($('#fechaDesde').val())
             const fecha_hasta = transformarFecha($('#fechaHasta').val())
             filteredURL += `?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}${getValueAlmacen()}`
-            
+
             if (filters.length !== 0) {
                 filteredURL += `&multifilter=${filters.join('OR')}`
             }
@@ -1572,8 +1621,19 @@ $(document).ready(() => {
     }
 
     // mostrar modal de cotizaciones
-    function showModalCotizaciones(){
+    function showModalCotizaciones() {
         const modalElement = document.getElementById('cotizadoModal')
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        modal.show();
+    }
+
+    // mostrar modal de adjuntos
+    function showModalAdjuntos() {
+        const modalElement = document.getElementById('adjuntosMaterialModal')
         const modal = new bootstrap.Modal(modalElement, {
             backdrop: 'static',
             keyboard: false

@@ -194,7 +194,8 @@ class OrdenInternaMaterialesController extends Controller
             [
                 'responsable',
                 'producto.unidad',
-                'ordenInternaParte.ordenInterna'
+                'ordenInternaParte.ordenInterna',
+                'detalleAdjuntos'
             ]
         )
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
@@ -334,7 +335,10 @@ class OrdenInternaMaterialesController extends Controller
                     'cotizaciones_count' => $cotizaciones_count,
                     'ordenes_compra_count' => $ordenes_compra_count,
                     'cotizacion_seleccionada' => $cotizacion_seleccionada,
-                    'detalle' => $grupo->values()
+                    'detalle' => $grupo->values(),
+                    'tiene_adjuntos' => $grupo->some(function ($item) {
+                        return $item->detalleAdjuntos->isNotEmpty();
+                    }),
                 ];
             })
             ->values();
@@ -374,7 +378,8 @@ class OrdenInternaMaterialesController extends Controller
                     'cotizaciones_count' => $cotizaciones_count,
                     'ordenes_compra_count' => $ordenes_compra_count,
                     'cotizacion_seleccionada' => $cotizacion_seleccionada,
-                    'detalle' => [$item]
+                    'detalle' => [$item],
+                    'tiene_adjuntos' => $item->detalleAdjuntos->isNotEmpty() ? true : false
                 ];
             })
             ->values();

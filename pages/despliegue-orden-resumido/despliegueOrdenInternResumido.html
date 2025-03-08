@@ -471,6 +471,7 @@
                                 <th>Obs Producto</th>
                                 <th class="text-center">Und.</th>
                                 <th class="text-center">Cantidad</th>
+                                <th class="text-center">Adjuntos</th>
                                 <th>Usu. Creador</th>
                                 <th>Fec. Modificacion</th>
                                 <th>Usu. Modificador</th>
@@ -545,6 +546,37 @@
                             </tr>
                         </thead>
                         <tbody id="tbl-proveedor-productos-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ARCHIVOS ADJUNTOS -->
+<div class="modal fade" id="adjuntosMaterialModal" tabindex="-1" aria-labelledby="adjuntosMaterialModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adjuntosMaterialModalLabel">Archivos adjuntos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="col-1">#</th>
+                                <th class="col-4">Enlace</th>
+                                <th class="col-7">Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-archivos-adjuntos">
                         </tbody>
                     </table>
                 </div>

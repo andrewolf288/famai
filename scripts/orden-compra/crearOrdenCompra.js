@@ -530,6 +530,7 @@ $(document).ready(() => {
         const entidadBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorSelect").val().trim()
         const cuentaBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorInput").val().trim()
         const idCuentaBancariaBancoNacionInput = $("#idCuentaBancariaBancoNacion").val().trim()
+        const tipoOrdenCompraInput = $("#tipoOrdenCompraSelect").val().trim()
 
         // datos de la orden de compra
         const moneda = $("#monedaOrdenCompraInput").val()
@@ -568,6 +569,9 @@ $(document).ready(() => {
         }
         if (impuestoOrdenCompra.length === 0) {
             handleError += "- Debe seleccionar un impuesto\n"
+        }
+        if (tipoOrdenCompraInput.length === 0) {
+            handleError += "- Debe seleccionar un tipo de orden de compra\n"
         }
 
         // manejar alerta de error
@@ -620,6 +624,7 @@ $(document).ready(() => {
             occ_impuesto: impuesto,
             occ_total: total,
             detalle_productos: formatDetalle,
+            occ_tipo: tipoOrdenCompraInput,
             proveedor: {
                 prv_id: idProveedorInput,
                 prv_nombre: razonsocialProveedorInput,

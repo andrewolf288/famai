@@ -33,6 +33,7 @@ class OrdenCompra extends Model
         'occ_saldo',
         'occ_estado',
         'occ_importado',
+        'occ_tipo',
         'occ_activo',
         'occ_usucreacion',
         'occ_feccreacion',

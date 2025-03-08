@@ -295,8 +295,8 @@
                         class="value">{{ $ordencompra['occ_referencia'] ? $ordencompra['occ_referencia'] : '' }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">ACTIVO:</span>
-                    <span class="value">{{ $ordencompra['occ_activo'] == 1 ? 'Activo' : 'Inactivo' }}</span>
+                    <span class="label">TIPO:</span>
+                    <span class="value">{{ $ordencompra['occ_tipo'] }}</span>
                 </div>
             </td>
         </tr>

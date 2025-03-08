@@ -142,6 +142,7 @@ class OrdenCompraController extends Controller
                 'occ_subtotal' => 'required|numeric|min:1',
                 'occ_impuesto' => 'required|numeric|min:1',
                 'occ_total' => 'required|numeric|min:1',
+                'occ_tipo' => 'required|string',
                 'imprimir_disgregado' => 'required|boolean',
                 'detalle_productos' => 'required|array|min:1',
             ])->validate();
@@ -212,8 +213,10 @@ class OrdenCompraController extends Controller
                 $numero = intval(substr($lastOrdenCompra->occ_numero, 1)) + 1;
             }
 
+            $prefijo_sede = $sed_codigo == '10' ? 'A' : 'L';
+
             $ordencompra = OrdenCompra::create([
-                'occ_numero' => $sed_codigo == '10' ? 'A' : 'L' . str_pad($numero, 7, '0', STR_PAD_LEFT),
+                'occ_numero' => $prefijo_sede . str_pad($numero, 7, '0', STR_PAD_LEFT),
                 'prv_id' => $proveedor->prv_id,
                 'sed_codigo' => $sed_codigo,
                 'occ_fecha' => $validatedData['occ_fecha'],
@@ -229,6 +232,7 @@ class OrdenCompraController extends Controller
                 'occ_observacionpago' => $validatedData['occ_observacionpago'],
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
+                'occ_tipo' => $validatedData['occ_tipo'],
                 'occ_estado' => 'SOL',
                 'occ_usucreacion' => $user->usu_codigo,
                 'occ_fecmodificacion' => null
@@ -300,6 +304,7 @@ class OrdenCompraController extends Controller
                 'occ_observacionpago' => 'nullable|string',
                 'occ_adelanto' => 'nullable|numeric|min:1',
                 'occ_saldo' => 'nullable|numeric|min:1',
+                'occ_tipo' => 'required|string',
                 'detalle_productos' => 'nullable|array|min:0',
             ])->validate();
 
@@ -324,6 +329,7 @@ class OrdenCompraController extends Controller
                 'occ_observacionpago' => $validatedData['occ_observacionpago'],
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
+                'occ_tipo' => $validatedData['occ_tipo'],
                 'occ_estado' => '1',
                 'occ_usumodificacion' => $user->usu_codigo,
             ]);
