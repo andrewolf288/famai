@@ -35,9 +35,6 @@
                 <option value="">Seleccione un filtro</option>
                 <option value="odt_numero">Orden trabajo</option>
                 <option value="oic_tipo">Tipo proceso</option>
-                <option value="tra_nombre">Responsable</option>
-                <option value="pfa_descripcion">Familia</option>
-                <option value="psf_descripcion">Subfamilia</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -55,7 +52,6 @@
                     <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
                     <option value="pendiente_emitir_cotizacion">Pendiente de emitir cotización</option>
                     <option value="material_sin_codigo">Material sin codigo</option>
-                    <option value="material_sin_compra">Material sin histórico</option>
                 </select>
             </div>
             <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
@@ -64,15 +60,22 @@
 </div>
 
 <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
-    <div class="d-flex me-4">
+    <div class="w-auto me-4">
         <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
     </div>
-    <div class="me-4">
+    <div class="w-25 me-4">
         <select name="almacen" id="almacenStock" class="form-select">
             <option value="">Selecciona un almacén</option>
         </select>
     </div>
-    <div>
+    <div class="w-25">
+        <select id="responsableSelect" class="form-control" multiple>
+        </select>
+    </div>
+    <div class="w-auto me-4">
+        <button id="filtrar-responsable" class="btn btn-sm btn-primary ms-2">Filtrar</button>
+    </div>
+    <div class="w-auto">
         <button class="btn btn-success" id="btn-exportar-materiales">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
                 <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M5.884 6.68 8 9.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 10l2.233 2.68a.5.5 0 0 1-.768.64L8 10.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 10 5.116 7.32a.5.5 0 1 1 .768-.64"/>

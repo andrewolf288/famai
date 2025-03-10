@@ -32,6 +32,7 @@ use App\Http\Controllers\OrdenInternaMaterialesController;
 use App\Http\Controllers\OrdenInternaProcesosController;
 use App\Http\Controllers\PadronSunatController;
 use App\Http\Controllers\ProductoProveedorController;
+use App\Http\Controllers\ProductoResponsableController;
 use App\Http\Controllers\SubFamiliaController;
 use App\Http\Controllers\TrabajadorController;
 use App\Http\Controllers\UnidadController;
@@ -399,6 +400,11 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 // rutas de detalle de archivo de cotizacion
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::delete('cotizacion-archivo/{id}', [CotizacionDetalleArchivoController::class, 'destroy']);
+});
+
+// rutas para producto responsable
+Route::group(['middleware' => ['auth.jwt']], function () {
+    Route::get('producto-responsable/responsables', [ProductoResponsableController::class, 'obtenerResponsables']);
 });
 
 // rutas de ordenes de compra

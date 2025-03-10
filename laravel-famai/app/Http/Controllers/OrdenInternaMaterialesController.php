@@ -18,6 +18,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Helpers\DateHelper;
 use App\OrdenCompraDetalle;
 use App\Producto;
+use App\ProductoResponsable;
 use App\Services\ProductoService;
 use App\Trabajador;
 use App\Unidad;
@@ -155,7 +156,7 @@ class OrdenInternaMaterialesController extends Controller
     public function indexResumido(Request $request)
     {
         // lo primero que hacemos es ejecutar el procedimiento almacenado
-        DB::statement('EXEC dbo.ActualizarDetalleMaterialesOT');
+        // DB::statement('EXEC dbo.ActualizarDetalleMaterialesOT');
 
         // ejecutamos lo demas del controlador
         $user = auth()->user();
@@ -178,12 +179,13 @@ class OrdenInternaMaterialesController extends Controller
 
         $ordenTrabajo = $request->input('odt_numero', null);
         $tipoProceso = $request->input('oic_tipo', null);
-        $responsable = $request->input('tra_nombre', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
         $almacen_request = $request->input('alm_codigo', null);
         // multifilters
         $multifilter = $request->input('multifilter', null);
+        // responsables
+        $responsables = $request->input('responsables', null);
 
         if ($almacen_request !== null) {
             $almacen_codigo = $almacen_request;
@@ -223,10 +225,13 @@ class OrdenInternaMaterialesController extends Controller
             });
         }
 
-        if ($responsable !== null) {
-            $query->whereHas('responsable', function ($q) use ($responsable) {
-                $q->whereRaw("tra_nombre COLLATE SQL_Latin1_General_CP1_CI_AI LIKE ?", ['%' . $responsable . '%']);
-            });
+        if ($responsables !== null) {
+            // print_r($responsables);
+            $productosIds = ProductoResponsable::whereIn('tra_id', $responsables)
+                ->pluck('pro_id')
+                ->toArray();
+            // print_r($productosIds);
+            $query->whereIn('pro_id', $productosIds);
         }
 
         // filtro de fecha

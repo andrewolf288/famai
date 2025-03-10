@@ -1,4 +1,4 @@
-$(document).ready(() => {
+$(document).ready(async() => {
     // controla el abort de solicitudes asincronas
     let abortController
     let despliegueMaterialesResumido = []
@@ -20,6 +20,7 @@ $(document).ready(() => {
     const filterButton = $('#filter-button')
     const filterFechas = $('#filter-dates')
     const filterMultiselect = $('#filtermultiselect-button')
+    const filterResponsable = $('#filtrar-responsable')
 
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
@@ -164,8 +165,20 @@ $(document).ready(() => {
         },
     }
 
+    // declaracion de multiselect
+    $('#responsableSelect').multiselect({
+        selectAll: true,
+        search: true,
+        texts: {
+            selectAll: "Seleccionar todos",
+            search: "Buscar",
+            unselectAll: "Deseleccionar todos",
+            placeholder: "Seleccionar responsables"
+        }
+    })
+
     // gestion de multiselect
-    $('select[multiple]').multiselect()
+    $('#filterMultipleSelector').multiselect()
 
     // traer informacion de almacenes
     async function traerInformacionAlmacenes() {
@@ -175,6 +188,31 @@ $(document).ready(() => {
             const option = $('<option>').val(almacen["alm_codigo"]).text(almacen["alm_descripcion"])
             $almacenes.append(option)
         })
+    }
+
+    // traer informacion de responsables
+    async function traerInformacionResponsables() {
+        console.log("Trae responsables")
+        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
+        const { data } = await client.get('/producto-responsable/responsables')
+        const options = []
+        data.forEach(responsable => {
+            options.push({
+                name: responsable["tra_nombre"],
+                value: responsable["tra_id"],
+                checked: usu_codigo == responsable['usu_codigo']
+            })
+        })
+        $('#responsableSelect').multiselect('loadOptions', options);
+    }
+
+    const initInformacionMaestros = async() => {
+        return Promise.all(
+            [
+                traerInformacionAlmacenes(),
+                traerInformacionResponsables()
+            ]
+        )
     }
 
     // inicializacion de datatable
@@ -273,9 +311,6 @@ $(document).ready(() => {
         }
     }
 
-    traerInformacionAlmacenes()
-    initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`)
-
     // ----------- GESTIONAR CAMBIO DE ALMACEN ------------
     const getValueAlmacen = () => {
         const almacenStockValue = $('#almacenStock').val()
@@ -284,6 +319,9 @@ $(document).ready(() => {
         }
         return ""
     }
+
+    await initInformacionMaestros()
+    initDataTable(obtenerFiltrosActuales())
 
     $('#almacenStock').on('change', () => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
@@ -295,34 +333,26 @@ $(document).ready(() => {
     // ------------ ADMINISTRACION DE FILTROS ---------------
     // filter fechas
     filterFechas.on('click', () => {
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}${getValueAlmacen()}`
+        const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
     // filter input
     filterButton.on('click', () => {
-        const filterField = filterSelector.val().trim()
-        const filterValue = filterInput.val().trim()
-        let filteredURL = apiURL
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}${getValueAlmacen()}`
-        }
+        const filteredURL = obtenerFiltrosActuales() 
         initDataTable(filteredURL)
     })
 
     // filtro multi select
     filterMultiselect.on('click', async () => {
-        const filters = $('select[multiple]').val()
-        if (filters.length === 0) {
-            alert('No se ha seleccionado ningun filtro')
-            return
-        }
-        const fecha_desde = transformarFecha($('#fechaDesde').val())
-        const fecha_hasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}${getValueAlmacen()}`
+        const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
+    })
+
+    // filtro de responsables
+    $(filterResponsable).on('click', function () {
+        const filterField = obtenerFiltrosActuales()
+        initDataTable(filterField)
     })
 
     // ---------- ADMINISTRACIÓN DE DETALLE DE DATOS ------------
@@ -1500,7 +1530,6 @@ $(document).ready(() => {
     })
 
     // -------- FUNCIONES UTILITARIAS PARA ESTE SCRIPT -------------
-
     // limpiar datos para nuevas cotizaciones
     function clearDataCotizacion() {
         // deshabilitamos la opción de proveedor único
@@ -1517,16 +1546,17 @@ $(document).ready(() => {
         $(".precio-unitario-detalle").val(0)
     }
     // obtener filtros para la busqueda
-    function obtenerFiltrosActuales(urlAPI=apiURL) {
+    function obtenerFiltrosActuales(urlAPI = apiURL) {
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
+        const responsables = $("#responsableSelect").val()
         let filteredURL = urlAPI
 
         // si existen filtros de combobox, estos no dependen de filtros de fechas ni filtros multiples
         if (filterField.length !== 0 && filterValue.length !== 0) {
             filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}${getValueAlmacen()}`
         } else {
-            const filters = $('select[multiple]').val()
+            const filters = $('#filterMultipleSelector').val()
             const fecha_desde = transformarFecha($('#fechaDesde').val())
             const fecha_hasta = transformarFecha($('#fechaHasta').val())
             filteredURL += `?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}${getValueAlmacen()}`
@@ -1537,11 +1567,17 @@ $(document).ready(() => {
 
         }
 
+        if(responsables.length !== 0){
+            responsables.forEach((responsable) => {
+                filteredURL += `&responsables[]=${responsable}`
+            })
+        }
+
         return filteredURL
     }
 
     // exportar excel
-    $("#btn-exportar-materiales").on('click', async function(){
+    $("#btn-exportar-materiales").on('click', async function () {
         const disgregado = confirm('¿Quieres exportar disgregado?')
 
         const filteredURL = obtenerFiltrosActuales('/detalleMaterialesOrdenInterna-logistica-excel') + `&disgregado=${disgregado}`
