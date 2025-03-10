@@ -9,7 +9,6 @@ $(document).ready(() => {
     // variables para el manejo de datatable
     let dataTable;
     let dataTableCotizaciones;
-    let dataTableOrdenesCompra;
     const dataContainer = $('#data-container')
 
     // URL ENDPOINT
@@ -21,11 +20,6 @@ $(document).ready(() => {
     const filterButton = $('#filter-button')
     const filterFechas = $('#filter-dates')
     const filterMultiselect = $('#filtermultiselect-button')
-
-    // manejadores de files
-    const fileInput = document.getElementById('file-input');
-    const fileList = document.getElementById('file-list');
-    const form = document.getElementById('file-form');
 
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
@@ -1523,10 +1517,10 @@ $(document).ready(() => {
         $(".precio-unitario-detalle").val(0)
     }
     // obtener filtros para la busqueda
-    function obtenerFiltrosActuales() {
+    function obtenerFiltrosActuales(urlAPI=apiURL) {
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
-        let filteredURL = apiURL
+        let filteredURL = urlAPI
 
         // si existen filtros de combobox, estos no dependen de filtros de fechas ni filtros multiples
         if (filterField.length !== 0 && filterValue.length !== 0) {
@@ -1545,6 +1539,28 @@ $(document).ready(() => {
 
         return filteredURL
     }
+
+    // exportar excel
+    $("#btn-exportar-materiales").on('click', async function(){
+        const disgregado = confirm('¿Quieres exportar disgregado?')
+
+        const filteredURL = obtenerFiltrosActuales('/detalleMaterialesOrdenInterna-logistica-excel') + `&disgregado=${disgregado}`
+        try {
+            const response = await client.get(filteredURL, {
+                responseType: 'blob',
+            })
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'reporte.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error("Error al descargar el archivo:", error);
+        }
+    })
+
     // obtener ids de productos segun los materiales a cotizar
     function obtenerIdDetallesProductos() {
         let proIds = $('#tbl-cotizaciones-materiales tbody input[type="hidden"]').map(function () {

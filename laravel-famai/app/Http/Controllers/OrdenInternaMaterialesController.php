@@ -156,7 +156,7 @@ class OrdenInternaMaterialesController extends Controller
     {
         // lo primero que hacemos es ejecutar el procedimiento almacenado
         DB::statement('EXEC dbo.ActualizarDetalleMaterialesOT');
-        
+
         // ejecutamos lo demas del controlador
         $user = auth()->user();
         $sed_codigo = "10";
@@ -388,6 +388,315 @@ class OrdenInternaMaterialesController extends Controller
         $resultado = $agrupados->concat($sinAgrupar);
 
         return response()->json($resultado);
+    }
+
+    // exportar excel logistica requerimientos
+    public function exportLogisticaRequerimientos(Request $request)
+    {
+        // ejecutamos lo demas del controlador
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
+        $almacen = Almacen::where('sed_codigo', $sed_codigo)
+            ->where('alm_esprincipal', 1)
+            ->first();
+
+        $almacen_codigo = $almacen->alm_codigo;
+
+        // incializamos el servicio
+        $productoService = new ProductoService();
+
+        $ordenTrabajo = $request->input('odt_numero', null);
+        $tipoProceso = $request->input('oic_tipo', null);
+        $responsable = $request->input('tra_nombre', null);
+        $fecha_desde = $request->input('fecha_desde', null);
+        $fecha_hasta = $request->input('fecha_hasta', null);
+        $almacen_request = $request->input('alm_codigo', null);
+        // multifilters
+        $multifilter = $request->input('multifilter', null);
+
+        if ($almacen_request !== null) {
+            $almacen_codigo = $almacen_request;
+        }
+
+        // se necesita agregar informacion de procedimiento almacenado
+        $query = OrdenInternaMateriales::with(
+            [
+                'responsable',
+                'producto.unidad',
+                'ordenInternaParte.ordenInterna',
+                'detalleAdjuntos'
+            ]
+        )
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            })
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('oic_estado', 'PROCESO')
+                    ->orWhere('oic_tipo', 'REQ');
+            })
+            ->whereNotIn('odm_tipo', [3, 4, 5])
+            ->where('odm_cantidadpendiente', '>', 0)
+            ->whereNotNull('odm_estado');
+
+        // filtro de orden de trabajo
+        if ($ordenTrabajo !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
+                $q->where('odt_numero', $ordenTrabajo);
+            });
+        }
+
+        // filtro de tipo de proceso
+        if ($tipoProceso !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($tipoProceso) {
+                $q->where('oic_tipo', $tipoProceso);
+            });
+        }
+
+        if ($responsable !== null) {
+            $query->whereHas('responsable', function ($q) use ($responsable) {
+                $q->whereRaw("tra_nombre COLLATE SQL_Latin1_General_CP1_CI_AI LIKE ?", ['%' . $responsable . '%']);
+            });
+        }
+
+        // filtro de fecha
+        if ($fecha_desde !== null && $fecha_hasta !== null) {
+            $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
+                ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
+        }
+
+
+        // Procesar el parámetro multiselect
+        if ($multifilter !== null) {
+            // Separar el string por "OR" y crear un array con cada palabra
+            $palabras = explode('OR', $request->input('multifilter'));
+
+            // Agregar el grupo de condiciones OR
+            foreach ($palabras as $palabra) {
+                // pendiente de emision de orden de compra
+                if ($palabra === 'pendiente_emitir_orden_compra') {
+                    $query->where('odm_estado', 'COT');
+                }
+                // pendiente de emision de cotizacion
+                if ($palabra === 'pendiente_emitir_cotizacion') {
+                    $query->where('odm_estado', 'REQ');
+                }
+                // material sin codigo
+                if ($palabra === 'material_sin_codigo') {
+                    $query->where('pro_id', null);
+                }
+                // material sin compra
+                if ($palabra === 'material_sin_compra') {
+                    $query->whereNotNull('pro_id');
+                    $query->orderBy('odm_feccreacion', 'desc');
+
+                    $data = $query->get();
+                    $dataFiltrada = [];
+
+                    foreach ($data as $item) {
+                        $productoCodigo = $item->producto->pro_codigo;
+
+                        $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
+                            ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
+                            ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
+                            ->where('PDN1.ItemCode', '=', $productoCodigo)
+                            ->first();
+
+                        // Comprobar si ultima_fecha_compra es null
+                        if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
+                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
+                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
+                                ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
+                                ->where('IGN1.ItemCode', '=', $productoCodigo)
+                                ->first();
+
+                            if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
+                                $dataFiltrada[] = $item;
+                            }
+                        }
+                    }
+
+                    return response($dataFiltrada);
+                }
+            }
+        }
+        // ordenamos la data de manera desc
+        $query->orderBy('odm_feccreacion', 'desc');
+
+        $data = $query->get();
+
+        $disgregado = $request->input('disgregado');
+        if ($disgregado == 'true') {
+            return $this->exportLogisticaRequerimientosDisgregado($data);
+        } else {
+            return $this->exportLogisticaRequerimientosAgrupado($data);
+        }
+    }
+
+    // exportar excel logistica requerimientos agrupado
+    private function exportLogisticaRequerimientosAgrupado($data)
+    {
+        // debemos agrupar la información
+        $agrupados = $data
+            ->whereNotNull('pro_id')
+            ->groupBy('pro_id')
+            ->map(function ($grupo, $pro_id) {
+
+                $producto = $grupo->first()->producto;
+                $producto_codigo = $producto->pro_codigo;
+
+                return [
+                    'pro_id' => $pro_id,
+                    'pro_codigo' => $producto_codigo,
+                    'pro_descripcion' => $producto->pro_descripcion,
+                    'uni_codigo' => $producto->unidad->uni_codigo,
+                    'cantidad' => $grupo->sum('odm_cantidadpendiente'),
+                    'detalle' => $grupo->values(),
+                ];
+            })
+            ->values();
+
+        $sinAgrupar = $data
+            ->whereNull('pro_id')
+            ->map(function ($item) {
+                return [
+                    'pro_id' => null,
+                    'pro_codigo' => null,
+                    'pro_descripcion' => $item->odm_descripcion,
+                    'uni_codigo' => null,
+                    'cantidad' => $item->odm_cantidadpendiente,
+                    'detalle' => [$item],
+                ];
+            })
+            ->values();
+
+        // Combinar los resultados
+        $resultado = $agrupados->concat($sinAgrupar);
+
+        // generamos el excel
+        $headers = ['Cod Producto', 'Producto', 'Und.', 'Cantidad'];
+        $columnWidths = [10, 40, 7, 10];
+        $tipoDato = ['texto', 'texto', 'texto', 'numero'];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Establecemos anchos de columnas
+        foreach ($columnWidths as $columnIndex => $width) {
+            $sheet->getColumnDimensionByColumn($columnIndex + 1)->setWidth($width);
+        }
+
+        // Establecemos encabezados con formatos
+        foreach ($headers as $columnIndex => $header) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+
+            // Dar color al fondo del encabezado
+            $sheet->getStyle("{$columnLetter}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('c7cdd6');
+
+            // Poner el texto en negrita
+            $sheet->getStyle("{$columnLetter}1")->getFont()->setBold(true);
+
+            // Establecer el valor en la celda
+            $sheet->setCellValue("{$columnLetter}1", $header);
+        }
+
+        // Establecer tipos de datos
+        $SIZE_DATA = sizeof($data) + 1;
+        foreach ($tipoDato as $columnIndex => $tipoDato) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+            $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+            if ($tipoDato === "numero") {
+                $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode('0.00');
+            }
+        }
+
+        // Agregamos la data
+        $row = 2;
+
+        foreach ($resultado as $rowData) {
+            $sheet->setCellValue("A{$row}", UtilHelper::getValueFormatExcel($rowData['pro_codigo']));
+            $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData['pro_descripcion']));
+            $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData['uni_codigo']));
+            $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData['cantidad']));
+            $row++;
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+    }
+
+    // export excel logistica requerimientos disgregado
+    private function exportLogisticaRequerimientosDisgregado($data)
+    {
+        // print_r($data);
+        // generamos el excel
+        $headers = ['OT', 'Fec. Det OI', 'Tipo', 'Cod Producto', 'Producto', 'Obs Producto', 'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
+        $columnWidths = [15, 19, 5, 10, 50, 40, 10, 7, 10, 10, 10];
+        $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'texto', 'numero', 'numero', 'numero'];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Establecemos anchos de columnas
+        foreach ($columnWidths as $columnIndex => $width) {
+            $sheet->getColumnDimensionByColumn($columnIndex + 1)->setWidth($width);
+        }
+
+        // Establecemos encabezados con formatos
+        foreach ($headers as $columnIndex => $header) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+
+            // Dar color al fondo del encabezado
+            $sheet->getStyle("{$columnLetter}1")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('c7cdd6');
+
+            // Poner el texto en negrita
+            $sheet->getStyle("{$columnLetter}1")->getFont()->setBold(true);
+
+            // Establecer el valor en la celda
+            $sheet->setCellValue("{$columnLetter}1", $header);
+        }
+
+        // Establecer tipos de datos
+        $SIZE_DATA = sizeof($data) + 1;
+        foreach ($tipoDato as $columnIndex => $tipoDato) {
+            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnIndex + 1);
+            $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+            if ($tipoDato === "numero") {
+                $sheet->getStyle("{$columnLetter}2:{$columnLetter}{$SIZE_DATA}")->getNumberFormat()->setFormatCode('0.00');
+            }
+        }
+
+        // Agregamos la data
+        $row = 2;
+
+        foreach ($data as $rowData) {
+            $sheet->setCellValue("A{$row}", UtilHelper::getValueFormatExcel($rowData->ordenInternaParte && $rowData->ordenInternaParte->ordenInterna ? $rowData->ordenInternaParte->ordenInterna->odt_numero : null));
+            $sheet->setCellValue("B{$row}", UtilHelper::getValueFormatExcel($rowData->odm_feccreacion));
+            $sheet->setCellValue("C{$row}", UtilHelper::getValueFormatExcel($rowData->odm_tipo == 1 ? 'R' : 'A'));
+            $sheet->setCellValue("D{$row}", UtilHelper::getValueFormatExcel($rowData->producto ? $rowData->producto->pro_codigo : null));
+            $sheet->setCellValue("E{$row}", UtilHelper::getValueFormatExcel($rowData->odm_descripcion));
+            $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel($rowData->odm_observacion));
+            $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidadpendiente));
+            $sheet->setCellValue("H{$row}", UtilHelper::getValueFormatExcel($rowData->producto && $rowData->producto->unidad ? $rowData->producto->unidad->uni_codigo : null));
+            // $sheet->setCellValue("I{$row}", UtilHelper::getValueFormatExcel($rowData->responsable ? $rowData->responsable->tra_nombre : null));
+            $sheet->setCellValue("J{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidadreservada ? $rowData->odm_cantidadreservada : 0.00));
+            $sheet->setCellValue("K{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidadordenada ? $rowData->odm_cantidadordenada : 0.00));
+            $sheet->setCellValue("L{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidadatendida ? $rowData->odm_cantidadatendida : 0.00));
+            $row++;
+        }
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, 'reporte.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
 
     // mostrar detalle de un material por ID
