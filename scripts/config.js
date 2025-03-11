@@ -1,7 +1,15 @@
+const FLAG_LOCAL = window.location.hostname === "localhost"
+const API_LOCAL_FRONT = "http://localhost"
+const API_PUBLIC_FRONT = "http://logistica.famaisealjet.com"
+const API_LOCAL_BACK = "http://localhost:8080/api"
+const API_PUBLIC_BACK = "http://logistica.famaisealjet.com:8083/api"
+const API_STORAGE_LOCAL = "http://localhost:8080/storage/"
+const API_STORAGE_PUBLIC = "http://logistica.famaisealjet.com:8083/storage/"
+
 const config = {
     XAMPP_CARPET: 'logistica',
-    BACK_URL: 'http://localhost:8080/api',
-    BACK_STORAGE_URL: 'http://localhost:8080/storage/',
-    FRONT_URL: 'http://localhost/logistica',
-    BACK_EXTRANET_URL: 'http://logistica.famaisealjet.com:8083/api'
+    BACK_URL: FLAG_LOCAL ? API_LOCAL_BACK : API_PUBLIC_BACK,
+    BACK_STORAGE_URL: FLAG_LOCAL ? API_STORAGE_LOCAL : API_STORAGE_PUBLIC,
+    FRONT_URL: FLAG_LOCAL ? API_LOCAL_FRONT : API_PUBLIC_FRONT,
+    BACK_EXTRANET_URL: API_PUBLIC_BACK
 }
