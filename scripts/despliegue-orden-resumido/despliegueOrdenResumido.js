@@ -1427,7 +1427,7 @@ $(document).ready(async() => {
     // Funcion para ir al enlace de url de la solicitud de cotizacion
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-cotizacion-enlace', function () {
         const id_cotizacion = $(this).data('cotizacion-id')
-        const url = `${config.FRONT_URL}/cotizacion-proveedor.html?coc_id=${id_cotizacion}`
+        const url = `${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${id_cotizacion}`
         window.open(url, '_blank')
     })
 
