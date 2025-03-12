@@ -239,6 +239,8 @@ class OrdenCompraController extends Controller
                 'occ_fecmodificacion' => null
             ]);
 
+            $trabajador_elaborador = Trabajador::find($validatedData['tra_elaborado']);
+
             foreach ($validatedData['detalle_productos'] as $detalle) {
                 $ordencompraDetalle = OrdenCompraDetalle::create([
                     'odm_id' => $detalle['odm_id'],
@@ -266,13 +268,13 @@ class OrdenCompraController extends Controller
 
                 if ($responsable_producto) {
                     $responsable_producto::update([
-                        'tra_id' => $validatedData['tra_elaborado']
+                        'tra_id' => $trabajador_elaborador->tra_id
                     ]);
                 } else {
                     ProductoResponsable::create([
                         "pro_id" => $detalle['pro_id'],
-                        "tra_id" => $validatedData['tra_elaborado'],
-                        "sed_codigo" => $sed_codigo,
+                        "tra_id" => $trabajador_elaborador->tra_id,
+                        "sed_codigo" => $trabajador_elaborador->sed_codigo,
                         "pre_usucreacion" => $user->usu_codigo,
                         "pre_fecmodificacion" => null
                     ]);

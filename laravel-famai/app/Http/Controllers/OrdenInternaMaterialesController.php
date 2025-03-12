@@ -998,7 +998,7 @@ class OrdenInternaMaterialesController extends Controller
                     'odm_fecasignacionresponsable' => Carbon::now(),
                     'odm_usumodificacion' => $user->usu_codigo,
                 ]);
-
+                
             $primerRegistro = OrdenInternaMateriales::whereIn('odm_id', $detalleMaterialesFilter)->first();
             if ($primerRegistro) {
                 $primerRegistro->load('responsable');
