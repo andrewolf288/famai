@@ -192,10 +192,15 @@ $(document).ready(async() => {
 
     // traer informacion de responsables
     async function traerInformacionResponsables() {
-        console.log("Trae responsables")
         const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
         const { data } = await client.get('/producto-responsable/responsables')
         const options = []
+        // agregamos opcion de materiales sin responsable
+        options.push({
+            name: "Materiales sin responsable",
+            value: "SRE",
+            checked: false
+        })
         data.forEach(responsable => {
             options.push({
                 name: responsable["tra_nombre"],

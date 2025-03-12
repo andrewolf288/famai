@@ -225,13 +225,22 @@ class OrdenInternaMaterialesController extends Controller
             });
         }
 
+        // filtro de responsables
         if ($responsables !== null) {
-            // print_r($responsables);
-            $productosIds = ProductoResponsable::whereIn('tra_id', $responsables)
-                ->pluck('pro_id')
-                ->toArray();
-            // print_r($productosIds);
-            $query->whereIn('pro_id', $productosIds);
+            if(in_array('SRE', $responsables)){
+                if (count($responsables) === 1) {
+                    $query->whereNull('tra_responsable');
+                } else {
+                    $responsables_new = array_diff($responsables, ['SRE']);
+                    $query->whereIn('tra_responsable', $responsables_new)
+                        ->orWhere('tra_responsable', null);
+                }
+            } else {
+                if(!is_array($responsables)) {
+                    $responsables = [$responsables];
+                }
+                $query->whereIn('tra_responsable', $responsables);
+            }
         }
 
         // filtro de fecha

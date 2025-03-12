@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\UtilHelper;
+use App\ProductoResponsable;
 use App\Proveedor;
 use App\ProveedorCuentaBanco;
 use Carbon\Carbon;
@@ -134,7 +135,7 @@ class OrdenCompraController extends Controller
                 'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
                 'fpa_codigo' => 'required|numeric|exists:tblformaspago_fpa,fpa_codigo',
                 'occ_referencia' => 'nullable|string',
-                'tra_elaborado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
+                'tra_elaborado' => 'required|exists:tbltrabajadores_tra,tra_id',
                 'occ_notas' => 'nullable|string',
                 'occ_adelanto' => 'nullable|numeric|min:1',
                 'occ_saldo' => 'nullable|numeric|min:1',
@@ -257,6 +258,25 @@ class OrdenCompraController extends Controller
                     'ocd_usucreacion' => $user->usu_codigo,
                     'ocd_fecmodificacion' => null
                 ]);
+
+                // ahora debemos actualizar o crear el registro en producto responsables
+                $responsable_producto = ProductoResponsable::where('pro_id', $detalle['pro_id'])
+                    ->where('sed_codigo', $sed_codigo)
+                    ->first();
+
+                if ($responsable_producto) {
+                    $responsable_producto::update([
+                        'tra_id' => $validatedData['tra_elaborado']
+                    ]);
+                } else {
+                    ProductoResponsable::create([
+                        "pro_id" => $detalle['pro_id'],
+                        "tra_id" => $validatedData['tra_elaborado'],
+                        "sed_codigo" => $sed_codigo,
+                        "pre_usucreacion" => $user->usu_codigo,
+                        "pre_fecmodificacion" => null
+                    ]);
+                }
             }
 
             DB::commit();

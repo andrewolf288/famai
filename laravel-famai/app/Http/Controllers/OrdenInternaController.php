@@ -12,6 +12,7 @@ use App\OrdenInternaPartes;
 use App\OrdenInternaProcesos;
 use App\Parte;
 use App\Producto;
+use App\ProductoResponsable;
 use App\Unidad;
 use Carbon\Carbon;
 use Exception;
@@ -129,8 +130,14 @@ class OrdenInternaController extends Controller
     public function update_material(Request $request, $id)
     {
         $user = auth()->user();
+        $sed_codigo = "10";
+
         try {
             DB::beginTransaction();
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+            if ($trabajador) {
+                $sed_codigo = $trabajador->sed_codigo;
+            }
 
             $ordenInternaParte = OrdenInternaPartes::find($id);
             if (!$ordenInternaParte) {
@@ -148,6 +155,7 @@ class OrdenInternaController extends Controller
             foreach ($materiales as $material) {
                 // buscamos el material en la base de datos
                 $pro_id = null;
+                $tra_id = null;
                 // si se debe asociat el amterial
                 if ($material['odm_asociar']) {
                     // buscamos el material en la base de datos
@@ -204,6 +212,14 @@ class OrdenInternaController extends Controller
                     } else {
                         // en el caso que se encuentre el producto en base de datos dbfamai
                         $pro_id = $findMaterial->pro_id;
+                        // buscamos si tiene un responsable asociado
+                        $responsable_producto = ProductoResponsable::where('pro_id', $pro_id)
+                        ->where('sed_codigo', $sed_codigo)
+                        ->first();
+                        // extraemos el responsable correspondiente
+                        if($responsable_producto){
+                            $tra_id = $responsable_producto->tra_id;
+                        }
                     }
                 }
 
@@ -216,6 +232,8 @@ class OrdenInternaController extends Controller
                     'odm_cantidadpendiente' => $material['odm_cantidad'],
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
+                    'tra_responsable' => $tra_id,
+                    'odm_fecasignacionresponsable' => $tra_id ? Carbon::now() : null,
                     'odm_estado' => null,
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null
@@ -469,6 +487,7 @@ class OrdenInternaController extends Controller
 
                     // buscamos el material en la base de datos
                     $pro_id = null;
+                    $tra_id = null;
                     // si se debe asociat el material
                     if ($material['odm_asociar']) {
                         // buscamos el material en la base de datos
@@ -525,6 +544,14 @@ class OrdenInternaController extends Controller
                         } else {
                             // en el caso que se encuentre el producto en base de datos dbfamai
                             $pro_id = $findMaterial->pro_id;
+                            // buscamos si tiene un responsable asociado
+                            $responsable_producto = ProductoResponsable::where('pro_id', $pro_id)
+                            ->where('sed_codigo', $sed_codigo)
+                            ->first();
+                            // extraemos el responsable correspondiente
+                            if($responsable_producto){
+                                $tra_id = $responsable_producto->tra_id;
+                            }
                         }
                     }
 
@@ -537,6 +564,8 @@ class OrdenInternaController extends Controller
                         'odm_item' => $material['odm_item'],
                         'odm_observacion' => $material['odm_observacion'],
                         'odm_tipo' => $material['odm_tipo'],
+                        'tra_responsable' => $tra_id,
+                        'odm_fecasignacionresponsable' => $tra_id ? Carbon::now() : null,
                         'odm_estado' => null,
                         'odm_usucreacion' => $user->usu_codigo,
                         'odm_fecmodificacion' => null
