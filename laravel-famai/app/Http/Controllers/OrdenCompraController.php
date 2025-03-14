@@ -73,6 +73,7 @@ class OrdenCompraController extends Controller
                     return [
                         'pro_id' => $detalle->pro_id,
                         'ocd_descripcion' => $detalle->ocd_descripcion,
+                        'ocd_observacion' => $detalle->detalleMaterial->odm_observacion,
                         'ocd_preciounitario' => $detalle->ocd_preciounitario,
                         'ocd_cantidad' => $detalle->ocd_cantidad,
                         'ocd_total' => $detalle->ocd_total,
@@ -101,6 +102,7 @@ class OrdenCompraController extends Controller
                     return [
                         'pro_id' => $group->first()->pro_id,
                         'ocd_descripcion' => $group->first()->ocd_descripcion,
+                        'ocd_observacion' => $group->first()->detalleMaterial->odm_observacion,
                         'ocd_preciounitario' => $group->first()->ocd_preciounitario,
                         'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
                         'ocd_cantidad' => $group->sum('ocd_cantidad'),

@@ -321,7 +321,7 @@
                     <td class="col-item">{{ $loop->iteration }}</td>
                     <td class="col-ot">{{ $detalle['odt_numero'] ? $detalle['odt_numero'] : '' }}</td>
                     <td class="col-creador">{{ $detalle['usu_nombre'] ? $detalle['usu_nombre'] : '' }}</td>
-                    <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }}</td>
+                    <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }} {!! nl2br(e($detalle['odm_observacion'])) !!}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
                     <td class="col-und">{{ $detalle['uni_codigo'] ? $detalle['uni_codigo'] : '' }}</td>
                     <td class="col-precio">{{ $detalle['ocd_preciounitario'] }}</td>
