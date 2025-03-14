@@ -425,6 +425,7 @@ $(document).ready(async() => {
     }
 
     $('#tbl-despliegue-materiales-body').on('click', '.btn-adjuntos', async function () {
+        $('#tabla-archivos-adjuntos').empty()
         const detalleMaterial = $(this).data('detalle')
         // llamamos a la informacion del detalle
         try {

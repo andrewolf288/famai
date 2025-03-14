@@ -495,6 +495,8 @@ $(document).ready(() => {
                 $(element).remove()
             }
         })
+        // renderizamos la vista de resumen
+        renderizarResumenOrdenCompra()
     })
 
     // cambiar la moneda

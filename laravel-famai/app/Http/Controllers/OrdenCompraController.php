@@ -267,7 +267,7 @@ class OrdenCompraController extends Controller
                     ->first();
 
                 if ($responsable_producto) {
-                    $responsable_producto::update([
+                    $responsable_producto->update([
                         'tra_id' => $trabajador_elaborador->tra_id
                     ]);
                 } else {
