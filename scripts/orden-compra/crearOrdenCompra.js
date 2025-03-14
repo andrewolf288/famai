@@ -532,7 +532,6 @@ $(document).ready(() => {
         const entidadBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorSelect").val().trim()
         const cuentaBancariaBancoNacionInput = $("#cuentaBancoNacionProveedorInput").val().trim()
         const idCuentaBancariaBancoNacionInput = $("#idCuentaBancariaBancoNacion").val().trim()
-        const tipoOrdenCompraInput = $("#tipoOrdenCompraSelect").val().trim()
 
         // datos de la orden de compra
         const moneda = $("#monedaOrdenCompraInput").val()
@@ -549,6 +548,8 @@ $(document).ready(() => {
         const subtotal = $("#subtotalOrdenCompra").text()
         const impuesto = $("#impuestoOrdenCompra").text()
         const total = $("#totalOrdenCompra").text()
+        const tipoOrdenCompraInput = $("#tipoOrdenCompraSelect").val().trim()
+        const esActivoOrdenCompraInput = $("#activoOrdenCompra").is(":checked")
 
         let handleError = ""
         if (detallesOrdenCompra.length == 0) {
@@ -627,6 +628,7 @@ $(document).ready(() => {
             occ_total: total,
             detalle_productos: formatDetalle,
             occ_tipo: tipoOrdenCompraInput,
+            occ_esactivo: esActivoOrdenCompraInput,
             proveedor: {
                 prv_id: idProveedorInput,
                 prv_nombre: razonsocialProveedorInput,

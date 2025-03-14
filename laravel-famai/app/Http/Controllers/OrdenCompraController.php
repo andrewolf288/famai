@@ -146,6 +146,7 @@ class OrdenCompraController extends Controller
                 'occ_impuesto' => 'required|numeric|min:1',
                 'occ_total' => 'required|numeric|min:1',
                 'occ_tipo' => 'required|string',
+                'occ_esactivo' => 'required|boolean',
                 'imprimir_disgregado' => 'required|boolean',
                 'detalle_productos' => 'required|array|min:1',
             ])->validate();
@@ -236,6 +237,7 @@ class OrdenCompraController extends Controller
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
                 'occ_tipo' => $validatedData['occ_tipo'],
+                'occ_esactivo' => $validatedData['occ_esactivo'],
                 'occ_estado' => 'SOL',
                 'occ_usucreacion' => $user->usu_codigo,
                 'occ_fecmodificacion' => null
@@ -329,6 +331,7 @@ class OrdenCompraController extends Controller
                 'occ_adelanto' => 'nullable|numeric|min:1',
                 'occ_saldo' => 'nullable|numeric|min:1',
                 'occ_tipo' => 'required|string',
+                'occ_esactivo' => 'required|boolean',
                 'detalle_productos' => 'nullable|array|min:0',
             ])->validate();
 
@@ -354,6 +357,7 @@ class OrdenCompraController extends Controller
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
                 'occ_tipo' => $validatedData['occ_tipo'],
+                'occ_esactivo' => $validatedData['occ_esactivo'],
                 'occ_estado' => '1',
                 'occ_usumodificacion' => $user->usu_codigo,
             ]);

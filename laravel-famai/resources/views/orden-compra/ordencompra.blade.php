@@ -276,24 +276,24 @@
             </td>
             <td>
                 <div class="info-row">
-                    <span class="label">Moneda</span>
+                    <span class="label">MONEDA:</span>
                     <span class="value">{{ $ordencompra['moneda']['mon_descripcion'] }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">FORMA DE PAGO</span>
+                    <span class="label">FORMA DE PAGO:</span>
                     <span
                         class="value">{{ $ordencompra['fpa_codigo'] ? $ordencompra['formaPago']['fpa_descripcion'] : '' }}</span>
                 </div>
             </td>
             <td>
                 <div class="info-row">
-                    <span class="label">REFERENCIA</span>
+                    <span class="label">REFERENCIA:</span>
                     <span
                         class="value">{{ $ordencompra['occ_referencia'] ? $ordencompra['occ_referencia'] : '' }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="label">TIPO:</span>
-                    <span class="value">{{ $ordencompra['occ_tipo'] }}</span>
+                    <span class="label">ACTIVO:</span>
+                    <span class="value">{{ $ordencompra['occ_esactivo'] ? 'SI' : 'NO' }}</span>
                 </div>
             </td>
         </tr>
