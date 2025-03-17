@@ -989,23 +989,32 @@ class CotizacionController extends Controller
     // funcion para traer proveedores con cotizaciones
     public function obtenerProveedoresCotizaciones(Request $request)
     {
+        $user = auth()->user();
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
         $detalleCotizaciones = CotizacionDetalle::whereHas('detalleMaterial', function ($query) {
             $query->where('odm_estado', 'COT');
         })
+            ->whereHas('cotizacion', function ($query) use ($trabajador) {
+                if ($trabajador) {
+                    $query->where('tra_solicitante', $trabajador->tra_id);
+                }
+            })
             ->whereNotNull('cod_estado')
             ->whereNotNull('pro_id')
             ->get();
 
         // debemos agrupar por proveedor
         $proveedores = $detalleCotizaciones
-            ->groupBy('cotizacion.prv_id')
-            ->map(function ($grupo, $prv_id) {
-                // Contamos los grupos con pro_id único
-                // $uniqueProIdCount = $grupo->pluck('pro_id')->unique()->count();
-
+            ->groupBy(function ($item) {
+                return $item->cotizacion->prv_id . '-' . $item->cotizacion->mon_codigo;
+            })
+            ->map(function ($grupo, $key) {
+                $primerItem = $grupo->first();
                 return [
-                    'prv_id' => $prv_id,
-                    'proveedor' => $grupo->first()->cotizacion->proveedor,
+                    'prv_id' => $primerItem->cotizacion->prv_id,
+                    'proveedor' => $primerItem->cotizacion->proveedor,
+                    'moneda' => $primerItem->cotizacion->moneda,
                     'items' => $grupo->values(),
                     'total_items' => $grupo->count(),
                 ];

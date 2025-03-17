@@ -23,6 +23,7 @@ $(document).ready(() => {
             <tr data-index="${index}">
                 <td>${element.proveedor.prv_nrodocumento}</td>
                 <td>${element.proveedor.prv_nombre}</td>
+                <td>${element.moneda?.mon_descripcion || 'N/A'}</td>
                 <td class="text-center">
                     <button class="btn btn-sm btn-primary btn-detalle">${element.total_items} items</button>
                 </td>
