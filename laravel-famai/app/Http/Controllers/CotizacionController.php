@@ -989,15 +989,17 @@ class CotizacionController extends Controller
     // funcion para traer proveedores con cotizaciones
     public function obtenerProveedoresCotizaciones(Request $request)
     {
-        $user = auth()->user();
-        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        $solicitantes = $request->input('solicitantes', null);
 
         $detalleCotizaciones = CotizacionDetalle::whereHas('detalleMaterial', function ($query) {
             $query->where('odm_estado', 'COT');
         })
-            ->whereHas('cotizacion', function ($query) use ($trabajador) {
-                if ($trabajador) {
-                    $query->where('tra_solicitante', $trabajador->tra_id);
+            ->whereHas('cotizacion', function ($query) use ($solicitantes) {
+                if ($solicitantes) {
+                    if (!is_array($solicitantes)) {
+                        $solicitantes = [$solicitantes];
+                    }
+                    $query->whereIn('tra_solicitante', $solicitantes);
                 }
             })
             ->whereNotNull('cod_estado')
@@ -1057,5 +1059,13 @@ class CotizacionController extends Controller
         );
 
         return response()->json($formatData);
+    }
+
+    public function obtenerSolicitantes()
+    {
+        $tra_ids = Cotizacion::distinct()->pluck('tra_solicitante');
+        $result = Trabajador::whereIn('tra_id', $tra_ids)->get();
+
+        return response()->json($result);
     }
 }

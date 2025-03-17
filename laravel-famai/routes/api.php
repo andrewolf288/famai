@@ -383,6 +383,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::patch('cotizacion/update-estado/{id}', [CotizacionController::class, 'updateEstadoCotizacion']);
     Route::get('cotizacion-proveedores', [CotizacionController::class, 'obtenerProveedoresCotizaciones']);
     Route::post('cotizacion-proveedores-detalles', [CotizacionController::class, 'obtenerDetallesProveedoresCotizaciones']);
+    Route::get('cotizacion-solicitantes', [CotizacionController::class, 'obtenerSolicitantes']);
 });
 
 // rutas de detalle de cotizacion

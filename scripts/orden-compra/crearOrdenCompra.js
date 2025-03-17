@@ -1,8 +1,10 @@
-$(document).ready(() => {
+$(document).ready(async () => {
     let dataInformacion = []
     let detallesOrdenCompra = []
     let impuestos = []
     const cuentaConSeparadoresRegex = /^[\d\- ]{8,30}$/
+    const filterSolicitante = $('#filtrar-solicitante')
+    const apiUrl = 'cotizacion-proveedores'
 
     $("#fechaOrdenCompraPicker").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -12,10 +14,62 @@ $(document).ready(() => {
         dateFormat: 'dd/mm/yy',
     }).datepicker("setDate", moment().toDate())
 
+    // declaracion de multiselect
+    $('#solicitanteSelect').multiselect({
+        selectAll: true,
+        search: true,
+        texts: {
+            selectAll: "Seleccionar todos",
+            search: "Buscar",
+            unselectAll: "Deseleccionar todos",
+            placeholder: "Seleccionar solicitantes"
+        }
+    })
+    
+    // traer informacion de trabajadores
+    async function traerInformacionSolicitantes() {
+        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
+        const { data } = await client.get('/cotizacion-solicitantes')
+        const options = []
+        data.forEach(responsable => {
+            options.push({
+                name: responsable["tra_nombre"],
+                value: responsable["tra_id"],
+                checked: usu_codigo == responsable['usu_codigo']
+            })
+        })
+        $('#solicitanteSelect').multiselect('loadOptions', options);
+    }
+
+    const initInformacionFiltros = async() => {
+        return Promise.all(
+            [
+                traerInformacionSolicitantes()
+            ]
+        )
+    }
+
     // funcion que inicializa la información de proveedores que tienen cotizaciones
-    async function initDataInformacion() {
-        const { data } = await client.get('cotizacion-proveedores')
+    async function initDataInformacion(urlEndpoint = apiUrl) {
+        const { data } = await client.get(urlEndpoint)
+
+        // vaceamos la informacion
         $("#data-container-body").empty()
+        // agregamos un loader
+        $('#data-container-body').append(`
+            <tr>
+                <td colspan="100%">
+                    <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="mt-2">Cargando...</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `)
 
         let content = ''
         data.forEach((element, index) => {
@@ -35,10 +89,37 @@ $(document).ready(() => {
         })
 
         dataInformacion = data
-        $("#data-container-body").append(content)
+        $("#data-container-body").html(content)
     }
 
-    initDataInformacion()
+    // obtener filtros
+    function obtenerFiltrosActuales(urlAPI = apiUrl) {
+        const solicitantes = $("#solicitanteSelect").val()
+        let filteredURL = urlAPI
+
+        if(solicitantes.length !== 0){
+            let counter = 0
+            solicitantes.forEach((solicitante) => {
+                if (counter === 0){
+                    filteredURL += `?solicitantes[]=${solicitante}`
+                } else {
+                    filteredURL += `&solicitantes[]=${solicitante}`
+                }
+                counter++
+            })
+        }
+
+        return filteredURL
+    }
+
+    // filtro de responsables
+    $(filterSolicitante).on('click', function () {
+        const filteredURL = obtenerFiltrosActuales()
+        initDataInformacion(filteredURL)
+    })
+
+    await initInformacionFiltros()
+    initDataInformacion(obtenerFiltrosActuales())
 
     // ------------- GESTION DE VER DETALLE DE MATERIALES COTIZADOS ------------
     $("#data-container-body").on('click', '.btn-detalle', async function () {
