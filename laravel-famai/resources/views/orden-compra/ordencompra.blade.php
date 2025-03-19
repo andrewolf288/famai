@@ -133,12 +133,12 @@
 
         .col-precio {
             width: 10.20%;
-            /* 2/12 */
+            text-align: right !important;
         }
 
         .col-total {
             width: 10.20%;
-            /* 2/12 */
+            text-align: right !important;
         }
 
         .page-break {

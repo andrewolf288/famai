@@ -137,10 +137,12 @@
 
         .col-precio {
             width: 10.20%;
+            text-align: right !important;
         }
 
         .col-total {
             width: 10.20%;
+            text-align: right !important;
         }
 
         .page-break {
