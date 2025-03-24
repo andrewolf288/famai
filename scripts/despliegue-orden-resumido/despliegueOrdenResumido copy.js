@@ -1270,10 +1270,22 @@ $(document).ready(async() => {
         rows.each(function () {
             const index = $(this).data('index')
             const observacion = $(this).find('.observacion-detalle').val().trim()
+            const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val().trim()
+            const cantidadRequerida = $(this).find('.cantidad-requerida-detalle').text().trim()
             let precioUnitario = proveedor_unico
                 ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2)
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
+
+            if (esValorNumericoValidoYMayorQueCero(cantidadPedida)) {
+                if (parseFloat(cantidadRequerida) < parseFloat(cantidadPedida)) {
+                    alert('La cantidad pedida es mayor a lo requerido')
+                    return
+                }
+            } else {
+                alert('La cantidad pedida debe ser un valor numérico mayor a 0')
+                return
+            }
 
             const detalleIndex = detalleCotizacion[index]
             if (detalleIndex.odm_id === undefined) {
@@ -1289,6 +1301,20 @@ $(document).ready(async() => {
                         cod_preciounitario: precioUnitario
                     })
                 })
+
+                // si lo pedido es mayor a lo requerido
+                if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
+                        pro_id: detalleIndex.pro_id,
+                        uni_codigo: detalleIndex.uni_codigo,
+                        cod_descripcion: detalleIndex.pro_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
+                        cod_preciounitario: precioUnitario,
+                        cod_parastock: 1
+                    })
+                }
             } else {
                 detalleMateriales.push({
                     cod_orden: cod_orden,
@@ -1300,6 +1326,20 @@ $(document).ready(async() => {
                     cod_cantidad: detalleIndex.odm_cantidad,
                     cod_preciounitario: precioUnitario
                 })
+
+                // si lo pedido es mayor a lo requerido
+                if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
+                    detalleMateriales.push({
+                        cod_orden: cod_orden,
+                        pro_id: detalleIndex.pro_id,
+                        uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
+                        cod_descripcion: detalleIndex.odm_descripcion,
+                        cod_observacion: observacion,
+                        cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
+                        cod_preciounitario: precioUnitario,
+                        cod_parastock: 1
+                    })
+                }
             }
             cod_orden++
         })
@@ -1666,4 +1706,6 @@ $(document).ready(async() => {
         const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
         modal.show();
     }
+
+
 })
