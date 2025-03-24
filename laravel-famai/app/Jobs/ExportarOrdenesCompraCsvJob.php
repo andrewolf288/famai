@@ -1,19 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Jobs;
 
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use App\Helpers\UtilHelper;
 use App\OrdenCompra;
 use App\OrdenCompraDetalle;
-use Illuminate\Support\Facades\File;
 use League\Csv\Writer;
 
-class OrdenCompraExportController extends Controller
+class ExportarOrdenesCompraCsvJob implements ShouldQueue
 {
-    public function export()
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
     {
         // Ruta donde se guardaran los archivos
-        $rutaDestino = "C:/exports/csv/";
+        $rutaDestino = "/home/andrewdev/laravel-files/";
         // Verifica si la carpeta existe, si no la crea
         if (!file_exists($rutaDestino)) {
             mkdir($rutaDestino, 0777, true);
@@ -28,7 +49,7 @@ class OrdenCompraExportController extends Controller
         $pathcsvDetalleTemp = $rutaDestino . "POR1-Document_Lines.csv";
 
         // creamos la cabecera del csv
-        $csvCabecera = Writer::createFromPath($pathcsvCabeceraTemp, 'w');
+        $csvCabecera = Writer::createFromPath($pathcsvCabeceraTemp, 'w+');
         $csvCabecera->insertOne([
             'DocNum',
             'DocEntry',
@@ -67,7 +88,7 @@ class OrdenCompraExportController extends Controller
         ]);
 
         // creamos el detalle del csv
-        $csvDetalle = Writer::createFromPath($pathcsvDetalleTemp, 'w');
+        $csvDetalle = Writer::createFromPath($pathcsvDetalleTemp, 'w+');
         $csvDetalle->insertOne([
             "ParentKey",
             "LineNum",

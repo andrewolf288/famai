@@ -110,25 +110,20 @@
             padding: 5px;
         }
 
-        /* Ajuste de las proporciones según la base de 12 */
         .col-item {
             width: 5%;
-            /* 1/12 */
         }
 
         .col-descripcion {
             width: 53.60%;
-            /* 4/12 */
         }
 
         .col-cantidad {
             width: 7%;
-            /* 2/12 */
         }
 
         .col-und {
             width: 5%;
-            /* 1/12 */
         }
 
         .col-precio {
@@ -146,8 +141,8 @@
         }
 
         .bold-underline {
-            font-weight: bold; /* Negrita */
-            text-decoration: underline; /* Subrayado */
+            font-weight: bold;
+            text-decoration: underline;
         }
 
         .parrafo {
@@ -156,11 +151,11 @@
             font-size: 11px;
         }
         .custom-list {
-            margin-left: 20px; /* Ajusta el margen izquierdo según necesites */
-            list-style-type: none; /* Quita los puntos predeterminados */
+            margin-left: 20px;
+            list-style-type: none;
         }
         .custom-list li::before {
-            content: "- "; /* Agrega el guion antes del texto */
+            content: "- ";
         }
 
         .parrafo-nota {
@@ -241,21 +236,23 @@
                 <div class="info-row">
                     <span class="label">TLF:</span>
                     <span
-                        class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}/{{ $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
+                        class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}{{ $proveedor['prv_whatsapp'] ? " / " . $proveedor['prv_whatsapp'] : '' }}</span>
                 </div>
-                <div class="info-row">
+                <div style="display: table; width: 100%;">
                     <span class="label">CTA S/:</span>
                     <span class="value">{{ $cuenta_soles ? $cuenta_soles['pvc_numerocuenta'] : '' }}</span>
                 </div>
+                <p style="font-size: 8px">{{$cuenta_soles ? $cuenta_soles['entidadBancaria']['eba_descripcion'] : ''}}</p>
                 <div class="info-row">
                     <span class="label">CTA $/:</span>
                     <span class="value">{{ $cuenta_dolares ? $cuenta_dolares['pvc_numerocuenta'] : '' }}</span>
                 </div>
+                <p style="font-size: 8px">{{$cuenta_dolares ? $cuenta_dolares['entidadBancaria']['eba_descripcion'] : ''}}</p>
                 <div class="info-row">
                     <span class="label">CTA BCO NACION S/:</span>
-                    <span
-                        class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</span>
+                    <span class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</span>
                 </div>
+                <p style="font-size: 8px">{{$cuenta_banco_nacion ? $cuenta_banco_nacion['entidadBancaria']['eba_descripcion'] : ''}}</p>
             </td>
         </tr>
     </table>

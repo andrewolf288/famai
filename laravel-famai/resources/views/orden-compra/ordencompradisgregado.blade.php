@@ -246,7 +246,7 @@
                 <div class="info-row">
                     <span class="label">TLF:</span>
                     <span
-                        class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}/{{ $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
+                        class="value">{{ $proveedor['prv_telefono'] ? $proveedor['prv_telefono'] : '' }}{{ " / " . $proveedor['prv_whatsapp'] ? $proveedor['prv_whatsapp'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">CTA S/:</span>

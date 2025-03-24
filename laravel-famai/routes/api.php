@@ -45,6 +45,7 @@ use App\Http\Controllers\SedeController;
 use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\TipoDocumentoReferenciaController;
 use App\MotivoRequerimiento;
+use App\OrdenInternaMateriales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -365,7 +366,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 
 // rutas almacenamiento
 Route::group(['middleware' => ['auth.jwt']], function () {
-    Route::get('almacenes',[AlmacenController::class, 'index']);
+    Route::get('almacenes', [AlmacenController::class, 'index']);
 });
 
 // rutas de cotizaciones
@@ -454,7 +455,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 });
 
 // rutas publicas sin autenticación
-Route::get('pop', function() {
+Route::get('pop', function () {
     return response('OK SERVER', 200);
 });
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
@@ -466,3 +467,12 @@ Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCot
 // });
 // Route::get('import-data', [ProductoResponsableController::class, 'importarData']);
 Route::get('exportar-SAP-orden-compra', [OrdenCompraExportController::class, 'export']);
+Route::get('test', function () {
+    $materiales = OrdenInternaMateriales::where('odm_cantidadpendiente', '>', 0)
+        ->whereNotIn('odm_tipo', [3, 4, 5])
+        ->whereNotNull('odm_estado')
+        ->whereDate('odm_feccreacion', '>=', '2024-12-01')
+        ->whereDate('odm_feccreacion', '<=', '2025-03-31')
+        ->get();
+    return response()->json($materiales);
+});

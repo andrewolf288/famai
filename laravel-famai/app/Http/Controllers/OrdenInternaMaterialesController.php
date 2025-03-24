@@ -199,17 +199,16 @@ class OrdenInternaMaterialesController extends Controller
                 'ordenInternaParte.ordenInterna',
                 'detalleAdjuntos'
             ]
-        )
-            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
-                $q->where('sed_codigo', $sed_codigo);
-            })
-            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
-                $q->where('oic_estado', 'PROCESO')
-                    ->orWhere('oic_tipo', 'REQ');
-            })
-            ->whereNotIn('odm_tipo', [3, 4, 5])
-            ->where('odm_cantidadpendiente', '>', 0)
-            ->whereNotNull('odm_estado');
+        );
+        $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+            $q->where('sed_codigo', $sed_codigo)
+                ->where(function ($query) {
+                    $query->where('oic_estado', 'PROCESO')
+                        ->orWhere('oic_tipo', 'REQ');
+                });
+        });
+        $query->whereNotIn('odm_tipo', [3, 4, 5]);
+        $query->whereNotNull('odm_estado');
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {
@@ -227,7 +226,7 @@ class OrdenInternaMaterialesController extends Controller
 
         // filtro de responsables
         if ($responsables !== null) {
-            if(in_array('SRE', $responsables)){
+            if (in_array('SRE', $responsables)) {
                 if (count($responsables) === 1) {
                     $query->whereNull('tra_responsable');
                 } else {
@@ -236,7 +235,7 @@ class OrdenInternaMaterialesController extends Controller
                         ->orWhere('tra_responsable', null);
                 }
             } else {
-                if(!is_array($responsables)) {
+                if (!is_array($responsables)) {
                     $responsables = [$responsables];
                 }
                 $query->whereIn('tra_responsable', $responsables);
@@ -248,7 +247,6 @@ class OrdenInternaMaterialesController extends Controller
             $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
                 ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
         }
-
 
         // Procesar el parámetro multiselect
         if ($multifilter !== null) {
@@ -305,6 +303,7 @@ class OrdenInternaMaterialesController extends Controller
             }
         }
         // ordenamos la data de manera desc
+        $query->where('odm_cantidadpendiente', '>', 0);
         $query->orderBy('odm_feccreacion', 'desc');
 
         $data = $query->get();
@@ -998,7 +997,7 @@ class OrdenInternaMaterialesController extends Controller
                     'odm_fecasignacionresponsable' => Carbon::now(),
                     'odm_usumodificacion' => $user->usu_codigo,
                 ]);
-                
+
             $primerRegistro = OrdenInternaMateriales::whereIn('odm_id', $detalleMaterialesFilter)->first();
             if ($primerRegistro) {
                 $primerRegistro->load('responsable');
