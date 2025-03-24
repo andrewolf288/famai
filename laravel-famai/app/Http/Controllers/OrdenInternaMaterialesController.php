@@ -1711,15 +1711,16 @@ class OrdenInternaMaterialesController extends Controller
                 throw new Exception('Material no encontrado');
             }
 
-            $codigoIncrustado = $ordenInternaMaterial->pro_id !== null ? $ordenInternaMaterial->producto->pro_codigo . ' - ' : '';
-            $descripcionMaterial = $ordenInternaMaterial->odm_descripcion ? $ordenInternaMaterial->odm_descripcion : '';
+            // $codigoIncrustado = $ordenInternaMaterial->pro_id !== null ? $ordenInternaMaterial->producto->pro_codigo . ' - ' : '';
+            // $descripcionMaterial = $ordenInternaMaterial->odm_descripcion ? $ordenInternaMaterial->odm_descripcion : '';
             $observacionMaterial = $ordenInternaMaterial->odm_observacion ? " - $ordenInternaMaterial->odm_observacion" : '';
             // actualizamos el material
             $ordenInternaMaterial->update([
                 'pro_id' => $pro_id,
                 'odm_estado' => 'REQ',
                 'odm_descripcion' => $pro_descripcion,
-                'odm_observacion' => $codigoIncrustado . $descripcionMaterial . $observacionMaterial,
+                // 'odm_observacion' => $codigoIncrustado . $descripcionMaterial . $observacionMaterial,
+                'odm_observacion' => $observacionMaterial,
                 'odm_usumodificacion' => $user->usu_codigo
             ]);
 
