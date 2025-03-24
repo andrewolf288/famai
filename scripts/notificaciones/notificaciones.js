@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     function cargarListaNotificaciones(data) {
-        console.log(data)
         $("#data-notificaciones").empty();
         // Recorremos las notificaciones y agregamos cada una como un elemento de lista
         data.forEach((notificacion) => {
