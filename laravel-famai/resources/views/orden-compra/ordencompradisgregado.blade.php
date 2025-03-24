@@ -252,15 +252,18 @@
                     <span class="label">CTA S/:</span>
                     <span class="value">{{ $cuenta_soles ? $cuenta_soles['pvc_numerocuenta'] : '' }}</span>
                 </div>
+                <p style="font-size: 8px">{{$cuenta_soles ? $cuenta_soles['entidadBancaria']['eba_descripcion'] : ''}}</p>
                 <div class="info-row">
                     <span class="label">CTA $/:</span>
                     <span class="value">{{ $cuenta_dolares ? $cuenta_dolares['pvc_numerocuenta'] : '' }}</span>
                 </div>
+                <p style="font-size: 8px">{{$cuenta_dolares ? $cuenta_dolares['entidadBancaria']['eba_descripcion'] : ''}}</p>
                 <div class="info-row">
                     <span class="label">CTA BCO NACION S/:</span>
                     <span
                         class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] : '' }}</span>
                 </div>
+                <p style="font-size: 8px">{{$cuenta_banco_nacion ? $cuenta_banco_nacion['entidadBancaria']['eba_descripcion'] : ''}}</p>
             </td>
         </tr>
     </table>
