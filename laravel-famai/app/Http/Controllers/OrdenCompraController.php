@@ -243,6 +243,11 @@ class OrdenCompraController extends Controller
                 'occ_fecmodificacion' => null
             ]);
 
+            // actualizamos la forma de pago del proveedor
+            $proveedor->update([
+                "fpa_codigo" => $validatedData['fpa_codigo']
+            ]);
+
             $trabajador_elaborador = Trabajador::find($validatedData['tra_elaborado']);
 
             foreach ($validatedData['detalle_productos'] as $detalle) {
