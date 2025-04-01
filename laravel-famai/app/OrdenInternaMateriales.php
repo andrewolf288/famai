@@ -29,7 +29,7 @@ class OrdenInternaMateriales extends Model
         'odm_estado',
         'odm_notapresupuesto',
         'odm_adjuntopresupuesto',
-        'odm_fecreservacion',
+        'odm_fecconsultareservacion',
         'odm_usucreacion',
         'odm_feccreacion',
         'odm_usumodificacion',

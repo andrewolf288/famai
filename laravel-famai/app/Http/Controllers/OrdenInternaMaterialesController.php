@@ -244,8 +244,8 @@ class OrdenInternaMaterialesController extends Controller
 
         // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
-            $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
-                ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
+            $query->whereDate('odm_fecconsultareservacion', '>=', $fecha_desde)
+                ->whereDate('odm_fecconsultareservacion', '<=', $fecha_hasta);
         }
 
         // Procesar el parámetro multiselect
@@ -267,44 +267,11 @@ class OrdenInternaMaterialesController extends Controller
                 if ($palabra === 'material_sin_codigo') {
                     $query->where('pro_id', null);
                 }
-                // material sin compra
-                if ($palabra === 'material_sin_compra') {
-                    $query->whereNotNull('pro_id');
-                    $query->orderBy('odm_feccreacion', 'desc');
-
-                    $data = $query->get();
-                    $dataFiltrada = [];
-
-                    foreach ($data as $item) {
-                        $productoCodigo = $item->producto->pro_codigo;
-
-                        $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
-                            ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
-                            ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
-                            ->where('PDN1.ItemCode', '=', $productoCodigo)
-                            ->first();
-
-                        // Comprobar si ultima_fecha_compra es null
-                        if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
-                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
-                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
-                                ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
-                                ->where('IGN1.ItemCode', '=', $productoCodigo)
-                                ->first();
-
-                            if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
-                                $dataFiltrada[] = $item;
-                            }
-                        }
-                    }
-
-                    return response($dataFiltrada);
-                }
             }
         }
         // ordenamos la data de manera desc
         $query->where('odm_cantidadpendiente', '>', 0);
-        $query->orderBy('odm_feccreacion', 'desc');
+        $query->orderBy('odm_fecconsultareservacion', 'desc');
 
         $data = $query->get();
 
