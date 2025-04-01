@@ -231,8 +231,10 @@ class OrdenInternaMaterialesController extends Controller
                     $query->whereNull('tra_responsable');
                 } else {
                     $responsables_new = array_diff($responsables, ['SRE']);
-                    $query->whereIn('tra_responsable', $responsables_new)
-                        ->orWhere('tra_responsable', null);
+                    $query->where(function ($q) use ($responsables_new) {
+                        $q->whereIn('tra_responsable', $responsables_new)
+                          ->orWhereNull('tra_responsable');
+                    });
                 }
             } else {
                 if (!is_array($responsables)) {
