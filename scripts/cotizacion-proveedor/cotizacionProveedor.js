@@ -411,7 +411,7 @@ $(document).ready(function () {
                         pvc_id: idCuentaBancariaDolaresInput.length != 0 ? idCuentaBancariaDolaresInput : null,
                         eba_id: entidadBancariaDolaresInput,
                         pvc_numerocuenta: cuentaBancariaDolaresInput,
-                        mon_codigo: 'DOL'
+                        mon_codigo: 'USD'
                     })
                 } else {
                     handleErrorsCuentasBancarias.push('La cuenta bancaria en dolares es inválida')
