@@ -180,6 +180,7 @@ $(document).ready(async function () {
                 <td>
                     <input type="number" class="form-control cantidad-input" value='${element.odm_cantidad}' readonly/>
                 </td>
+                <td>${element.producto?.uni_codigo ?? ''}</td>
                 <td>
                     <input type="text" class="form-control observacion-input" value='${element.odm_observacion?.replace(/'/g, "&#39;") || ''}' readonly/>
                 </td>
