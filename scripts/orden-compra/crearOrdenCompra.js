@@ -173,6 +173,7 @@ $(document).ready(async () => {
         try {
             const { data } = await client.get('/monedasSimple')
             const $monedaSelect = $('#monedaOrdenCompraInput')
+            $monedaSelect.empty()
 
             data.forEach((moneda) => {
                 const option = $(`<option ${moneda["mon_codigo"] === 'SOL' ? 'selected' : ''}>`).val(moneda["mon_codigo"]).text(`${moneda["mon_simbolo"]} ${moneda["mon_descripcion"]}`)
@@ -187,6 +188,7 @@ $(document).ready(async () => {
         try {
             const { data } = await client.get('/formaspagoSimple')
             const defaultOptionFormaPago = $('<option>').val('').text('Seleccione una forma de pago')
+            $("#formaDePagoOrdenCompraInput").empty()
             $("#formaDePagoOrdenCompraInput").append(defaultOptionFormaPago)
 
             data.forEach((formaPago) => {
@@ -201,6 +203,10 @@ $(document).ready(async () => {
     const cargarBancos = async () => {
         try {
             const { data } = await client.get('/entidadesbancariasSimple')
+            // vaceamos la data
+            $("#cuentaSolesProveedorSelect").empty()
+            $("#cuentaDolaresProveedorSelect").empty()
+            $("#cuentaBancoNacionProveedorSelect").empty()
             // agregamos valor por defecto
             const defaultOptionEntidadBancararia = $('<option>').val('').text('Seleccione una entidad bancaria')
             $("#cuentaSolesProveedorSelect").append(defaultOptionEntidadBancararia.clone())
@@ -211,7 +217,7 @@ $(document).ready(async () => {
                 const option = $('<option>').val(banco["eba_id"]).text(banco["eba_descripcion"])
                 $("#cuentaSolesProveedorSelect").append(option.clone())
                 $("#cuentaDolaresProveedorSelect").append(option.clone())
-                if (compareStringsIgnoreCaseAndAccents(banco["eba_descripcion"], 'Banco de la Nación')) {
+                if (banco["eba_codigo"] === 'BN') {
                     $("#cuentaBancoNacionProveedorSelect").append(option.clone())
                 }
             })
@@ -226,6 +232,7 @@ $(document).ready(async () => {
             const { data } = await client.get('/trabajadoresSimple')
             const defaultOptionTrabajador = '<option value="" selected>Seleccione un trabajador</option>'
             const $elaboradoOrdenCompraInput = $('#elaboradoOrdenCompraInput')
+            $elaboradoOrdenCompraInput.empty()
 
             // ingresamos el valor por defecto
             $elaboradoOrdenCompraInput.append(defaultOptionTrabajador)
@@ -251,6 +258,7 @@ $(document).ready(async () => {
             impuestos = data
             const defaultOptionImpuesto = $('<option>').val('').text('Seleccione un impuesto')
             const $impuestoSelect = $('#impuestoOrdenCompraInput')
+            $impuestoSelect.empty()
             // agregamos el valor por defecto
             $impuestoSelect.append(defaultOptionImpuesto)
             // agregamos lso valores de impuestos
@@ -286,19 +294,19 @@ $(document).ready(async () => {
         $("#direccionProveedorInput").val(prv_direccion)
 
         // establecemos información de las cuentas bancarias
-        const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => compareStringsIgnoreCaseAndAccents(cuenta.entidad_bancaria?.eba_descripcion, 'Banco de la Nación'))
+        const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => cuenta.entidad_bancaria?.eba_codigo === 'BN')
         const cuenta_soles = cuentas_bancarias.find(cuenta => {
             if (cuenta_banco_nacion) {
-                return cuenta.mon_codigo === 'SOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+                return cuenta.mon_codigo === 'SOL' && cuenta.pvc_id !== cuenta_banco_nacion.pvc_id
             } else {
                 return cuenta.mon_codigo === 'SOL'
             }
         })
         const cuenta_dolares = cuentas_bancarias.find(cuenta => {
             if (cuenta_banco_nacion) {
-                return cuenta.mon_codigo === 'DOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+                return cuenta.mon_codigo === 'USD' && cuenta.pvc_id !== cuenta_banco_nacion.pvc_id
             } else {
-                return cuenta.mon_codigo === 'DOL'
+                return cuenta.mon_codigo === 'USD'
             }
         })
 
@@ -318,12 +326,19 @@ $(document).ready(async () => {
         $("#impuestoOrdenCompraInput").val('IGV')
     }
 
+    // inicializamos información de la cotización
+    const initInformacionCotizacion = (cotizacion) => {
+        $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo)
+    }
+
     // inicializamos la informacion de orden de compra
     $("#data-container-body").on('click', '.btn-crear-orden-compra', async function () {
         // cargamos la información de maestros
         await initInformacionMaestros()
         // obtenemos la información de detalle de materiales
         const { data } = await getInformacionDetalleMateriales(this)
+        // cargamos la informacion de cotizacion
+        initInformacionCotizacion(data.cotizacion)
         // cargamos la informacion del proveedor
         initInformacionProveedor(data.proveedor)
         // cargamos la informacion de la orden de compra
@@ -881,7 +896,7 @@ $(document).ready(async () => {
                 pvc_id: idCuentaBancariaDolaresInput.length != 0 ? idCuentaBancariaDolaresInput : null,
                 eba_id: entidadBancariaDolaresInput,
                 pvc_numerocuenta: cuentaBancariaDolaresInput,
-                mon_codigo: 'DOL'
+                mon_codigo: 'USD'
             })
         } else {
             if (entidadBancariaDolaresInput.length == 0) {

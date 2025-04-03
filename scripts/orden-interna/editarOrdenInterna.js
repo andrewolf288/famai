@@ -544,6 +544,7 @@ $(document).ready(async function () {
                 <td>
                     <input type="number" class="form-control cantidad-input" value='${element.odm_cantidad}' readonly/>
                 </td>
+                <td>${element.producto?.uni_codigo ?? ''}</td>
                 <td>
                     <input type="text" class="form-control observacion-input" value='${element.odm_observacion?.replace(/'/g, "&#39;") || ''}' readonly/>
                 </td>
@@ -682,6 +683,7 @@ $(document).ready(async function () {
                 <td>
                     <input type="number" class="form-control cantidad-input" value='1.00' readonly/>
                 </td>
+                <td></td>
                 <td>
                     <input type="text" class="form-control observacion-input" value='' readonly/>
                 </td>
@@ -719,7 +721,7 @@ $(document).ready(async function () {
     }
 
     function seleccionarMaterial(material) {
-        const { pro_id, pro_codigo, pro_descripcion } = material
+        const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material
 
         let idProductosArray = []
         $('#tbl-orden-interna-productos tbody tr').each(function () {
@@ -748,6 +750,7 @@ $(document).ready(async function () {
                 <td>
                     <input type="number" class="form-control cantidad-input" value='1.00' readonly/>
                 </td>
+                <td>${uni_codigo ?? ''}</td>
                 <td>
                     <input type="text" class="form-control observacion-input" value='' readonly/>
                 </td>

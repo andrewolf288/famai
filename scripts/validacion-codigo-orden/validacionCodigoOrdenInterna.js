@@ -62,7 +62,7 @@ $(document).ready(() => {
                 className: 'form-check-input'
             },
             { targets: 8, searchable: true },
-            { targets: [2, 3, 4, 5, 6, 7, 9, 10, 11], searchable: false },
+            { targets: [2, 3, 4, 5, 6, 7, 9, 10, 11, 12], searchable: false },
         ],
         select: {
             style: 'multi',
@@ -103,6 +103,7 @@ $(document).ready(() => {
                     <td>${producto?.pro_codigo || 'N/A'}</td>
                     <td>${material.odm_descripcion}</td>
                     <td>${material.odm_observacion || 'N/A'}</td>
+                    <td>${producto?.uni_codigo || 'N/A'}</td>
                     <td class="text-center">${material.odm_cantidad}</td>
                     <td class="text-center">
                         <button class="btn btn-primary asignar-codigo" data-detalle="${material.odm_id}">Validar Código</button>

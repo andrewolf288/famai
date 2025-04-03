@@ -22,6 +22,7 @@ $(document).ready(() => {
             content += `
             <tr>
                 <td scope="row" class="text-left">${index + 1}</td>
+                <td>${entidadBancaria.eba_codigo}</td>
                 <td>${entidadBancaria.eba_descripcion}</td>
                 <td class="text-center">${entidadBancaria.eba_activo == 1 ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-danger">Inactivo</span>'}</td>
                 <td>${entidadBancaria.eba_usucreacion === null ? 'No aplica' : entidadBancaria.eba_usucreacion}</td>
@@ -73,7 +74,12 @@ $(document).ready(() => {
         event.preventDefault()
         let handleError = ''
 
+        const codigoEntidadBancaria = $.trim($('#codigoEntidadBancaria').val())
         const descripcionEntidadBancaria = $.trim($('#descripcionEntidadBancaria').val())
+
+        if (!codigoEntidadBancaria) {
+            handleError += '- Debe ingresar el código de la entidad bancaria\n'
+        }
 
         if (!descripcionEntidadBancaria) {
             handleError += '- Debe ingresar el nombre de la entidad bancaria\n'
@@ -85,6 +91,7 @@ $(document).ready(() => {
         }
 
         const entidadBancariaData = {
+            eba_codigo: codigoEntidadBancaria,
             eba_descripcion: descripcionEntidadBancaria
         }
         try {
@@ -109,6 +116,7 @@ $(document).ready(() => {
 
             // actualizamos el formulario de edicion
             $("#entidadBancariaIDEdit").val(data.eba_id)
+            $("#editarCodigoEntidadBancaria").val(data.eba_codigo)
             $("#editarDescripcionEntidadBancaria").val(data.eba_descripcion)
             $("#activoEntidadBancariaEdit").prop("checked", data.eba_activo == 1 ? true : false)
 
@@ -131,8 +139,13 @@ $(document).ready(() => {
         event.preventDefault()
         let handleError = ''
         const idEntidadBancaria = $("#entidadBancariaIDEdit").val()
+        const codigoEntidadBancaria = $.trim($('#editarCodigoEntidadBancaria').val())
         const descripcionEntidadBancaria= $.trim($('#editarDescripcionEntidadBancaria').val())
         const activoEntidadBancara = $('#activoEntidadBancariaEdit').is(':checked')
+
+        if (!codigoEntidadBancaria) {
+            handleError += '- Debe ingresar el código de la entidad bancaria\n'
+        }
 
         if(!descripcionEntidadBancaria){
             handleError += '- Debe ingresar el nombre de la entidad bancaria\n'
@@ -144,6 +157,7 @@ $(document).ready(() => {
         }
 
         const entidadBancariaData = {
+            eba_codigo: codigoEntidadBancaria,
             eba_descripcion: descripcionEntidadBancaria,
             eba_activo: activoEntidadBancara
         }

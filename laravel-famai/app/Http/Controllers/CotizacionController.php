@@ -564,7 +564,7 @@ class CotizacionController extends Controller
             ->get();
 
         // informacion de bancos
-        $bancos = EntidadBancaria::select('eba_id', 'eba_descripcion', 'eba_activo')
+        $bancos = EntidadBancaria::select('eba_id', 'eba_descripcion', 'eba_activo', 'eba_codigo')
             ->where('eba_activo', 1)
             ->get();
 
@@ -1037,6 +1037,12 @@ class CotizacionController extends Controller
         // buscamos las cotizaciones detalle correspondientes
         $detallesCotizaciones = CotizacionDetalle::whereIn('cod_id', $detalles)
             ->get();
+        
+        $cotizacion = null;
+        if(count($detallesCotizaciones) > 0){
+            $coc_id = $detallesCotizaciones[0]->coc_id;
+            $cotizacion = Cotizacion::findOrFail($coc_id);
+        }
 
         $detalles = $detallesCotizaciones->map(function ($detalle) {
             // debemos buscar los detalles relacionados en la cotizacion
@@ -1056,6 +1062,7 @@ class CotizacionController extends Controller
         $formatData = array(
             "proveedor" => $proveedor,
             "detalles" => $detalles,
+            "cotizacion" => $cotizacion
         );
 
         return response()->json($formatData);

@@ -26,6 +26,7 @@
     <thead>
         <tr>
             <th class="text-center">#</th>
+            <th>Código</th>
             <th>Descripcion</th>
             <th>Estado</th>
             <th>Usu. Creador</th>
@@ -40,7 +41,6 @@
 </table>
 
 <!-- MODAL DE CREACION DE ENTIDAD BANCARIA -->
-<!-- MODAL DE CREACION DE PRODUCTO-->
 <div class="modal modal-lg fade" id="entidadBancariaCrearModal" tabindex="-1"
     aria-labelledby="entidadBancariaCrearModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -52,6 +52,12 @@
             <div class="modal-body">
                 <form id="crearEntidadBancariaForm">
                     <div class="row">
+                        <!-- Codigo de la entidad bancaria -->
+                        <div class="col-12 mb-3">
+                            <label for="codigoEntidadBancaria" class="form-label">Código entidad bancaria</label>
+                            <input type="text" class="form-control" id="codigoEntidadBancaria" required>
+                        </div>
+                        <!-- Descripcion de la entidad bancaria -->
                         <div class="col-12 mb-3">
                             <label for="descripcionEntidadBancaria" class="form-label">Nombre entidad bancaria</label>
                             <input type="text" class="form-control" id="descripcionEntidadBancaria" required>
@@ -82,6 +88,11 @@ aria-labelledby="entidadBancariaEditarModalLabel" aria-hidden="true">
                 <div class="row">
                     <!-- Entidad bancaria ID -->
                     <input type="hidden" id="entidadBancariaIDEdit">
+                    <!-- Codigo entidad bancaria -->
+                    <div class="col-12 mb-3">
+                        <label for="editarCodigoEntidadBancaria" class="form-label">Código entidad bancaria</label>
+                        <input type="text" class="form-control" id="editarCodigoEntidadBancaria" required>
+                    </div>
                     <!-- Nombre entidad bancaria -->
                     <div class="col-12 mb-3">
                         <label for="editarDescripcionEntidadBancaria" class="form-label">Nombre entidad bancaria</label>

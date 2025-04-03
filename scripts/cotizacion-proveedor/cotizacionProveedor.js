@@ -42,7 +42,7 @@ $(document).ready(function () {
                 const option = $('<option>').val(banco["eba_id"]).text(banco["eba_descripcion"])
                 $("#cuentaSolesProveedorSelect").append(option.clone())
                 $("#cuentaDolaresProveedorSelect").append(option.clone())
-                if(compareStringsIgnoreCaseAndAccents(banco["eba_descripcion"],'Banco de la Nación')) {
+                if(banco["eba_codigo"] === 'BN') {
                     $("#cuentaBancoNacionProveedorSelect").append(option.clone())
                 }
             })
@@ -55,19 +55,19 @@ $(document).ready(function () {
             $("#telefonoProveedorInput").val(prv_telefono || '')
             $("#whatsappProveedorInput").val(prv_whatsapp || '')
             $("#direccionProveedorInput").val(prv_direccion || '')
-            const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => compareStringsIgnoreCaseAndAccents(cuenta.entidad_bancaria?.eba_descripcion, 'Banco de la Nación'))
+            const cuenta_banco_nacion = cuentas_bancarias.find(cuenta => cuenta.entidad_bancaria?.eba_codigo === 'BN')
             const cuenta_soles = cuentas_bancarias.find(cuenta => {
                 if (cuenta_banco_nacion) {
-                    return cuenta.mon_codigo === 'SOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+                    return cuenta.mon_codigo === 'SOL' && cuenta.pvc_id !== cuenta_banco_nacion.pvc_id
                 } else {
                     return cuenta.mon_codigo === 'SOL'
                 }
             })
             const cuenta_dolares = cuentas_bancarias.find(cuenta => {
                 if (cuenta_banco_nacion) {
-                    return cuenta.mon_codigo === 'DOL' && cuenta.pvc_numerocuenta !== cuenta_banco_nacion.pvc_numerocuenta
+                    return cuenta.mon_codigo === 'USD' && cuenta.pvc_id !== cuenta_banco_nacion.pvc_id
                 } else {
-                    return cuenta.mon_codigo === 'DOL'
+                    return cuenta.mon_codigo === 'USD'
                 }
             })
 

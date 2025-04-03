@@ -43,7 +43,7 @@ class UtilHelper
     public static function obtenerCuentasBancarias($cuentas_bancarias)
     {
         $cuenta_banco_nacion = collect($cuentas_bancarias)->first(function ($cuenta) {
-            return $cuenta->pvc_activo == 1 && UtilHelper::compareStringsIgnoreCaseAndAccents($cuenta->entidadBancaria->eba_descripcion ?? '', 'Banco de la Nación');
+            return $cuenta->pvc_activo == 1 && $cuenta->entidadBancaria->eba_codigo == 'BN';
         });
 
         $cuenta_soles = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
@@ -56,9 +56,9 @@ class UtilHelper
 
         $cuenta_dolares = collect($cuentas_bancarias)->first(function ($cuenta) use ($cuenta_banco_nacion) {
             if ($cuenta_banco_nacion) {
-                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'DOL' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
+                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'USD' && $cuenta->pvc_numerocuenta !== $cuenta_banco_nacion->pvc_numerocuenta;
             } else {
-                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'DOL';
+                return $cuenta->pvc_activo == 1 && $cuenta->mon_codigo === 'USD';
             }
         });
 

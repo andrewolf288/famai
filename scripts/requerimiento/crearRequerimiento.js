@@ -212,6 +212,7 @@ $(document).ready(function () {
                  <td>
                      <input type="number" class="form-control cantidad-input" value="${data["odm_cantidad"]}" readonly/>
                  </td>
+                 <td></td>
                  <td>
                      <input type="text" class="form-control observacion-input" value='${data["odm_observacion"].replace(/'/g, "&#39;")}' readonly/>
                  </td>
@@ -242,7 +243,7 @@ $(document).ready(function () {
     }
 
     function seleccionarMaterial(material) {
-        const { pro_id, pro_codigo, pro_descripcion } = material
+        const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material
         const findProducto = detalle_requerimiento.find(element => element.pro_id == pro_id)
 
         // Excepcion de validacion
@@ -257,6 +258,7 @@ $(document).ready(function () {
                 pro_codigo,
                 odm_descripcion: pro_descripcion,
                 odm_cantidad: 1.00,
+                uni_codigo,
                 odm_observacion: "",
                 odm_tipo: 1,
                 odm_asociar: true,
@@ -272,6 +274,7 @@ $(document).ready(function () {
                 <td>
                     <input type="number" class="form-control cantidad-input" value='${data["odm_cantidad"]}' readonly/>
                 </td>
+                <td>${data["uni_codigo"] ?? ''}</td>
                 <td>
                     <input type="text" class="form-control observacion-input" value='${data["odm_observacion"].replace(/'/g, "&#39;")}' readonly/>
                 </td>

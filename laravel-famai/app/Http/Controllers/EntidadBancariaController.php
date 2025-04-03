@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\EntidadBancaria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class EntidadBancariaController extends Controller
 {
@@ -31,7 +32,7 @@ class EntidadBancariaController extends Controller
 
     public function indexSimple()
     {
-        $entidadesbancarias = EntidadBancaria::where('eba_activo', 1)->select('eba_id', 'eba_descripcion')->get();
+        $entidadesbancarias = EntidadBancaria::where('eba_activo', 1)->select('eba_id', 'eba_descripcion', 'eba_codigo')->get();
         return response()->json($entidadesbancarias);
     }
 
@@ -52,6 +53,7 @@ class EntidadBancariaController extends Controller
 
         $validator = Validator::make($request->all(), [
             'eba_descripcion' => 'required|string',
+            'eba_codigo' => 'required|string|unique:tblentidadbancaria_eba,eba_codigo'
         ]);
 
         if ($validator->fails()) {
@@ -59,6 +61,7 @@ class EntidadBancariaController extends Controller
         }
 
         $entidadBancaria = EntidadBancaria::create([
+            'eba_codigo' => $request->eba_codigo,
             'eba_descripcion' => $request->eba_descripcion,
             'eba_usucreacion' => $user->usu_codigo,
             'eba_fecmodificacion' => null,
@@ -82,6 +85,11 @@ class EntidadBancariaController extends Controller
 
         $validator = Validator::make($request->all(), [
             'eba_descripcion' => 'required|string',
+            'eba_codigo' => [
+                'required',
+                'string',
+                Rule::unique('tblentidadbancaria_eba', 'eba_codigo')->ignore($id, 'eba_id'),
+            ],
             'eba_activo' => 'required|boolean',
         ]);
 
@@ -92,6 +100,7 @@ class EntidadBancariaController extends Controller
         $entidadbancaria->update(
             [
                 'eba_descripcion' => $request->eba_descripcion,
+                'eba_codigo' => $request->eba_codigo,
                 'eba_activo' => $request->eba_activo,
                 'eba_usumodificacion' => $user->usu_codigo,
             ]
