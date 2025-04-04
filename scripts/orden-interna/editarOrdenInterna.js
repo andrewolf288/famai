@@ -377,8 +377,8 @@ $(document).ready(async function () {
                 findProceso["odp_usumodificacion"] = data.odp_usumodificacion
                 findProceso["odp_fecmodificacion"] = data.odp_fecmodificacion
 
-                $row.find('td').eq(4).text(data.odp_usumodificacion || 'No aplica')
-                $row.find('td').eq(5).text(data.odp_fecmodificacion ? parseDate(data.odp_fecmodificacion) : 'No aplica')
+                $row.find('td').eq(5).text(data.odp_usumodificacion || 'No aplica')
+                $row.find('td').eq(6).text(data.odp_fecmodificacion ? parseDate(data.odp_fecmodificacion) : 'No aplica')
             } catch (error) {
                 alert('Error al actualizar el detalle de proceso')
             } finally {
@@ -817,8 +817,8 @@ $(document).ready(async function () {
                 findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
                 findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
 
-                $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
-                $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
+                $row.find('td').eq(5).text(data.odm_usumodificacion || 'No aplica')
+                $row.find('td').eq(6).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
 
                 // se actualiza las cantidades
                 const idCantidadClientes = `#cantidad-clientes-${currentDetalleParte}`
@@ -891,8 +891,8 @@ $(document).ready(async function () {
                 findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
                 findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
 
-                $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
-                $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
+                $row.find('td').eq(5).text(data.odm_usumodificacion || 'No aplica')
+                $row.find('td').eq(6).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
 
                 // se actualiza las cantidades
                 const idCantidadClientes = `#cantidad-nopedir-${currentDetalleParte}`
@@ -964,8 +964,8 @@ $(document).ready(async function () {
                 findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
                 findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
 
-                $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
-                $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
+                $row.find('td').eq(5).text(data.odm_usumodificacion || 'No aplica')
+                $row.find('td').eq(6).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
 
                 // se actualiza las cantidades
                 const idCantidadClientes = `#cantidad-recuperado-${currentDetalleParte}`
@@ -1060,8 +1060,8 @@ $(document).ready(async function () {
                 findMaterial["odm_usumodificacion"] = data.odm_usumodificacion
                 findMaterial["odm_fecmodificacion"] = data.odm_fecmodificacion
 
-                $row.find('td').eq(4).text(data.odm_usumodificacion || 'No aplica')
-                $row.find('td').eq(5).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
+                $row.find('td').eq(5).text(data.odm_usumodificacion || 'No aplica')
+                $row.find('td').eq(6).text(data.odm_fecmodificacion ? parseDate(data.odm_fecmodificacion) : 'No aplica')
             } catch (error) {
                 alert('Error al actualizar el detalle de material')
             } finally {
