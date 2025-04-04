@@ -1,4 +1,4 @@
-$(document).ready(async() => {
+$(document).ready(async () => {
     // controla el abort de solicitudes asincronas
     let abortController
     let despliegueMaterialesResumido = []
@@ -211,7 +211,7 @@ $(document).ready(async() => {
         $('#responsableSelect').multiselect('loadOptions', options);
     }
 
-    const initInformacionMaestros = async() => {
+    const initInformacionMaestros = async () => {
         return Promise.all(
             [
                 traerInformacionAlmacenes(),
@@ -344,7 +344,7 @@ $(document).ready(async() => {
 
     // filter input
     filterButton.on('click', () => {
-        const filteredURL = obtenerFiltrosActuales() 
+        const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
@@ -946,7 +946,6 @@ $(document).ready(async() => {
             return acc;
         }, []);
 
-        // detalleCotizacion = dataSeleccionada
         detalleCotizacion = dataSeleccionadaAgrupada
 
         // de la data seleccionada extraemos los productos para poder buscar sus proveedores de ordenes de compra correspondientes
@@ -984,6 +983,24 @@ $(document).ready(async() => {
 
         // abrir modal de solicitud de cotizacion
         showModalSolicitudCotizacion()
+    })
+
+    // agregar producto para stock
+    $("#add-product-stock").on('click', function() {
+        $("#selectMaterialesStock").empty()
+        $("#inputCantidadMaterialStock").val(1)
+
+        const optionDefault = "<option value=''>Seleccione un material</option>"
+        $("#selectMaterialesStock").append(optionDefault)
+
+        detalleCotizacion.forEach((detalle) => {
+            if(detalle.pro_id){
+                const option = `<option value="${detalle.pro_id}">${detalle.pro_descripcion}</option>`
+                $("#selectMaterialesStock").append(option)
+            }
+        })
+        // llenamos con los diferentes materiales habilitados
+        showModalCotizacionesMaterialesStock()
     })
 
     // evento para escuchar cuando se cambie la cantidad pedida
@@ -1263,29 +1280,21 @@ $(document).ready(async() => {
         }
 
         const detalleMateriales = []
+        const detalleMaterialesStock = []
 
         const rows = $('#tbl-cotizaciones-materiales tbody tr')
+        const rows_stock = $('#tbl-cotizaciones-materiales-stock tbody tr')
+
         let cod_orden = 1;
 
+        // agregamos detalle de cotizacion
         rows.each(function () {
             const index = $(this).data('index')
             const observacion = $(this).find('.observacion-detalle').val().trim()
-            const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val().trim()
-            const cantidadRequerida = $(this).find('.cantidad-requerida-detalle').text().trim()
             let precioUnitario = proveedor_unico
                 ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2)
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
-
-            if (esValorNumericoValidoYMayorQueCero(cantidadPedida)) {
-                if (parseFloat(cantidadRequerida) < parseFloat(cantidadPedida)) {
-                    alert('La cantidad pedida es mayor a lo requerido')
-                    return
-                }
-            } else {
-                alert('La cantidad pedida debe ser un valor numérico mayor a 0')
-                return
-            }
 
             const detalleIndex = detalleCotizacion[index]
             if (detalleIndex.odm_id === undefined) {
@@ -1301,20 +1310,6 @@ $(document).ready(async() => {
                         cod_preciounitario: precioUnitario
                     })
                 })
-
-                // si lo pedido es mayor a lo requerido
-                if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
-                    detalleMateriales.push({
-                        cod_orden: cod_orden,
-                        pro_id: detalleIndex.pro_id,
-                        uni_codigo: detalleIndex.uni_codigo,
-                        cod_descripcion: detalleIndex.pro_descripcion,
-                        cod_observacion: observacion,
-                        cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
-                        cod_preciounitario: precioUnitario,
-                        cod_parastock: 1
-                    })
-                }
             } else {
                 detalleMateriales.push({
                     cod_orden: cod_orden,
@@ -1326,27 +1321,40 @@ $(document).ready(async() => {
                     cod_cantidad: detalleIndex.odm_cantidad,
                     cod_preciounitario: precioUnitario
                 })
-
-                // si lo pedido es mayor a lo requerido
-                if (parseFloat(cantidadPedida) > parseFloat(cantidadRequerida)) {
-                    detalleMateriales.push({
-                        cod_orden: cod_orden,
-                        pro_id: detalleIndex.pro_id,
-                        uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
-                        cod_descripcion: detalleIndex.odm_descripcion,
-                        cod_observacion: observacion,
-                        cod_cantidad: parseFloat(cantidadPedida) - parseFloat(cantidadRequerida),
-                        cod_preciounitario: precioUnitario,
-                        cod_parastock: 1
-                    })
-                }
             }
+            cod_orden++
+        })
+
+        // agregamos detalle de cotizacion stock
+        rows_stock.each(function () {
+            const producto = $(this).find('.producto-id').val().trim()
+            const unidad = $(this).find('.unidad-producto').val().trim()
+            const descripcion = $(this).find('.descripcion-producto').val().trim()
+            const observacion = $(this).find('.observacion-producto').val().trim()
+            const cantidad = $(this).find('.cantidad-producto')
+            let precioUnitario = proveedor_unico
+                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2)
+                : 0.00
+            if (isNaN(precioUnitario)) precioUnitario = 0.00
+
+            const detalleStock = {
+                cod_orden: cod_orden,
+                pro_id: producto,
+                uni_codigo: unidad,
+                cod_descripcion: descripcion,
+                cod_observacion: observacion,
+                cod_cantidad: cantidad,
+                cod_preciounitario: precioUnitario
+            }
+
+            detalleMaterialesStock.push(detalleStock)
             cod_orden++
         })
 
         const formatData = {
             proveedor,
             detalle_materiales: detalleMateriales,
+            detalle_materiales_stock: detalleMaterialesStock,
             proveedor_unico: proveedor_unico
         }
 
@@ -1573,7 +1581,7 @@ $(document).ready(async() => {
 
         }
 
-        if(responsables.length !== 0){
+        if (responsables.length !== 0) {
             responsables.forEach((responsable) => {
                 filteredURL += `&responsables[]=${responsable}`
             })
@@ -1689,6 +1697,17 @@ $(document).ready(async() => {
         modal.show();
     }
 
+    // mostrar modal de stock de materiales
+    function showModalCotizacionesMaterialesStock() {
+        const modalElement = document.getElementById('materialesStockModal')
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        modal.show();
+    }
+
     // mostrar modal de adjuntos
     function showModalAdjuntos() {
         const modalElement = document.getElementById('adjuntosMaterialModal')
@@ -1706,6 +1725,4 @@ $(document).ready(async() => {
         const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
         modal.show();
     }
-
-
 })

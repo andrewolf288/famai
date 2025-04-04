@@ -233,7 +233,7 @@ class OrdenInternaMaterialesController extends Controller
                     $responsables_new = array_diff($responsables, ['SRE']);
                     $query->where(function ($q) use ($responsables_new) {
                         $q->whereIn('tra_responsable', $responsables_new)
-                          ->orWhereNull('tra_responsable');
+                            ->orWhereNull('tra_responsable');
                     });
                 }
             } else {
@@ -785,12 +785,18 @@ class OrdenInternaMaterialesController extends Controller
         try {
             DB::beginTransaction();
             foreach ($materiales as $material) {
-                $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($material);
-                $ordenInternaMaterial->update([
+                $ordenInternaMaterial = OrdenInternaMateriales::with('ordenInternaParte.ordenInterna')->findOrFail($material);
+                $data = [
                     'odm_estado' => "REQ",
-                    'odm_usumodificacion' => $user->usu_codigo
-                ]);
+                    'odm_usumodificacion' => $user->usu_codigo,
+                ];
+
+                if ($ordenInternaMaterial->ordenInternaParte->ordenInterna->oic_tipo !== 'OI') {
+                    $data['odm_fecconsultareservacion'] = Carbon::now();
+                }
+                $ordenInternaMaterial->update($data);
             }
+
             DB::commit();
             return response()->json($materiales, 200);
         } catch (Exception $e) {
@@ -1673,25 +1679,24 @@ class OrdenInternaMaterialesController extends Controller
             }
 
             // buscamos el material en la base de datos
-            $ordenInternaMaterial = OrdenInternaMateriales::with('producto')
+            $ordenInternaMaterial = OrdenInternaMateriales::with('producto', 'ordenInternaParte.ordenInterna')
                 ->where('odm_id', $request['odm_id'])->first();
 
             if (!$ordenInternaMaterial) {
                 throw new Exception('Material no encontrado');
             }
 
-            // $codigoIncrustado = $ordenInternaMaterial->pro_id !== null ? $ordenInternaMaterial->producto->pro_codigo . ' - ' : '';
-            // $descripcionMaterial = $ordenInternaMaterial->odm_descripcion ? $ordenInternaMaterial->odm_descripcion : '';
-            // $observacionMaterial = $ordenInternaMaterial->odm_observacion ? " - $ordenInternaMaterial->odm_observacion" : '';
-            // actualizamos el material
-            $ordenInternaMaterial->update([
+            $data = [
                 'pro_id' => $pro_id,
                 'odm_estado' => 'REQ',
                 'odm_descripcion' => $pro_descripcion,
-                // 'odm_observacion' => $codigoIncrustado . $descripcionMaterial . $observacionMaterial,
-                // 'odm_observacion' => $observacionMaterial,
                 'odm_usumodificacion' => $user->usu_codigo
-            ]);
+            ];
+
+            if ($ordenInternaMaterial->ordenInternaParte->ordenInterna->oic_tipo !== 'OI') {
+                $data['odm_fecconsultareservacion'] = Carbon::now();
+            }
+            $ordenInternaMaterial->update($data);
 
             DB::commit();
             return response()->json("Material actualizado exitosamente", 200);
