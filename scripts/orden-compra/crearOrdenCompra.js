@@ -25,7 +25,7 @@ $(document).ready(async () => {
             placeholder: "Seleccionar solicitantes"
         }
     })
-    
+
     // traer informacion de trabajadores
     async function traerInformacionSolicitantes() {
         const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
@@ -41,7 +41,7 @@ $(document).ready(async () => {
         $('#solicitanteSelect').multiselect('loadOptions', options);
     }
 
-    const initInformacionFiltros = async() => {
+    const initInformacionFiltros = async () => {
         return Promise.all(
             [
                 traerInformacionSolicitantes()
@@ -97,10 +97,10 @@ $(document).ready(async () => {
         const solicitantes = $("#solicitanteSelect").val()
         let filteredURL = urlAPI
 
-        if(solicitantes.length !== 0){
+        if (solicitantes.length !== 0) {
             let counter = 0
             solicitantes.forEach((solicitante) => {
-                if (counter === 0){
+                if (counter === 0) {
                     filteredURL += `?solicitantes[]=${solicitante}`
                 } else {
                     filteredURL += `&solicitantes[]=${solicitante}`
@@ -174,6 +174,9 @@ $(document).ready(async () => {
             const { data } = await client.get('/monedasSimple')
             const $monedaSelect = $('#monedaOrdenCompraInput')
             $monedaSelect.empty()
+
+            const optionDefault = '<option value="">Seleccione una moneda</option>'
+            $monedaSelect.append(optionDefault)
 
             data.forEach((moneda) => {
                 const option = $(`<option ${moneda["mon_codigo"] === 'SOL' ? 'selected' : ''}>`).val(moneda["mon_codigo"]).text(`${moneda["mon_simbolo"]} ${moneda["mon_descripcion"]}`)
@@ -328,7 +331,7 @@ $(document).ready(async () => {
 
     // inicializamos información de la cotización
     const initInformacionCotizacion = (cotizacion) => {
-        $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo)
+        $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
     }
 
     // inicializamos la informacion de orden de compra
@@ -359,7 +362,6 @@ $(document).ready(async () => {
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
                     ocd_preciounitario: parseFloat(precio_unitario),
                     ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario),
-                    // imp_codigo: 'IGV',
                     ocd_fechaentrega: ""
                 }
                 formatData.push(formatDetalle)
@@ -685,7 +687,7 @@ $(document).ready(async () => {
             entidadBancariaSolesInput, cuentaBancariaSolesInput, idCuentaBancariaSolesInput,
             entidadBancariaDolaresInput, cuentaBancariaDolaresInput, idCuentaBancariaDolaresInput,
             entidadBancariaBancoNacionInput, cuentaBancariaBancoNacionInput, idCuentaBancariaBancoNacionInput)
-        
+
         if (cuentas_bancarias.length === 0) {
             const errorValidacionCuentasBancarias = 'No se pudo verificar correctamente la información de ninguna cuenta bancaria. Se presentan los siguientes errores:\n' + handle_errors_cuentas_bancarias.join('\n')
             alert(errorValidacionCuentasBancarias)
@@ -789,9 +791,14 @@ $(document).ready(async () => {
     }
 
     function establecerSimboloMoneda() {
-        const moneda = $("#monedaOrdenCompraInput").find('option:selected').text()
-        const simboloMoneda = moneda.split(' ')[0]
-        $('.moneda').text(simboloMoneda)
+        const monedaSelected = $("#monedaOrdenCompraInput").find('option:selected').val()
+        if (monedaSelected.length !== 0) {
+            const moneda = $("#monedaOrdenCompraInput").find('option:selected').text()
+            const simboloMoneda = moneda.split(' ')[0]
+            $('.moneda').text(simboloMoneda)
+        } else {
+            $('.moneda').text('')
+        }
     }
 
     function obtenerImpuestoPorcentaje() {

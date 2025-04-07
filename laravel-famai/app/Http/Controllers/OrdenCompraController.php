@@ -248,8 +248,6 @@ class OrdenCompraController extends Controller
                 "fpa_codigo" => $validatedData['fpa_codigo']
             ]);
 
-            $trabajador_elaborador = Trabajador::find($validatedData['tra_elaborado']);
-
             foreach ($validatedData['detalle_productos'] as $detalle) {
                 $ordencompraDetalle = OrdenCompraDetalle::create([
                     'odm_id' => $detalle['odm_id'],
@@ -275,6 +273,8 @@ class OrdenCompraController extends Controller
                     ->where('sed_codigo', $sed_codigo)
                     ->first();
 
+                $trabajador_elaborador = Trabajador::find($validatedData['tra_elaborado']);
+
                 if ($responsable_producto) {
                     $responsable_producto->update([
                         'tra_id' => $trabajador_elaborador->tra_id
@@ -283,7 +283,7 @@ class OrdenCompraController extends Controller
                     ProductoResponsable::create([
                         "pro_id" => $detalle['pro_id'],
                         "tra_id" => $trabajador_elaborador->tra_id,
-                        "sed_codigo" => $trabajador_elaborador->sed_codigo,
+                        "sed_codigo" => $trabajador_elaborador->sed_codigo ?? $sed_codigo,
                         "pre_usucreacion" => $user->usu_codigo,
                         "pre_fecmodificacion" => null
                     ]);

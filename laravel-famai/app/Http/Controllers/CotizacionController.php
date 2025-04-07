@@ -207,6 +207,7 @@ class CotizacionController extends Controller
             $proveedor = $data['proveedor'];
             $detalleMateriales = $data['detalle_materiales'];
             $proveedor_unico = $data['proveedor_unico'];
+            $cotizacion_proveedor_unico = $data['cotizacion'];
 
             $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
             if (!$lastCotizacion) {
@@ -247,17 +248,37 @@ class CotizacionController extends Controller
                 }
             }
 
-            $cotizacion = Cotizacion::create([
-                'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
-                'prv_id' => $id_proveedor,
-                'coc_fechacotizacion' => date('Y-m-d'),
-                'tra_solicitante' => $tra_solicitante,
-                'sed_codigo' => $sed_codigo,
-                'coc_proveedorunico' => $proveedor_unico ? 1 : 0,
-                'coc_usucreacion' => $user->usu_codigo,
-                'coc_fecmodificacion' => null,
-                'coc_estado' => $proveedor_unico ? 'RPR' : 'SOL',
-            ]);
+            if ($proveedor_unico) {
+                $cotizacion = Cotizacion::create([
+                    'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+                    'prv_id' => $id_proveedor,
+                    'coc_fechacotizacion' => date('Y-m-d'),
+                    'tra_solicitante' => $tra_solicitante,
+                    'sed_codigo' => $sed_codigo,
+                    'coc_proveedorunico' => $proveedor_unico ? 1 : 0,
+                    'coc_usucreacion' => $user->usu_codigo,
+                    'coc_fecmodificacion' => null,
+                    'coc_estado' => $proveedor_unico ? 'RPR' : 'SOL',
+                    'mon_codigo' => $cotizacion_proveedor_unico['mon_codigo'],
+                    'coc_cotizacionproveedor' => $cotizacion_proveedor_unico['coc_cotizacionproveedor'],
+                    'coc_fechavalidez' => $cotizacion_proveedor_unico['coc_fechavalidez'],
+                    'coc_formapago' => $cotizacion_proveedor_unico['coc_formapago'],
+                    'coc_notas' => $cotizacion_proveedor_unico['coc_notas'],
+                    'coc_lugarentrega' => $cotizacion_proveedor_unico['coc_lugarentrega'],
+                ]);
+            } else {
+                $cotizacion = Cotizacion::create([
+                    'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+                    'prv_id' => $id_proveedor,
+                    'coc_fechacotizacion' => date('Y-m-d'),
+                    'tra_solicitante' => $tra_solicitante,
+                    'sed_codigo' => $sed_codigo,
+                    'coc_proveedorunico' => $proveedor_unico ? 1 : 0,
+                    'coc_usucreacion' => $user->usu_codigo,
+                    'coc_fecmodificacion' => null,
+                    'coc_estado' => $proveedor_unico ? 'RPR' : 'SOL',
+                ]);
+            }
 
             foreach ($detalleMateriales as $detalle) {
 

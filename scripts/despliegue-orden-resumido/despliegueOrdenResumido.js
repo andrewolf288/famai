@@ -1,4 +1,4 @@
-$(document).ready(async() => {
+$(document).ready(async () => {
     // controla el abort de solicitudes asincronas
     let abortController
     let despliegueMaterialesResumido = []
@@ -211,7 +211,7 @@ $(document).ready(async() => {
         $('#responsableSelect').multiselect('loadOptions', options);
     }
 
-    const initInformacionMaestros = async() => {
+    const initInformacionMaestros = async () => {
         return Promise.all(
             [
                 traerInformacionAlmacenes(),
@@ -344,7 +344,7 @@ $(document).ready(async() => {
 
     // filter input
     filterButton.on('click', () => {
-        const filteredURL = obtenerFiltrosActuales() 
+        const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
@@ -1034,15 +1034,47 @@ $(document).ready(async() => {
         initHistoricoByProducto(producto)
     })
 
+    // ----------- TRAER INFORMACION DE MONEDAS ----------
+    const cargarTipoMonedas = async () => {
+        try {
+            const { data } = await client.get('/monedasSimple')
+            const $monedaSelect = $('#monedaCotizacionInput')
+            $monedaSelect.empty()
+
+            const optionDefault = '<option value="">Seleccione una moneda</option>'
+            $monedaSelect.append(optionDefault)
+
+            data.forEach((moneda) => {
+                const option = $(`<option>`).val(moneda["mon_codigo"]).text(`${moneda["mon_simbolo"]} ${moneda["mon_descripcion"]}`)
+                $monedaSelect.append(option)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     // ----------- GESTIÓN DE PROVEEDORES ----------------
-    $("#checkProveedorUnico").on('change', function () {
+    $("#checkProveedorUnico").on('change', async function () {
         const checked = $(this).is(':checked')
         if (checked) {
-            $("#div-adjuntos").removeClass('d-none')
+            // cargamos información de monedas
+            await cargarTipoMonedas()
+            // establecemos manejador de fecha de validez
+            $("#fechaValidezPicker").datepicker({
+                dateFormat: 'dd/mm/yy',
+            })
+            // resetemos los valores
+            $("#cotizacionProveedorCotizacionInput").val("")
+            $("#fechaValidezPicker").val("")
+            $("#formapagoCotizacionInput").val("CONTADO")
+            $("#observacionFormapagoCotizacionInput").val("")
+            $("#lugarEntregaCotizacionInput").val("")
+            // mostramos los contenedores
+            $("#div-cotizacion").removeClass('d-none')
             $(".label-precio-unitario").removeClass('d-none')
             $(".label-precio-unitario-detalle").removeClass('d-none')
         } else {
-            $("#div-adjuntos").addClass('d-none')
+            $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
             $(".label-precio-unitario-detalle").addClass('d-none')
         }
@@ -1262,6 +1294,41 @@ $(document).ready(async() => {
             prv_correo: row.find('.correo-proveedor').val() || ''
         }
 
+        // si es proveedor unico, se debe ingresar información de cotizacion
+        let handleError = ''
+        let cotizacion = {}
+
+        if (proveedor_unico) {
+            const numeroCotizacion = $("#cotizacionProveedorCotizacionInput").val()
+            const fechaValidezCotizacion = $("#fechaValidezPicker").val()
+            const monedaCotizacion = $("#monedaCotizacionInput").val()
+            const formapagoCotizacion = $("#formapagoCotizacionInput").val()
+            const observacionFormapagoCotizacion = $("#observacionFormapagoCotizacionInput").val()
+            const lugarEntregaCotizacion = $("#lugarEntregaCotizacionInput").val()
+
+            if (numeroCotizacion.length === 0) {
+                handleError += "- Debe ingresar el número de cotización\n"
+            }
+
+            if (monedaCotizacion.length === 0) {
+                handleError += "- Debe ingresar una moneda para la cotización\n"
+            }
+
+            if (handleError.length !== 0) {
+                alert(handleError)
+                return
+            }
+
+            cotizacion = {
+                coc_cotizacionproveedor: numeroCotizacion,
+                mon_codigo: monedaCotizacion,
+                coc_fechavalidez: fechaValidezCotizacion || null,
+                coc_formapago: formapagoCotizacion || '',
+                coc_notas: observacionFormapagoCotizacion || '',
+                coc_lugarentrega: lugarEntregaCotizacion || ''
+            }
+        }
+
         const detalleMateriales = []
 
         const rows = $('#tbl-cotizaciones-materiales tbody tr')
@@ -1307,7 +1374,8 @@ $(document).ready(async() => {
         const formatData = {
             proveedor,
             detalle_materiales: detalleMateriales,
-            proveedor_unico: proveedor_unico
+            proveedor_unico: proveedor_unico,
+            cotizacion: cotizacion
         }
 
         const formData = new FormData()
@@ -1318,7 +1386,7 @@ $(document).ready(async() => {
         }
 
         formData.append('cotizacion', JSON.stringify(formatData))
-        // return
+
         try {
             const { data } = await client.post('/cotizacionesByDespliegue', formData, {
                 headers: {
@@ -1366,7 +1434,6 @@ $(document).ready(async() => {
 
             alert('La cotización fue creada con éxito')
         } catch (error) {
-            console.log(error)
             alert("Hubo un error en la creación de solicitud de cotización")
         }
     })
@@ -1458,6 +1525,7 @@ $(document).ready(async() => {
 
     // Gestionamos el cierre del modal
     $('#cotizacionesModal').on('hide.bs.modal', function (e) {
+        clearDataCotizacion()
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
@@ -1505,12 +1573,13 @@ $(document).ready(async() => {
         // vaceamos la lista de archivos adjuntos
         $("#file-list").empty()
         // ocultamos los campos correspondientes
-        $("#div-adjuntos").addClass('d-none')
+        $("#div-cotizacion").addClass('d-none')
         $(".label-precio-unitario").addClass('d-none')
         $(".label-precio-unitario-detalle").addClass('d-none')
         // los valores de precios unitarios reseteamos a 0
         $(".precio-unitario-detalle").val(0)
     }
+
     // obtener filtros para la busqueda
     function obtenerFiltrosActuales(urlAPI = apiURL) {
         const filterField = filterSelector.val().trim()
@@ -1533,7 +1602,7 @@ $(document).ready(async() => {
 
         }
 
-        if(responsables.length !== 0){
+        if (responsables.length !== 0) {
             responsables.forEach((responsable) => {
                 filteredURL += `&responsables[]=${responsable}`
             })

@@ -48,7 +48,7 @@ class TrabajadorController extends Controller
     // funcion para traer informacion simple de trabajadores
     public function indexSimple()
     {
-        $trabajadores = Trabajador::where('tra_activo', 1)->select('tra_id', 'tra_nombre')->get();
+        $trabajadores = Trabajador::where('tra_activo', 1)->whereNotNull('sed_codigo')->select('tra_id', 'tra_nombre')->get();
         return response()->json($trabajadores);
     }
 
