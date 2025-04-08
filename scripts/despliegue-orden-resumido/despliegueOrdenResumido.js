@@ -1295,7 +1295,7 @@ $(document).ready(async () => {
             cotizacion = {
                 coc_cotizacionproveedor: numeroCotizacion,
                 mon_codigo: monedaCotizacion,
-                coc_fechavalidez: fechaValidezCotizacion || null,
+                coc_fechavalidez: fechaValidezCotizacion ? transformarFecha(fechaValidezCotizacion) : null,
                 coc_formapago: formapagoCotizacion || '',
                 coc_notas: observacionFormapagoCotizacion || '',
                 coc_lugarentrega: lugarEntregaCotizacion || ''
