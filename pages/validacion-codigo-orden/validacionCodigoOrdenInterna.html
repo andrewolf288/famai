@@ -56,7 +56,14 @@
 </div>
 
 <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
-    <button class="btn btn-success me-2" id="btn-validar-materiales">Validar</button>
+    <div class="w-auto me-4">
+        <button class="btn btn-success me-2" id="btn-validar-materiales">Validar</button>
+    </div>
+    <div class="w-25 me-4">
+        <select name="sedes" id="sedesFilter" class="form-select">
+            <option value="">Selecciona una sede</option>
+        </select>
+    </div>
 </div>
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">

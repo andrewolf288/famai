@@ -986,33 +986,6 @@ $(document).ready(async () => {
         showModalSolicitudCotizacion()
     })
 
-    // evento para escuchar cuando se cambie la cantidad pedida
-    // $('#tbl-cotizaciones-materiales tbody').on('input', '.cantidad-pedida-detalle', function () {
-    //     const row = $(this).closest('tr')
-    //     const cantidadRequerida = parseFloat(row.find('.cantidad-requerida-detalle').text())
-    //     const cantidadPedida = parseFloat($(this).val()) || 0
-
-    //     const diferencia = cantidadPedida - cantidadRequerida
-    //     const observaciones = row.find('.observacion-detalle').val().split("\n").filter(line => line.trim() !== "")
-
-    //     const stockIndex = observaciones.findIndex(line => line.startsWith(STOCK_PREFIX))
-
-    //     if (diferencia > 0) {
-    //         const stockObservacion = `${STOCK_PREFIX} ${parseFloat(diferencia).toFixed(2)} -`
-    //         if (stockIndex >= 0) {
-    //             observaciones[stockIndex] = stockObservacion;
-    //         } else {
-    //             observaciones.push(stockObservacion);
-    //         }
-    //     } else {
-    //         if (stockIndex >= 0) {
-    //             observaciones.splice(stockIndex, 1);
-    //         }
-    //     }
-    //     row.find('.observacion-detalle').attr("rows", Math.max(1, observaciones.length))
-    //     row.find('.observacion-detalle').val(observaciones.join("\n"))
-    // })
-
     // ver detalle de agrupamiento de detalle de cotizacion
     $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-detalle', (event) => {
         const $element = $(event.currentTarget).closest('tr')

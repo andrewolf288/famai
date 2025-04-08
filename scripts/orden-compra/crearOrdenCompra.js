@@ -334,6 +334,46 @@ $(document).ready(async () => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
     }
 
+    // refresh informacion bancos
+    $("#refresh-bancos").on('click', function() {
+        refreshInformacionBancos()
+    })
+    
+    const refreshInformacionBancos = async () => {
+        try {
+            const { data } = await client.get('/entidadesbancariasSimple')
+            // valores ya seleccionados
+            const valorCuentasSoles = $("#cuentaSolesProveedorSelect").val()
+            const valorCuentasDolates = $("#cuentaDolaresProveedorSelect").val()
+            const valorCuentaBancoNacion = $("#cuentaBancoNacionProveedorSelect").val()
+            // vaceamos la data
+            $("#cuentaSolesProveedorSelect").empty()
+            $("#cuentaDolaresProveedorSelect").empty()
+            $("#cuentaBancoNacionProveedorSelect").empty()
+            // agregamos valor por defecto
+            const defaultOptionEntidadBancararia = $('<option>').val('').text('Seleccione una entidad bancaria')
+            $("#cuentaSolesProveedorSelect").append(defaultOptionEntidadBancararia.clone())
+            $("#cuentaDolaresProveedorSelect").append(defaultOptionEntidadBancararia.clone())
+            $("#cuentaBancoNacionProveedorSelect").append(defaultOptionEntidadBancararia.clone())
+
+            data.forEach((banco) => {
+                const option = $('<option>').val(banco["eba_id"]).text(banco["eba_descripcion"])
+                $("#cuentaSolesProveedorSelect").append(option.clone())
+                $("#cuentaDolaresProveedorSelect").append(option.clone())
+                if (banco["eba_codigo"] === 'BN') {
+                    $("#cuentaBancoNacionProveedorSelect").append(option.clone())
+                }
+            })
+
+            // establecer valores por defecto
+            $("#cuentaSolesProveedorSelect").val(valorCuentasSoles)
+            $("#cuentaDolaresProveedorSelect").val(valorCuentasDolates)
+            $("#cuentaBancoNacionProveedorSelect").val(valorCuentaBancoNacion)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     // inicializamos la informacion de orden de compra
     $("#data-container-body").on('click', '.btn-crear-orden-compra', async function () {
         // cargamos la información de maestros

@@ -1,4 +1,4 @@
-$(document).ready(() => {
+$(document).ready(async () => {
 
     let abortController
     // URL ENDPOINT
@@ -21,7 +21,7 @@ $(document).ready(() => {
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
     }).datepicker("setDate", moment().startOf('month').subtract(1, 'months').toDate());
-    
+
     $("#fechaHasta").datepicker({
         dateFormat: 'dd/mm/yy',
     }).datepicker("setDate", moment().endOf('month').add(1, 'months').toDate());
@@ -69,6 +69,24 @@ $(document).ready(() => {
             selector: 'td.form-check-input'
         },
         order: [[2, 'asc']],
+    }
+
+    // traer informacion de sedes
+    async function traerInformacionSedes() {
+        const { data } = await client.get('/sedesSimple')
+        const $sedes = $("#sedesFilter")
+        data.forEach(sede => {
+            const option = $('<option>').val(sede["sed_codigo"]).text(sede["sed_nombre"])
+            $sedes.append(option)
+        })
+    }
+
+    const initInformacionMaestros = async () => {
+        return Promise.all(
+            [
+                traerInformacionSedes(),
+            ]
+        )
     }
 
     // Inicializacion de data table
@@ -119,50 +137,60 @@ $(document).ready(() => {
         }
     }
 
-    function filterData() {
-        const fecha_desde = transformarFecha($('#fechaDesde').val())
-        const fecha_hasta = transformarFecha($('#fechaHasta').val())
-
-        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}`
-
-        const filters = $('select[multiple]').val()
-        if (filters.length !== 0) {
-            filteredURL += `&multifilter=${filters.join('OR')}`
+    const getValueSede = () => {
+        const sedeValue = $('#sedesFilter').val()
+        if (sedeValue.length !== 0) {
+            return `&sed_codigo=${sedeValue}`
         }
-
-        initDataTable(filteredURL)
+        return ""
     }
 
-    filterFechas.on('click', () => {
-        filterData()
-    })
-
-    // filtro multi select
-    filterMultiselect.on('click', async () => {
-        filterData()
-    })
-
-    filterButton.on('click', () => {
-        // seleccionamos el valor del selector
+    function obtenerFiltrosActuales(urlAPI = apiURL) {
         const filterField = filterSelector.val().trim()
-        // seleccionamos el valor del criterio de busqueda
         const filterValue = filterInput.val().trim()
+        let filteredURL = urlAPI
 
-        let filteredURL = apiURL
-
-        // debemos adjuntar el filtro de busqueda por criterio
+        // si existen filtros de combobox, estos no dependen de filtros de fechas ni filtros multiples
         if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}${getValueSede()}`
+        } else {
             const filters = $('select[multiple]').val()
+            const fecha_desde = transformarFecha($('#fechaDesde').val())
+            const fecha_hasta = transformarFecha($('#fechaHasta').val())
+
+            filteredURL += `?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}${getValueSede()}`
+
             if (filters.length !== 0) {
                 filteredURL += `&multifilter=${filters.join('OR')}`
             }
         }
 
+        return filteredURL
+    }
+
+    $("#sedesFilter").on('change', () => {
+        const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
-    initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').subtract(1, 'months').format('YYYY-MM-DD')}&fecha_hasta=${moment().endOf('month').add(1, 'months').format('YYYY-MM-DD')}&multifilter=no_verificados`)
+    filterFechas.on('click', () => {
+        const filteredURL = obtenerFiltrosActuales()
+        initDataTable(filteredURL)
+    })
+
+    // filtro multi select
+    filterMultiselect.on('click', async () => {
+        const filteredURL = obtenerFiltrosActuales()
+        initDataTable(filteredURL)
+    })
+
+    filterButton.on('click', () => {
+        const filteredURL = obtenerFiltrosActuales()
+        initDataTable(filteredURL)
+    })
+
+    await initInformacionMaestros()
+    initDataTable(obtenerFiltrosActuales())
 
     // ------ GESTIÓN DE ASIGNACIÓN DE CÓDIGOS ------
     // al momento de ir ingresando valores en el input
@@ -279,7 +307,7 @@ $(document).ready(() => {
             modalAsignacionCodigo.hide()
 
             // cargamos la informacion
-            filterData()
+            obtenerFiltrosActuales()
         } catch (error) {
             console.log(error)
             alert('Error al asignar el codigo')
@@ -307,7 +335,7 @@ $(document).ready(() => {
 
         try {
             await client.post('detalleMaterialesOrdenInterna/verificar-materiales', formatData)
-            filterData()
+            obtenerFiltrosActuales()
         } catch (error) {
             console.log(error)
             alert('Error al verificar los materiales')

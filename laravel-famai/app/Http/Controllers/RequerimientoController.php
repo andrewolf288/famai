@@ -14,6 +14,7 @@ use App\Trabajador;
 use App\Unidad;
 use Exception;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -233,7 +234,10 @@ class RequerimientoController extends Controller
                     'odm_observacion' => $material['odm_observacion'],
                     'odm_tipo' => $material['odm_tipo'],
                     'odm_usucreacion' => $user->usu_codigo,
-                    'odm_fecmodificacion' => null
+                    'odm_fecmodificacion' => null,
+                    // Condiciones especiales si es requerimientos de stock
+                    'odm_estado' => $data['mrq_codigo'] === 'STK' ? 'REQ' : null,
+                    'odm_fecconsultareservacion' => $data['mrq_codigo'] === 'STK' ? Carbon::now() : null
                 ]);
 
                 // detalle de descripciones

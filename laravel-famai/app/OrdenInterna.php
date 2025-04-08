@@ -37,12 +37,6 @@ class OrdenInterna extends Model
     const CREATED_AT = 'oic_feccreacion';
     const UPDATED_AT = 'oic_fecmodificacion';
 
-    // Orden de Trabajo
-    // public function ordenTrabajo()
-    // {
-    //     return $this->belongsTo(OrdenTrabajo::class, 'odt_numero');
-    // }
-
     // Cliente
     public function cliente()
     {

@@ -706,6 +706,7 @@ class OrdenInternaMaterialesController extends Controller
         $ordenTrabajo = $request->input('odt_numero', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+        $sede = $request->input('sed_codigo', $sed_codigo);
 
         // multifilters
         $multifilter = $request->input('multifilter', null);
@@ -717,8 +718,8 @@ class OrdenInternaMaterialesController extends Controller
                 'ordenInternaParte.ordenInterna.area'
             ]
         )
-            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
-                $q->where('sed_codigo', $sed_codigo);
+            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sede) {
+                $q->where('sed_codigo', $sede);
             })
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'ENVIADO')

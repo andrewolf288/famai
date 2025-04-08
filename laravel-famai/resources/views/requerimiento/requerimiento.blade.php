@@ -125,8 +125,12 @@
             width: 3%;
         }
 
+        .col-codigo {
+            width: 10%;
+        }
+
         .col-descripcion {
-            width: 43%;
+            width: 33%;
         }
 
         .col-observacion {
@@ -136,7 +140,6 @@
         .col-cantidad {
             width: 4%;
         }
-
         .col-und {
             width: 3%;
         }
@@ -190,6 +193,7 @@
         <thead>
             <tr>
                 <th class="col-item" style="text-align: center;">ITEM</th>
+                <th class="col-codigo">CÓDIGO</th>
                 <th class="col-descripcion">DESCRIPCIÓN</th>
                 <th class="col-und" style="text-align: center;">UND</th>
                 <th class="col-cantidad" style="text-align: center;">CANT.</th>
@@ -200,6 +204,7 @@
             @foreach ($detalleMateriales as $index => $detalle)
                 <tr>
                     <td class="col-item" style="text-align: center;">{{ $loop->iteration }}</td>
+                    <td class="col-codigo">{{ $detalle['pro_codigo'] ?? '' }}</td>
                     <td class="col-descripcion">{{ $detalle['odm_descripcion'] }}</td>
                     <td class="col-und" style="text-align: center;">{{ $detalle['uni_codigo'] }}</td>
                     <td class="col-cantidad" style="text-align: center;">{{ $detalle['odm_cantidad'] }}</td>
