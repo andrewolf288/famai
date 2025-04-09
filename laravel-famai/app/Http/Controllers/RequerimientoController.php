@@ -9,6 +9,7 @@ use App\OrdenInternaMaterialesAdjuntos;
 use App\OrdenInternaPartes;
 use App\Parte;
 use App\Producto;
+use App\ProductoResponsable;
 use App\Reporte;
 use App\Trabajador;
 use App\Unidad;
@@ -164,6 +165,7 @@ class RequerimientoController extends Controller
 
             foreach ($data['detalle_requerimiento'] as $index => $material) {
                 $pro_id = null;
+                $tra_id = null;
                 // si se debe asociat el amterial
                 if ($material['odm_asociar']) {
                     // buscamos el material en la base de datos
@@ -220,6 +222,14 @@ class RequerimientoController extends Controller
                     } else {
                         // en el caso que se encuentre el producto en base de datos dbfamai
                         $pro_id = $findMaterial->pro_id;
+                        // buscamos si tiene un responsable asociado
+                        $responsable_producto = ProductoResponsable::where('pro_id', $pro_id)
+                        ->where('sed_codigo', $sed_codigo)
+                        ->first();
+                        // extraemos el responsable correspondiente
+                        if($responsable_producto){
+                            $tra_id = $responsable_producto->tra_id;
+                        }
                     }
                 }
 
@@ -235,6 +245,8 @@ class RequerimientoController extends Controller
                     'odm_tipo' => $material['odm_tipo'],
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null,
+                    'tra_responsable' => $tra_id,
+                    'odm_fecasignacionresponsable' => $tra_id ? Carbon::now() : null,
                     // Condiciones especiales si es requerimientos de stock
                     'odm_estado' => $data['mrq_codigo'] === 'STK' ? 'REQ' : null,
                     'odm_fecconsultareservacion' => $data['mrq_codigo'] === 'STK' ? Carbon::now() : null
