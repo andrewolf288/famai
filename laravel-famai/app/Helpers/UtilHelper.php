@@ -81,7 +81,8 @@ class UtilHelper
 
     public static function formatDateExportSAP($date)
     {
-        return str_replace('-', '', $date);
+        $soloFecha = substr($date, 0, 10);
+        return str_replace('-', '', $soloFecha);
     }
 
     public static function cleanForCSV($string)

@@ -60,7 +60,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         // creamos la cabecera del csv
         if (!$ordenescompra->isEmpty()) {
             $csvCabecera = Writer::createFromPath($pathcsvCabeceraTemp, 'w');
-            $csvCabecera->setEnclosure('');
             $csvCabecera->insertOne([
                 'DocNum',
                 'DocEntry',
@@ -74,6 +73,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 'DocRate',
                 'Comments',
                 'PaymentGroupCode',
+                'U_EXX_CORDOCOR',
+                'U_EXX_FECDOCOT'
                 // 'TaxDate',
                 // 'DocTotalFc',
                 // 'VatPercent',
@@ -91,6 +92,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 'DocRate',
                 'Comments',
                 'GroupNum',
+                'U_EXX_CORDOCOR',
+                'U_EXX_FECDOCOT'
                 // 'TaxDate',
                 // 'DocTotalFC',
                 // 'VatPercent',
@@ -98,7 +101,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
 
             // creamos el detalle del csv
             $csvDetalle = Writer::createFromPath($pathcsvDetalleTemp, 'w');
-            $csvDetalle->setEnclosure('');
             $csvDetalle->insertOne([
                 "ParentKey",
                 "LineNum",
@@ -153,6 +155,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     UtilHelper::formatDateExportSAP($orden->occ_fecha), // TaxDate (assuming the same as DocDate)
                     // 0, // DocTotalFC (Total en moneda extranjera)
                     // 0, // VatPercent 
+                    $orden->occ_numero,
+                    UtilHelper::formatDateExportSAP($orden->occ_feccreacion)
                 ]);
 
                 $ordenescompradetalle = OrdenCompraDetalle::with('producto')
