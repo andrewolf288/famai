@@ -96,14 +96,10 @@ class UtilHelper
         // Reemplazar caracteres problemáticos
         $string = str_replace(["\r\n", "\r", "\n"], ' ', $string); // Evitar saltos de línea
         $string = str_replace(["\"", "'"], '', $string); // Evitar comillas problemáticas
+        $string = str_replace([',', ';'], '', $string);
 
         // Eliminar espacios en blanco al inicio y al final
         $string = trim($string);
-
-        // Si la cadena contiene el delimitador CSV, encerrarla entre comillas dobles
-        if (strpos($string, ',') !== false || strpos($string, ';') !== false) {
-            $string = '"' . $string . '"';
-        }
 
         return $string;
     }
