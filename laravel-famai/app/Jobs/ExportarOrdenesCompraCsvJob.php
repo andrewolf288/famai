@@ -152,7 +152,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     $orden->occ_tipocambio ?? 1, // DocRate
                     UtilHelper::cleanForCSV($orden->occ_notas), // Comments (Comentarios)
                     $orden->fpa_codigo, // GroupNum (Forma de pago)
-                    UtilHelper::formatDateExportSAP($orden->occ_fecha), // TaxDate (assuming the same as DocDate)
+                    // UtilHelper::formatDateExportSAP($orden->occ_fecha), // TaxDate (assuming the same as DocDate)
                     // 0, // DocTotalFC (Total en moneda extranjera)
                     // 0, // VatPercent 
                     $orden->occ_numero,
