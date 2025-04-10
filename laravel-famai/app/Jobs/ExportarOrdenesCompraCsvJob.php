@@ -60,6 +60,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         // creamos la cabecera del csv
         if (!$ordenescompra->isEmpty()) {
             $csvCabecera = Writer::createFromPath($pathcsvCabeceraTemp, 'w');
+            $csvCabecera->setEnclosure('');
             $csvCabecera->insertOne([
                 'DocNum',
                 'DocEntry',
@@ -67,7 +68,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 'DocDate',
                 'DocDueDate',
                 'CardCode',
-                'CardName',
                 'Address',
                 'DocTotal',
                 'DocCurrency',
@@ -85,7 +85,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 'DocDate',
                 'DocDueDate',
                 'CardCode',
-                'CardName',
                 'Address',
                 'DocTotal',
                 'DocCur',
@@ -99,6 +98,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
 
             // creamos el detalle del csv
             $csvDetalle = Writer::createFromPath($pathcsvDetalleTemp, 'w');
+            $csvDetalle->setEnclosure('');
             $csvDetalle->insertOne([
                 "ParentKey",
                 "LineNum",
@@ -144,7 +144,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                     UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                     $orden->proveedor->prv_codigo, // CardCode
-                    UtilHelper::cleanForCSV($orden->proveedor->prv_nombre), // CardName
                     UtilHelper::cleanForCSV($orden->proveedor->prv_direccion), // Address 
                     $orden->occ_total, // DocTotal (Total)
                     $orden->mon_codigo, // DocCur (Moneda)

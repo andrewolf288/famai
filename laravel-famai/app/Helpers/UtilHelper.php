@@ -91,7 +91,7 @@ class UtilHelper
         }
 
         // Convertimos a UTF-8 para evitar problemas de codificación
-        $string = mb_convert_encoding($string, 'UTF-8', 'auto');
+        // $string = mb_convert_encoding($string, 'UTF-8', 'auto');
 
         // Reemplazar caracteres problemáticos
         $string = str_replace(["\r\n", "\r", "\n"], ' ', $string); // Evitar saltos de línea
