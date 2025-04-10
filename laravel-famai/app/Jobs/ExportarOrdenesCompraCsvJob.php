@@ -45,12 +45,12 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         $pathcsvDetalleTemp = $rutaDestino . "POR1-Document_Lines.csv";
 
         // Eliminar archivos existentes si existen
-        if (File::exists($pathcsvCabeceraTemp)) {
-            File::delete($pathcsvCabeceraTemp);
-        }
-        if (File::exists($pathcsvDetalleTemp)) {
-            File::delete($pathcsvDetalleTemp);
-        }
+        // if (File::exists($pathcsvCabeceraTemp)) {
+        //     File::delete($pathcsvCabeceraTemp);
+        // }
+        // if (File::exists($pathcsvDetalleTemp)) {
+        //     File::delete($pathcsvDetalleTemp);
+        // }
 
         // debemos buscar aquellas ordenes de compra que no se han importado aún
         $ordenescompra = OrdenCompra::with('proveedor', 'moneda')
@@ -58,7 +58,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             ->get();
 
         // creamos la cabecera del csv
-        if (!$ordenescompra->isEmpty()) {
             $csvCabecera = Writer::createFromPath($pathcsvCabeceraTemp, 'w');
             $csvCabecera->insertOne([
                 'DocNum',
@@ -192,6 +191,5 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
 
             // al finalizar la importacion, cambiamos el flag de importacion
             OrdenCompra::whereIn('occ_id', $ordenescompra->pluck('occ_id'))->update(['occ_importacion' => 1]);
-        }
     }
 }
