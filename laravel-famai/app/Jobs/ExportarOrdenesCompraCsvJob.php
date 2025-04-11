@@ -135,7 +135,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "LineTotal",
             "TaxPercentagePerRow",
             "U_FAM_FECINOC",
-            "Text"
+            // "Text"
             // "GrossTotal"
             // "TaxTotal"
         ]);
@@ -152,7 +152,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "LineTotal",
             "VatPrcnt",
             "U_FAM_FECINOC",
-            "Text"
+            // "Text"
             // "GTotal"
             // "VatSum"
         ]);
@@ -206,7 +206,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     // $detalle->ocd_total, // GrossTotal
                     // '', // VatSum (por calcular o llenar según lógica)
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
-                    UtilHelper::cleanForCSV($detalle->ocd_observacion)
+                    // UtilHelper::cleanForCSV($detalle->ocd_observacion)
                 ]);
 
                 $contadorDetalle++;
