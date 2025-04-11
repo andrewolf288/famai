@@ -162,14 +162,15 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         foreach ($ordenescompra as $key => $orden) {
             $sed_codigo = $ordenescompra->sed_codigo;
             $occ_tipo = $ordenescompra->occ_tipo;
+            $serie = array_filter($series, function ($item) use ($sed_codigo, $occ_tipo) {
+                return $item['sed_codigo'] === $sed_codigo && $item['occ_tipo'] === $occ_tipo;
+            });
 
             $csvCabecera->insertOne([
                 $contador, // DocNum
                 $contador, // DocEntry
                 $occ_tipo == 'SUM' ? 'I' : 'S', // DocType (standard for purchase order)
-                array_filter($series, function ($item) use ($sed_codigo, $occ_tipo) {
-                    return $item['sed_codigo'] === $sed_codigo && $item['occ_tipo'] === $occ_tipo;
-                }),
+                $serie,
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                 $orden->proveedor->prv_codigo, // CardCode
