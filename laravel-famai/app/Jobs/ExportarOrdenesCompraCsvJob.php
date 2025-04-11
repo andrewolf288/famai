@@ -163,7 +163,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             $sed_codigo = $orden->sed_codigo;
             $occ_tipo = $orden->occ_tipo;
             $serie = UtilHelper::getSerieValue($series, $sed_codigo, $occ_tipo);
-            $tipo_documento = $occ_tipo === 'SUM' ? 'I' : 'S';
+            $tipo_documento = 'I';
             
             $csvCabecera->insertOne([
                 $contador, // DocNum
