@@ -135,7 +135,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "LineTotal",
             "TaxPercentagePerRow",
             "U_FAM_FECINOC",
-            "ItemDetails"
+            "Text"
             // "GrossTotal"
             // "TaxTotal"
         ]);
