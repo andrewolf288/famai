@@ -76,9 +76,11 @@
     </div>
     <div class="w-auto">
         <button class="btn btn-success" id="btn-exportar-materiales">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
-                <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M5.884 6.68 8 9.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 10l2.233 2.68a.5.5 0 0 1-.768.64L8 10.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 10 5.116 7.32a.5.5 0 1 1 .768-.64"/>
-              </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
+                <path
+                    d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M5.884 6.68 8 9.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 10l2.233 2.68a.5.5 0 0 1-.768.64L8 10.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 10 5.116 7.32a.5.5 0 1 1 .768-.64" />
+            </svg>
         </button>
     </div>
 </div>
@@ -182,7 +184,8 @@
                                     <div class="col-md-6">
                                         <div>
                                             <label for="cotizacionProveedorCotizacionInput">Número cotización *</label>
-                                            <input type="text" id="cotizacionProveedorCotizacionInput" class="form-control" />
+                                            <input type="text" id="cotizacionProveedorCotizacionInput"
+                                                class="form-control" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -209,13 +212,15 @@
                                 <div class="row mt-3">
                                     <div class="col-md-12">
                                         <label for="observacionFormapagoCotizacionInput">Detalle de pago</label>
-                                        <textarea name="" id="observacionFormapagoCotizacionInput" class="form-control" rows="2"></textarea>
+                                        <textarea name="" id="observacionFormapagoCotizacionInput" class="form-control"
+                                            rows="2"></textarea>
                                     </div>
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-md-12">
                                         <label for="lugarEntregaCotizacionInput">Lugar de entrega</label>
-                                        <textarea name="" id="lugarEntregaCotizacionInput" class="form-control" rows="2"></textarea>
+                                        <textarea name="" id="lugarEntregaCotizacionInput" class="form-control"
+                                            rows="2"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -252,7 +257,17 @@
                 <hr>
                 <!-- SECCION DE DATA DE MATERIALES -->
                 <div class="mt-4">
-                    <h2 class="fs-5">Materiales</h2>
+                    <div class="d-flex justify-content-between">
+                        <h2 class="fs-5">Detalle cotización</h2>
+                        <button class="btn btn-sm btn-success" id="add-product-stock">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                <path
+                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                            </svg>
+                            Agrega producto stock
+                        </button>
+                    </div>
                     <table id="tbl-cotizaciones-materiales" class="table mt-3">
                         <thead>
                             <tr>
@@ -262,7 +277,7 @@
                                 <th class="col-3">Observación</th>
                                 <th class="col-1 text-center">Unidad</th>
                                 <th class="col-1 text-center">Cant. Req</th>
-                                <th class="col-1 text-center">Cant. Ped</th>
+                                <!-- <th class="col-1 text-center">Cant. Ped</th> -->
                                 <th class="col-1 text-center d-none label-precio-unitario">Prec. Uni</th>
                                 <th class="col-1 text-center">Acciones</th>
                             </tr>
@@ -278,6 +293,39 @@
         </div>
     </div>
 </div>
+
+<!-- DIALOG DE PRODUCTO DE STOCK -->
+<div class="modal fade" id="materialesStockModal" tabindex="-1" aria-labelledby="materialesStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="materialesStockModalLabel">Materiales Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #DBDBDB;">
+                <div class="row">
+                    <div class="col-9">
+                        <label for="selectMaterialesStock" class="form-label">
+                            Material
+                        </label>
+                        <select class="form-select" id="selectMaterialesStock"></select>
+                    </div>
+                    <div class="col-3">
+                        <label for="inputCantidadMaterialStock" class="form-label">
+                            Cantidad
+                        </label>
+                        <input type="number" class="form-control" id="inputCantidadMaterialStock" value="1">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background-color: #DBDBDB; border-color: #6C757D;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-agregar-material-stock">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- DIALOG RESPONSABLE -->
 <div class="modal fade" id="responsableModal" tabindex="-1" aria-labelledby="responsableModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

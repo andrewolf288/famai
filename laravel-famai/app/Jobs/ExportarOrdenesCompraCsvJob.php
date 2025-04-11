@@ -34,6 +34,28 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
      */
     public function handle()
     {
+        $series = [
+            [
+                "sed_codigo" => 10,
+                "occ_tipo" => 'SUM',
+                "value" => 929
+            ],
+            [
+                "sed_codigo" => 10,
+                "occ_tipo" => 'SER',
+                "value" => 930
+            ],
+            [
+                "sed_codigo" => 20,
+                "occ_tipo" => 'SUM',
+                "value" => 931
+            ],
+            [
+                "sed_codigo" => 20,
+                "occ_tipo" => 'SER',
+                "value" => 932
+            ]
+        ];
         // Ruta donde se guardaran los archivos
         $rutaDestino = "C:\\OrdenesCompra\\";
         // Verifica si la carpeta existe, si no la crea
@@ -64,6 +86,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'DocNum',
             'DocEntry',
             'DocType',
+            'Serie',
             'DocDate',
             'DocDueDate',
             'CardCode',
@@ -81,6 +104,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'DocNum',
             'DocEntry',
             'DocType',
+            'Serie',
             'DocDate',
             'DocDueDate',
             'CardCode',
@@ -136,10 +160,16 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         $contador = 1;
         // generamos el csv de cabecera
         foreach ($ordenescompra as $key => $orden) {
+            $sed_codigo = $ordenescompra->sed_codigo;
+            $occ_tipo = $ordenescompra->occ_tipo;
+
             $csvCabecera->insertOne([
                 $contador, // DocNum
                 $contador, // DocEntry
-                'I', // DocType (standard for purchase order)
+                $occ_tipo == 'SUM' ? 'I' : 'S', // DocType (standard for purchase order)
+                array_filter($series, function ($item) use ($sed_codigo, $occ_tipo) {
+                    return $item['sed_codigo'] === $sed_codigo && $item['occ_tipo'] === $occ_tipo;
+                }),
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                 $orden->proveedor->prv_codigo, // CardCode
