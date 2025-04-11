@@ -170,7 +170,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 $contador, // DocNum
                 $contador, // DocEntry
                 $occ_tipo == 'SUM' ? 'I' : 'S', // DocType (standard for purchase order)
-                $serie,
+                array_values($serie)[0]['value'],
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                 $orden->proveedor->prv_codigo, // CardCode
