@@ -78,7 +78,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         $ordenescompra = OrdenCompra::with('proveedor', 'moneda')
             ->where('occ_importacion', 0)
             ->get();
-
+        
         // creamos la cabecera del csv
         $csvCabecera = Writer::createFromPath($pathcsvCabeceraTemp, 'w');
         // $csvCabecera->setEnclosure(' ');
@@ -162,15 +162,14 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         foreach ($ordenescompra as $key => $orden) {
             $sed_codigo = $orden->sed_codigo;
             $occ_tipo = $orden->occ_tipo;
-            $serie = array_filter($series, function ($item) use ($sed_codigo, $occ_tipo) {
-                return $item['sed_codigo'] === $sed_codigo && $item['occ_tipo'] === $occ_tipo;
-            });
-
+            $serie = UtilHelper::getSerieValue($series, $sed_codigo, $occ_tipo);
+            $tipo_documento = $occ_tipo === 'SUM' ? 'I' : 'S';
+            
             $csvCabecera->insertOne([
                 $contador, // DocNum
                 $contador, // DocEntry
-                $occ_tipo == 'SUM' ? 'I' : 'S', // DocType (standard for purchase order)
-                array_values($serie)[0]['value'],
+                $tipo_documento, // DocType (standard for purchase order)
+                $serie,
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                 $orden->proveedor->prv_codigo, // CardCode
@@ -184,7 +183,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 // 0, // VatPercent 
                 $orden->occ_numero,
             ]);
-
+            
             $ordenescompradetalle = OrdenCompraDetalle::with('producto')
                 ->where('occ_id', $orden->occ_id)
                 ->get();

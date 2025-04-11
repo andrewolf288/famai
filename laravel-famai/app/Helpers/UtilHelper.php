@@ -104,4 +104,16 @@ class UtilHelper
 
         return $string;
     }
+
+    public static function getSerieValue(array $series, string $sed_codigo, string $occ_tipo): ?int
+    {
+        foreach ($series as $item) {
+            if ($item['sed_codigo'] == $sed_codigo && $item['occ_tipo'] == $occ_tipo) {
+                return $item['value'];
+            }
+        }
+
+        // Puedes retornar null o lanzar una excepción si no se encuentra
+        return null;
+    }
 }
