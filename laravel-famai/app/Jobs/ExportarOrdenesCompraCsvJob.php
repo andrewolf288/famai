@@ -160,8 +160,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         $contador = 1;
         // generamos el csv de cabecera
         foreach ($ordenescompra as $key => $orden) {
-            $sed_codigo = $ordenescompra->sed_codigo;
-            $occ_tipo = $ordenescompra->occ_tipo;
+            $sed_codigo = $orden->sed_codigo;
+            $occ_tipo = $orden->occ_tipo;
             $serie = array_filter($series, function ($item) use ($sed_codigo, $occ_tipo) {
                 return $item['sed_codigo'] === $sed_codigo && $item['occ_tipo'] === $occ_tipo;
             });
