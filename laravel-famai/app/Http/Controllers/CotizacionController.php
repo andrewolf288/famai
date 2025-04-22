@@ -277,9 +277,11 @@ class CotizacionController extends Controller
                     'coc_usucreacion' => $user->usu_codigo,
                     'coc_fecmodificacion' => null,
                     'coc_estado' => $proveedor_unico ? 'RPR' : 'SOL',
+                    'coc_total' => 0
                 ]);
             }
 
+            $total_cotizacion = 0;
             foreach ($detalleMateriales as $detalle) {
 
                 if (isset($detalle['odm_id'])) {
@@ -301,6 +303,7 @@ class CotizacionController extends Controller
                     'cod_cantidad' => $detalle['cod_cantidad'],
                     'cod_parastock' => isset($detalle['cod_parastock']) ? $detalle['cod_parastock'] : 0,
                     'cod_preciounitario' => $detalle['cod_preciounitario'],
+                    'cod_total' => $detalle['cod_total'],
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null
@@ -308,7 +311,13 @@ class CotizacionController extends Controller
 
                 $detalleMaterial->odm_estado = 'COT';
                 $detalleMaterial->save();
+
+                $total_cotizacion += $detalle['cod_total'];
             }
+
+            // actualizamos total de cotizacion
+            $cotizacion->coc_total = round(floatval($total_cotizacion), 2);
+            $cotizacion->save();
 
             // adjuntamos los archivos
             if ($proveedor_unico) {

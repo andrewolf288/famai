@@ -1475,7 +1475,7 @@ $(document).ready(async () => {
         }
 
         try {
-            const { data } = await client.get('comrpasaByProductoProveedor', { params: formatData })
+            const { data } = await client.get('comprasByProductoProveedor', { params: formatData })
             // vaciamos la tabla
             $("#tbl-proveedor-productos-body").empty()
             // llenamos la data

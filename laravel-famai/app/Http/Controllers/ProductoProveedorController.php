@@ -177,4 +177,15 @@ class ProductoProveedorController extends Controller
 
         return response()->json($data);
     }
+
+    public function findOrdenCompraByProducto(Request $request)
+    {
+        $producto = $request->input('producto', null);
+        $data = ProductoProveedor::with('producto', 'proveedor')
+            ->where('pro_id', $producto)
+            ->orderBy('prp_fechaultimacompra', 'desc')
+            ->get();
+
+        return response()->json($data);
+    }
 }

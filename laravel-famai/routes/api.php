@@ -46,6 +46,7 @@ use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\TipoDocumentoReferenciaController;
 use App\MotivoRequerimiento;
 use App\OrdenInternaMateriales;
+use App\ProductoProveedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -436,7 +437,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('comprasByProducto', [ProductoProveedorController::class, 'comprasByProducto']);
     Route::post('ultimas-compras/producto', [ProductoProveedorController::class, 'findByProductoUltimaCompra']);
-    Route::get('comrpasaByProductoProveedor', [ProductoProveedorController::class, 'findOrdenCompraByProveedorProducto']);
+    Route::get('comprasByProductoProveedor', [ProductoProveedorController::class, 'findOrdenCompraByProveedorProducto']);
+    Route::get('comprasByProducto', [ProductoProveedorController::class, 'findOrdenCompraByProducto']);
 });
 
 // rutas de movimientos de almacen

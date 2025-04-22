@@ -3,7 +3,6 @@ $(document).ready(async () => {
     let abortController
     let despliegueMaterialesResumido = []
     let detalleCotizacion = []
-    const STOCK_PREFIX = "STOCK:"
     let archivosAdjuntos = []
 
     // variables para el manejo de datatable
@@ -568,7 +567,39 @@ $(document).ready(async () => {
 
     $("#data-container-body").on('click', '.btn-historico', async function () {
         const producto = $(this).data('historico')
-        initHistoricoByProducto(producto)
+        // initHistoricoByProducto(producto)
+        const formatData = {
+            producto: producto
+        }
+
+        try {
+            const { data } = await client.get('comprasByProducto', { params: formatData })
+            // vaciamos la tabla
+            $("#tbl-proveedor-productos-body").empty()
+            // llenamos la data
+            let content = ''
+            data.forEach(item => {
+                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra } = item
+                content += `
+                    <tr>
+                        <td>${prp_nroordencompra}</td>
+                        <td>${proveedor.prv_nrodocumento}</td>
+                        <td>${proveedor.prv_nombre}</td>
+                        <td>${producto.pro_codigo}</td>
+                        <td>${producto.pro_descripcion}</td>
+                        <td>${parseDateSimple(prp_fechaultimacompra)}</td>
+                        <td>${parseFloat(prp_preciounitario).toFixed(2)}</td>
+                    </tr>
+                `
+            })
+
+            // renderizamos la información
+            $("#tbl-proveedor-productos-body").html(content)
+            // abrimos el modal correspondiente
+            showModalProveedorProductosCompras()
+        } catch (error) {
+            console.log(error)
+        }
     })
 
     // ------------- GESTION DE RESERVACION -------------
@@ -880,6 +911,94 @@ $(document).ready(async () => {
             </tr>`
         }
     }
+
+    // agregar productosde stock a detalle
+    $("#add-product-stock").on('click', async function () {
+        // estructurar informacion
+        $("#selectMaterialesStock").empty()
+        $("#inputCantidadMaterialStock").val("1.00")
+
+        const optionDefault = "<option value=''>Seleccione un material</option>"
+        $("#selectMaterialesStock").append(optionDefault)
+
+        detalleCotizacion.forEach((detalle) => {
+            if (detalle.pro_id) {
+                const option = `<option value="${detalle.pro_id}">${detalle.pro_descripcion}</option>`
+                $("#selectMaterialesStock").append(option)
+            }
+        })
+        // mostrar el modal
+        showModalProductoStock()
+    })
+
+    // accion de agregar material de stock
+    $("#btn-agregar-material-stock").on('click', function () {
+        // validamos informacion
+        const valueMaterial = $("#selectMaterialesStock").val()
+        const valueCantidad = $("#inputCantidadMaterialStock").val()
+
+        let handleError = ''
+
+        if (valueMaterial.length === 0) {
+            handleError += "- Debes seleccionar un material\n"
+        }
+
+        if (!esValorNumericoValidoYMayorQueCero(valueCantidad)) {
+            handleError += "- La cantidad ingresada debe ser un valor numérico mayor que cero"
+        }
+
+        if (handleError.length !== 0) {
+            alert(handleError)
+            return
+        }
+        // añadimos información al dom del table de detalle de cotización
+        const findProducto = detalleCotizacion.find(element => element.pro_id == valueMaterial)
+        if (findProducto) {
+            const row = `
+                <tr>
+                    <input type="hidden" value="${findProducto.pro_id}" class="producto-detalle"/>
+                    <td>Stock</td>
+                    <td class="codigo-detalle">${findProducto.pro_codigo}</td>
+                    <td class="descripcion-detalle">${findProducto.pro_descripcion}</td>
+                    <td>
+                        <textarea class="form-control observacion-detalle" rows="1"></textarea>
+                    </td>
+                    <td class="text-center unidad-detalle">${findProducto.uni_codigo}</td>
+                    <td class="text-center cantidad-requerida-detalle">${valueCantidad}</td>
+                    <td class="text-center">
+                        <input type="number" class="form-control cantidad-pedida-detalle" value="${valueCantidad}" min="${valueCantidad}" />
+                    </td>
+                    <td class="text-center d-none label-precio-unitario-detalle">
+                        <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center">
+                            <button class="btn btn-sm btn-secondary btn-detalle me-1 disabled">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1" data-historico="${findProducto.pro_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                                    <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                                    <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                                    <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-delete-detalle-material">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                    <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `
+            $('#tbl-cotizaciones-materiales tbody').append(row)
+        }
+
+    })
 
     // mostrar información a cotizar
     $("#btn-cotizar-materiales").on('click', async function () {
@@ -1298,11 +1417,12 @@ $(document).ready(async () => {
                 coc_fechavalidez: fechaValidezCotizacion ? transformarFecha(fechaValidezCotizacion) : null,
                 coc_formapago: formapagoCotizacion || '',
                 coc_notas: observacionFormapagoCotizacion || '',
-                coc_lugarentrega: lugarEntregaCotizacion || ''
+                coc_lugarentrega: lugarEntregaCotizacion || '',
             }
         }
 
         const detalleMateriales = []
+        const detalleMaterialesStock = []
 
         const rows = $('#tbl-cotizaciones-materiales tbody tr')
         let cod_orden = 1;
@@ -1315,41 +1435,63 @@ $(document).ready(async () => {
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
 
-            const detalleIndex = detalleCotizacion[index]
-            if (detalleIndex.odm_id === undefined) {
-                detalleIndex.detalle.forEach(detalle => {
+            // valores detalle de cotizacion
+            if (index !== undefined) {
+                const detalleIndex = detalleCotizacion[index]
+                if (detalleIndex.odm_id === undefined) {
+                    detalleIndex.detalle.forEach(detalle => {
+                        detalleMateriales.push({
+                            cod_orden: cod_orden,
+                            odm_id: detalle.odm_id,
+                            pro_id: detalleIndex.pro_id,
+                            uni_codigo: detalle.producto.uni_codigo,
+                            cod_descripcion: detalle.producto.pro_descripcion,
+                            cod_observacion: observacion,
+                            cod_cantidad: detalle.odm_cantidad,
+                            cod_preciounitario: precioUnitario,
+                            cod_total: parseFloat(detalle.odm_cantidad * precioUnitario).toFixed(2)
+                        })
+                    })
+                } else {
                     detalleMateriales.push({
                         cod_orden: cod_orden,
-                        odm_id: detalle.odm_id,
                         pro_id: detalleIndex.pro_id,
-                        uni_codigo: detalle.producto.uni_codigo,
-                        cod_descripcion: detalle.producto.pro_descripcion,
+                        odm_id: detalleIndex.odm_id,
+                        uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
+                        cod_descripcion: detalleIndex.odm_descripcion,
                         cod_observacion: observacion,
-                        cod_cantidad: detalle.odm_cantidad,
-                        cod_preciounitario: precioUnitario
+                        cod_cantidad: detalleIndex.odm_cantidad,
+                        cod_preciounitario: precioUnitario,
+                        cod_total: parseFloat(detalleIndex.odm_cantidad * precioUnitario).toFixed(2)
                     })
-                })
+                }
             } else {
-                detalleMateriales.push({
+                detalleMaterialesStock.push({
                     cod_orden: cod_orden,
-                    pro_id: detalleIndex.pro_id,
-                    odm_id: detalleIndex.odm_id,
-                    uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
-                    cod_descripcion: detalleIndex.odm_descripcion,
-                    cod_observacion: observacion,
-                    cod_cantidad: detalleIndex.odm_cantidad,
-                    cod_preciounitario: precioUnitario
+                    pro_id: $(this).find('.producto-detalle').val(),
+                    odm_id: null,
+                    uni_codigo: $(this).find('.unidad-detalle').text(),
+                    cod_descripcion: $(this).find('.descripcion-detalle').text(),
+                    cod_observacion: $(this).find('.observacion-detalle').val(),
+                    cod_cantidad: $(this).find('.cantidad-pedida-detalle').val(),
+                    cod_preciounitario: precioUnitario,
+                    cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(2)
                 })
             }
             cod_orden++
         })
 
+
         const formatData = {
             proveedor,
             detalle_materiales: detalleMateriales,
+            detalle_materiales_stock: detalleMaterialesStock,
             proveedor_unico: proveedor_unico,
             cotizacion: cotizacion
         }
+
+        console.log(formatData)
+        // return
 
         const formData = new FormData()
         if (proveedor_unico) {
@@ -1467,7 +1609,7 @@ $(document).ready(async () => {
         }
 
         try {
-            const { data } = await client.get('comrpasaByProductoProveedor', { params: formatData })
+            const { data } = await client.get('comprasByProductoProveedor', { params: formatData })
             // vaciamos la tabla
             $("#tbl-proveedor-productos-body").empty()
             // llenamos la data
@@ -1702,10 +1844,14 @@ $(document).ready(async () => {
         modal.show();
     }
 
-    // mostrar modal previsualizacion de pdf
-    function showModalPreview(pdfUrl) {
-        document.getElementById('pdf-frame').src = pdfUrl;
-        const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));
-        modal.show();
+    // mostrar modal de productos stock
+    function showModalProductoStock() {
+        const modalElement = document.getElementById('materialesStockModal')
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        })
+
+        modal.show()
     }
 })
