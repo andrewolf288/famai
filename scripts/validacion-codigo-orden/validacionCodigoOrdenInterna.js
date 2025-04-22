@@ -307,7 +307,7 @@ $(document).ready(async () => {
             modalAsignacionCodigo.hide()
 
             // cargamos la informacion
-            obtenerFiltrosActuales()
+            initDataTable(obtenerFiltrosActuales())
         } catch (error) {
             console.log(error)
             alert('Error al asignar el codigo')
@@ -335,7 +335,7 @@ $(document).ready(async () => {
 
         try {
             await client.post('detalleMaterialesOrdenInterna/verificar-materiales', formatData)
-            obtenerFiltrosActuales()
+            initDataTable(obtenerFiltrosActuales())
         } catch (error) {
             console.log(error)
             alert('Error al verificar los materiales')
