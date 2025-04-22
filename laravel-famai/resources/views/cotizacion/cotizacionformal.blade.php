@@ -227,13 +227,13 @@
             <td style="font-weight: bold;font-size: 10px">FECH. VALIDEZ</td>
             <td style="font-size: 10px">{{ $cotizacion['coc_fechavalidez'] ? DateTime::createFromFormat('Y-m-d', $cotizacion['coc_fechavalidez'])->format('d/m/Y'): '' }}</td>
             <td style="font-weight: bold;font-size: 10px">FORMA DE PAGO:</td>
-            <td style="font-size: 10px">{{ explode("-",$cotizacion['coc_formapago'])[0] }}</td>
+            <td style="font-size: 10px">{{ $cotizacion['coc_formapago'] }}</td>
             <td style="font-weight: bold;font-size: 10px">CORREO CONTACTO:</td>
             <td style="font-size: 10px">{{ $cotizacion['coc_correocontacto'] ? $cotizacion['coc_correocontacto']: '' }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold;font-size: 10px">DETALLE PAGO:</td>
-            <td colspan="5" style="font-size: 10px">{{ explode("-",$cotizacion['coc_formapago'])[1] }}</td>
+            <td colspan="5" style="font-size: 10px">{{ $cotizacion['coc_formapago'] }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold;font-size: 10px">LUGAR DE ENTREGA:</td>
