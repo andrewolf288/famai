@@ -491,11 +491,15 @@ class CotizacionController extends Controller
                     'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
                     'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
                     // 'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
-                    'cod_cantidadcotizada' => $detalle->sum(fn($d) => floatval($d->cod_cantidadcotizada)),
+                    'cod_cantidadcotizada' => $detalle->sum(function ($d) {
+                        return floatval($d->cod_cantidadcotizada);
+                    }),
                     'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                     'cod_preciounitario' => $detalle->first()->cod_preciounitario,
                     // 'cod_total' => $detalle->sum('cod_total'),
-                    'cod_total' => $detalle->sum(fn($d) => floatval($d->cod_total)),
+                    'cod_total' => $detalle->sum(function ($d) {
+                        return floatval($d->cod_total);
+                    }),
                     'flag_selecto' => true
                 ];
             })
@@ -1070,9 +1074,9 @@ class CotizacionController extends Controller
         // buscamos las cotizaciones detalle correspondientes
         $detallesCotizaciones = CotizacionDetalle::whereIn('cod_id', $detalles)
             ->get();
-        
+
         $cotizacion = null;
-        if(count($detallesCotizaciones) > 0){
+        if (count($detallesCotizaciones) > 0) {
             $coc_id = $detallesCotizaciones[0]->coc_id;
             $cotizacion = Cotizacion::findOrFail($coc_id);
         }
