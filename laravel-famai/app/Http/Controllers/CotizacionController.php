@@ -490,10 +490,12 @@ class CotizacionController extends Controller
                     'cod_observacion' => $detalle->first()->cod_observacion,
                     'cod_observacionproveedor' => $detalle->first()->cod_observacionproveedor,
                     'uni_codigo' => $detalle->first()->producto ? $detalle->first()->producto->uni_codigo : '',
-                    'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
+                    // 'cod_cantidadcotizada' => $detalle->sum('cod_cantidadcotizada'),
+                    'cod_cantidadcotizada' => $detalle->sum(fn($d) => floatval($d->cod_cantidadcotizada)),
                     'cod_tiempoentrega' => $detalle->first()->cod_tiempoentrega,
                     'cod_preciounitario' => $detalle->first()->cod_preciounitario,
-                    'cod_total' => $detalle->sum('cod_total'),
+                    // 'cod_total' => $detalle->sum('cod_total'),
+                    'cod_total' => $detalle->sum(fn($d) => floatval($d->cod_total)),
                     'flag_selecto' => true
                 ];
             })
@@ -514,7 +516,8 @@ class CotizacionController extends Controller
             'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
             'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
             'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-            'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
+            // 'total_format' => UtilHelper::convertirNumeroALetras($cotizacion->coc_total),
+            'total_format' => UtilHelper::convertirNumeroALetras(floatval($cotizacion->coc_total)),
         ];
 
         return Pdf::loadView('cotizacion.cotizacionformal', $data)
