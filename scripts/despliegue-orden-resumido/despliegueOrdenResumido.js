@@ -177,7 +177,11 @@ $(document).ready(async () => {
     })
 
     // gestion de multiselect
-    $('#filterMultipleSelector').multiselect()
+    $('#filterMultipleSelector').multiselect({
+        texts: {
+            placeholder: "Estado"
+        }
+    })
 
     // traer informacion de almacenes
     async function traerInformacionAlmacenes() {
