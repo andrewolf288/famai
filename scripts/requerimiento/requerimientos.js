@@ -60,6 +60,11 @@ $(document).ready(() => {
                                     <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                                 </svg>
                             </button>-->
+                            <button class="btn btn-sm btn-outline-danger btn-requerimiento-anular me-2 d-flex align-items-center justify-content-center" ${requerimiento.ordenes_compra.length !== 0 || requerimiento.oic_estado === 'ANULADO' ? 'disabled' : ''} data-cotizaciones='${JSON.stringify(requerimiento.cotizaciones)}' data-requerimiento="${requerimiento.oic_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+                                </svg>
+                            </button>
                         </div>
                     </td>
                     <td>${requerimiento.oic_feccreacion === null ? 'No aplica' : parseDate(requerimiento.oic_feccreacion)}</td>
@@ -142,6 +147,32 @@ $(document).ready(() => {
             //         alert('Error al eliminar el requerimiento')
             //     }
             // }
+        }
+    })
+
+    $('#data-container').on('click', '.btn-requerimiento-anular', async function () {
+        const cotizaciones = ($(this).data('cotizaciones'))
+        if (cotizaciones.length > 0) {
+            console.log("habia cotizaciones")
+            $('#alert-anular-requerimiento').removeClass('d-none')
+        } else {
+            console.log("no habia cotizaciones")
+            $('#alert-anular-requerimiento').addClass('d-none')
+        }
+        $($('#btn-anular-requerimiento')).data('requerimiento', $(this).data('requerimiento'))
+        const modal = new bootstrap.Modal(document.getElementById("anularRequerimientoModal"));
+        modal.show();
+    })
+    
+    $('#btn-anular-requerimiento').on('click', async function () {
+        const id = $(this).data('requerimiento')
+        try {
+            await client.delete(`/requerimiento/${id}`)
+            initPagination(`${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions)
+            $('#anularRequerimientoModal').modal('hide')
+        } catch (error) {
+            console.log(error)
+            alert('Error al anular el requerimiento')
         }
     })
 

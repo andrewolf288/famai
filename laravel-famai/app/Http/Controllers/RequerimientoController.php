@@ -22,6 +22,49 @@ use Illuminate\Support\Facades\Validator;
 
 class RequerimientoController extends Controller
 {
+    // funcion para eliminar un requerimiento
+    public function destroy($id) {
+        try {
+            DB::beginTransaction();
+            $user = auth()->user();
+            
+            $requerimiento = OrdenInterna::findOrFail($id);
+            
+            // Actualizar el estado a ANULADO
+            $requerimiento->update([
+                'oic_estado' => 'ANULADO',
+                'oic_fecmodificacion' => now(),
+                'oic_usumodificacion' => $user->usu_codigo
+            ]);
+            
+            // Eliminar los registros relacionados en cascada
+            foreach ($requerimiento->partes as $parte) {
+                // Eliminar los adjuntos de materiales
+                foreach ($parte->materiales as $material) {
+                    $material->detalleAdjuntos()->delete();
+                }
+                // Eliminar las cotizaciones
+                foreach ($parte->materiales as $material) {
+                    foreach ($material->cotizaciones as $cotizacion) {
+                        $cotizacion->delete();
+                    }
+                }
+
+                // Eliminar los materiales
+                $parte->materiales()->delete();
+                
+                // Eliminar la parte
+                $parte->delete();
+
+            }
+            
+            DB::commit();
+            return response()->json(['message' => 'Requerimiento anulado correctamente'], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
     // funcion para traer toda la informaicion de requerimientos
     public function index(Request $request)
@@ -33,7 +76,13 @@ class RequerimientoController extends Controller
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
 
-        $query = OrdenInterna::with(['area', 'trabajadorOrigen', 'motivoRequerimiento'])
+        $query = OrdenInterna::with([
+            'area', 
+            'trabajadorOrigen', 
+            'motivoRequerimiento',
+            'partes.materiales.ordenesCompra.ordenCompra',
+            'partes.materiales.cotizaciones.cotizacion'
+        ])
             ->where('oic_tipo', 'REQ');
 
         if ($odtNumero !== null) {
@@ -47,9 +96,33 @@ class RequerimientoController extends Controller
 
         $requerimientos = $query->paginate($pageSize, ['*'], 'page', $page);
 
-        // Agregar el total de materiales
+        // Agregar el total de materiales, las ordenes de compra y las cotizaciones
         $requerimientos->getCollection()->transform(function ($ordenInterna) {
             $ordenInterna->total_materiales = $ordenInterna->totalMateriales();
+            
+            $ordenesCompra = collect();
+            $cotizaciones = collect();
+
+            foreach ($ordenInterna->partes as $parte) {
+                foreach ($parte->materiales as $material) {
+                    // obtener las ordenes de compra
+                    foreach ($material->ordenesCompra as $ordenCompraDetalle) {
+                        if ($ordenCompraDetalle->ordenCompra) {
+                            $ordenesCompra->push($ordenCompraDetalle->ordenCompra);
+                        }
+                    }
+                    // obtener las cotizaciones
+                    foreach ($material->cotizaciones as $cotizacionDetalle) {
+                        if ($cotizacionDetalle->cotizacion) {
+                            $cotizaciones->push($cotizacionDetalle->cotizacion);
+                        }
+                    }
+                }
+            }
+            
+            // Eliminar duplicados y asignar al requerimiento
+            $ordenInterna->ordenes_compra = $ordenesCompra->unique('occ_id')->values();
+            $ordenInterna->cotizaciones = $cotizaciones->unique('cot_id')->values();
             return $ordenInterna;
         });
 
