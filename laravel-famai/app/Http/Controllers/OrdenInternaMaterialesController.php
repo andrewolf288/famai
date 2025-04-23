@@ -28,6 +28,36 @@ use Illuminate\Support\Facades\Storage;
 class OrdenInternaMaterialesController extends Controller
 {
 
+    public function asignarResponsableEnBloque(Request $request, $idResponsable)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+
+            $request->validate([
+                'idsDetalles' => 'required|array',
+                'idsDetalles.*' => 'required|integer'
+            ]);
+
+            $detalleMaterialesFilter = $request->input('idsDetalles');
+
+            OrdenInternaMateriales::whereIn('odm_id', $detalleMaterialesFilter)
+                ->update([
+                    'tra_responsable' => $idResponsable,
+                    'odm_fecasignacionresponsable' => Carbon::now(),
+                    'odm_usumodificacion' => $user->usu_codigo,
+                ]);
+
+            $trabajador = Trabajador::find($idResponsable);
+
+            DB::commit();
+            return response()->json(['message' => 'Responsable asignado en bloque', 'nombreResponsable' => $trabajador->tra_nombre, 'idsDetalles' => $detalleMaterialesFilter], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();

@@ -828,6 +828,40 @@ $(document).ready(async () => {
         }
     })
 
+    // ------------- ASIGNACION DE RESPONSABLE EN BLOQUE -------------
+    $("#btn-asignar-responsable-en-bloque").on('click', async function () {
+        const idsDetalles = $("#ids-detalles-seleccionados").val().split(',').map(Number)
+        const responsable = $("#responsable-select-bloque").val()
+        const indexDetalles = $("#index-detalles-seleccionados").val().split(',').map(Number)
+
+        if (idsDetalles.length === 0) {
+            alert('No se han seleccionado detalles de materiales')
+            return
+        }
+
+        if (responsable.length === 0) {
+            alert('No se ha seleccionado un responsable')
+            return
+        }
+
+        try {
+            const { data } = await client.put(`/ordeninternamateriales/asignar-responsable-en-bloque/${responsable}`, { idsDetalles })
+
+            const rows = dataTable.rows().nodes().to$().filter(function () {
+                return indexDetalles.includes($(this).find('button.btn-responsable').data('index-detalle'));
+            })
+            rows.each(function () {
+                $(this).find('button.btn-responsable').text(data.nombreResponsable)
+            })
+
+            const loadModalResponsable = bootstrap.Modal.getInstance(document.getElementById('responsableModalBloque'))
+            loadModalResponsable.hide()
+        } catch (error) {
+            console.error(error)
+            alert('Error al asignar responsable en bloque')
+        }
+    })
+
     // --------------- MANEJO DE COTIZACIONES --------------
     function renderRowCotizacion(detalle, index) {
         if (detalle.odm_id === undefined) {
@@ -1002,6 +1036,36 @@ $(document).ready(async () => {
             $('#tbl-cotizaciones-materiales tbody').append(row)
         }
 
+    })
+
+    // accion de asignar responsable
+    $("#btn-asignar-responsable").on('click', function () {
+        // debemos obtener los materiales seleccionados
+        const filasSeleccionadas = dataTable.rows({ selected: true }).nodes();
+        const indicesSeleccionados = [];
+        $(filasSeleccionadas).each(function (index, node) {
+            const valor = $(node).data('index');
+            indicesSeleccionados.push(valor);
+        });
+
+        // debe al menos seleccionarse un item
+        if (indicesSeleccionados.length === 0) {
+            alert('Debe seleccionar al menos un material')
+            return
+        }
+
+        // extraer la informacion de los materiales seleccionados
+        const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index))
+        const idsDetalles = []
+        dataSeleccionada.forEach((data) => {
+            data.detalle.forEach((detalle) => {
+                idsDetalles.push(detalle.odm_id)
+            })
+        })
+
+        $("#ids-detalles-seleccionados").val(idsDetalles)
+        $("#index-detalles-seleccionados").val(indicesSeleccionados)
+        showModalResponsableBloque()
     })
 
     // mostrar información a cotizar
@@ -1768,6 +1832,28 @@ $(document).ready(async () => {
         return params = new URLSearchParams({
             param: detalleMaterial.detalle.map(detalle => detalle.odm_id).join(','),
         })
+    }
+
+    // mostrar modal de asignacion de responsable
+    async function showModalResponsableBloque() {
+        const modalElement = document.getElementById("responsableModalBloque")
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        })
+
+        const { data } = await client.get('/trabajadoresSimple')
+
+        // Ordenar la data alfabéticamente según el nombre (índice [1])
+        data.sort((a, b) => a.tra_nombre.localeCompare(b.tra_nombre))
+
+        $("#responsable-select-bloque").append($('<option selected>').val('').text('Sin responsable'))
+        data.forEach(trabajador => {
+            const option = $(`<option>`).val(trabajador.tra_id).text(trabajador.tra_nombre)
+            $("#responsable-select-bloque").append(option.clone())
+        })
+
+        modal.show()
     }
 
     // mostrar modal de cotizaciones

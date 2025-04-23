@@ -60,6 +60,7 @@
 
 <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
     <div class="w-auto me-4">
+        <button class="btn btn-success me-2" id="btn-asignar-responsable">Asignar Responsable</button>
         <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
     </div>
     <div class="w-25 me-4">
@@ -708,6 +709,29 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE ASIGNACION DE RESPONSABLE EN BLOQUE -->
+<div class="modal fade" id="responsableModalBloque" tabindex="-1" aria-labelledby="responsableModalBloqueLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="responsableModalBloqueLabel">Asignar responsable en bloque</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="text" id="ids-detalles-seleccionados" hidden>
+                    <input type="text" id="index-detalles-seleccionados" hidden>
+                    <select id="responsable-select-bloque" class="form-select"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btn-asignar-responsable-en-bloque">Guardar</button>
             </div>
         </div>
     </div>

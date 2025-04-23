@@ -227,6 +227,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('detalleMaterialesOrdenInterna-pendientes-entregar', [OrdenInternaMaterialesController::class, 'detalleMaterialesPorEmitirNotaSalida']);
     Route::post('detalleMaterialesOrdenInterna-pendientes-entregar', [OrdenInternaMaterialesController::class, 'detalleMaterialesPorEmitirNotaSaliadByIds']);
     Route::get('detalleMaterialesOrdenInterna-logistica-excel', [OrdenInternaMaterialesController::class, 'exportLogisticaRequerimientos']);
+    Route::put('ordeninternamateriales/asignar-responsable-en-bloque/{idResponsable}', [OrdenInternaMaterialesController::class, 'asignarResponsableEnBloque']);
 });
 
 // rutas detalle de adjuntos detalle materiales
