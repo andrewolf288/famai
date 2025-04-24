@@ -321,7 +321,7 @@ class OrdenInternaMaterialesController extends Controller
                     return null;
                 }
                 $producto_codigo = $producto->pro_codigo;
-
+                // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
                 $totalProveedores = $producto->proveedores_count ?? 0;
 
                 $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
