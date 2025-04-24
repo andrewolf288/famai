@@ -11,7 +11,7 @@ $(document).ready(() => {
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", new Date());
+    }).datepicker("setDate", new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 
     $("#fechaHasta").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -136,7 +136,7 @@ $(document).ready(() => {
     })
 
     // inicializamos la paginacion con datatable
-    initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
+    initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
 
     // FUNCION PARA VER DETALLE DE COTIZACION
     $('#data-container').on('click', '.btn-cotizacion-detalle', async function () {

@@ -39,6 +39,8 @@ class CotizacionController extends Controller
 
         $coc_numero = $request->input('coc_numero', null);
         $coc_estado = $request->input('coc_estado', null);
+        $fechaDesde = $request->input('fecha_desde', null);
+        $fechaHasta = $request->input('fecha_hasta', null);
 
         $query = Cotizacion::with(['proveedor', 'moneda'])
             ->where('sed_codigo', $sed_codigo);
@@ -51,6 +53,8 @@ class CotizacionController extends Controller
         }
 
         $query->orderBy('coc_fechacotizacion', 'desc');
+        $query->where('coc_fechacotizacion', '>=', $fechaDesde);
+        $query->where('coc_fechacotizacion', '<=', $fechaHasta);
 
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
@@ -306,7 +310,8 @@ class CotizacionController extends Controller
                     'cod_total' => $detalle['cod_total'],
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
-                    'cod_fecmodificacion' => null
+                    'cod_fecmodificacion' => null,
+                    'cod_cantidadcotizada' => $detalle['cod_cantidadcotizada']
                 ]);
 
                 $detalleMaterial->odm_estado = 'COT';
