@@ -225,7 +225,10 @@ class OrdenInternaMaterialesController extends Controller
         $query = OrdenInternaMateriales::with(
             [
                 'responsable',
-                'producto.unidad',
+                'producto' => function($q) {
+                    $q->withCount('proveedores'); // Contar proveedores aquí
+                    $q->with('unidad');         // Cargar unidad aquí
+                },
                 'ordenInternaParte.ordenInterna',
                 'detalleAdjuntos'
             ]
@@ -314,8 +317,12 @@ class OrdenInternaMaterialesController extends Controller
             ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo) {
 
                 $producto = $grupo->first()->producto;
+                if (!$producto) {
+                    return null;
+                }
                 $producto_codigo = $producto->pro_codigo;
-                // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
+
+                $totalProveedores = $producto->proveedores_count ?? 0;
 
                 $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
                 $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)
@@ -339,7 +346,8 @@ class OrdenInternaMaterialesController extends Controller
                     'pro_id' => $pro_id,
                     'pro_codigo' => $producto_codigo,
                     'pro_descripcion' => $producto->pro_descripcion,
-                    'uni_codigo' => $producto->unidad->uni_codigo,
+                    // Acceder a la unidad desde el producto cargado
+                    'uni_codigo' => $producto->unidad ? $producto->unidad->uni_codigo : null,
                     'cantidad' => $grupo->sum('odm_cantidadpendiente'),
                     // 'cantidad' => $grupo->sum('odm_cantidad'),
                     // 'stock' => $productoStock ? $productoStock['alp_stock'] : 0.00,
@@ -351,8 +359,10 @@ class OrdenInternaMaterialesController extends Controller
                     'tiene_adjuntos' => $grupo->some(function ($item) {
                         return $item->detalleAdjuntos->isNotEmpty();
                     }),
+                    'proveedores_count' => $totalProveedores,
                 ];
             })
+            ->filter() // Añadir filter para remover posibles valores null si el producto no se cargó
             ->values();
 
         $sinAgrupar = $data

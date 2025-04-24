@@ -108,4 +108,10 @@ class Producto extends Model
     {
         return $this->hasMany(OrdenCompraDetalle::class, 'pro_id', 'pro_id');
     }
+
+    // proveedores
+    public function proveedores()
+    {
+        return $this->hasMany(ProductoProveedor::class, 'pro_id');
+    }
 }

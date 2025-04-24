@@ -254,7 +254,7 @@ $(document).ready(async () => {
             let content = ''
             data.forEach((material, index) => {
                 // if (material.detalle !== undefined) {
-                const { pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada, tiene_adjuntos } = material
+                const { proveedores_count, pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada, tiene_adjuntos } = material
                 content += `
                 <tr data-index="${index}">
                     <td></td>
@@ -274,10 +274,18 @@ $(document).ready(async () => {
                                     </svg>
                                 </span>
                             ` : ''}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                ${detalle.length}
+                            </span>
                         </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>Ver histórico</button>
+                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico position-relative" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>
+                            Ver histórico
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                ${proveedores_count}
+                            </span>
+                        </button>
                     </td>
                     <td>
                         <button class="btn btn-sm btn-primary btn-responsable" data-index-detalle="${index}">
