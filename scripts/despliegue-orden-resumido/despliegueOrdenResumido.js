@@ -481,13 +481,9 @@ $(document).ready(async () => {
             <td>${parseDateSimple(cotizacion.coc_fechacotizacion)}</td>
             <td>${cotizacion.coc_numero}</td>
             <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
-            <td>
-                <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : cotizacion.coc_estado === 'RPR' ? 'bg-primary' : 'bg-success'}">
-                    ${cotizacion.coc_estado}
-                </span>
-            </td>
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
+            <td>${detalle.detalle_material.producto.pro_codigo}</td>
             <td>${detalle.cod_descripcion}</td>
             <td class="text-center">${detalle.cod_cantidad || 'N/A'}</td>
             <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.cod_preciounitario || 'N/A'}</td>
@@ -509,13 +505,9 @@ $(document).ready(async () => {
             rowItem.innerHTML = `
             <td>${parseDateSimple(orden_compra.occ_fecha)}</td>
             <td>${orden_compra.occ_numero}</td>
-            <td>
-                <span class="badge bg-primary">
-                    ${orden_compra.occ_estado}
-                </span>
-            </td>
             <td>${proveedor.prv_nrodocumento}</td>
             <td>${proveedor.prv_nombre}</td>
+            <td>${detalle.detalle_material.producto.pro_codigo}</td>
             <td>${detalle.ocd_descripcion}</td>
             <td class="text-center">${detalle.ocd_cantidad || 'N/A'}</td>
             <td class="text-center">${moneda?.mon_simbolo || ''} ${detalle.ocd_preciounitario || 'N/A'}</td>
@@ -594,13 +586,15 @@ $(document).ready(async () => {
                 const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra } = item
                 content += `
                     <tr>
-                        <td>${prp_nroordencompra}</td>
-                        <td>${proveedor.prv_nrodocumento}</td>
-                        <td>${proveedor.prv_nombre}</td>
-                        <td>${producto.pro_codigo}</td>
-                        <td>${producto.pro_descripcion}</td>
-                        <td>${parseDateSimple(prp_fechaultimacompra)}</td>
-                        <td>${parseFloat(prp_preciounitario).toFixed(2)}</td>
+                    <td>${parseDateSimple(prp_fechaultimacompra)}</td>
+                    <td>${prp_nroordencompra}</td>
+                    <td>${proveedor.prv_nrodocumento}</td>
+                    <td>${proveedor.prv_nombre}</td>
+                    <td>${producto.pro_codigo}</td>
+                    <td>${producto.pro_descripcion}</td>
+                    <td class="text-center"></td>
+                    <td class="text-center">${parseFloat(prp_preciounitario).toFixed(2)}</td>
+                    <td class="text-center"></td>
                     </tr>
                 `
             })
@@ -871,7 +865,7 @@ $(document).ready(async () => {
     })
 
     // --------------- MANEJO DE COTIZACIONES --------------
-    function renderRowCotizacion(detalle, index) {
+    function renderRowCotizacion(detalle, index, proveedor) {
         if (detalle.odm_id === undefined) {
             const observacion = unionObservaciones(detalle.detalle)
             const rowsObs = observacion.split('\n').length
@@ -890,7 +884,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" min="${detalle.cantidad}" readonly disabled/>
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
+                    <input type="number" class="form-control precio-unitario-detalle" value="${proveedor.precio_unitario}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -930,7 +924,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" min="${detalle.odm_cantidad}" readonly disabled/>
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
+                    <input type="number" class="form-control precio-unitario-detalle" value="${proveedor.precio_unitario}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -1172,7 +1166,8 @@ $(document).ready(async () => {
         $('#tbl-cotizaciones-materiales tbody').empty()
         let content = ''
         detalleCotizacion.forEach((detalle, index) => {
-            content += renderRowCotizacion(detalle, index)
+            const proveedor = data.find(proveedor => proveedor.pro_id === detalle.pro_id)
+            content += renderRowCotizacion(detalle, index, proveedor)
         })
 
         $('#tbl-cotizaciones-materiales tbody').html(content)

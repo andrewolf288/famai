@@ -3,12 +3,13 @@ $(document).ready(() => {
   const modulos = JSON.parse(localStorage.getItem('modulos'));
   const { procesos } = modulos
 
-  function createCard(title, url) {
+  function createCard(title, url, colorIndex) {
+    const colores = ['#C3E2EB', '#C4CAEB', '#CAC3EB']
     return `
           <div class="col-lg-6 col-md-6 col-12 mb-5">
-            <div class="card bg-light border-0 h-100">
-              <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
-                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4">
+            <div class="card border-1 h-100 shadow-sm" style="background-color: ${colores[colorIndex]}">
+              <div class="card-body text-center flex flex-column justify-content-center align-items-center p-4">
+                <div class="feature bg-primary bg-gradient text-white rounded-3">
                   <i class="bi bi-collection"></i>
                 </div>
                 <h2 class="fs-4 fw-bold">${title}</h2>
@@ -23,8 +24,11 @@ $(document).ready(() => {
   const container = document.getElementById("cards-container");
 
   // Itera sobre los datos y agrega cada tarjeta al contenedor
+  let colorIndex = 0;
   procesos.forEach(proceso => {
-    container.innerHTML += createCard(proceso.mol_descripcion, proceso.mol_url);
+    container.innerHTML += createCard(proceso.mol_descripcion, proceso.mol_url, colorIndex);
+    if (proceso.mol_descripcion === 'Despliegue OT-Materiales') return colorIndex = 1
+    if (proceso.mol_descripcion === 'OIs Validación Códigos') return colorIndex = 2
   });
 
   function cargarListaNotificaciones(data) {

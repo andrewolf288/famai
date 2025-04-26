@@ -26,6 +26,6 @@ class Modulo extends Model
 
     public function scopeSelectFields($query)
     {
-        return $query->select('mol_id', 'mol_descripcion', 'mol_tipo', 'mol_url');
+        return $query->select('mol_id', 'mol_descripcion', 'mol_tipo', 'mol_url', 'mol_feccreacion');
     }
 }

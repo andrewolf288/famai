@@ -148,7 +148,7 @@ class ProductoProveedorController extends Controller
         $productos = $request->input('productos', []);
 
         $data = ProductoProveedor::with(['proveedor', 'producto'])
-            ->select('pro_id', 'prv_id', 'prp_fechaultimacompra')
+            ->select('pro_id', 'prv_id', 'prp_fechaultimacompra', 'prp_preciounitario')
             ->whereIn('pro_id', $productos)
             ->orderBy('prp_fechaultimacompra', 'desc')
             ->get()
@@ -158,7 +158,13 @@ class ProductoProveedorController extends Controller
             });
 
         $dataProveedores = $data->map(function ($item) {
-            return $item->proveedor;
+            return array_merge(
+                $item->proveedor->toArray(),
+                [
+                    'precio_unitario' => $item->prp_preciounitario,
+                    'pro_id' => $item->pro_id
+                ]
+            );
         })->unique('prv_id')->values();
 
         return response()->json($dataProveedores);

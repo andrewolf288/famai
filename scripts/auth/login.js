@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     result.procesos.push(mod.modulo);
                 }
             })
+            result.maestros.sort((a, b) => new Date(a.mol_feccreacion) - new Date(b.mol_feccreacion));
+            result.procesos.sort((a, b) => new Date(a.mol_feccreacion) - new Date(b.mol_feccreacion));
             localStorage.setItem('modulos', JSON.stringify(result))
 
             window.location.href = `/${config.XAMPP_CARPET}`

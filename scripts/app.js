@@ -263,7 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para crear enlaces de menú
     function crearEnlaceMenu(descripcion, url) {
-        return `<li><a class="dropdown-item" href="${url}">${descripcion}</a></li>`;
+        let li = `<li><a class="dropdown-item" href="${url}">${descripcion}</a></li>`
+        if (descripcion === 'Despliegue OT-Materiales') return li+= '<hr class="dropdown-divider">'
+        if (descripcion === 'OIs Validación Códigos') return li+= '<hr class="dropdown-divider">'
+        return li
     }
 
     // Agregar los enlaces de "Maestros" al menú de "Catálogos"

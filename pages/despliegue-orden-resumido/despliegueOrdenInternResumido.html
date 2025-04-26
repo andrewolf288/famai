@@ -33,7 +33,7 @@
         <div class="d-flex flex-column flex-md-row">
             <select id="filter-selector" class="form-select w-100 w-md-auto">
                 <option value="">Seleccione un filtro</option>
-                <option value="odt_numero" selected>Orden trabajo</option>
+                <option value="odt_numero" selected>Orden trabajo/N°Req</option>
             </select>
 
             <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
@@ -459,9 +459,10 @@
                                     <tr>
                                         <th class="text-start">Fecha Ord. Compra</th>
                                         <th>Num. Ord. Compra</th>
-                                        <th>Estado</th>
+                                        <!-- <th>Estado</th> -->
                                         <th>Doc. proveedor</th>
                                         <th>Raz. social proveedor</th>
+                                        <th>Cod. producto</th>
                                         <th>Descripción</th>
                                         <th class="text-center">Cantidad</th>
                                         <th class="text-center">Precio unitario</th>
@@ -493,9 +494,10 @@
                                         <th class="text-start">Fecha Cot.</th>
                                         <th>Nro cotización</th>
                                         <th>Nro Cot proveedor</th>
-                                        <th>Estado</th>
+                                        <!-- <th>Estado</th> -->
                                         <th>Doc. proveedor</th>
                                         <th>Raz. social proveedor</th>
+                                        <th>Cod. producto</th>
                                         <th>Descripción</th>
                                         <th class="text-center">Cantidad</th>
                                         <th class="text-center">Precio unitario</th>
@@ -663,13 +665,15 @@
                     <table id="tbl-proveedor-productos" class="table mt-3 table-striped nowrap">
                         <thead>
                             <tr>
-                                <th>Nro Orden Compra</th>
-                                <th>RUC</th>
-                                <th>Raz. social</th>
+                                <th class="text-start">Fecha Ord. Compra</th>
+                                <th>Num. Ord. Compra</th>
+                                <th>Doc. proveedor</th>
+                                <th>Raz. social proveedor</th>
                                 <th>Cod. producto</th>
-                                <th>Producto</th>
-                                <th>Fech. Última Compra</th>
-                                <th>Prec. Unitario</th>
+                                <th>Descripción</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Precio unitario</th>
+                                <th class="text-center">Total</th>
                             </tr>
                         </thead>
                         <tbody id="tbl-proveedor-productos-body">
