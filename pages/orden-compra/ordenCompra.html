@@ -59,6 +59,7 @@
     <th class="text-center">Subtotal</th>
     <th class="text-center">Impuesto</th>
     <th class="text-center">Total</th>
+    <th class="text-center">Nro. SAP</th>
     <th class="text-center">Ver detalle</th>
     <th>Estado</th>
     <th class="text-center">Acciones</th>
@@ -123,3 +124,27 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL IMPRIMIR -->
+<div class="modal fade" id="imprimirModal" tabindex="-1" aria-labelledby="imprimirModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row">
+          <input type="text" id="oc-id" value="" hidden>
+          <h4 class="mb-3 text-center">Imprimir Orden de Compra</h4>
+          <label>Formato de impresion:</label>
+          <select id="formato-impresion" class="form-select">
+            <option value="1">Disgregado</option>
+            <option value="2">Resumen</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" id="btn-imprimir">Imprimir</button>
+      </div>
+    </div>
+  </div>
+  <div/>
+

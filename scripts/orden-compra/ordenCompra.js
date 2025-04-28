@@ -11,7 +11,7 @@ $(document).ready(() => {
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", new Date());
+    }).datepicker("setDate", moment().subtract(30, 'days').toDate());
 
     $("#fechaHasta").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -41,6 +41,7 @@ $(document).ready(() => {
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_subtotal}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_impuesto}</td>
                     <td class="text-center">${moneda?.mon_simbolo ?? ''} ${ordenCompra.occ_total}</td>
+                    <td class="text-center">${ordenCompra.occ_nrosap ?? ''}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary btn-ordencompra-detalle" data-ordencompra="${ordenCompra.occ_id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
@@ -107,7 +108,7 @@ $(document).ready(() => {
     })
 
     // inicializamos la paginacion con datatable
-    initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
+    initPagination(`${apiURL}?fecha_desde=${moment().subtract(30, 'days').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
 
     // FUNCION PARA VER DETALLE DE ORDEN DE COMPRA
     $('#data-container').on('click', '.btn-ordencompra-detalle', async function () {
@@ -151,12 +152,18 @@ $(document).ready(() => {
     })
 
     $('#data-container').on('click', '.btn-orden-compra-pdf', async function () {
-        const id = $(this).data('ordencompra')
+        $('#oc-id').val($(this).data('ordencompra'))
+        const modal = new bootstrap.Modal(document.getElementById("imprimirModal"));
+        modal.show();
+    })
 
-        const confirmar = confirm("¿Deseas imprimir la orden de compra de manera disgregada?")
+    $('#btn-imprimir').on('click', async () => {
+        const id = $('#oc-id').val()
+        const formato = $('#formato-impresion').val()
+        const imprimirModal = bootstrap.Modal.getInstance(document.getElementById("imprimirModal"));
 
         try {
-            const response = await client.get(`/ordenescompra/exportarPDF?occ_id=${id}&imprimir_disgregado=${confirmar ? 1 : 0}`, {
+            const response = await client.get(`/ordenescompra/exportarPDF?occ_id=${id}&imprimir_disgregado=${formato === '1' ? 1 : 0}`, {
                 headers: {
                     'Accept': 'application/pdf'
                 },
@@ -165,6 +172,7 @@ $(document).ready(() => {
 
             const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
             const pdfUrl = URL.createObjectURL(pdfBlob);
+            imprimirModal.hide()
             showModalPreview(pdfUrl)
         } catch (error) {
             console.log(error)

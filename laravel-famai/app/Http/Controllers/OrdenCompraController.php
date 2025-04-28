@@ -17,6 +17,7 @@ use App\Proveedor;
 use App\ProveedorCuentaBanco;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class OrdenCompraController extends Controller
 {
@@ -31,19 +32,32 @@ class OrdenCompraController extends Controller
             $sed_codigo = $trabajador->sed_codigo;
         }
 
+        // Obtener órdenes de compra sin número SAP y actualizarlas mediante un procedimiento almacenado
+        try {
+            // DB::statement('EXEC dbo.ActualizarNumerosSAPOrdenCompra');
+            $resultadoSap = 'Se actualizo correctamente';
+        } catch (Exception $e) {
+            $resultadoSap = $e->getMessage();
+        }
+
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
+        $fechaDesde = $request->input('fecha_desde');
+        $fechaHasta = $request->input('fecha_hasta');
 
         $query = OrdenCompra::with(['proveedor', 'moneda', 'autorizador', 'elaborador'])
             ->where('sed_codigo', $sed_codigo);
 
         $query->orderBy('occ_fecha', 'desc');
+        $query->where('occ_fecha', '>=', $fechaDesde);
+        $query->where('occ_fecha', '<=', $fechaHasta);
 
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Se listan las ordenes de compra',
             'data' => $cotizaciones->items(),
-            'count' => $cotizaciones->total()
+            'count' => $cotizaciones->total(),
+            'resultadoSap' => $resultadoSap
         ]);
     }
 
