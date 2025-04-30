@@ -34,7 +34,7 @@ class OrdenCompraController extends Controller
 
         // Obtener órdenes de compra sin número SAP y actualizarlas mediante un procedimiento almacenado
         try {
-            // DB::statement('EXEC dbo.ActualizarNumerosSAPOrdenCompra');
+            DB::statement('EXEC dbo.ActualizarNumerosSAPOrdenCompra');
             $resultadoSap = 'Se actualizo correctamente';
         } catch (Exception $e) {
             $resultadoSap = $e->getMessage();
