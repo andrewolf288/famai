@@ -23,7 +23,8 @@ $(document).ready(() => {
         responsive: true,
         paging: false,
         searching: false,
-        info: false
+        info: false,
+        order: [[12, 'desc']]
     }
 
     function initDataTable(data) {
