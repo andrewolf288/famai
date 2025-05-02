@@ -242,7 +242,7 @@ class RequerimientoController extends Controller
                 // si se debe asociat el amterial
                 if ($material['odm_asociar']) {
                     // buscamos el material en la base de datos
-                    $findMaterial = Producto::where('pro_codigo', $material['pro_id'])->first();
+                    $findMaterial = Producto::where('pro_codigo', $material['pro_codigo'])->first();
                     // en caso no se encuentre, se crea el registro
                     if (!$findMaterial) {
                         // hacemos una busqueda de los datos en la base de datos secundaria

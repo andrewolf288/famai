@@ -93,15 +93,26 @@
             </div>
             <div class="card-body">
                 <div class="d-flex flex-row justify-content-between align-items-end">
-                    <div class="col-12 me-2 position-relative">
+                    <div class="col-12 me-2">
                         <div class="mb-2">
                             <input type="checkbox" class="form-check-input me-2" id="checkAsociarProducto">
                             <label class="form-check-label" for="generaStockProductoEdit">Sin código</label>
                         </div>
-                        <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
-                        <ul id="resultadosLista" class="list-group mt-2 position-absolute"
-                            style="z-index: 1050; max-height: 250px; overflow-y: auto; width: 100%;">
-                        </ul>
+                        <div class="d-flex gap-2">
+                            <div class="position-relative flex-grow-1">
+                                <input type="text" id="productosInput" class="form-control" placeholder="Buscar material...">
+                                <ul id="resultadosLista" class="list-group mt-2 position-absolute w-100"
+                                    style="z-index: 1050; max-height: 250px; overflow-y: auto;">
+                                </ul>
+                            </div>
+                            <button class="btn btn-success" id="importar-requerimientos">
+                                Importar Requerimientos
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+                                    <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-2">
@@ -201,6 +212,94 @@
                     <span class="visually-hidden">Cargando...</span>
                 </div>
                 <p class="mt-3">Procesando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE IMPORTACION DE REQUERIMIENTOS -->
+<div class="modal fade" id="importarRequerimientosModal" tabindex="-1" aria-labelledby="importarRequerimientosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importarRequerimientosModalLabel">Importar Requerimientos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="importar-requerimientos-body" class="d-none">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <p class="text-muted">Copie y pegue los datos del Excel.</p>
+                            <textarea class="form-control" id="excelData" rows="5" placeholder="Pegue aquí los datos del Excel..."></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Mapeo de Columnas</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Columna Requerida</th>
+                                            <th>Columna del Excel</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Código</td>
+                                            <td>
+                                                <select class="form-select column-mapping" data-field="pro_codigo">
+                                                    <option value="">Seleccione columna</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Material</td>
+                                            <td>
+                                                <select class="form-select column-mapping" data-field="odm_descripcion">
+                                                    <option value="">Seleccione columna</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cantidad</td>
+                                            <td>
+                                                <select class="form-select column-mapping" data-field="odm_cantidad">
+                                                    <option value="">Seleccione columna</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Unidad</td>
+                                            <td>
+                                                <select class="form-select column-mapping" data-field="uni_codigo">
+                                                    <option value="">Seleccione columna</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Observación</td>
+                                            <td>
+                                                <select class="form-select column-mapping" data-field="odm_observacion">
+                                                    <option value="">Seleccione columna</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="sin-elementos-copiados" class="d-none">
+                    <div class="alert alert-danger">
+                        No hay datos copiados. Por favor, copie los datos del Excel y vuelva a intentarlo.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-importar-requerimientos" disabled>Importar</button>
             </div>
         </div>
     </div>

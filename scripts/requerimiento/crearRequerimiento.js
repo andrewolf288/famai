@@ -560,4 +560,213 @@ $(document).ready(function () {
         window.location.href = 'requerimiento'
     })
 
+    // Funcion de importar requerimientos
+    $('#importar-requerimientos').on('click', async function () {
+        const modalBody = $('#importar-requerimientos-body')
+        const sinElementosCopiados = $('#sin-elementos-copiados')
+        
+        // Mostrar siempre el textarea para pegar datos
+        modalBody.removeClass('d-none')
+        sinElementosCopiados.addClass('d-none')
+        
+        // Habilitar o deshabilitar el botón importar según si hay datos
+        $('#btn-importar-requerimientos').prop('disabled', !$('#excelData').val().trim())
+            
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById("importarRequerimientosModal"))
+        modal.show()
+    })
+
+    // Evento para el textarea de datos
+    $('#excelData').on('input', function() {
+        const texto = $(this).val().trim()
+        if (texto) {
+            // Obtener los encabezados de las columnas (primera fila)
+            const lineas = texto.split('\n')
+            if (lineas.length > 0) {
+                const columnas = lineas[0].split('\t')
+                
+                // Actualizar los selectores de mapeo
+                $('.column-mapping').each(function() {
+                    const select = $(this)
+                    select.empty()
+                    select.append('<option value="">Seleccione columna</option>')
+                    
+                    columnas.forEach((columna, index) => {
+                        select.append(`<option value="${index}">${columna}</option>`)
+                    })
+                })
+                
+                // Habilitar el botón de importar
+                $('#btn-importar-requerimientos').prop('disabled', false)
+            }
+        } else {
+            $('#btn-importar-requerimientos').prop('disabled', true)
+        }
+    })
+
+    // Procesar la importación cuando se haga clic en el botón
+    $('#btn-importar-requerimientos').on('click', async function() {
+        // Cambiar el botón a spinner
+        const $btnImportar = $(this)
+        const btnTextoOriginal = $btnImportar.html()
+        $btnImportar.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...')
+        $btnImportar.prop('disabled', true)
+        
+        // Deshabilitar cerrar modal
+        const modalElement = document.getElementById('importarRequerimientosModal')
+        const modalInstance = bootstrap.Modal.getInstance(modalElement)
+        $('.btn-close', '#importarRequerimientosModal').prop('disabled', true)
+        $('#importarRequerimientosModal .btn-secondary').prop('disabled', true)
+        
+        try {
+            const texto = $('#excelData').val().trim()
+            const lineas = texto.split('\n')
+            
+            if (lineas.length <= 1) {
+                throw new Error('No hay datos para importar')
+            }
+            
+            // Obtener el mapeo seleccionado
+            const mapeo = {}
+            let mapeoValido = true
+            
+            $('.column-mapping').each(function() {
+                const field = $(this).data('field')
+                const value = $(this).val()
+                mapeo[field] = value === '' ? null : parseInt(value)
+                if (value === '') {
+                    mapeoValido = false
+                }
+            })
+            
+            if (!mapeoValido) {
+                throw new Error('Debe seleccionar todas las columnas, aunque no tengan datos')
+            }
+            
+            // Saltamos la primera línea (encabezados) y procesamos cada línea
+            for (let i = 1; i < lineas.length; i++) {
+                const lineaActual = lineas[i]
+                
+                const celdas = lineaActual.split('\t')
+                console.log(celdas)
+                // Crear item con valores iniciales vacíos
+                const item = {
+                    pro_id: null,
+                    pro_codigo: '',
+                    odm_descripcion: '',
+                    odm_cantidad: 1,
+                    uni_codigo: '',
+                    odm_observacion: '',
+                    odm_tipo: 1,
+                    odm_asociar: false,
+                    detalle_adjuntos: []
+                }
+                
+                // Asignar valores exactamente como los mapea el usuario
+                if (mapeo.pro_codigo !== null && celdas.length > mapeo.pro_codigo) {
+                    item.pro_codigo = celdas[mapeo.pro_codigo].trim();
+                }
+                
+                if (mapeo.odm_descripcion !== null && celdas.length > mapeo.odm_descripcion) {
+                    item.odm_descripcion = celdas[mapeo.odm_descripcion].trim();
+                }
+                
+                if (mapeo.odm_cantidad !== null && celdas.length > mapeo.odm_cantidad) {
+                    const cantidad = parseFloat(celdas[mapeo.odm_cantidad]);
+                    item.odm_cantidad = !isNaN(cantidad) ? cantidad : 1;
+                }
+                
+                if (mapeo.uni_codigo !== null && celdas.length > mapeo.uni_codigo) {
+                    item.uni_codigo = celdas[mapeo.uni_codigo].trim();
+                }
+                
+                if (mapeo.odm_observacion !== null && celdas.length > mapeo.odm_observacion) {
+                    item.odm_observacion = celdas[mapeo.odm_observacion].trim();
+                }
+                
+                // Determinar si el item tiene código de producto
+                const tieneCodigo = item.pro_codigo !== ''
+                
+                if (tieneCodigo) {
+                    // Buscar el producto en la base de datos
+                    try {
+                        const { data } = await client.get(`/productosByQuery2?query=${encodeURIComponent(item.pro_codigo)}`)
+                        if (data && data.length > 0) {
+                            const producto = data[0]
+                            item.pro_id = producto.pro_id
+                            item.uni_codigo = producto.uni_codigo || item.uni_codigo
+                            item.odm_asociar = true
+                            item.odm_descripcion = producto.pro_descripcion
+                        } else {
+                            throw new Error('Producto no encontrado')
+                        }
+                    } catch (error) {
+                        alert('Error al buscar el producto ' + error.message)
+                    }
+                } else {
+                    item.pro_id = obtenerIdUnico()
+                    item.pro_codigo = ''
+                    item.uni_codigo = ''
+                    item.odm_asociar = false
+                }
+
+                // Agregar a la tabla y al array de detalle
+                const row = `
+                <tr>
+                    <td>${item.pro_codigo}</td>
+                    <td>
+                        <input type="text" class="form-control descripcion-input" value='${item.odm_descripcion.replace(/'/g, "&#39;")}' readonly/>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control cantidad-input" value='${item.odm_cantidad}' readonly/>
+                    </td>
+                    <td>${item.uni_codigo || ''}</td>
+                    <td>
+                        <input type="text" class="form-control observacion-input" value='${item.odm_observacion.replace(/'/g, "&#39;")}' readonly/>
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-around">
+                            <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-2" data-producto="${item.pro_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${item.pro_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${item.pro_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `
+                
+                $('#tbl-requerimientos tbody').append(row)
+                detalle_requerimiento.push(item)
+            }
+            
+            // Si todo salió bien, cerramos el modal
+            $('#importarRequerimientosModal').modal('hide')
+            $('#excelData').val('')
+            
+        } catch (error) {
+            alert(error.message || 'Error al importar datos')
+        } finally {
+            // Restaurar el botón
+            $btnImportar.html(btnTextoOriginal)
+            $btnImportar.prop('disabled', false)
+            
+            // Restaurar el modal
+            $('.btn-close', '#importarRequerimientosModal').prop('disabled', false)
+            $('#importarRequerimientosModal .btn-secondary').prop('disabled', false)
+        
+        }
+    })
+
 })
