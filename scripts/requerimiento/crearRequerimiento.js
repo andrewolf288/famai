@@ -629,19 +629,15 @@ $(document).ready(function () {
             
             // Obtener el mapeo seleccionado
             const mapeo = {}
-            let mapeoValido = true
             
             $('.column-mapping').each(function() {
                 const field = $(this).data('field')
                 const value = $(this).val()
                 mapeo[field] = value === '' ? null : parseInt(value)
-                if (value === '') {
-                    mapeoValido = false
-                }
             })
             
-            if (!mapeoValido) {
-                throw new Error('Debe seleccionar todas las columnas, aunque no tengan datos')
+            if (mapeo.odm_descripcion === null || mapeo.odm_descripcion === '') {
+                throw new Error('Debe seleccionar minimo la columna de Material')
             }
             
             // Saltamos la primera línea (encabezados) y procesamos cada línea
@@ -649,7 +645,6 @@ $(document).ready(function () {
                 const lineaActual = lineas[i]
                 
                 const celdas = lineaActual.split('\t')
-                console.log(celdas)
                 // Crear item con valores iniciales vacíos
                 const item = {
                     pro_id: null,
@@ -685,6 +680,8 @@ $(document).ready(function () {
                     item.odm_observacion = celdas[mapeo.odm_observacion].trim();
                 }
                 
+                if (item.pro_codigo === '' && item.odm_descripcion === '') continue
+
                 // Determinar si el item tiene código de producto
                 const tieneCodigo = item.pro_codigo !== ''
                 
