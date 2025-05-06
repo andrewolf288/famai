@@ -227,7 +227,7 @@ $(document).ready(() => {
             const { orden_compra } = detalle
             const { proveedor, moneda } = orden_compra
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(`${orden_compra.occ_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
+            rowItem.classList.add(`${orden_compra.occ_estado === 'EMI' ? 'table-danger' : 'table-success'}`)
 
             rowItem.innerHTML = `
             <td>${parseDateSimple(orden_compra.occ_fecha)}</td>
@@ -373,7 +373,7 @@ $(document).ready(() => {
             const { orden_compra } = detalle
             const { proveedor, moneda } = orden_compra
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(`${orden_compra.occ_estado === 'SOL' ? 'table-danger' : 'table-success'}`)
+            rowItem.classList.add(`${orden_compra.occ_estado === 'EMI' ? 'table-danger' : 'table-success'}`)
 
             rowItem.innerHTML = `
             <td>${parseDateSimple(orden_compra.occ_fecha)}</td>

@@ -18,9 +18,37 @@ use App\ProveedorCuentaBanco;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use App\ProductoProveedor;
 
 class OrdenCompraController extends Controller
 {
+
+    public function anular(Request $request, $id)
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            $ordencompra = OrdenCompra::find($id);
+            $ordencompra->update([
+                'occ_estado' => 'ANU',
+                'occ_usumodificacion' => $user->usu_codigo,
+                'occ_fecmodificacion' => Carbon::now(),
+                'occ_total' => 0.00,
+                'occ_subtotal' => 0.00,
+                'occ_impuesto' => 0.00
+            ]);
+
+            // eliminamos los detalles de la orden de compra
+            OrdenCompraDetalle::where('occ_id', $id)->delete();
+
+            DB::commit();
+            return response()->json(['message' => 'Orden de compra anulada correctamente']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -252,7 +280,7 @@ class OrdenCompraController extends Controller
                 'occ_saldo' => $validatedData['occ_saldo'],
                 'occ_tipo' => $validatedData['occ_tipo'],
                 'occ_esactivo' => $validatedData['occ_esactivo'],
-                'occ_estado' => 'SOL',
+                'occ_estado' => 'EMI',
                 'occ_usucreacion' => $user->usu_codigo,
                 'occ_fecmodificacion' => null
             ]);
@@ -445,17 +473,42 @@ class OrdenCompraController extends Controller
             return response()->json(['error' => 'No se encontro el trabajador relacionado con el usuario'], 400);
         }
 
-        // recorremos la lista de ordenes de compra a aprobar
-        foreach ($validatedData['ordenesCompra'] as $ordencompra) {
-            $ordencompra = OrdenCompra::findOrFail($ordencompra);
-            $ordencompra->update([
-                'tra_autorizado' => $trabajador_aprobacion->tra_id,
-                'occ_fecautorizacion' => Carbon::now(),
-                'occ_estado' => 'APR'
-            ]);
+        try {
+            DB::beginTransaction();
+            
+            // recorremos la lista de ordenes de compra a aprobar
+            foreach ($validatedData['ordenesCompra'] as $ordencompraId) {
+                $ordencompra = OrdenCompra::findOrFail($ordencompraId);
+                $ordencompra->update([
+                    'tra_autorizado' => $trabajador_aprobacion->tra_id,
+                    'occ_fecautorizacion' => Carbon::now(),
+                    'occ_estado' => 'APR'
+                ]);
+                
+                // Obtener los detalles de la orden de compra
+                $detallesOrden = OrdenCompraDetalle::where('occ_id', $ordencompra->occ_id)->get();
+                
+                // Registrar cada producto en el historial de productos por proveedor
+                foreach ($detallesOrden as $detalle) {
+                    // Crear un nuevo registro
+                    ProductoProveedor::create([
+                        'pro_id' => $detalle->pro_id,
+                        'prv_id' => $ordencompra->prv_id,
+                        'prp_nroordencompra' => $ordencompra->occ_numero,
+                        'prp_fechaultimacompra' => Carbon::now(),
+                        'prp_preciounitario' => $detalle->ocd_preciounitario,
+                        'prp_observaciones' => null,
+                        'prp_usucreacion' => $user->usu_codigo
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            return response()->json('Se aprobaron las ordenes de compra y se actualizó el historial de productos por proveedor', 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        return response()->json('Se aprobaron las ordenes de compra', 200);
     }
 
     // ordenes de compra por emitir nota de ingreso

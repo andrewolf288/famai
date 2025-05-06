@@ -77,6 +77,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         // debemos buscar aquellas ordenes de compra que no se han importado aún
         $ordenescompra = OrdenCompra::with('proveedor', 'moneda')
             ->where('occ_importacion', 0)
+            ->where('occ_estado', '!=', 'ANU')
             ->get();
         
         // creamos la cabecera del csv
@@ -216,6 +217,9 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         }
 
         // al finalizar la importacion, cambiamos el flag de importacion
-        OrdenCompra::whereIn('occ_id', $ordenescompra->pluck('occ_id'))->update(['occ_importacion' => 1]);
+        OrdenCompra::whereIn('occ_id', $ordenescompra->pluck('occ_id'))->update([
+            'occ_importacion' => 1,
+            'occ_estado' => 'SAP'
+        ]);
     }
 }
