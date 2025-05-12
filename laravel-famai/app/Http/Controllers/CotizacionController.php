@@ -9,7 +9,10 @@ use App\EntidadBancaria;
 use App\Helpers\DateHelper;
 use App\Helpers\UtilHelper;
 use App\Moneda;
+use App\OrdenInterna;
 use App\OrdenInternaMateriales;
+use App\OrdenInternaPartes;
+use App\Parte;
 use App\Proveedor;
 use App\ProveedorCuentaBanco;
 use App\Trabajador;
@@ -212,6 +215,66 @@ class CotizacionController extends Controller
             $detalleMateriales = $data['detalle_materiales'];
             $proveedor_unico = $data['proveedor_unico'];
             $cotizacion_proveedor_unico = $data['cotizacion'];
+            $productos_excedentes = isset($data['productos_excedentes']) ? $data['productos_excedentes'] : null;
+
+            // Crear requerimiento para productos excedentes si existen
+            $requerimiento_excedente = null;
+            if ($productos_excedentes) {
+                // Buscar el último requerimiento para generar el número
+                $lastRequerimientoCabecera = OrdenInterna::where('sed_codigo', $sed_codigo)
+                    ->where('oic_tipo', 'REQ')
+                    ->orderBy('oic_id', 'desc')
+                    ->first();
+                    
+                $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 2)) + 1;
+
+                // Crear el requerimiento
+                $requerimiento_excedente = OrdenInterna::create([
+                    'odt_numero' => 'RQ' . str_pad($numero, 7, '0', STR_PAD_LEFT),
+                    'oic_fecha' => now(),
+                    'sed_codigo' => $sed_codigo,
+                    'oic_fechaentregaestimada' => now()->addDays(7),
+                    'are_codigo' => $trabajador->are_codigo,
+                    'tra_idorigen' => $trabajador->tra_id,
+                    'mrq_codigo' => 'STK', // Requerimiento de stock
+                    'oic_equipo_descripcion' => 'Requerimiento generado automáticamente por excedente en cotización',
+                    'oic_tipo' => 'REQ',
+                    'oic_estado' => 'ENVIADO',
+                    'oic_usucreacion' => $user->usu_codigo,
+                    'oic_fecmodificacion' => null
+                ]);
+
+                // Crear parte de requerimiento
+                $parteRequerimiento = Parte::where('oip_descripcion', 'REQUERIMIENTO')->first();
+                if (!$parteRequerimiento) {
+                    throw new Exception('No se encontró la parte requerimiento');
+                }
+
+                $detalleParte = OrdenInternaPartes::create([
+                    'oic_id' => $requerimiento_excedente->oic_id,
+                    'oip_id' => $parteRequerimiento->oip_id,
+                    'opd_usucreacion' => $user->usu_codigo,
+                    'opd_fecmodificacion' => null
+                ]);
+
+                // Crear materiales excedentes
+                foreach ($productos_excedentes as $index => $material) {
+                    OrdenInternaMateriales::create([
+                        'opd_id' => $detalleParte->opd_id,
+                        'pro_id' => $material['pro_id'],
+                        'odm_item' => $index + 1,
+                        'odm_descripcion' => $material['odm_descripcion'],
+                        'odm_cantidad' => $material['odm_cantidad'],
+                        'odm_cantidadpendiente' => $material['odm_cantidad'],
+                        'odm_observacion' => $material['odm_observacion'],
+                        'odm_tipo' => $material['odm_tipo'],
+                        'odm_usucreacion' => $user->usu_codigo,
+                        'odm_fecmodificacion' => null,
+                        'odm_estado' => 'REQ',
+                        'odm_fecconsultareservacion' => now()
+                    ]);
+                }
+            }
 
             $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
             if (!$lastCotizacion) {
@@ -357,10 +420,14 @@ class CotizacionController extends Controller
             // actualizamos la cotizacion seleccionada
             $this->seleccionarCotizacionDetalleProducto($cotizacion->coc_id);
 
-            return response()->json($cotizacion, 200);
+            return response()->json([
+                'message' => 'Cotización creada correctamente',
+                'cotizacion' => $cotizacion,
+                'requerimiento_excedente' => $requerimiento_excedente
+            ], 200);
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(["error" => $e->getMessage()], 500, ['Content-Type' => 'application/json']);
+            return response()->json(["error" => $e->getMessage()], 500);
         }
     }
 

@@ -156,3 +156,14 @@
     overflow-x: auto;
     width: 100%;
 }
+
+/* Estilos para el bootbox */
+.bootbox-confirm-modal {
+    z-index: 1060 !important;
+}
+.bootbox-confirm-modal + .modal-backdrop {
+    z-index: 1059 !important;
+}
+.modal-backdrop + .modal-backdrop {
+    z-index: 1058 !important;
+}

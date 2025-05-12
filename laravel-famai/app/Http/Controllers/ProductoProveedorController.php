@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Producto;
 use App\ProductoProveedor;
 use App\Proveedor;
+use App\OrdenCompra;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\FormaPago;
 
 class ProductoProveedorController extends Controller
 {
@@ -148,7 +150,7 @@ class ProductoProveedorController extends Controller
         $productos = $request->input('productos', []);
 
         $data = ProductoProveedor::with(['proveedor', 'producto'])
-            ->select('pro_id', 'prv_id', 'prp_fechaultimacompra', 'prp_preciounitario')
+            ->select('pro_id', 'prv_id', 'prp_fechaultimacompra', 'prp_preciounitario', 'prp_nroordencompra')
             ->whereIn('pro_id', $productos)
             ->orderBy('prp_fechaultimacompra', 'desc')
             ->get()
@@ -158,14 +160,24 @@ class ProductoProveedorController extends Controller
             });
 
         $dataProveedores = $data->map(function ($item) {
+            // Buscar la orden de compra para obtener el mon_codigo
+            $ordenCompra = OrdenCompra::where('occ_numero', $item->prp_nroordencompra)->first();
+            $formaPago = null;
+            
+            if ($ordenCompra) {
+                $formaPago = FormaPago::where('fpa_codigo', $ordenCompra->fpa_codigo)->first();
+            }
+            
             return array_merge(
                 $item->proveedor->toArray(),
                 [
                     'precio_unitario' => $item->prp_preciounitario,
-                    'pro_id' => $item->pro_id
+                    'pro_id' => $item->pro_id,
+                    'mon_codigo' => $ordenCompra ? $ordenCompra->mon_codigo : null,
+                    'fpa_descripcion' => $formaPago ? $formaPago->fpa_descripcion : null,
                 ]
             );
-        })->unique('prv_id')->values();
+        })->unique('pro_id')->values();
 
         return response()->json($dataProveedores);
     }

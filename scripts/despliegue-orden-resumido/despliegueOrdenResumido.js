@@ -881,7 +881,7 @@ $(document).ready(async () => {
                 <td class="text-center">${detalle.uni_codigo}</td>
                 <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
                 <td class="text-center">
-                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" min="${detalle.cantidad}" readonly disabled/>
+                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" max="${detalle.cantidad}"/>
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${proveedor.precio_unitario}"/>
@@ -921,7 +921,7 @@ $(document).ready(async () => {
                 <td class="text-center">${detalle.producto?.uni_codigo || 'N/A'}</td>
                 <td class="text-center cantidad-requerida-detalle">${detalle.odm_cantidad}</td>
                 <td class="text-center">
-                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" min="${detalle.odm_cantidad}" readonly disabled/>
+                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" max="${detalle.odm_cantidad}" />
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${proveedor.precio_unitario}"/>
@@ -1006,7 +1006,7 @@ $(document).ready(async () => {
                     <td class="text-center unidad-detalle">${findProducto.uni_codigo}</td>
                     <td class="text-center cantidad-requerida-detalle">${valueCantidad}</td>
                     <td class="text-center">
-                        <input type="number" class="form-control cantidad-pedida-detalle" value="${valueCantidad}" min="${valueCantidad}" />
+                        <input type="number" class="form-control cantidad-pedida-detalle" value="${valueCantidad}" max="${valueCantidad}" />
                     </td>
                     <td class="text-center d-none label-precio-unitario-detalle">
                         <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
@@ -1156,10 +1156,19 @@ $(document).ready(async () => {
         $('#tbl-cotizaciones-proveedores tbody').empty()
         $('#tbl-cotizaciones-materiales tbody').empty()
 
+        // Setear valor de forma de pago y moneda de data
+        $("#formapagoCotizacionInputHidden").val(data[0].fpa_descripcion ? data[0].fpa_descripcion : 'CONTADO')
+        $("#monedaCotizacionInputHidden").val(data[0].mon_codigo ? data[0].mon_codigo : '')
+
         // debemos agregar a la información de proveedores que compraron los productos
+        const proveedoresUnicos = new Set()
         data.forEach(proveedor => {
-            const row = renderRowProveedor(proveedor)
-            $('#tbl-cotizaciones-proveedores tbody').append(row)
+            // Solo renderizar si el prv_id no existe en el Set y no es null
+            if (proveedor.prv_id && !proveedoresUnicos.has(proveedor.prv_id)) {
+                proveedoresUnicos.add(proveedor.prv_id)
+                const row = renderRowProveedor(proveedor)
+                $('#tbl-cotizaciones-proveedores tbody').append(row)
+            }
         })
 
         // debemos ingresar la informacion de detalle a cotizar
@@ -1211,6 +1220,14 @@ $(document).ready(async () => {
                 const option = $(`<option>`).val(moneda["mon_codigo"]).text(`${moneda["mon_simbolo"]} ${moneda["mon_descripcion"]}`)
                 $monedaSelect.append(option)
             })
+
+            // Setear valor de moneda de data y forma de pago
+            $("#monedaCotizacionInput").val($("#monedaCotizacionInputHidden").val())
+            if ($("#formapagoCotizacionInputHidden").val().toUpperCase() === "CREDITO") {
+                $("#formapagoCotizacionInput").val("CREDITO")
+            } else {
+                $("#formapagoCotizacionInput").val("CONTADO")
+            }
         } catch (error) {
             console.log(error)
         }
@@ -1229,7 +1246,6 @@ $(document).ready(async () => {
             // resetemos los valores
             $("#cotizacionProveedorCotizacionInput").val("")
             $("#fechaValidezPicker").val("")
-            $("#formapagoCotizacionInput").val("CONTADO")
             $("#observacionFormapagoCotizacionInput").val("")
             $("#lugarEntregaCotizacionInput").val("")
             // mostramos los contenedores
@@ -1440,6 +1456,7 @@ $(document).ready(async () => {
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-guardar-cotizacion', async (event) => {
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')
+        let flagPedidoMayorRequerido = false
 
         // debemos saber si la solicitud de cotización sera de proveedor unico
         const proveedor_unico = $('#checkProveedorUnico').is(':checked')
@@ -1507,6 +1524,11 @@ $(document).ready(async () => {
             if (isNaN(precioUnitario)) precioUnitario = 0.00
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val()
             // valores detalle de cotizacion
+
+            if (cantidadPedida > $(this).find('.cantidad-requerida-detalle').text()) {
+                flagPedidoMayorRequerido = true
+            }
+
             if (index !== undefined) {
                 const detalleIndex = detalleCotizacion[index]
                 if (detalleIndex.odm_id === undefined) {
@@ -1563,6 +1585,34 @@ $(document).ready(async () => {
             cotizacion: cotizacion
         }
 
+        // Recolectar información de productos excedentes
+        if (flagPedidoMayorRequerido) {
+            const productosExcedentes = [];
+            rows.each(function () {
+                const cantidadPedida = parseFloat($(this).find('.cantidad-pedida-detalle').val());
+                const cantidadRequerida = parseFloat($(this).find('.cantidad-requerida-detalle').text());
+                
+                if (cantidadPedida > cantidadRequerida) {
+                    const index = $(this).data('index');
+                    const detalleIndex = detalleCotizacion[index];
+                    
+                    productosExcedentes.push({
+                        pro_id: detalleIndex.pro_id,
+                        odm_item: 1, // Se ajustará en el backend
+                        odm_asociar: true,
+                        odm_descripcion: detalleIndex.pro_descripcion || detalleIndex.odm_descripcion,
+                        odm_cantidad: cantidadPedida - cantidadRequerida,
+                        odm_observacion: `Cantidad excedente de cotización ${formatData.proveedor.prv_nombre}`,
+                        odm_tipo: 1
+                    });
+                }
+            });
+            
+            if (productosExcedentes.length > 0) {
+                formatData.productos_excedentes = productosExcedentes;
+            }
+        }
+
         console.log(formatData)
         // return
 
@@ -1571,6 +1621,34 @@ $(document).ready(async () => {
             $.each(archivosAdjuntos, function (index, file) {
                 formData.append('files[]', file)
             })
+        }
+
+        if (flagPedidoMayorRequerido) {
+            const result = await new Promise((resolve) => {
+                bootbox.confirm({
+                    title: 'Confirmación',
+                    centerVertical: true,
+                    className: 'bootbox-confirm-modal',
+                    message: "<p>La cantidad pedida es mayor a la cantidad requerida, se procedera a crear un requerimiento para la cantidad excedente.</p><p class='text-danger fw-bold'>¿Estás seguro de que deseas continuar con la solicitud de cotización?</p>",
+                    buttons: {
+                        confirm: {
+                            label: '<i class="fa fa-check-circle text-success-emphasis"></i> Confirmar',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: '<i class="fa fa-times-circle text-danger-emphasis"></i> Cancelar',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        resolve(result);
+                    }
+                });
+            });
+
+            if (!result) {
+                return;
+            }
         }
 
         formData.append('cotizacion', JSON.stringify(formatData))
@@ -1613,14 +1691,25 @@ $(document).ready(async () => {
             row.find('.btn-guardar-cotizacion')
                 .addClass('disabled')
                 .removeClass('btn-success')
-                .addClass('btn-secondary')
+                .addClass('btn-secondary') 
 
             row.addClass('table-success')
 
             // limpiamos el form de cotizacion
             clearDataCotizacion()
 
-            alert('La cotización fue creada con éxito')
+            bootbox.dialog({
+                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Cotización creada</span>',
+                message: `La cotización fue creada con éxito. ${data.requerimiento_excedente ? `Adicional se ha creado un requerimiento para la cantidad excedente con numero: <span class="fw-bold">${data.requerimiento_excedente.odt_numero}</span>` : ''}`,
+                backdrop: true,
+                centerVertical: true,
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                        className: 'btn-success'
+                    }
+                }
+            })
             $('#cotizacionesModal').modal('hide')
         } catch (error) {
             alert("Hubo un error en la creación de solicitud de cotización")

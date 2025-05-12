@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Requerimiento</title>
     <style>
+        @page {
+            size: A4 portrait;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -151,6 +155,19 @@
     <header>
         <table class="table-encabezado">
             <tr>
+                <td style="width: 30%;">
+                    <img src="{{ public_path('famai/logo-blanco-famai.jpg') }}" width="210px" height="35px">
+                </td>
+                <td style="width: 40%; vertical-align: bottom; text-align: center; color: #0000FF;">
+                    <p style="font-weight: bold; font-size: 20px;">
+                        FAMAI SEAL JET S.A.C.
+                    </p>
+                    <p style="font-size: 11px;">
+                        CALIDAD, RAPIDEZ Y GARANTIA
+                    </p>
+                </td>
+            </tr>
+            <tr>
                 <td style="text-align: left" style="font-size: 12px;"><span style="font-weight: bold;">Usu.
                         impresión:</span> {{ $usuarioImpresion }}</td>
             </tr>
@@ -160,7 +177,7 @@
             </tr>
         </table>
     </header>
-    <hr style="margin-top: 5px">
+    <hr style="margin-top: 40px">
     <p style="font-size: 12px; text-align: right">Arequipa, {{ $fechaActual }}</p>
     {{-- table de cabecera de factura --}}
     <div class="section-title" style="margin-top: 5px;">DATOS DEL REQUERIMIENTO</div>
