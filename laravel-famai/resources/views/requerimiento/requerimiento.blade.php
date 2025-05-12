@@ -18,7 +18,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            margin-top: 1.5cm;
+            margin-top: 3cm;
             margin-left: 10px;
             margin-right: 10px;
             margin-bottom: 0.5cm;
@@ -29,21 +29,11 @@
             top: 0cm;
             left: 0cm;
             right: 0cm;
-            height: 1.5cm;
+            height: 3cm;
             margin-top: 20px;
             margin-bottom: 20px;
             margin-left: 10px;
             margin-right: 10px;
-        }
-
-        footer {
-            position: fixed;
-            bottom: 0cm;
-            left: 0cm;
-            right: 0cm;
-            height: 1.5cm;
-            margin-left: 20px;
-            margin-right: 30px;
         }
 
         .table-encabezado {
@@ -176,8 +166,9 @@
                         impresión:</span> {{ $fechaHoraImpresion }}</td>
             </tr>
         </table>
+        <hr style="margin-top: 5px">
     </header>
-    <hr style="margin-top: 40px">
+
     <p style="font-size: 12px; text-align: right">Arequipa, {{ $fechaActual }}</p>
     {{-- table de cabecera de factura --}}
     <div class="section-title" style="margin-top: 5px;">DATOS DEL REQUERIMIENTO</div>
