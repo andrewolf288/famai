@@ -72,9 +72,27 @@ $(document).ready(() => {
 
         // vaciamos la lista
         $('#data-container-body').empty()
+        
+        // Agregamos el loader de nuevo después de vaciar
+        $('#data-container-body').append(`
+            <tr id="loader-row">
+                <td colspan="18" class="text-center">
+                    <div class="d-flex justify-content-center align-items-center p-3">
+                        <div class="spinner-border text-primary me-2" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <span>Cargando datos...</span>
+                    </div>
+                </td>
+            </tr>
+        `)
 
         try {
             const { data } = await client.get(URL)
+            
+            // Removemos el loader antes de agregar los datos
+            $('#loader-row').remove()
+            
             data.forEach((material, index) => {
                 // obtenemos los datos
                 const { producto, orden_interna_parte, cotizaciones_count, ordenes_compra_count } = material
