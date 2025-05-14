@@ -866,6 +866,13 @@ $(document).ready(async () => {
 
     // --------------- MANEJO DE COTIZACIONES --------------
     function renderRowCotizacion(detalle, index, proveedor) {
+        // TypeError: Cannot read properties of undefined (reading 'precio_unitario')
+        let precioUnitario = 0
+        try {
+            precioUnitario = proveedor.precio_unitario
+        } catch (error) {
+            console.log(error)
+        }
         if (detalle.odm_id === undefined) {
             const observacion = unionObservaciones(detalle.detalle)
             const rowsObs = observacion.split('\n').length
@@ -884,7 +891,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" max="${detalle.cantidad}"/>
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="${proveedor.precio_unitario}"/>
+                    <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -924,7 +931,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" max="${detalle.odm_cantidad}" />
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="${proveedor.precio_unitario}"/>
+                    <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
