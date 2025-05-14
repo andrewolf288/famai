@@ -1157,8 +1157,12 @@ $(document).ready(async () => {
         $('#tbl-cotizaciones-materiales tbody').empty()
 
         // Setear valor de forma de pago y moneda de data
-        $("#formapagoCotizacionInputHidden").val(data[0].fpa_descripcion ? data[0].fpa_descripcion : 'CONTADO')
-        $("#monedaCotizacionInputHidden").val(data[0].mon_codigo ? data[0].mon_codigo : '')
+        try {
+            $("#formapagoCotizacionInputHidden").val(data[0].fpa_descripcion ? data[0].fpa_descripcion : 'CONTADO')
+            $("#monedaCotizacionInputHidden").val(data[0].mon_codigo ? data[0].mon_codigo : '')
+        } catch (error) {
+            console.log(error)
+        }
 
         // debemos agregar a la información de proveedores que compraron los productos
         const proveedoresUnicos = new Set()
