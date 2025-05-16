@@ -202,6 +202,7 @@ class ProductoProveedorController extends Controller
         $data = ProductoProveedor::with('producto', 'proveedor')
             ->where('pro_id', $producto)
             ->orderBy('prp_fechaultimacompra', 'desc')
+            ->limit(5)
             ->get();
 
         return response()->json($data);

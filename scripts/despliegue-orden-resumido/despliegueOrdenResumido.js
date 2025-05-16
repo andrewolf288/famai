@@ -308,12 +308,6 @@ $(document).ready(async () => {
                             </span>
                         </button>
                     </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-reservado">0.00</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-atendido">0.00</button>
-                    </td>
                 </tr>
                 `
             })
@@ -1723,7 +1717,20 @@ $(document).ready(async () => {
             })
             $('#cotizacionesModal').modal('hide')
         } catch (error) {
-            alert("Hubo un error en la creación de solicitud de cotización")
+            console.log(error)
+            bootbox.dialog({
+                title: '<i class="fa fa-times-circle text-danger"></i> <span class="text-danger">Error</span>',
+                message: error.response.data.error ? error.response.data.error : 'Hubo un error en la creación de solicitud de cotización',
+                backdrop: true,
+                centerVertical: true,
+                className: 'bootbox-alert-modal',
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                        className: 'btn-danger'
+                    }
+                }
+            })
         }
     })
 

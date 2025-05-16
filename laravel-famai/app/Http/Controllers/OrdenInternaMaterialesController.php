@@ -221,6 +221,12 @@ class OrdenInternaMaterialesController extends Controller
             $almacen_codigo = $almacen_request;
         }
 
+        try {
+            DB::statement('EXEC dbo.SincronizarProductosProveedores');
+        } catch (\Throwable $th) {
+            // 
+        }
+
         // se necesita agregar informacion de procedimiento almacenado
         $query = OrdenInternaMateriales::with(
             [
@@ -287,20 +293,24 @@ class OrdenInternaMaterialesController extends Controller
         if ($multifilter !== null) {
             // Separar el string por "OR" y crear un array con cada palabra
             $palabras = explode('OR', $request->input('multifilter'));
-
+            $estados = [];
             // Agregar el grupo de condiciones OR
             foreach ($palabras as $palabra) {
                 // pendiente de emision de orden de compra
                 if ($palabra === 'pendiente_emitir_orden_compra') {
-                    $query->where('odm_estado', 'COT');
+                    $estados[] = 'COT';
                 }
                 // pendiente de emision de cotizacion
                 if ($palabra === 'pendiente_emitir_cotizacion') {
-                    $query->where('odm_estado', 'REQ');
+                    $estados[] = 'REQ';
                 }
                 // material sin codigo
                 if ($palabra === 'material_sin_codigo') {
                     $query->where('pro_id', null);
+                }
+
+                if (!empty($estados)) {
+                    $query->whereIn('odm_estado', $estados);
                 }
             }
         }
@@ -323,6 +333,9 @@ class OrdenInternaMaterialesController extends Controller
                 $producto_codigo = $producto->pro_codigo;
                 // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
                 $totalProveedores = $producto->proveedores_count ?? 0;
+                if ($totalProveedores > 5) {
+                    $totalProveedores = 5;
+                }
 
                 $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
                 $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)

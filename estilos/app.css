@@ -158,12 +158,18 @@
 }
 
 /* Estilos para el bootbox */
-.bootbox-confirm-modal {
+.bootbox-alert-modal,
+.bootbox-confirm-modal,
+.bootbox-modal {
     z-index: 1060 !important;
 }
-.bootbox-confirm-modal + .modal-backdrop {
+
+.bootbox-alert-modal + .modal-backdrop,
+.bootbox-confirm-modal + .modal-backdrop,
+.bootbox-modal + .modal-backdrop {
     z-index: 1059 !important;
 }
+
 .modal-backdrop + .modal-backdrop {
     z-index: 1058 !important;
 }

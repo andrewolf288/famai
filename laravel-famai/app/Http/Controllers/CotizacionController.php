@@ -193,13 +193,18 @@ class CotizacionController extends Controller
     {
         $user = auth()->user();
         $sed_codigo = "10";
+        $tra_solicitante = null;
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
-        if ($trabajador) {
-            $sed_codigo = $trabajador->sed_codigo;
-        }
 
         try {
             DB::beginTransaction();
+
+            if ($trabajador) {
+                $sed_codigo = $trabajador->sed_codigo;
+                $tra_solicitante = $trabajador->tra_id;
+            } else {
+                throw new Exception('El usuario no tiene un trabajador asignado');
+            }
 
             $request->validate([
                 'cotizacion' => 'required|string',
@@ -281,14 +286,6 @@ class CotizacionController extends Controller
                 $numero = 1;
             } else {
                 $numero = intval($lastCotizacion->coc_numero) + 1;
-            }
-
-            // buscamos informacion de trabajador
-            $tra_solicitante = null;
-            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
-
-            if ($trabajador) {
-                $tra_solicitante = $trabajador->tra_id;
             }
 
             // debemos verificar si el proveedor existe
