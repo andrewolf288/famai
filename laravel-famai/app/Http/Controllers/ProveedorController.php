@@ -70,6 +70,20 @@ class ProveedorController extends Controller
         return response()->json($results);
     }
 
+    public function findProveedorByQuerySAP(Request $request)
+    {
+        $prv_nombre = $request->input('query', null);
+        $prv_nrodocumento = $request->input('prv_nrodocumento', null);
+
+        try {
+            $sql = "EXEC dbo.FAM_LOG_Proveedores @parRazonSocial = ?, @parRUC = ?";
+            $result = DB::select($sql, [$prv_nombre, $prv_nrodocumento]);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al consultar SAP', 'detalle' => $e->getMessage()], 500);
+        }
+    }
+
     public function findProveedorByDocumento(Request $request)
     {
         $query = $request->input('query', null);
@@ -471,7 +485,7 @@ class ProveedorController extends Controller
 
                         // cuenta de retencion
                         if ($colIndex == 'BE') {
-                            $numerocuentainterbancaria5 = $cell->getFormattedValue();
+                            $numerocuentaretencion = $cell->getFormattedValue();
                         }
                     }
 
