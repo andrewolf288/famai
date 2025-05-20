@@ -1171,11 +1171,7 @@ $(document).ready(async () => {
             // Solo renderizar si el prv_id no existe en el Set y no es null
             if (proveedor.prv_id && !proveedoresUnicos.has(proveedor.prv_id)) {
                 proveedoresUnicos.add(proveedor.prv_id)
-                const proveedorMapeado = {
-                    ...proveedor,
-                    prv_id: proveedor.prv_codigo,
-                }
-                const row = renderRowProveedor(proveedorMapeado)
+                const row = renderRowProveedor(proveedor)
                 $('#tbl-cotizaciones-proveedores tbody').append(row)
             }
         })
@@ -1291,7 +1287,7 @@ $(document).ready(async () => {
         buscarProveedorBySUNAT(query)
     });
 
-    // buscar proveedores por SAP
+    // buscar proveedores por SUNAT
     async function buscarProveedorBySUNAT(documento) {
         if (documento.length < 8) {
             alert('El documento debe tener más de 8 dígitos')
@@ -1299,8 +1295,20 @@ $(document).ready(async () => {
         }
 
         try {
-            const { data } = await client.get(`/proveedoresByQuerySAP?nrodocumento=${documento}`)
-            seleccionarProveedor(data[0])
+            const { data } = await client.get(`/padronSunat?nrodocumento=${documento}`)
+            const { xps_nrodocumento, xps_nombre } = data
+            const formatData = {
+                prv_id: null,
+                prv_nrodocumento: xps_nrodocumento,
+                prv_nombre: xps_nombre,
+                prv_direccion: '',
+                tdo_codigo: 'RUC',
+                prv_telefono: '',
+                prv_whatsapp: '',
+                prv_contacto: '',
+                prv_correo: ''
+            }
+            seleccionarProveedor(formatData)
         } catch (error) {
             const { data, status } = error.response
             if (status === 404) {
@@ -1321,15 +1329,15 @@ $(document).ready(async () => {
 
         try {
             const queryEncoded = encodeURIComponent(query)
-            const { data } = await client.get(`/proveedoresByQuerySAP?query=${queryEncoded}`)
+            const { data } = await client.get(`/proveedoresByQuery?query=${queryEncoded}`)
             // Limpiamos la lista
             limpiarLista()
             // formamos la lista
             data.forEach(proveedor => {
                 const listItem = document.createElement('li')
                 listItem.className = 'list-group-item list-group-item-action'
-                listItem.textContent = `${proveedor.RUC} - ${proveedor.RazSocial}`
-                listItem.dataset.id = proveedor.CardCode
+                listItem.textContent = `${proveedor.prv_nrodocumento} - ${proveedor.prv_nombre}`
+                listItem.dataset.id = proveedor.prv_id
                 listItem.addEventListener('click', () => seleccionarProveedor(proveedor))
                 // agregar la lista completa
                 $('#resultadosLista').append(listItem)
@@ -1350,14 +1358,9 @@ $(document).ready(async () => {
 
     // renderizar row de proveedor
     function renderRowProveedor(proveedor) {
-        const { prv_id, prv_nrodocumento, prv_nombre, prv_direccion, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto, prv_correo, prv_account_sol, prv_banco_sol, prv_account_usd, prv_banco_usd, prv_account_nacion } = proveedor
+        const { prv_id, prv_nrodocumento, prv_nombre, prv_direccion, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto, prv_correo } = proveedor
         const row = `
         <tr data-id-proveedor="${prv_id}">
-            <input class="account-sol-proveedor" type="hidden" value="${prv_account_sol || ''}"/>
-            <input class="banco-sol-proveedor" type="hidden" value="${prv_banco_sol || ''}"/>
-            <input class="account-usd-proveedor" type="hidden" value="${prv_account_usd || ''}"/>
-            <input class="banco-usd-proveedor" type="hidden" value="${prv_banco_usd || ''}"/>
-            <input class="account-nacion-proveedor" type="hidden" value="${prv_account_nacion || ''}"/>
             <input class="direccion-proveedor" type="hidden" value="${prv_direccion || ''}"/>
             <td class="nombre-proveedor">${prv_nombre}</td>
             <td class="tipodocumento-proveedor text-center">${tdo_codigo}</td>
@@ -1427,22 +1430,6 @@ $(document).ready(async () => {
 
     // seleccionar o busqueda de proveedor
     function seleccionarProveedor(proveedor) {
-        const mapProveedor = {
-            prv_id: proveedor.CardCode,
-            prv_nrodocumento: proveedor.RUC,
-            prv_nombre: proveedor.RazSocial,
-            tdo_codigo: 'RUC',
-            prv_direccion: proveedor.Direccion,
-            prv_telefono: proveedor.Telefono,
-            prv_whatsapp: proveedor.Celular,
-            prv_correo: proveedor.E_Mail,
-            prv_contacto: proveedor.Contacto,
-            prv_account_sol: proveedor.account_sol,
-            prv_banco_sol: proveedor.banco_sol,
-            prv_account_usd: proveedor.account_usd,
-            prv_banco_usd: proveedor.banco_usd,
-            prv_account_nacion: proveedor.account_nacion,
-        }
         const $rows = $('#tbl-cotizaciones-proveedores tbody tr')
 
         const array_prov = $rows.map(function () {
@@ -1450,7 +1437,7 @@ $(document).ready(async () => {
             return $(this).find('.nrodocumento-proveedor').text()
         }).get()
         // const findElement = array_prov.find(element => element == prv_id)
-        const findElement = array_prov.find(element => element == mapProveedor.prv_nrodocumento)
+        const findElement = array_prov.find(element => element == proveedor.prv_nrodocumento)
 
         if (findElement) {
             alert('El proveedor ya fue agregado')
@@ -1460,7 +1447,7 @@ $(document).ready(async () => {
         limpiarLista()
         $('#proveedoresInput').val('')
 
-        const row = renderRowProveedor(mapProveedor)
+        const row = renderRowProveedor(proveedor)
         $('#tbl-cotizaciones-proveedores tbody').append(row)
     }
 
@@ -1489,12 +1476,7 @@ $(document).ready(async () => {
             prv_contacto: row.find('.contacto-proveedor').val() || '',
             prv_whatsapp: row.find('.celular-proveedor').val() || '',
             prv_telefono: row.find('.telefono-proveedor').val() || '',
-            prv_correo: row.find('.correo-proveedor').val() || '',
-            prv_account_sol: row.find('.account-sol-proveedor').val() || '',
-            prv_banco_sol: row.find('.banco-sol-proveedor').val() || '',
-            prv_account_usd: row.find('.account-usd-proveedor').val() || '',
-            prv_banco_usd: row.find('.banco-usd-proveedor').val() || '',
-            prv_account_nacion: row.find('.account-nacion-proveedor').val() || '',
+            prv_correo: row.find('.correo-proveedor').val() || ''
         }
 
         // si es proveedor unico, se debe ingresar información de cotizacion

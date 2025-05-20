@@ -274,7 +274,6 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('proveedores', [ProveedorController::class, 'store']);
     Route::put('proveedor/{id}', [ProveedorController::class, 'update']);
     Route::get('/proveedoresByQuery', [ProveedorController::class, 'findProveedorByQuery']);
-    Route::get('/proveedoresByQuerySAP', [ProveedorController::class, 'findProveedorByQuerySAP']);
     Route::get('/proveedoresByDocumento', [ProveedorController::class, 'findProveedorByDocumento']);
 });
 
