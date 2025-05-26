@@ -1829,13 +1829,15 @@ $(document).ready(async () => {
                 const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra } = item
                 content += `
                     <tr>
+                        <td>${parseDateSimple(prp_fechaultimacompra)}</td>
                         <td>${prp_nroordencompra}</td>
                         <td>${proveedor.prv_nrodocumento}</td>
                         <td>${proveedor.prv_nombre}</td>
                         <td>${producto.pro_codigo}</td>
                         <td>${producto.pro_descripcion}</td>
-                        <td>${parseDateSimple(prp_fechaultimacompra)}</td>
+                        <td></td>
                         <td>${parseFloat(prp_preciounitario).toFixed(2)}</td>
+                        <td></td>
                     </tr>
                 `
             })

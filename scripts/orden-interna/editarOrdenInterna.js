@@ -720,7 +720,7 @@ $(document).ready(async function () {
         }
     }
 
-    function seleccionarMaterial(material) {
+    async function seleccionarMaterial(material) {
         const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material
 
         let idProductosArray = []
@@ -733,8 +733,32 @@ $(document).ready(async function () {
 
         // Si se trata del producto SU500706, si se acepta varias ingresos de estos en la OI
         if (findProducto && pro_codigo != 'SU500706') {
-            alert('Este producto ya fué agregado')
-        } else {
+            const result = await new Promise((resolve) => {
+                bootbox.confirm({
+                    title: 'Confirmación',
+                    centerVertical: true,
+                    className: 'bootbox-confirm-modal',
+                    message: `<p>El producto ${pro_descripcion} con codigo ${pro_codigo} ya fué agregado.</p><p class='text-danger fw-bold'>¿Estás seguro de agregar de nuevo este producto?</p>`,
+                    buttons: {
+                        confirm: {
+                            label: '<i class="fa fa-check-circle text-success-emphasis"></i> Confirmar',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: '<i class="fa fa-times-circle text-danger-emphasis"></i> Cancelar',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        resolve(result);
+                    }
+                });
+            });
+
+            if (!result) {
+                return;
+            }
+        } 
             limpiarLista()
             $('#productosInput').val('')
 
@@ -784,7 +808,6 @@ $(document).ready(async function () {
             </tr>`
 
             $('#tbl-orden-interna-productos tbody').append(row)
-        }
     }
 
     // funcion de cambiar de tipo proporcionado por el cliente

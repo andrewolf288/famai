@@ -186,11 +186,13 @@ class ProductoProveedorController extends Controller
     public function findOrdenCompraByProveedorProducto(Request $request)
     {
         $productos = $request->input('productos', []);
-        $proveedor = $request->input('proveedor', null);
+        $proveedorCodigo = $request->input('proveedor', null);
+
+        $proveedor = Proveedor::where('prv_codigo', $proveedorCodigo)->first();
 
         $data = ProductoProveedor::with('producto', 'proveedor')
             ->whereIn('pro_id', $productos)
-            ->where('prv_id', $proveedor)
+            ->where('prv_id', $proveedor->prv_id)
             ->orderBy('prp_fechaultimacompra', 'desc')
             ->get();
 

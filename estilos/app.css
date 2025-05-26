@@ -169,7 +169,3 @@
 .bootbox-modal + .modal-backdrop {
     z-index: 1059 !important;
 }
-
-.modal-backdrop + .modal-backdrop {
-    z-index: 1058 !important;
-}
