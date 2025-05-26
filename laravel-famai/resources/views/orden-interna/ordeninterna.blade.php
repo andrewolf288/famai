@@ -199,6 +199,7 @@
                 <td width="20%">OBSERVACIONES</td>
                 <td width="6%">COD.</td>
                 <td width="21%">DESCRIPCIÓN</td>
+                <td width="4%">UNI</td>
                 <td width="4%">CANT</td>
                 <td>OBSERVACIÓN</td>
             </tr>
@@ -291,6 +292,9 @@
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
                                     style="font-weight: {{ $fontWeight }};">
                                     {{ $parte['detalle_materiales'][$i]['odm_descripcion'] }}</td>
+                                <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
+                                    style="text-align: center;">{{ $parte['detalle_materiales'][$i]['uni_codigo'] }}
+                                </td>
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
                                     style="text-align: center;">{{ $parte['detalle_materiales'][$i]['odm_cantidad'] }}
                                 </td>
