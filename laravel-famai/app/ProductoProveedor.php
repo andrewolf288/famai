@@ -20,7 +20,8 @@ class ProductoProveedor extends Model
         'prp_usucreacion',
         'prp_feccreacion',
         'prp_usumodificacion',
-        'prp_fecmodificacion'
+        'prp_fecmodificacion',
+        'prp_descuentoporcentaje'
     ];
 
     const CREATED_AT = 'prp_feccreacion';
@@ -28,6 +29,7 @@ class ProductoProveedor extends Model
 
     protected $casts = [
         'prp_preciounitario' => 'decimal:2',
+        'prp_descuentoporcentaje' => 'decimal:2'
     ];
 
     // producto

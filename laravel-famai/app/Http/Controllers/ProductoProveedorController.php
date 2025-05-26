@@ -150,7 +150,7 @@ class ProductoProveedorController extends Controller
         $productos = $request->input('productos', []);
 
         $data = ProductoProveedor::with(['proveedor', 'producto'])
-            ->select('pro_id', 'prv_id', 'prp_fechaultimacompra', 'prp_preciounitario', 'prp_nroordencompra')
+            ->select('pro_id', 'prv_id', 'prp_fechaultimacompra', 'prp_preciounitario', 'prp_nroordencompra', 'prp_descuentoporcentaje')
             ->whereIn('pro_id', $productos)
             ->orderBy('prp_fechaultimacompra', 'desc')
             ->get()
@@ -172,6 +172,7 @@ class ProductoProveedorController extends Controller
                 $item->proveedor->toArray(),
                 [
                     'precio_unitario' => $item->prp_preciounitario,
+                    'descuento_porcentaje' => $item->prp_descuentoporcentaje,
                     'pro_id' => $item->pro_id,
                     'mon_codigo' => $ordenCompra ? $ordenCompra->mon_codigo : null,
                     'fpa_descripcion' => $formaPago ? $formaPago->fpa_descripcion : null,
