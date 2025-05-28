@@ -176,6 +176,7 @@ class ProductoProveedorController extends Controller
                     'pro_id' => $item->pro_id,
                     'mon_codigo' => $ordenCompra ? $ordenCompra->mon_codigo : null,
                     'fpa_descripcion' => $formaPago ? $formaPago->fpa_descripcion : null,
+                    'prp_fechaultimacompra' => $item->prp_fechaultimacompra,
                 ]
             );
         })->unique('pro_id')->values();

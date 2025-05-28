@@ -885,11 +885,11 @@ $(document).ready(async () => {
                 <td class="text-center">
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" max="${detalle.cantidad}"/>
                 </td>
-                <td class="text-center">
-                    <input type="number" readonly class="form-control descuento" value="${descuento}"/>
-                </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
+                </td>
+                <td class="text-center">
+                    <input type="number" readonly class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -928,11 +928,11 @@ $(document).ready(async () => {
                 <td class="text-center">
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" max="${detalle.odm_cantidad}" />
                 </td>
-                <td class="text-center">
-                    <input type="number" readonly class="form-control descuento" value="${descuento}"/>
-                </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
+                </td>
+                <td class="text-center">
+                    <input type="number" readonly class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -1357,7 +1357,8 @@ $(document).ready(async () => {
 
     // renderizar row de proveedor
     function renderRowProveedor(proveedor) {
-        const { prv_id, prv_nrodocumento, prv_nombre, prv_direccion, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto, prv_correo, prv_account_sol, prv_banco_sol, prv_account_usd, prv_banco_usd, prv_account_nacion } = proveedor
+        console.log(proveedor)
+        const { prv_id, prv_nrodocumento, prv_nombre, prv_direccion, tdo_codigo, prv_telefono, prv_whatsapp, prv_contacto, prv_correo, prv_account_sol, prv_banco_sol, prv_account_usd, prv_banco_usd, prv_account_nacion, precio_unitario, prp_fechaultimacompra } = proveedor
         const row = `
         <tr data-id-proveedor="${prv_id}">
             <input class="account-sol-proveedor" type="hidden" value="${prv_account_sol || ''}"/>
@@ -1381,6 +1382,8 @@ $(document).ready(async () => {
             <td>
                 <input type="text" class="form-control telefono-proveedor" value="${prv_telefono || ''}" />
             </td>
+            <td>${parseDateSimple(prp_fechaultimacompra) || ''}</td>
+            <td>${precio_unitario || ''}</td>
             <td>
                 <div class="d-flex justify-content-around">
                     <!--
