@@ -45,6 +45,11 @@ class CotizacionController extends Controller
         $fechaDesde = $request->input('fecha_desde', null);
         $fechaHasta = $request->input('fecha_hasta', null);
 
+        // Ajustar fecha_hasta para incluir toda la fecha si no viene con hora
+        if ($fechaHasta !== null && strlen($fechaHasta) === 10) { // formato YYYY-MM-DD
+            $fechaHasta .= ' 23:59:59';
+        }
+
         $query = Cotizacion::with(['proveedor', 'moneda'])
             ->where('sed_codigo', $sed_codigo);
 
