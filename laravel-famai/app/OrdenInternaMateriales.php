@@ -88,4 +88,10 @@ class OrdenInternaMateriales extends Model
         return $this->hasMany(OrdenCompraDetalle::class, 'odm_id');
     }
 
+    // relacion con historial de materiales para contar registros
+    public function cantidadHistorialMateriales()
+    {
+        return $this->hasMany(HistoriaOrdenesInternasMat::class, 'odm_id');
+    }
+
 }

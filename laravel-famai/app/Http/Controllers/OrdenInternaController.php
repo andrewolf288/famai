@@ -23,9 +23,16 @@ use Illuminate\Support\Facades\View;
 use App\Reporte;
 use App\Trabajador;
 use DateTime;
+use App\HistoriaOrdenesInternasMat;
 
 class OrdenInternaController extends Controller
 {
+    public function historialMaterialesOrdenInterna($id)
+    {
+        $historialMateriales = HistoriaOrdenesInternasMat::where('odm_id', $id)->get();
+        return response()->json($historialMateriales);
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -111,7 +118,9 @@ class OrdenInternaController extends Controller
 
     public function show($id)
     {
-        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso', 'partes.materiales.detalleAdjuntos'])
+        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso', 'partes.materiales.detalleAdjuntos', 'partes.materiales' => function($query) {
+                $query->withCount('cantidadHistorialMateriales');
+            }])
             ->findOrFail($id);
         return response()->json($ordenInterna);
     }

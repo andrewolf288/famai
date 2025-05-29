@@ -10,6 +10,9 @@ $(document).ready(async () => {
     let dataTableCotizaciones;
     const dataContainer = $('#data-container')
 
+    // variables para asignación de códigos
+    let idOrdenInternaMaterial = 0
+
     // URL ENDPOINT
     const apiURL = '/detalleMaterialesOrdenInterna-resumido'
 
@@ -906,11 +909,12 @@ $(document).ready(async () => {
                                 <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-delete-detalle-material" title="Eliminar Detalle Material">
+                        <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                 <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                             </svg>
                         </button>
+                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 130px;">Validar Código</button>
                     </div>
                 </td>
             </tr>`
@@ -949,16 +953,738 @@ $(document).ready(async () => {
                                 <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-delete-detalle-material" title="Eliminar Detalle Material">
+                        <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                 <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                             </svg>
                         </button>
+                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" disabled style="width: 155px;">Reasignar Código</button>
                     </div>
                 </td>
             </tr>`
         }
     }
+
+    // accion al presionar validar codigo
+    $("#tbl-cotizaciones-materiales").on('click', '.asignar-codigo', function () {
+        const odmId = $(this).data('odm-id')
+        idOrdenInternaMaterial = odmId
+
+        bootbox.dialog({
+            title: 'Asignación Código',
+            message: $('#validarCodigoModal').html(),
+            className: 'bootbox-confirm-modal',
+            size: 'extra-large',
+            buttons: {},
+            callback: function(result) {
+                // Inicializar el modal después de que se abra
+                setTimeout(function() {
+                    // borramos el detalle actual de la asignacion de codigos
+                    $(".bootbox #tbl-asignar-codigos tbody").empty()
+                    // limpiamos la lista
+                    $(".bootbox #resultadosListaValidarCodigo").empty()
+                    // limpiar input
+                    $(".bootbox #productosInput").val('')
+                    // deshabilitamos el boton de asignación
+                    $(".bootbox #btn-asignar-codigo").prop('disabled', true)
+                    
+                    // Aplicar estilos a la lista
+                    $(".bootbox #resultadosListaValidarCodigo").css({
+                        'z-index': '9999',
+                        'position': 'absolute',
+                        'background-color': 'white',
+                        'border': '1px solid #ccc',
+                        'max-height': '200px',
+                        'overflow-y': 'auto',
+                        'width': '100%'
+                    });
+                }, 100);
+            }
+        })
+    })
+
+    // evento para el botón cancelar código
+    $(document).on('click', '#btn-cancelar-codigo', function () {
+        bootbox.hideAll()
+    })
+
+    // Verificar que jQuery y bootbox están disponibles
+
+    // buscador de productos a validar - usando delegación para bootbox
+    $(document).on('input', '#productosInput', debounce(async function () {
+        const query = $(this).val().trim()
+        console.log('se ejecuto el input', query);
+        if (query.length >= 3) {
+            await buscarMateriales(query)
+        } else {
+            limpiarListaValidacionCodigo()
+        }
+    }))
+
+    async function buscarMateriales(query) {
+        
+        if (abortController) {
+            abortController.abort();
+        }
+        abortController = new AbortController();
+        const signal = abortController.signal;
+
+        try {
+            const queryEncoded = encodeURIComponent(query)
+            // const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
+            // Limpiamos la lista
+
+            const data = [
+                {
+                    "pro_codigo": "MA402911",
+                    "pro_descripcion": "(04-A-05-//) PASTA ANTIOXIDANTE PENETROX ¨A¨",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": "228.630000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2025-05-27 00:00:00.000",
+                    "UltimaFechaIngreso": "2025-04-24 00:00:00.000",
+                    "pro_id": "MA402911"
+                },
+                {
+                    "pro_codigo": "SU503129",
+                    "pro_descripcion": "(06-B-//-/) ECOTEX 15,0 X 2,5 GUIDANCE TAPE - ORANGE - 34534",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "51.630667",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2023-04-25 00:00:00.000",
+                    "UltimaFechaIngreso": "2023-04-25 00:00:00.000",
+                    "pro_id": "SU503129"
+                },
+                {
+                    "pro_codigo": "SU503131",
+                    "pro_descripcion": "(06-B-//-/) ECOTEX 20,0 X 3,0 GUIDANCE TAPE - ORANGE - 34545",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "85.762000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-03-01 00:00:00.000",
+                    "UltimaFechaIngreso": "2016-10-10 00:00:00.000",
+                    "pro_id": "SU503131"
+                },
+                {
+                    "pro_codigo": "SU503132",
+                    "pro_descripcion": "(06-B-//-/) ECOTEX 25,0 X 2,5 GUIDANCE TAPE - ORANGE - 34536",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "41.394000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2023-02-04 00:00:00.000",
+                    "UltimaFechaIngreso": "2023-02-04 00:00:00.000",
+                    "pro_id": "SU503132"
+                },
+                {
+                    "pro_codigo": "SU505097",
+                    "pro_descripcion": "(2DO-PISO) ECOTEX 9.7 X 2,5 GUIDANCE TAPE - ORANGE - 34532 / SE.GT.34532",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "42.272000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2025-01-02 00:00:00.000",
+                    "UltimaFechaIngreso": "2024-12-31 00:00:00.000",
+                    "pro_id": "SU505097"
+                },
+                {
+                    "pro_codigo": "MA410302",
+                    "pro_descripcion": "BOMBA DOBLE DE PISTONES  -  SAUER DANFOSS",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": "12386.440000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-04-11 00:00:00.000",
+                    "UltimaFechaIngreso": "2017-04-11 00:00:00.000",
+                    "pro_id": "MA410302"
+                },
+                {
+                    "pro_codigo": "MA407095",
+                    "pro_descripcion": "CHOCOLATES DE FONDANT X 300",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": null,
+                    "pro_id": "MA407095"
+                },
+                {
+                    "pro_codigo": "RE600709",
+                    "pro_descripcion": "CRUCETA DE CARDAN VKUA 4542",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2017-10-10 00:00:00.000",
+                    "pro_id": "RE600709"
+                },
+                {
+                    "pro_codigo": "SU507086",
+                    "pro_descripcion": "DESOXIDANTE WURTH ROSS",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": null,
+                    "pro_id": "SU507086"
+                },
+                {
+                    "pro_codigo": "SU505098",
+                    "pro_descripcion": "ECOTEX 12.0 X 2,5 GUIDANCE TAPE - ORANGE - 34533",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2018-10-17 00:00:00.000",
+                    "pro_id": "SU505098"
+                },
+                {
+                    "pro_codigo": "SU503130",
+                    "pro_descripcion": "ECOTEX 20,0 X 2,5 GUIDANCE TAPE - ORANGE - 34535",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "39.787234",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-03-01 00:00:00.000",
+                    "UltimaFechaIngreso": "2017-11-17 00:00:00.000",
+                    "pro_id": "SU503130"
+                },
+                {
+                    "pro_codigo": "SU503133",
+                    "pro_descripcion": "ECOTEX 25,0 X 3,0 GUIDANCE TAPE - ORANGE - 34546",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "70.961039",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-03-01 00:00:00.000",
+                    "UltimaFechaIngreso": "2019-06-28 00:00:00.000",
+                    "pro_id": "SU503133"
+                },
+                {
+                    "pro_codigo": "SU505100",
+                    "pro_descripcion": "ECOTEX 30.0 X 2,5 GUIDANCE TAPE - ORANGE - 34537",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2019-01-16 00:00:00.000",
+                    "pro_id": "SU505100"
+                },
+                {
+                    "pro_codigo": "SU507187",
+                    "pro_descripcion": "ECOTEX 30.0 X 3.00 GUIDANCE TAPE - ORANGE - 34547",
+                    "uni_codigo": "M",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": null,
+                    "pro_id": "SU507187"
+                },
+                {
+                    "pro_codigo": "PT105245",
+                    "pro_descripcion": "GRUA TADANO MANTIS 6010-LEVANTE",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2025-02-13 00:00:00.000",
+                    "pro_id": "PT105245"
+                },
+                {
+                    "pro_codigo": "SU511256",
+                    "pro_descripcion": "GUANTES AMARILLO CUERO BADANA STEEL PRO",
+                    "uni_codigo": "PAR",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "5.930000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2025-01-06 00:00:00.000",
+                    "UltimaFechaIngreso": "2025-01-06 00:00:00.000",
+                    "pro_id": "SU511256"
+                },
+                {
+                    "pro_codigo": "SU512420",
+                    "pro_descripcion": "GUANTES CUERO BADANA CLUTE",
+                    "uni_codigo": "PAR",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "4.661000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2024-06-03 00:00:00.000",
+                    "UltimaFechaIngreso": "2025-04-10 00:00:00.000",
+                    "pro_id": "SU512420"
+                },
+                {
+                    "pro_codigo": "SU503268",
+                    "pro_descripcion": "GUANTES DE BADANA 10.5\" C/REF PALMA Y DEDOS",
+                    "uni_codigo": "PAR",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "5.000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2025-05-23 00:00:00.000",
+                    "UltimaFechaIngreso": "2025-05-22 00:00:00.000",
+                    "pro_id": "SU503268"
+                },
+                {
+                    "pro_codigo": "SU512706",
+                    "pro_descripcion": "MANDO INALAMBRICO DANFOSS // RECEPTOR, TRANSMISOR, BATERIAS, CARGADOR",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "6454.900000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2024-02-29 00:00:00.000",
+                    "UltimaFechaIngreso": "2024-02-29 00:00:00.000",
+                    "pro_id": "SU512706"
+                },
+                {
+                    "pro_codigo": "MA414097",
+                    "pro_descripcion": "MOTOR SEAL KIT 1.125\" MSKSAUER/SERIES 8 - DANFOSS",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": "442.140000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2021-09-30 00:00:00.000",
+                    "UltimaFechaIngreso": "2021-09-30 00:00:00.000",
+                    "pro_id": "MA414097"
+                },
+                {
+                    "pro_codigo": "MA406747",
+                    "pro_descripcion": "OREJA DE CARDAN",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": null,
+                    "pro_id": "MA406747"
+                },
+                {
+                    "pro_codigo": "MA413373",
+                    "pro_descripcion": "PASTA ANTIOXIDANTE INTELTROX",
+                    "uni_codigo": "KG",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": "72.140000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2024-06-18 00:00:00.000",
+                    "UltimaFechaIngreso": "2024-06-18 00:00:00.000",
+                    "pro_id": "MA413373"
+                },
+                {
+                    "pro_codigo": "MA402347",
+                    "pro_descripcion": "PASTA ANTIOXIDANTE PENETROX ¨A-13¨",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": "106.700000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2021-01-29 00:00:00.000",
+                    "UltimaFechaIngreso": "2021-01-28 00:00:00.000",
+                    "pro_id": "MA402347"
+                },
+                {
+                    "pro_codigo": "MA409011",
+                    "pro_descripcion": "PASTA ANTIOXIDANTE PENETROX ¨E¨",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "169.380000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-03-06 00:00:00.000",
+                    "UltimaFechaIngreso": "2017-10-24 00:00:00.000",
+                    "pro_id": "MA409011"
+                },
+                {
+                    "pro_codigo": "MA401800",
+                    "pro_descripcion": "PASTA CONDUCTORA ANTIOXIDANTE",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2019-08-26 00:00:00.000",
+                    "pro_id": "MA401800"
+                },
+                {
+                    "pro_codigo": "RE602117",
+                    "pro_descripcion": "PRESOSTATO DANFOSS 061B510166 - 250 bar G 1⁄4 hembra (ISO 228-1)",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": "4.000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "978.160000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2025-05-23 00:00:00.000",
+                    "UltimaFechaIngreso": "2025-05-13 00:00:00.000",
+                    "pro_id": "RE602117"
+                },
+                {
+                    "pro_codigo": "SU505502",
+                    "pro_descripcion": "ROLDANA 1TN",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": "29.660000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-11-30 00:00:00.000",
+                    "UltimaFechaIngreso": "2017-11-30 00:00:00.000",
+                    "pro_id": "SU505502"
+                },
+                {
+                    "pro_codigo": "PT104220",
+                    "pro_descripcion": "SBOM-611 -  CARDAN TOMAFUERZA",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": "40.210000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2020-09-30 00:00:00.000",
+                    "UltimaFechaIngreso": "2020-09-17 00:00:00.000",
+                    "pro_id": "PT104220"
+                },
+                {
+                    "pro_codigo": "PT103832",
+                    "pro_descripcion": "TRACTOR KOMATSU D655EX-DANGULACION DE HOJA",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "",
+                    "AvgPrice": "331.630000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": "2017-12-26 00:00:00.000",
+                    "UltimaFechaIngreso": "2017-12-18 00:00:00.000",
+                    "pro_id": "PT103832"
+                },
+                {
+                    "pro_codigo": "RE601038",
+                    "pro_descripcion": "VALVULA CHECK DUAL DANFOSS - COMATROL",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2018-09-07 00:00:00.000",
+                    "pro_id": "RE601038"
+                },
+                {
+                    "pro_codigo": "RE601249",
+                    "pro_descripcion": "VALVULA CONTRABALANCE SAUERDANFOSS",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2019-05-23 00:00:00.000",
+                    "pro_id": "RE601249"
+                },
+                {
+                    "pro_codigo": "SU511763",
+                    "pro_descripcion": "VALVULA SELENOIDE 2/2 1\" EJE CENTRAL 24VDC DANFOSS",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": null,
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2023-11-20 00:00:00.000",
+                    "pro_id": "SU511763"
+                },
+                {
+                    "pro_codigo": "MA406746",
+                    "pro_descripcion": "YUGO DE CARDAN",
+                    "uni_codigo": "PZ",
+                    "WhsCode": "01_AQPAG",
+                    "alp_stock": ".000000",
+                    "CntUnitMsr": "PZ",
+                    "AvgPrice": ".000000",
+                    "validFor": "Y",
+                    "InvntItem": "Y",
+                    "UltimaFechaMovimiento": null,
+                    "UltimaFechaIngreso": "2019-06-28 00:00:00.000",
+                    "pro_id": "MA406746"
+                }
+            ]
+            
+            limpiarListaValidacionCodigo()
+            
+            // formamos la lista
+            data.forEach((material, index) => {
+                
+                const listItem = document.createElement('li')
+                listItem.className = 'list-group-item list-group-item-action material-item'
+                listItem.style.cursor = 'pointer'
+                listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - Stock: ${material.alp_stock || '0.000000'} - Fec. Ult. Ingreso: ${material["UltimaFechaIngreso"] ? parseDateSimple(material["UltimaFechaIngreso"]) : 'No Aplica'}`
+                listItem.dataset.id = material.pro_id
+                listItem.dataset.procodigo = material.pro_codigo
+                listItem.dataset.prodescripcion = material.pro_descripcion
+                listItem.dataset.alpstock = material.alp_stock
+                listItem.dataset.ultimafechaingreso = material["UltimaFechaIngreso"]
+                
+                // agregar la lista completa - buscar en el contexto correcto
+                const $resultadosLista = $('.bootbox #resultadosListaValidarCodigo').length > 0 
+                    ? $('.bootbox #resultadosListaValidarCodigo') 
+                    : $('#resultadosListaValidarCodigo');
+                
+                
+                // Agregar z-index alto para que aparezca encima del modal
+                $resultadosLista.css({
+                    'z-index': '9999',
+                    'position': 'absolute',
+                    'background-color': 'white',
+                    'border': '1px solid #ccc',
+                    'max-height': '400px',
+                    'overflow-y': 'auto',
+                });
+                
+                $resultadosLista.append(listItem)
+            })
+
+
+            // Agregar evento usando delegación para los elementos li
+            $(document).off('click', '.material-item').on('click', '.material-item', function() {
+                const material = {
+                    pro_id: $(this).data('id'),
+                    pro_codigo: $(this).data('procodigo'),
+                    pro_descripcion: $(this).data('prodescripcion'),
+                    alp_stock: $(this).data('alpstock'),
+                    UltimaFechaIngreso: $(this).data('ultimafechaingreso')
+                };
+                seleccionarMaterial(material);
+            });
+            
+        } catch (error) {
+            if (error.name === 'AbortError') {
+            } else {
+                console.error('Error al buscar materiales:', error);
+            }
+        }
+    }
+
+    // funcion que limpia la lista
+    function limpiarListaValidacionCodigo() {
+        const $resultadosLista = $('.bootbox #resultadosListaValidarCodigo').length > 0 
+            ? $('.bootbox #resultadosListaValidarCodigo') 
+            : $('#resultadosListaValidarCodigo');
+        console.log('se ejecuto la funcion limpiarLista', $resultadosLista);
+        $resultadosLista.empty()
+    }
+
+    // funcion que se ejecuta al seleccionar un material
+    function seleccionarMaterial(material) {
+        limpiarListaValidacionCodigo()
+        const $productosInput = $('.bootbox #productosInput').length > 0 
+            ? $('.bootbox #productosInput') 
+            : $('#productosInput');
+        const $btnAsignarCodigo = $('.bootbox #btn-asignar-codigo').length > 0 
+            ? $('.bootbox #btn-asignar-codigo') 
+            : $('#btn-asignar-codigo');
+        const $tblAsignarCodigos = $('.bootbox #tbl-asignar-codigos tbody').length > 0 
+            ? $('.bootbox #tbl-asignar-codigos tbody') 
+            : $('#tbl-asignar-codigos tbody');
+
+        $productosInput.val('')
+        $btnAsignarCodigo.prop('disabled', false)
+        const { pro_id, pro_codigo, pro_descripcion, alp_stock, UltimaFechaIngreso } = material
+
+        const row = `
+        <tr data-id="${pro_id}">
+            <td>${pro_codigo}</td>
+            <td>${pro_descripcion}</td>
+            <td>${alp_stock}</td>
+            <td>${UltimaFechaIngreso || 'N/A'}</td>
+            <td>
+                <button class="btn btn-sm btn-danger eliminar-detalle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                    </svg>
+                </button>
+            </td>
+        </tr>
+        `
+        $tblAsignarCodigos.html(row)
+    }
+
+    // evento para eliminar detalle de la tabla de asignación de códigos
+    $(document).on('click', '.eliminar-detalle', function () {
+        const row = $(this).closest('tr')
+        row.remove()
+
+        // deshabilitamos el boton de asignación - buscar en el contexto correcto
+        const $btnAsignarCodigo = $('.bootbox #btn-asignar-codigo').length > 0 
+            ? $('.bootbox #btn-asignar-codigo') 
+            : $('#btn-asignar-codigo');
+        $btnAsignarCodigo.prop('disabled', true)
+    })
+
+    // evento para el botón de asignar código
+    $(document).on('click', '#btn-asignar-codigo', async function () {
+        // Validar que se haya seleccionado el ID del material
+        if (!idOrdenInternaMaterial || idOrdenInternaMaterial === 0) {
+            alert('Error: No se ha seleccionado un material de orden interna válido');
+            return;
+        }
+
+        // Buscar en el contexto del bootbox o en el documento
+        const $tblAsignarCodigos = $('.bootbox #tbl-asignar-codigos tbody tr:first').length > 0 
+            ? $('.bootbox #tbl-asignar-codigos tbody tr:first') 
+            : $('#tbl-asignar-codigos tbody tr:first');
+        
+        // Validar que existe una fila con producto seleccionado
+        if ($tblAsignarCodigos.length === 0) {
+            alert('Debe seleccionar un producto de la lista');
+            return;
+        }
+
+        var pro_codigo = $tblAsignarCodigos.data('id');
+        
+        // Validar que el código del producto existe
+        if (!pro_codigo) {
+            alert('Error: No se pudo obtener el código del producto seleccionado');
+            return;
+        }
+
+        // Obtener información del producto para mostrar en la confirmación
+        const productoCodigo = $tblAsignarCodigos.find('td:first').text();
+        const productoDescripcion = $tblAsignarCodigos.find('td:nth-child(2)').text();
+
+        // Mostrar confirmación dentro del mismo modal
+        const $btnAsignar = $(this);
+        const $btnCancelar = $('#btn-cancelar-codigo');
+        
+        // Cambiar el contenido del modal actual
+        const $modalBody = $btnAsignar.closest('.bootbox').find('.modal-body');
+        const originalContent = $modalBody.html();
+        
+        $modalBody.html(`
+            <div class="confirmation-message">
+                <p>¿Está seguro de asignar el código <strong>${productoCodigo}</strong> - <strong>${productoDescripcion}</strong> a este material?</p>
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar-confirmacion">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btn-confirmar-asignacion">Sí, asignar</button>
+                </div>
+            </div>
+        `);
+
+        // Manejar la confirmación
+        $('#btn-confirmar-asignacion').on('click', async function() {
+            try {
+                $btnAsignar.prop('disabled', true).text('Asignando...');
+                
+                const formatData = {
+                    odm_id: idOrdenInternaMaterial,
+                    pro_codigo: pro_codigo
+                };
+
+                await client.post('/ordeninternamateriales/validar-codigo', formatData);
+                bootbox.hideAll();
+                initDataTable(obtenerFiltrosActuales());
+            } catch (error) {
+                console.error('Error al asignar el codigo:', error);
+                alert('Error al asignar el codigo: ' + (error.response?.data?.message || error.message));
+            } finally {
+                $btnAsignar.prop('disabled', false).text('Asignar Código');
+            }
+        });
+
+        // Manejar la cancelación
+        $('#btn-cancelar-confirmacion').on('click', function() {
+            $modalBody.html(originalContent);
+        });
+    });
 
     // agregar productosde stock a detalle
     $("#add-product-stock").on('click', async function () {
@@ -1034,7 +1760,7 @@ $(document).ready(async () => {
                                     <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
                                 </svg>
                             </button>
-                            <button class="btn btn-sm btn-danger btn-delete-detalle-material" title="Eliminar Detalle Material">
+                            <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                     <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                                 </svg>
@@ -1198,7 +1924,7 @@ $(document).ready(async () => {
         $('#tbl-cotizaciones-materiales tbody').html(content)
 
         // abrir modal de solicitud de cotizacion
-        showModalSolicitudCotizacion()
+        showModalSolicitudCotizacion(data.length)
     })
 
     // ver detalle de agrupamiento de detalle de cotizacion
@@ -1698,21 +2424,21 @@ $(document).ready(async () => {
                 .removeClass('disabled')
                 .removeClass('btn-secondary')
                 .addClass('btn-success')
-                .attr('data-cotizacion-id', data.coc_id)
+                .attr('data-cotizacion-id', data.cotizacion.coc_id)
 
             // debemos habilitar la exportacion de formato text
             row.find('.btn-cotizacion-exportar-text')
                 .removeClass('disabled')
                 .removeClass('btn-secondary')
                 .addClass('btn-primary')
-                .attr('data-cotizacion-id', data.coc_id)
+                .attr('data-cotizacion-id', data.cotizacion.coc_id)
 
             // debemos habilitar la copia del enlace
             row.find('.btn-cotizacion-enlace')
                 .removeClass('disabled')
                 .removeClass('btn-secondary')
                 .addClass('btn-info')
-                .attr('data-cotizacion-id', data.coc_id)
+                .attr('data-cotizacion-id', data.cotizacion.coc_id)
 
             // debemos deshabilitar la eliminacion del detalle de proveedor
             row.find('.btn-proveedor-eliminar')
@@ -1730,12 +2456,15 @@ $(document).ready(async () => {
 
             // limpiamos el form de cotizacion
             clearDataCotizacion()
-
+            
             bootbox.dialog({
-                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Cotización creada</span>',
-                message: `La cotización fue creada con éxito. ${data.requerimiento_excedente ? `Adicional se ha creado un requerimiento para la cantidad excedente con numero: <span class="fw-bold">${data.requerimiento_excedente.odt_numero}</span>` : ''}`,
+                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Solicitud de cotización creada</span>',
+                message: `La solicitud de cotización fue creada con éxito. ${data.requerimiento_excedente ? `Adicional se ha creado un requerimiento para la cantidad excedente con numero: <span class="fw-bold">${data.requerimiento_excedente.odt_numero}</span>` : ''}.<br><br>
+                Aqui esta el link de la solicitud de cotización: <a href="${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${data.cotizacion.coc_id}" target="_blank">${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${data.cotizacion.coc_id}</a>
+                `,
                 backdrop: true,
                 centerVertical: true,
+                className: 'bootbox-confirm-modal',
                 buttons: {
                     confirm: {
                         label: 'Aceptar',
@@ -1743,7 +2472,11 @@ $(document).ready(async () => {
                     }
                 }
             })
-            $('#cotizacionesModal').modal('hide')
+
+            // SOLO SE CIERRA EL MODAL SI UN UNICO PROVEEDOR
+            if ($('#tbl-proveedores-container-body tr').length === 1) {
+                $('#cotizacionesModal').modal('hide')
+            }
         } catch (error) {
             console.log(error)
             bootbox.dialog({
@@ -2005,7 +2738,14 @@ $(document).ready(async () => {
     }
 
     // mostrar modal de cotizaciones
-    function showModalSolicitudCotizacion() {
+    function showModalSolicitudCotizacion(cantidadProveedores) {
+        console.log("cantidadProveedores", cantidadProveedores)
+        if (cantidadProveedores > 1) {
+            $("#btn-guardar-cotizacion-modal").hide()
+        } else {
+            $("#btn-guardar-cotizacion-modal").show()
+        }
+
         const modalElement = document.getElementById("cotizacionesModal");
         const modal = new bootstrap.Modal(modalElement, {
             backdrop: 'static',
