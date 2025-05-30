@@ -43,7 +43,6 @@ $(document).ready(() => {
 
     async function cargarCotizacion() {
         const { data } = await client.get(`/cotizacion/${id}`)
-        console.log(data)
         dataCotizacion = data
         // cotizacion de proveedor
         $('#numeroCotizacionProveedorInput').val(data.coc_cotizacionproveedor || '')
@@ -104,7 +103,9 @@ $(document).ready(() => {
             const { cod_id, cod_cantidad, cod_descripcion, cod_orden, cod_preciounitario, cod_total, pro_id } = detalle
             const producto_id = pro_id ? pro_id : obtenerIdUnico()
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(pro_id ? '' : 'sin-asociar');
+            if (!pro_id) {
+                rowItem.classList.add('sin-asociar');
+            }
             //debemos indicar que son ediciones directas en base de datos
             rowItem.classList.add('row-editable');
             rowItem.classList.add('table-primary')
@@ -316,6 +317,7 @@ $(document).ready(() => {
             ])
             await cargarCotizacion()
         } catch (error) {
+            console.log(error)
             alert("Error al cargar los datos")
         }
     }
