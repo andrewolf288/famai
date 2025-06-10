@@ -2029,9 +2029,9 @@ $(document).ready(async () => {
             $("#div-cotizacion").removeClass('d-none')
             $(".label-precio-unitario").removeClass('d-none')
             $(".label-precio-unitario-detalle").removeClass('d-none')
-        } else {
-            $(".label-precio-unitario-total").removeClass('d-none')
             $(".label-descuento").removeClass('d-none')
+            $(".label-precio-unitario-total").removeClass('d-none')
+        } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
             $(".label-precio-unitario-detalle").addClass('d-none')
@@ -2680,6 +2680,8 @@ $(document).ready(async () => {
     function clearDataCotizacion() {
         // deshabilitamos la opción de proveedor único
         $("#checkProveedorUnico").prop('checked', false)
+        $(".label-precio-unitario-total").addClass('d-none')
+        $(".label-descuento").addClass('d-none')
         // vaceamos la variable de archivos adjuntos
         archivosAdjuntos = []
         // vaceamos la lista de archivos adjuntos
