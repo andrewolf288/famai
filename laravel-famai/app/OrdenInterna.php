@@ -31,7 +31,8 @@ class OrdenInterna extends Model
         'oic_usucreacion',
         'oic_feccreacion',
         'oic_usumodificacion',
-        'oic_fecmodificacion'
+        'oic_fecmodificacion',
+        'oic_otsap' // ALTER TABLE tblordenesinternascab_oic ADD oic_otsap varchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
     ];
 
     const CREATED_AT = 'oic_feccreacion';

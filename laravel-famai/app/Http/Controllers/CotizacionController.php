@@ -461,7 +461,9 @@ class CotizacionController extends Controller
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null,
-                    'cod_cantidadcotizada' => $detalle['cod_cantidadcotizada']
+                    'cod_cantidadcotizada' => $detalle['cod_cantidadcotizada'],
+                    'cod_fecentregaoc' => $detalle['cod_fecentregaoc'],
+                    'cod_descuento' => $detalle['cod_descuento']
                 ]);
 
                 $detalleMaterial->odm_estado = 'COT';

@@ -248,6 +248,7 @@ class OrdenInternaMaterialesController extends Controller
         });
         $query->whereNotIn('odm_tipo', [3, 4, 5]);
         $query->whereNotNull('odm_estado');
+        $query->where('odm_estado', '!=', 'ODC');
 
         // filtro de orden de trabajo
         if ($ordenTrabajo !== null) {

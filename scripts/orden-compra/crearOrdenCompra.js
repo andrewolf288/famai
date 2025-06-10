@@ -402,7 +402,7 @@ $(document).ready(async () => {
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
                     ocd_preciounitario: parseFloat(precio_unitario),
                     ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario),
-                    ocd_fechaentrega: ""
+                    ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"]
                 }
                 formatData.push(formatDetalle)
             })
@@ -899,7 +899,7 @@ $(document).ready(async () => {
                 messageErrorValidation += "- El porcentaje de descuento debe ser un número mayor o igual que cero\n"
             }
             // validacion de fecha de entrega
-            if (!esFechaValida(detalle.ocd_fechaentrega)) {
+            if (!esFechaValida(moment(detalle.ocd_fechaentrega).format('YYYY-MM-DD'))) {
                 messageErrorValidation += "- La fecha de entrega debe ser una fecha valida\n"
             }
 

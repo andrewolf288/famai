@@ -70,7 +70,7 @@ $(document).ready(() => {
                         <a target="_blank" href="${config.FRONT_URL}/cotizacion-proveedor.html?coc_id=${cotizacion.coc_id}">Ir enlace</a>
                     </td>
                     <td>
-                        <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : 'bg-success'}">${cotizacion.coc_estado}</span>
+                        <span class="badge ${cotizacion.coc_estado === 'SOL' ? 'bg-danger' : 'bg-success'} btn-cambiar-estado-cotizacion" style="cursor: pointer;" data-cotizacion="${cotizacion.coc_id}">${cotizacion.coc_estado}</span>
                     </td>
                     <td>
                         <div class="d-flex justify-content-around">
@@ -271,6 +271,36 @@ $(document).ready(() => {
             console.log(error)
             alert('Error al generar el reporte')
         }
+    })
+
+    // FUNCION PARA CAMBIAR EL ESTADO DE LA COTIZACION
+    $('#data-container').on('click', '.btn-cambiar-estado-cotizacion', function () {
+        const coc_id = $(this).data('cotizacion')
+        const estado = $(this).text()
+        if (estado === 'RPR') {
+            bootbox.confirm({
+                title: 'Cambiar estado de la cotización',
+                message: '¿Desea cambiar el estado de la cotización a "SOLICITADO"?, Esto permitira que el proveedor pueda editar la cotización',
+                buttons: {
+                    confirm: {
+                        label: 'Si',
+                        className: 'btn-success'
+                    },
+                    cancel: {
+                        label: 'No',
+                        className: 'btn-danger'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        client.patch(`/cotizacion/update-estado/${coc_id}`, {coc_estado: 'SOL'})
+                        const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
+                        initPagination(URL, initDataTable, dataTableOptions)
+                    }
+                }
+            })
+        }
+
     })
 
     function showModalPreview(pdfUrl) {

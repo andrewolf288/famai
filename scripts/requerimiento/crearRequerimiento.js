@@ -460,98 +460,105 @@ $(document).ready(function () {
     })
 
     $("#btn-guardar-requerimiento").click(async function () {
-        let handleError = ''
-        window.onbeforeunload = null;
-
-        const $oiValorEquipo = $('#equipoInput').val().trim()
-        const $oiCodigoArea = $('#areaSelect').val()
-        const $motivoRequerimiento = $('#motivoRequerimientoSelect').val()
-        const $oiFecha = $('#fechaPicker').val()
-        const $oiFechaEntrega = $('#fechaEntregaPicker').val()
-        const $oiEncargadoOrigen = $('#responsableOrigen').val()
-
-        if (
-            $oiFecha.length === 0 ||
-            $oiFechaEntrega.length === 0 ||
-            $oiEncargadoOrigen.length === 0 ||
-            $oiCodigoArea.length === 0 ||
-            $motivoRequerimiento.length === 0 ||
-            detalle_requerimiento.length === 0
-        ) {
-            if ($oiCodigoArea.length === 0) {
-                handleError += '- Se debe ingresar información del área\n'
-            }
-            if ($oiFecha.length === 0) {
-                handleError += '- Se debe ingresar información de la fecha\n'
-            }
-            if ($oiFechaEntrega.length === 0) {
-                handleError += '- Se debe ingresar información de la fecha de entrega\n'
-            }
-            if ($oiEncargadoOrigen.length === 0) {
-                handleError += '- Se debe ingresar información de encargado origen\n'
-            }
-            if ($motivoRequerimiento.length === 0) {
-                handleError += '- Se debe ingresar información de motivo de requerimiento\n'
-            }
-            if (detalle_requerimiento.length === 0) {
-                handleError += '- Se debe ingresar información de detalle de requerimiento\n'
-            }
-        }
-
-        if (handleError.length !== 0) {
-            alert(handleError)
-            return
-        }
-
-        const formatData = {
-            oic_fecha: transformarFecha($oiFecha),
-            oic_fechaentregaestimada: transformarFecha($oiFechaEntrega),
-            are_codigo: $oiCodigoArea,
-            mrq_codigo: $motivoRequerimiento,
-            tra_idorigen: $oiEncargadoOrigen,
-            oic_equipo_descripcion: $oiValorEquipo || null,
-            detalle_requerimiento: []
-        }
-
-        // debemos parsear la informacion
-        detalle_requerimiento.forEach((element, index) => {
-            formatData.detalle_requerimiento.push({
-                pro_id: element.pro_id,
-                pro_codigo: element.pro_codigo,
-                odm_item: index + 1,
-                odm_descripcion: element.odm_descripcion,
-                odm_cantidad: element.odm_cantidad,
-                odm_observacion: element.odm_observacion,
-                odm_tipo: element.odm_tipo,
-                odm_asociar: element.odm_asociar,
-                detalle_adjuntos: [...element.detalle_adjuntos.map(element_adjunto => element_adjunto.oma_descripcion)]
-            })
-        })
-
-        // formar data
-        console.log(formatData)
-        // return
-        const formData = new FormData()
-        formData.append('data', JSON.stringify(formatData))
-
-        // agregamos estructuradamente los archivos en el formdata
-        detalle_requerimiento.forEach((detalle, indexDetalle) => {
-            const { detalle_adjuntos } = detalle
-            detalle_adjuntos.forEach((file, indexFile) => {
-                formData.append(`files[${indexDetalle}][${indexFile}]`, file.oma_file)
-            })
-        })
-
+        $('#btn-guardar-requerimiento').prop('disabled', true);
         try {
+            let handleError = ''
+            window.onbeforeunload = null;
+
+            const $oiValorEquipo = $('#equipoInput').val().trim()
+            const $oiCodigoArea = $('#areaSelect').val()
+            const $motivoRequerimiento = $('#motivoRequerimientoSelect').val()
+            const $oiFecha = $('#fechaPicker').val()
+            const $oiFechaEntrega = $('#fechaEntregaPicker').val()
+            const $oiEncargadoOrigen = $('#responsableOrigen').val()
+
+            if (
+                $oiFecha.length === 0 ||
+                $oiFechaEntrega.length === 0 ||
+                $oiEncargadoOrigen.length === 0 ||
+                $oiCodigoArea.length === 0 ||
+                $motivoRequerimiento.length === 0 ||
+                detalle_requerimiento.length === 0
+            ) {
+                if ($oiCodigoArea.length === 0) {
+                    handleError += '- Se debe ingresar información del área\n'
+                }
+                if ($oiFecha.length === 0) {
+                    handleError += '- Se debe ingresar información de la fecha\n'
+                }
+                if ($oiFechaEntrega.length === 0) {
+                    handleError += '- Se debe ingresar información de la fecha de entrega\n'
+                }
+                if ($oiEncargadoOrigen.length === 0) {
+                    handleError += '- Se debe ingresar información de encargado origen\n'
+                }
+                if ($motivoRequerimiento.length === 0) {
+                    handleError += '- Se debe ingresar información de motivo de requerimiento\n'
+                }
+                if (detalle_requerimiento.length === 0) {
+                    handleError += '- Se debe ingresar información de detalle de requerimiento\n'
+                }
+            }
+
+            if (handleError.length !== 0) {
+                alert(handleError)
+                return
+            }
+
+            await buscarOrdenTrabajo()
+
+            const formatData = {
+                oic_fecha: transformarFecha($oiFecha),
+                oic_fechaentregaestimada: transformarFecha($oiFechaEntrega),
+                are_codigo: $oiCodigoArea,
+                mrq_codigo: $motivoRequerimiento,
+                tra_idorigen: $oiEncargadoOrigen,
+                oic_equipo_descripcion: $oiValorEquipo || null,
+                detalle_requerimiento: [],
+                oic_otsap: $('#otInput').val()
+            }
+
+            // debemos parsear la informacion
+            detalle_requerimiento.forEach((element, index) => {
+                formatData.detalle_requerimiento.push({
+                    pro_id: element.pro_id,
+                    pro_codigo: element.pro_codigo,
+                    odm_item: index + 1,
+                    odm_descripcion: element.odm_descripcion,
+                    odm_cantidad: element.odm_cantidad,
+                    odm_observacion: element.odm_observacion,
+                    odm_tipo: element.odm_tipo,
+                    odm_asociar: element.odm_asociar,
+                    detalle_adjuntos: [...element.detalle_adjuntos.map(element_adjunto => element_adjunto.oma_descripcion)]
+                })
+            })
+
+            // formar data
+            console.log(formatData)
+            // return
+            const formData = new FormData()
+            formData.append('data', JSON.stringify(formatData))
+
+            // agregamos estructuradamente los archivos en el formdata
+            detalle_requerimiento.forEach((detalle, indexDetalle) => {
+                const { detalle_adjuntos } = detalle
+                detalle_adjuntos.forEach((file, indexFile) => {
+                    formData.append(`files[${indexDetalle}][${indexFile}]`, file.oma_file)
+                })
+            })
+
             await client.post('/requerimientos', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             })
             window.location.href = "requerimiento"
+
         } catch (error) {
-            console.log(error)
+        } finally {
             alert("Error al crear el requerimiento")
+
+            $('#btn-guardar-requerimiento').prop('disabled', false)
         }
     })
 
@@ -564,39 +571,39 @@ $(document).ready(function () {
     $('#importar-requerimientos').on('click', async function () {
         const modalBody = $('#importar-requerimientos-body')
         const sinElementosCopiados = $('#sin-elementos-copiados')
-        
+
         // Mostrar siempre el textarea para pegar datos
         modalBody.removeClass('d-none')
         sinElementosCopiados.addClass('d-none')
-        
+
         // Habilitar o deshabilitar el botón importar según si hay datos
         $('#btn-importar-requerimientos').prop('disabled', !$('#excelData').val().trim())
-            
+
         // Mostrar el modal
         const modal = new bootstrap.Modal(document.getElementById("importarRequerimientosModal"))
         modal.show()
     })
 
     // Evento para el textarea de datos
-    $('#excelData').on('input', function() {
+    $('#excelData').on('input', function () {
         const texto = $(this).val().trim()
         if (texto) {
             // Obtener los encabezados de las columnas (primera fila)
             const lineas = texto.split('\n')
             if (lineas.length > 0) {
                 const columnas = lineas[0].split('\t')
-                
+
                 // Actualizar los selectores de mapeo
-                $('.column-mapping').each(function() {
+                $('.column-mapping').each(function () {
                     const select = $(this)
                     select.empty()
                     select.append('<option value="">Seleccione columna</option>')
-                    
+
                     columnas.forEach((columna, index) => {
                         select.append(`<option value="${index}">${columna}</option>`)
                     })
                 })
-                
+
                 // Habilitar el botón de importar
                 $('#btn-importar-requerimientos').prop('disabled', false)
             }
@@ -606,44 +613,44 @@ $(document).ready(function () {
     })
 
     // Procesar la importación cuando se haga clic en el botón
-    $('#btn-importar-requerimientos').on('click', async function() {
+    $('#btn-importar-requerimientos').on('click', async function () {
         // Cambiar el botón a spinner
         const $btnImportar = $(this)
         const btnTextoOriginal = $btnImportar.html()
         $btnImportar.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando...')
         $btnImportar.prop('disabled', true)
-        
+
         // Deshabilitar cerrar modal
         const modalElement = document.getElementById('importarRequerimientosModal')
         const modalInstance = bootstrap.Modal.getInstance(modalElement)
         $('.btn-close', '#importarRequerimientosModal').prop('disabled', true)
         $('#importarRequerimientosModal .btn-secondary').prop('disabled', true)
-        
+
         try {
             const texto = $('#excelData').val().trim()
             const lineas = texto.split('\n')
-            
+
             if (lineas.length <= 1) {
                 throw new Error('No hay datos para importar')
             }
-            
+
             // Obtener el mapeo seleccionado
             const mapeo = {}
-            
-            $('.column-mapping').each(function() {
+
+            $('.column-mapping').each(function () {
                 const field = $(this).data('field')
                 const value = $(this).val()
                 mapeo[field] = value === '' ? null : parseInt(value)
             })
-            
+
             if (mapeo.odm_descripcion === null || mapeo.odm_descripcion === '') {
                 throw new Error('Debe seleccionar minimo la columna de Material')
             }
-            
+
             // Saltamos la primera línea (encabezados) y procesamos cada línea
             for (let i = 1; i < lineas.length; i++) {
                 const lineaActual = lineas[i]
-                
+
                 const celdas = lineaActual.split('\t')
                 // Crear item con valores iniciales vacíos
                 const item = {
@@ -657,34 +664,34 @@ $(document).ready(function () {
                     odm_asociar: false,
                     detalle_adjuntos: []
                 }
-                
+
                 // Asignar valores exactamente como los mapea el usuario
                 if (mapeo.pro_codigo !== null && celdas.length > mapeo.pro_codigo) {
                     item.pro_codigo = celdas[mapeo.pro_codigo].trim();
                 }
-                
+
                 if (mapeo.odm_descripcion !== null && celdas.length > mapeo.odm_descripcion) {
                     item.odm_descripcion = celdas[mapeo.odm_descripcion].trim();
                 }
-                
+
                 if (mapeo.odm_cantidad !== null && celdas.length > mapeo.odm_cantidad) {
                     const cantidad = parseFloat(celdas[mapeo.odm_cantidad]);
                     item.odm_cantidad = !isNaN(cantidad) ? cantidad : 1;
                 }
-                
+
                 if (mapeo.uni_codigo !== null && celdas.length > mapeo.uni_codigo) {
                     item.uni_codigo = celdas[mapeo.uni_codigo].trim();
                 }
-                
+
                 if (mapeo.odm_observacion !== null && celdas.length > mapeo.odm_observacion) {
                     item.odm_observacion = celdas[mapeo.odm_observacion].trim();
                 }
-                
+
                 if (item.pro_codigo === '' && item.odm_descripcion === '') continue
 
                 // Determinar si el item tiene código de producto
                 const tieneCodigo = item.pro_codigo !== ''
-                
+
                 if (tieneCodigo) {
                     // Buscar el producto en la base de datos
                     try {
@@ -743,27 +750,75 @@ $(document).ready(function () {
                     </td>
                 </tr>
                 `
-                
+
                 $('#tbl-requerimientos tbody').append(row)
                 detalle_requerimiento.push(item)
             }
-            
+
             // Si todo salió bien, cerramos el modal
             $('#importarRequerimientosModal').modal('hide')
             $('#excelData').val('')
-            
+
         } catch (error) {
             alert(error.message || 'Error al importar datos')
         } finally {
             // Restaurar el botón
             $btnImportar.html(btnTextoOriginal)
             $btnImportar.prop('disabled', false)
-            
+
             // Restaurar el modal
             $('.btn-close', '#importarRequerimientosModal').prop('disabled', false)
             $('#importarRequerimientosModal .btn-secondary').prop('disabled', false)
-        
+
         }
     })
+
+    // Maneja el evento de enter en el campo de orden de trabajo
+    $('#otInput').on('keypress', async (event) => {
+        if (event.which === 13) {
+            await buscarOrdenTrabajo()
+        }
+    })
+
+    $('#searchButton').on('click', async () => {
+        await buscarOrdenTrabajo()
+    })
+
+    // funcion de buscar Orden de Trabajo
+    const buscarOrdenTrabajo = async () => {
+        // Obtener el valor del campo de texto
+        var otValue = $('#otInput').val().trim()
+
+        // Validar si el campo está vacío
+        if (otValue.length === 0) {
+            alert('Por favor, ingrese un numero de orden de trabajo.')
+            $('#otInput').focus();
+            throw new Error('Por favor, ingrese un valor para buscar.')
+        }
+
+        try {
+            const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
+            if (!data.length > 0) {
+                alert('No se encontro la orden de trabajo en la base de datos')
+                $('#otInput').val("")
+                return
+            }
+
+        } catch (error) {
+            console.log(error)
+            const { response } = error
+            if (response.status === 404) {
+                alert(response.data.error)
+            } else {
+                alert('Error al buscar la orden de trabajo')
+            }
+
+            // actualizamos la referencia
+            $('#otInput').val("")
+            $('#clienteInput').val("")
+            $('#idClienteInput').val("")
+            $('#equipoInput').val("")
+        }
+    }
 
 })

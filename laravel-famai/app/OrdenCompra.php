@@ -85,4 +85,10 @@ class OrdenCompra extends Model
     {
         return $this->belongsTo(FormaPago::class, 'fpa_codigo');
     }
+
+    // Obtener el codigo sap del trabajador buscando por occ_usucreacion
+    public function trabajador()
+    {
+        return $this->belongsTo(Trabajador::class, 'tra_elaborado', 'tra_id');
+    }
 }

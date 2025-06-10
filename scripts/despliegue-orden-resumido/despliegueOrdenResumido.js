@@ -871,6 +871,11 @@ $(document).ready(async () => {
         } catch (error) {
             console.log(error)
         }
+
+        if (descuento == null || descuento == undefined) {
+            descuento = 0.00
+        }
+
         if (detalle.odm_id === undefined) {
             const observacion = unionObservaciones(detalle.detalle)
             const rowsObs = observacion.split('\n').length
@@ -891,8 +896,14 @@ $(document).ready(async () => {
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
                 </td>
+                <td class="text-center d-none label-descuento">
+                    <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
+                </td>
+                <td class="text-center d-none label-precio-unitario-total">
+                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(2)}"/>
+                </td>
                 <td class="text-center">
-                    <input type="number" readonly class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
+                    <input type="date" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -914,7 +925,7 @@ $(document).ready(async () => {
                                 <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                             </svg>
                         </button>
-                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" disabled style="width: 155px;">Reasignar Código</button>
+                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 155px;">Reasignar Código</button>
                     </div>
                 </td>
             </tr>`
@@ -935,8 +946,14 @@ $(document).ready(async () => {
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
                 </td>
+                <td class="text-center d-none label-descuento">
+                    <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
+                </td>
+                <td class="text-center d-none label-precio-unitario-total">
+                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(2)}"/>
+                </td>
                 <td class="text-center">
-                    <input type="number" readonly class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
+                    <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
@@ -958,7 +975,7 @@ $(document).ready(async () => {
                                 <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                             </svg>
                         </button>
-                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" disabled style="width: 155px;">Reasignar Código</button>
+                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 155px;">Reasignar Código</button>
                     </div>
                 </td>
             </tr>`
@@ -1006,6 +1023,14 @@ $(document).ready(async () => {
     // evento para el botón cancelar código
     $(document).on('click', '#btn-cancelar-codigo', function () {
         bootbox.hideAll()
+    })
+
+    // Evento para recalcular precio unitario total
+    $(document).on('input', '.precio-unitario-detalle, .descuento', function () {
+        const precioUnitario = $(this).closest('tr').find('.precio-unitario-detalle').val()
+        const descuento = $(this).closest('tr').find('.descuento').val()
+        const precioUnitarioConDescuento = precioUnitario * (1 - descuento / 100)
+        $(this).closest('tr').find('.precio-unitario-total').val(precioUnitarioConDescuento.toFixed(2))
     })
 
     // Verificar que jQuery y bootbox están disponibles
@@ -1670,8 +1695,13 @@ $(document).ready(async () => {
                 };
 
                 await client.post('/ordeninternamateriales/validar-codigo', formatData);
+                
+                // Solo cerrar el modal de bootbox, no todos los modales
                 bootbox.hideAll();
-                initDataTable(obtenerFiltrosActuales());
+                
+                // Actualizar el modal de cotización con la nueva información
+                await actualizarModalCotizacionDespuesAsignacion();
+                
             } catch (error) {
                 console.error('Error al asignar el codigo:', error);
                 alert('Error al asignar el codigo: ' + (error.response?.data?.message || error.message));
@@ -1923,6 +1953,11 @@ $(document).ready(async () => {
 
         $('#tbl-cotizaciones-materiales tbody').html(content)
 
+        // Inicializar datepicker en todos los inputs de fecha de las filas generadas
+        $('.fecha-entrega-detalle').datepicker({
+            dateFormat: 'dd/mm/yy'
+        });
+
         // abrir modal de solicitud de cotizacion
         showModalSolicitudCotizacion(data.length)
     })
@@ -1994,10 +2029,14 @@ $(document).ready(async () => {
             $("#div-cotizacion").removeClass('d-none')
             $(".label-precio-unitario").removeClass('d-none')
             $(".label-precio-unitario-detalle").removeClass('d-none')
+            $(".label-descuento").removeClass('d-none')
+            $(".label-precio-unitario-total").removeClass('d-none')
         } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
             $(".label-precio-unitario-detalle").addClass('d-none')
+            $(".label-descuento").addClass('d-none')
+            $(".label-precio-unitario-total").addClass('d-none')
         }
     })
 
@@ -2276,9 +2315,11 @@ $(document).ready(async () => {
 
         rows.each(function () {
             const index = $(this).data('index')
+            const descuentoDetalle = $(this).find('.descuento').val() ? $(this).find('.descuento').val() : 0.00
+
             const observacion = $(this).find('.observacion-detalle').val().trim()
             let precioUnitario = proveedor_unico
-                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2)
+                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2) * (1 - descuentoDetalle / 100)
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val()
@@ -2288,6 +2329,7 @@ $(document).ready(async () => {
                 flagPedidoMayorRequerido = true
             }
 
+            const fechaEntrega = $(this).find('.fecha-entrega-detalle').val() ? transformarFecha($(this).find('.fecha-entrega-detalle').val()) : null
             if (index !== undefined) {
                 const detalleIndex = detalleCotizacion[index]
                 if (detalleIndex.odm_id === undefined) {
@@ -2302,7 +2344,9 @@ $(document).ready(async () => {
                             cod_cantidad: detalle.odm_cantidad,
                             cod_preciounitario: precioUnitario,
                             cod_total: parseFloat(detalle.odm_cantidad * precioUnitario).toFixed(2),
-                            cod_cantidadcotizada: cantidadPedida
+                            cod_cantidadcotizada: cantidadPedida,
+                            cod_fecentregaoc: fechaEntrega,
+                            cod_descuento: descuentoDetalle
                         })
                     })
                 } else {
@@ -2316,7 +2360,9 @@ $(document).ready(async () => {
                         cod_cantidad: detalleIndex.odm_cantidad,
                         cod_preciounitario: precioUnitario,
                         cod_total: parseFloat(detalleIndex.odm_cantidad * precioUnitario).toFixed(2),
-                        cod_cantidadcotizada: cantidadPedida
+                        cod_cantidadcotizada: cantidadPedida,
+                        cod_fecentregaoc: fechaEntrega,
+                        cod_descuento: descuentoDetalle
                     })
                 }
             } else {
@@ -2329,7 +2375,9 @@ $(document).ready(async () => {
                     cod_observacion: $(this).find('.observacion-detalle').val(),
                     cod_cantidad: $(this).find('.cantidad-pedida-detalle').val(),
                     cod_preciounitario: precioUnitario,
-                    cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(2)
+                    cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(2),
+                    cod_fecentregaoc: fechaEntrega,
+                    cod_descuento: descuentoDetalle
                 })
             }
             cod_orden++
@@ -2831,5 +2879,116 @@ $(document).ready(async () => {
         })
 
         modal.show()
+    }
+
+    // función para actualizar el modal de cotización después de asignar código
+    async function actualizarModalCotizacionDespuesAsignacion() {
+        try {
+            // Primero necesitamos actualizar detalleCotizacion con la nueva información
+            // Volver a obtener los materiales seleccionados actualizados
+            const filasSeleccionadas = dataTable.rows({ selected: true }).nodes();
+            const indicesSeleccionados = [];
+            $(filasSeleccionadas).each(function (index, node) {
+                const valor = $(node).data('index');
+                indicesSeleccionados.push(valor);
+            });
+
+            // Recargar la información de los materiales
+            await initDataTable(obtenerFiltrosActuales());
+            
+            // Extraer la información actualizada
+            const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index))
+            const dataSeleccionadaMateriales = []
+            dataSeleccionada.forEach(detalle => {
+                detalle.detalle.forEach(detalleElement => {
+                    if (detalleElement.odm_estado != 'ODC') {
+                        dataSeleccionadaMateriales.push(detalleElement)
+                    }
+                })
+            })
+
+            const dataSeleccionadaAgrupada = dataSeleccionadaMateriales.reduce((acc, item) => {
+                if (item.pro_id != null && item.odm_observacion === null) {
+                    const existingGroup = acc.find((group) => group.pro_id === item.pro_id && group.odm_id == undefined)
+
+                    if (existingGroup) {
+                        existingGroup.cantidad += parseFloat(item.odm_cantidad)
+                        existingGroup.detalle.push(item)
+                    } else {
+                        acc.push({
+                            pro_id: item.pro_id,
+                            pro_descripcion: item.producto.pro_descripcion,
+                            uni_codigo: item.producto.uni_codigo,
+                            pro_codigo: item.producto.pro_codigo,
+                            cantidad: parseFloat(item.odm_cantidad),
+                            detalle: [item],
+                        });
+                    }
+                } else {
+                    acc.push(item);
+                }
+
+                return acc;
+            }, []);
+
+            // Actualizar la variable global
+            detalleCotizacion = dataSeleccionadaAgrupada
+
+            // Obtener los productos actualizados de la cotización
+            const productosCotizacion = dataSeleccionada.filter(detalle => detalle.odm_id === undefined).map(detalle => {
+                return detalle.detalle[0].pro_id
+            })
+
+            // Hacer la consulta actualizada de proveedores
+            const formatData = {
+                productos: productosCotizacion
+            }
+            const { data } = await client.post('/ultimas-compras/producto', formatData)
+
+            // Limpiar y actualizar la tabla de proveedores
+            $('#tbl-cotizaciones-proveedores tbody').empty()
+
+            // Actualizar valores de forma de pago y moneda
+            try {
+                $("#formapagoCotizacionInputHidden").val(data[0]?.fpa_descripcion || 'CONTADO')
+                $("#monedaCotizacionInputHidden").val(data[0]?.mon_codigo || '')
+            } catch (error) {
+                console.log(error)
+            }
+
+            // Agregar proveedores únicos actualizados
+            const proveedoresUnicos = new Set()
+            data.forEach(proveedor => {
+                if (proveedor.prv_id && !proveedoresUnicos.has(proveedor.prv_id)) {
+                    proveedoresUnicos.add(proveedor.prv_id)
+                    const proveedorMapeado = {
+                        ...proveedor,
+                        prv_id: proveedor.prv_codigo,
+                    }
+                    const row = renderRowProveedor(proveedorMapeado)
+                    $('#tbl-cotizaciones-proveedores tbody').append(row)
+                }
+            })
+
+            // Actualizar la tabla de materiales
+            $('#tbl-cotizaciones-materiales tbody').empty()
+            let content = ''
+            detalleCotizacion.forEach((detalle, index) => {
+                const proveedor = data.find(proveedor => proveedor.pro_id === detalle.pro_id)
+                content += renderRowCotizacion(detalle, index, proveedor)
+            })
+
+            $('#tbl-cotizaciones-materiales tbody').html(content)
+
+            // Reinicializar datepicker en las nuevas filas
+            $('.fecha-entrega-detalle').datepicker({
+                dateFormat: 'dd/mm/yy'
+            });
+
+            console.log('Modal de cotización actualizado correctamente');
+        } catch (error) {
+            console.error('Error al actualizar el modal de cotización:', error);
+            alert('Error al actualizar la información de cotización, cierre el modal y vuelva a abrirlo');
+        }
     }
 })
