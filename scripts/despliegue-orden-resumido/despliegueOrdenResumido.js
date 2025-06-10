@@ -993,9 +993,9 @@ $(document).ready(async () => {
             className: 'bootbox-confirm-modal',
             size: 'extra-large',
             buttons: {},
-            callback: function(result) {
+            callback: function (result) {
                 // Inicializar el modal después de que se abra
-                setTimeout(function() {
+                setTimeout(function () {
                     // borramos el detalle actual de la asignacion de codigos
                     $(".bootbox #tbl-asignar-codigos tbody").empty()
                     // limpiamos la lista
@@ -1004,7 +1004,7 @@ $(document).ready(async () => {
                     $(".bootbox #productosInput").val('')
                     // deshabilitamos el boton de asignación
                     $(".bootbox #btn-asignar-codigo").prop('disabled', true)
-                    
+
                     // Aplicar estilos a la lista
                     $(".bootbox #resultadosListaValidarCodigo").css({
                         'z-index': '9999',
@@ -1047,7 +1047,7 @@ $(document).ready(async () => {
     }))
 
     async function buscarMateriales(query) {
-        
+
         if (abortController) {
             abortController.abort();
         }
@@ -1523,12 +1523,12 @@ $(document).ready(async () => {
                     "pro_id": "MA406746"
                 }
             ]
-            
+
             limpiarListaValidacionCodigo()
-            
+
             // formamos la lista
             data.forEach((material, index) => {
-                
+
                 const listItem = document.createElement('li')
                 listItem.className = 'list-group-item list-group-item-action material-item'
                 listItem.style.cursor = 'pointer'
@@ -1538,13 +1538,13 @@ $(document).ready(async () => {
                 listItem.dataset.prodescripcion = material.pro_descripcion
                 listItem.dataset.alpstock = material.alp_stock
                 listItem.dataset.ultimafechaingreso = material["UltimaFechaIngreso"]
-                
+
                 // agregar la lista completa - buscar en el contexto correcto
-                const $resultadosLista = $('.bootbox #resultadosListaValidarCodigo').length > 0 
-                    ? $('.bootbox #resultadosListaValidarCodigo') 
+                const $resultadosLista = $('.bootbox #resultadosListaValidarCodigo').length > 0
+                    ? $('.bootbox #resultadosListaValidarCodigo')
                     : $('#resultadosListaValidarCodigo');
-                
-                
+
+
                 // Agregar z-index alto para que aparezca encima del modal
                 $resultadosLista.css({
                     'z-index': '9999',
@@ -1554,13 +1554,13 @@ $(document).ready(async () => {
                     'max-height': '400px',
                     'overflow-y': 'auto',
                 });
-                
+
                 $resultadosLista.append(listItem)
             })
 
 
             // Agregar evento usando delegación para los elementos li
-            $(document).off('click', '.material-item').on('click', '.material-item', function() {
+            $(document).off('click', '.material-item').on('click', '.material-item', function () {
                 const material = {
                     pro_id: $(this).data('id'),
                     pro_codigo: $(this).data('procodigo'),
@@ -1570,7 +1570,7 @@ $(document).ready(async () => {
                 };
                 seleccionarMaterial(material);
             });
-            
+
         } catch (error) {
             if (error.name === 'AbortError') {
             } else {
@@ -1581,8 +1581,8 @@ $(document).ready(async () => {
 
     // funcion que limpia la lista
     function limpiarListaValidacionCodigo() {
-        const $resultadosLista = $('.bootbox #resultadosListaValidarCodigo').length > 0 
-            ? $('.bootbox #resultadosListaValidarCodigo') 
+        const $resultadosLista = $('.bootbox #resultadosListaValidarCodigo').length > 0
+            ? $('.bootbox #resultadosListaValidarCodigo')
             : $('#resultadosListaValidarCodigo');
         console.log('se ejecuto la funcion limpiarLista', $resultadosLista);
         $resultadosLista.empty()
@@ -1591,14 +1591,14 @@ $(document).ready(async () => {
     // funcion que se ejecuta al seleccionar un material
     function seleccionarMaterial(material) {
         limpiarListaValidacionCodigo()
-        const $productosInput = $('.bootbox #productosInput').length > 0 
-            ? $('.bootbox #productosInput') 
+        const $productosInput = $('.bootbox #productosInput').length > 0
+            ? $('.bootbox #productosInput')
             : $('#productosInput');
-        const $btnAsignarCodigo = $('.bootbox #btn-asignar-codigo').length > 0 
-            ? $('.bootbox #btn-asignar-codigo') 
+        const $btnAsignarCodigo = $('.bootbox #btn-asignar-codigo').length > 0
+            ? $('.bootbox #btn-asignar-codigo')
             : $('#btn-asignar-codigo');
-        const $tblAsignarCodigos = $('.bootbox #tbl-asignar-codigos tbody').length > 0 
-            ? $('.bootbox #tbl-asignar-codigos tbody') 
+        const $tblAsignarCodigos = $('.bootbox #tbl-asignar-codigos tbody').length > 0
+            ? $('.bootbox #tbl-asignar-codigos tbody')
             : $('#tbl-asignar-codigos tbody');
 
         $productosInput.val('')
@@ -1629,8 +1629,8 @@ $(document).ready(async () => {
         row.remove()
 
         // deshabilitamos el boton de asignación - buscar en el contexto correcto
-        const $btnAsignarCodigo = $('.bootbox #btn-asignar-codigo').length > 0 
-            ? $('.bootbox #btn-asignar-codigo') 
+        const $btnAsignarCodigo = $('.bootbox #btn-asignar-codigo').length > 0
+            ? $('.bootbox #btn-asignar-codigo')
             : $('#btn-asignar-codigo');
         $btnAsignarCodigo.prop('disabled', true)
     })
@@ -1644,10 +1644,10 @@ $(document).ready(async () => {
         }
 
         // Buscar en el contexto del bootbox o en el documento
-        const $tblAsignarCodigos = $('.bootbox #tbl-asignar-codigos tbody tr:first').length > 0 
-            ? $('.bootbox #tbl-asignar-codigos tbody tr:first') 
+        const $tblAsignarCodigos = $('.bootbox #tbl-asignar-codigos tbody tr:first').length > 0
+            ? $('.bootbox #tbl-asignar-codigos tbody tr:first')
             : $('#tbl-asignar-codigos tbody tr:first');
-        
+
         // Validar que existe una fila con producto seleccionado
         if ($tblAsignarCodigos.length === 0) {
             alert('Debe seleccionar un producto de la lista');
@@ -1655,7 +1655,7 @@ $(document).ready(async () => {
         }
 
         var pro_codigo = $tblAsignarCodigos.data('id');
-        
+
         // Validar que el código del producto existe
         if (!pro_codigo) {
             alert('Error: No se pudo obtener el código del producto seleccionado');
@@ -1669,11 +1669,11 @@ $(document).ready(async () => {
         // Mostrar confirmación dentro del mismo modal
         const $btnAsignar = $(this);
         const $btnCancelar = $('#btn-cancelar-codigo');
-        
+
         // Cambiar el contenido del modal actual
         const $modalBody = $btnAsignar.closest('.bootbox').find('.modal-body');
         const originalContent = $modalBody.html();
-        
+
         $modalBody.html(`
             <div class="confirmation-message">
                 <p>¿Está seguro de asignar el código <strong>${productoCodigo}</strong> - <strong>${productoDescripcion}</strong> a este material?</p>
@@ -1685,23 +1685,23 @@ $(document).ready(async () => {
         `);
 
         // Manejar la confirmación
-        $('#btn-confirmar-asignacion').on('click', async function() {
+        $('#btn-confirmar-asignacion').on('click', async function () {
             try {
                 $btnAsignar.prop('disabled', true).text('Asignando...');
-                
+
                 const formatData = {
                     odm_id: idOrdenInternaMaterial,
                     pro_codigo: pro_codigo
                 };
 
                 await client.post('/ordeninternamateriales/validar-codigo', formatData);
-                
+
                 // Solo cerrar el modal de bootbox, no todos los modales
                 bootbox.hideAll();
-                
+
                 // Actualizar el modal de cotización con la nueva información
                 await actualizarModalCotizacionDespuesAsignacion();
-                
+
             } catch (error) {
                 console.error('Error al asignar el codigo:', error);
                 alert('Error al asignar el codigo: ' + (error.response?.data?.message || error.message));
@@ -1711,7 +1711,7 @@ $(document).ready(async () => {
         });
 
         // Manejar la cancelación
-        $('#btn-cancelar-confirmacion').on('click', function() {
+        $('#btn-cancelar-confirmacion').on('click', function () {
             $modalBody.html(originalContent);
         });
     });
@@ -2029,9 +2029,9 @@ $(document).ready(async () => {
             $("#div-cotizacion").removeClass('d-none')
             $(".label-precio-unitario").removeClass('d-none')
             $(".label-precio-unitario-detalle").removeClass('d-none')
-            $(".label-descuento").removeClass('d-none')
-            $(".label-precio-unitario-total").removeClass('d-none')
         } else {
+            $(".label-precio-unitario-total").removeClass('d-none')
+            $(".label-descuento").removeClass('d-none')
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
             $(".label-precio-unitario-detalle").addClass('d-none')
@@ -2398,11 +2398,11 @@ $(document).ready(async () => {
             rows.each(function () {
                 const cantidadPedida = parseFloat($(this).find('.cantidad-pedida-detalle').val());
                 const cantidadRequerida = parseFloat($(this).find('.cantidad-requerida-detalle').text());
-                
+
                 if (cantidadPedida > cantidadRequerida) {
                     const index = $(this).data('index');
                     const detalleIndex = detalleCotizacion[index];
-                    
+
                     productosExcedentes.push({
                         pro_id: detalleIndex.pro_id,
                         odm_item: 1, // Se ajustará en el backend
@@ -2414,7 +2414,7 @@ $(document).ready(async () => {
                     });
                 }
             });
-            
+
             if (productosExcedentes.length > 0) {
                 formatData.productos_excedentes = productosExcedentes;
             }
@@ -2498,13 +2498,13 @@ $(document).ready(async () => {
             row.find('.btn-guardar-cotizacion')
                 .addClass('disabled')
                 .removeClass('btn-success')
-                .addClass('btn-secondary') 
+                .addClass('btn-secondary')
 
             row.addClass('table-success')
 
             // limpiamos el form de cotizacion
             clearDataCotizacion()
-            
+
             bootbox.dialog({
                 title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Solicitud de cotización creada</span>',
                 message: `La solicitud de cotización fue creada con éxito. ${data.requerimiento_excedente ? `Adicional se ha creado un requerimiento para la cantidad excedente con numero: <span class="fw-bold">${data.requerimiento_excedente.odt_numero}</span>` : ''}.<br><br>
@@ -2895,7 +2895,7 @@ $(document).ready(async () => {
 
             // Recargar la información de los materiales
             await initDataTable(obtenerFiltrosActuales());
-            
+
             // Extraer la información actualizada
             const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index))
             const dataSeleccionadaMateriales = []
