@@ -903,7 +903,7 @@ $(document).ready(async () => {
                     <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(2)}"/>
                 </td>
                 <td class="text-center">
-                    <input type="date" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
+                    <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
                 </td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
