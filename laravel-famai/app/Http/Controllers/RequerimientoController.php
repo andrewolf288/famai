@@ -181,7 +181,7 @@ class RequerimientoController extends Controller
             'are_codigo' => 'required|exists:tblareas_are,are_codigo',
             'tra_idorigen' => 'required|exists:tbltrabajadores_tra,tra_id',
             'oic_equipo_descripcion' => 'nullable|string',
-            'oic_otsap' => 'required|string',
+            'oic_otsap' => 'nullable|string',
             'mrq_codigo' => 'required|exists:tblmotivorequerimiento_mrq,mrq_codigo'
         ]);
 

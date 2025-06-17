@@ -552,12 +552,27 @@ $(document).ready(function () {
                     'Content-Type': 'multipart/form-data'
                 }
             })
-            window.location.href = "requerimiento"
+            bootbox.dialog({
+                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Requerimiento creado correctamente</span>',
+                message: "El requerimiento fue creado con éxito.",
+                centerVertical: true,
+                className: 'bootbox-confirm-modal',
+                buttons: {
+                    ok: {
+                        label: 'Aceptar',
+                        className: 'btn-success',
+                        callback: function () {
+                            window.location.href = "requerimiento"
+                        }
+                    }
+                }
+
+            })
 
         } catch (error) {
-        } finally {
+            console.log(error)
             alert("Error al crear el requerimiento")
-
+        } finally {
             $('#btn-guardar-requerimiento').prop('disabled', false)
         }
     })
@@ -791,9 +806,10 @@ $(document).ready(function () {
 
         // Validar si el campo está vacío
         if (otValue.length === 0) {
-            alert('Por favor, ingrese un numero de orden de trabajo.')
-            $('#otInput').focus();
-            throw new Error('Por favor, ingrese un valor para buscar.')
+            return
+            // alert('Por favor, ingrese un numero de orden de trabajo.')
+            // $('#otInput').focus();
+            // throw new Error('Por favor, ingrese un valor para buscar.')
         }
 
         try {
