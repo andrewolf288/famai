@@ -2506,9 +2506,9 @@ $(document).ready(async () => {
             clearDataCotizacion()
 
             bootbox.dialog({
-                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Solicitud de cotización creada</span>',
-                message: `La solicitud de cotización fue creada con éxito. ${data.requerimiento_excedente ? `Adicional se ha creado un requerimiento para la cantidad excedente con numero: <span class="fw-bold">${data.requerimiento_excedente.odt_numero}</span>` : ''}.<br><br>
-                Aqui esta el link de la solicitud de cotización: <a href="${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${data.cotizacion.coc_id}" target="_blank">${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${data.cotizacion.coc_id}</a>
+                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">' + (proveedor_unico ? 'Cotización' : 'Solicitud de cotización') + ' creada</span>',
+                message: `La ${proveedor_unico ? 'cotización' : 'solicitud de cotización'} fue creada con éxito. ${data.requerimiento_excedente ? `Adicional se ha creado un requerimiento para la cantidad excedente con numero: <span class="fw-bold">${data.requerimiento_excedente.odt_numero}</span>` : ''}.<br><br>
+                Aqui esta el link de la ${proveedor_unico ? 'cotización' : 'solicitud de cotización'}: <a href="${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${data.cotizacion.coc_id}" target="_blank">${config.FRONT_EXTRANET_URL}/cotizacion-proveedor.html?coc_id=${data.cotizacion.coc_id}</a>
                 `,
                 backdrop: true,
                 centerVertical: true,
