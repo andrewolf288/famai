@@ -899,9 +899,9 @@ class OrdenInternaMaterialesController extends Controller
             DB::beginTransaction();
             $ordenInternaMaterial = OrdenInternaMateriales::findOrFail($id);
             $request->validate([
-                'odm_descripcion' => 'required|string|max:255',
+                'odm_descripcion' => 'required|string',
                 'odm_cantidad' => 'required|numeric',
-                'odm_observacion' => 'nullable|string|max:255',
+                'odm_observacion' => 'nullable|string',
             ]);
 
             $ordenInternaMaterial->update([
