@@ -258,8 +258,12 @@ $(document).ready(async () => {
             data.forEach((material, index) => {
                 // if (material.detalle !== undefined) {
                 const { proveedores_count, pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada, tiene_adjuntos } = material
+                let sePuedeCotizar = true
+                detalle.forEach(item => {
+                    if (item.orden_interna_parte.orden_interna.mrq_codigo !== 'RPR' && pro_codigo == null) sePuedeCotizar = false
+                })
                 content += `
-                <tr data-index="${index}">
+                <tr data-index="${index}" data-se-puede-cotizar="${sePuedeCotizar}">
                     <td></td>
                     <td></td>
                     <td>${pro_codigo || 'N/A'}</td>
@@ -1839,6 +1843,7 @@ $(document).ready(async () => {
         // vaceamos la informacion de detalle de cotizacion cada vez que abrimos el modal
         detalleCotizacion = []
         archivosAdjuntos = []
+        let sePuedeCotizar = true
 
         // debemos obtener los materiales seleccionados
         const filasSeleccionadas = dataTable.rows({ selected: true }).nodes();
@@ -1846,6 +1851,7 @@ $(document).ready(async () => {
         $(filasSeleccionadas).each(function (index, node) {
             const valor = $(node).data('index');
             indicesSeleccionados.push(valor);
+            if (!$(node).data('se-puede-cotizar')) sePuedeCotizar = false
         });
 
         // debe al menos seleccionarse un item
@@ -1864,6 +1870,22 @@ $(document).ready(async () => {
                 }
             })
         })
+
+        if (!sePuedeCotizar) {
+            bootbox.alert({
+                title: '<span style="color:#dc3545;font-weight:bold;">Error</span>',
+                message: `<div class="d-flex align-items-center gap-2 flex-column">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="#dc3545" class="bi bi-x-circle me-2" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                            <p>No se puede cotizar materiales que no tengan un código asignado</p>
+                        </div>`,
+                centerVertical: true,
+                size: 'large'
+            })
+            return
+        }
 
         // debemos hacer una validación
         if (dataSeleccionadaMateriales.length === 0) {
