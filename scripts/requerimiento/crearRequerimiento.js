@@ -557,6 +557,7 @@ $(document).ready(function () {
                 message: "El requerimiento fue creado con éxito.",
                 centerVertical: true,
                 className: 'bootbox-confirm-modal',
+                closeButton: false,
                 buttons: {
                     ok: {
                         label: 'Aceptar',
@@ -571,6 +572,7 @@ $(document).ready(function () {
 
         } catch (error) {
             console.log(error)
+            if (error.message === 'Cancelado') return
             alert("Error al crear el requerimiento")
         } finally {
             $('#btn-guardar-requerimiento').prop('disabled', false)
@@ -803,21 +805,44 @@ $(document).ready(function () {
     const buscarOrdenTrabajo = async () => {
         // Obtener el valor del campo de texto
         var otValue = $('#otInput').val().trim()
+        
 
         // Validar si el campo está vacío
         if (otValue.length === 0) {
+            const result = await new Promise((resolve) => {
+                bootbox.confirm({
+                    title: '<i class="fa fa-exclamation-triangle text-warning"></i> <span class="text-warning">Advertencia</span>',
+                    message: 'Generara un requerimiento sin orden de trabajo asociada, ¿Desea continuar?',
+                    buttons: {
+                        confirm: {
+                            label: 'Continuar',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'Cancelar',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) { 
+                        resolve(result)
+                    }
+                });
+            });
+
+            if (!result) throw new Error('Cancelado')
             return
-            // alert('Por favor, ingrese un numero de orden de trabajo.')
-            // $('#otInput').focus();
-            // throw new Error('Por favor, ingrese un valor para buscar.')
         }
 
         try {
+            $('#loader-ot').show()
+            $('#search-icon').hide()
+            $('#searchButton').prop('disabled', true)
+            $('#otInput').prop('disabled', true)
             const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
             if (!data.length > 0) {
                 alert('No se encontro la orden de trabajo en la base de datos')
                 $('#otInput').val("")
-                return
+                throw new Error('Orden de trabajo no encontrada')
             }
 
         } catch (error) {
@@ -834,6 +859,13 @@ $(document).ready(function () {
             $('#clienteInput').val("")
             $('#idClienteInput').val("")
             $('#equipoInput').val("")
+            
+            throw new Error('Error en la búsqueda de orden de trabajo')
+        } finally {
+            $('#loader-ot').hide()
+            $('#search-icon').show()
+            $('#searchButton').prop('disabled', false)
+            $('#otInput').prop('disabled', false)
         }
     }
 
