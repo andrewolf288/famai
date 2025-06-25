@@ -336,7 +336,8 @@ class CotizacionController extends Controller
                     'oic_tipo' => 'REQ',
                     'oic_estado' => 'ENVIADO',
                     'oic_usucreacion' => $user->usu_codigo,
-                    'oic_fecmodificacion' => null
+                    'oic_fecmodificacion' => null,
+                    'oic_otsap' => $data['ot_numero']
                 ]);
 
                 // Crear parte de requerimiento

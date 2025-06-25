@@ -2453,31 +2453,53 @@ $(document).ready(async () => {
         }
 
         if (flagPedidoMayorRequerido) {
-            const result = await new Promise((resolve) => {
-                bootbox.confirm({
-                    title: 'Confirmación',
-                    centerVertical: true,
-                    className: 'bootbox-confirm-modal',
-                    message: "<p>La cantidad pedida es mayor a la cantidad requerida, se procedera a crear un requerimiento para la cantidad excedente.</p><p class='text-danger fw-bold'>¿Estás seguro de que deseas continuar con la solicitud de cotización?</p>",
-                    buttons: {
-                        confirm: {
-                            label: '<i class="fa fa-check-circle text-success-emphasis"></i> Confirmar',
-                            className: 'btn-success'
-                        },
-                        cancel: {
-                            label: '<i class="fa fa-times-circle text-danger-emphasis"></i> Cancelar',
-                            className: 'btn-danger'
-                        }
-                    },
-                    callback: function (result) {
-                        resolve(result);
+            const resultadoModalExcedente = await new Promise((resolve) => {
+                $('#ot-numero-requerimiento').val('')
+                $('#modalRequerimientoExcedente').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).modal('show')
+                
+                $('#modalRequerimientoExcedente').off('hidden.bs.modal').on('hidden.bs.modal', () => {
+                    resolve(null)
+                })
+                
+                $('#modalRequerimientoExcedente .btn-secondary').off('click').on('click', () => {
+                    $('#modalRequerimientoExcedente').modal('hide')
+                })
+                
+                $('#btn-guardar-requerimiento-excedente').off('click').on('click', async () => {
+                    const ot_numero = $('#ot-numero-requerimiento').val()
+                    
+                    if (!ot_numero.trim()) {
+                        alert('Debe ingresar el número de orden de trabajo')
+                        return
                     }
-                });
-            });
-
-            if (!result) {
-                return;
+                    
+                    const $boton = $('#btn-guardar-requerimiento-excedente')
+                    const textoOriginal = $boton.html()
+                    
+                    $boton.prop('disabled', true).html(`
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Procesando...
+                    `)
+                    
+                    try {
+                        await buscarOrdenTrabajo(ot_numero.trim())
+                        $boton.prop('disabled', false).html(textoOriginal)
+                        $('#modalRequerimientoExcedente').modal('hide')
+                        resolve(ot_numero)
+                    } catch (error) {
+                        console.log(error)
+                        $boton.prop('disabled', false).html(textoOriginal)
+                    }
+                })
+            })
+            
+            if (!resultadoModalExcedente) {
+                return
             }
+            formatData.ot_numero = resultadoModalExcedente
         }
 
         formData.append('cotizacion', JSON.stringify(formatData))
@@ -2564,6 +2586,26 @@ $(document).ready(async () => {
             })
         }
     })
+
+    // funcion de buscar Orden de Trabajo
+    const buscarOrdenTrabajo = async (otValue) => {
+        try {
+            const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
+            if (!data.length > 0) {
+                alert('No se encontro la orden de trabajo en la base de datos')
+                throw new Error('Orden de trabajo no encontrada')
+            }
+        } catch (error) {
+            console.log(error)
+            const { response } = error
+            if (response && response.status === 404) {
+                alert(response.data.error)
+            } else {
+                alert('Error al buscar la orden de trabajo')
+            }
+            throw new Error('Error en la búsqueda de orden de trabajo')
+        }
+    }
 
     // crear solicitud de cotizacion modal
     $('#btn-guardar-cotizacion-modal').on('click', async (event) => {
