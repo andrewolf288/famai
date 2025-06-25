@@ -160,6 +160,11 @@ $(document).ready(function () {
                     </td>
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center">
+                            <input style="pointer-events: none; width: 100px;" type="number" class="form-control descuento-input" disabled value='${detalle.detalle[0].cod_descuento == '.00' ? '0.00' : parseFloat(detalle.detalle[0].cod_descuento).toFixed(2)}' /> %
+                        </div >
+                    </td >
+                    <td class="text-center">
+                        <div class="d-flex align-items-center justify-content-center">
                             <span class="moneda me-1"></span><span class="total-input">${cod_total.toFixed(2)}</span>
                         </div>
                     </td>

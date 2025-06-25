@@ -324,7 +324,7 @@ $(document).ready(async () => {
         $("#idCuentaBancariaBancoNacion").val(cuenta_banco_nacion?.pvc_id || '')
 
         // establecemos la forma de pago
-        $("#formaDePagoOrdenCompraInput").val(forma_pago || '')
+        if (forma_pago) $("#formaDePagoOrdenCompraInput").val(forma_pago || '')
         // establecemos el impuesto por defecto
         $("#impuestoOrdenCompraInput").val('IGV')
     }
@@ -332,13 +332,19 @@ $(document).ready(async () => {
     // inicializamos información de la cotización
     const initInformacionCotizacion = (cotizacion) => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
+        $("#formaDePagoOrdenCompraInput option").each(function () {
+            if (this.innerText.toLowerCase() === (cotizacion.coc_formapago.toLowerCase())) {
+                console.log(this.value)
+                $("#formaDePagoOrdenCompraInput").val(this.value)
+            }
+        })
     }
 
     // refresh informacion bancos
-    $("#refresh-bancos").on('click', function() {
+    $("#refresh-bancos").on('click', function () {
         refreshInformacionBancos()
     })
-    
+
     const refreshInformacionBancos = async () => {
         try {
             const { data } = await client.get('/entidadesbancariasSimple')
