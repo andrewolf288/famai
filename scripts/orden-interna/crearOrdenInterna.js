@@ -141,7 +141,8 @@ $(document).ready(function () {
                         odm_cantidad: material.odm_cantidad || 1,
                         odm_observacion: material.odm_observacion || '',
                         odm_tipo: material.odm_tipo != 2 ? material.odm_tipo : 1, // si no tiene un tipo ADICIONAL, se coloca el estado creado con anterioridad
-                        odm_asociar: material.producto === null ? false : true
+                        odm_asociar: material.producto === null ? false : true,
+                        uni_codigo: material.producto === null ? '' : material.producto.uni_codigo
                     })
                 })
 
