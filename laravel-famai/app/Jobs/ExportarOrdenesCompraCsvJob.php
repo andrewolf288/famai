@@ -75,7 +75,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         // }
 
         // debemos buscar aquellas ordenes de compra que no se han importado aún
-        $ordenescompra = OrdenCompra::with('proveedor', 'moneda')
+        $ordenescompra = OrdenCompra::with('proveedor', 'moneda', 'trabajador')
             ->where('occ_importacion', 0)
             ->where('occ_estado', '!=', 'ANU')
             ->get();
@@ -98,6 +98,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'PaymentGroupCode',
             'U_EXX_CORDOCOR',
             // 'TaxDate',
+            'DocumentsOwner',
             // 'DocTotalFc',
             // 'VatPercent',
         ]);
@@ -116,6 +117,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'GroupNum',
             'U_EXX_CORDOCOR',
             // 'TaxDate',
+            'OwnerCode',
             // 'DocTotalFC',
             // 'VatPercent',
         ]);
@@ -136,7 +138,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "LineTotal",
             "TaxPercentagePerRow",
             "U_FAM_FECINOC",
-            "ItemDetails"
+            "ItemDetails",
+            "U_EXF_DOCNUMOT"
             // "GrossTotal"
             // "TaxTotal"
         ]);
@@ -153,7 +156,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "LineTotal",
             "VatPrcnt",
             "U_FAM_FECINOC",
-            "Text"
+            "Text",
+            "U_EXF_DOCNUMOT"
             // "GTotal"
             // "VatSum"
         ]);
@@ -183,9 +187,10 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 // 0, // DocTotalFC (Total en moneda extranjera)
                 // 0, // VatPercent 
                 $orden->occ_numero,
+                $orden->trabajador->tra_codigosap
             ]);
             
-            $ordenescompradetalle = OrdenCompraDetalle::with('producto')
+            $ordenescompradetalle = OrdenCompraDetalle::with('producto', 'detalleMaterial.ordenInternaParte.ordenInterna')
                 ->where('occ_id', $orden->occ_id)
                 ->get();
 
@@ -207,7 +212,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     // $detalle->ocd_total, // GrossTotal
                     // '', // VatSum (por calcular o llenar según lógica)
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
-                    UtilHelper::cleanForCSV($detalle->ocd_observacion)
+                    UtilHelper::cleanForCSV($detalle->ocd_observacion),
+                    $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap,
                 ]);
 
                 $contadorDetalle++;
