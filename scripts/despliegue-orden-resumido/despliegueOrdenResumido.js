@@ -2347,7 +2347,7 @@ $(document).ready(async () => {
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val()
             // valores detalle de cotizacion
 
-            if (cantidadPedida > $(this).find('.cantidad-requerida-detalle').text()) {
+            if (+cantidadPedida > +$(this).find('.cantidad-requerida-detalle').text()) {
                 flagPedidoMayorRequerido = true
             }
 
@@ -2459,31 +2459,31 @@ $(document).ready(async () => {
                     backdrop: 'static',
                     keyboard: false
                 }).modal('show')
-                
+
                 $('#modalRequerimientoExcedente').off('hidden.bs.modal').on('hidden.bs.modal', () => {
                     resolve(null)
                 })
-                
+
                 $('#modalRequerimientoExcedente .btn-secondary').off('click').on('click', () => {
                     $('#modalRequerimientoExcedente').modal('hide')
                 })
-                
+
                 $('#btn-guardar-requerimiento-excedente').off('click').on('click', async () => {
                     const ot_numero = $('#ot-numero-requerimiento').val()
-                    
+
                     if (!ot_numero.trim()) {
                         alert('Debe ingresar el número de orden de trabajo')
                         return
                     }
-                    
+
                     const $boton = $('#btn-guardar-requerimiento-excedente')
                     const textoOriginal = $boton.html()
-                    
+
                     $boton.prop('disabled', true).html(`
                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                         Procesando...
                     `)
-                    
+
                     try {
                         await buscarOrdenTrabajo(ot_numero.trim())
                         $boton.prop('disabled', false).html(textoOriginal)
@@ -2495,7 +2495,7 @@ $(document).ready(async () => {
                     }
                 })
             })
-            
+
             if (!resultadoModalExcedente) {
                 return
             }
