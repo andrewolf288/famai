@@ -1030,11 +1030,14 @@ $(document).ready(async () => {
     })
 
     // Evento para recalcular precio unitario total
-    $(document).on('input', '.precio-unitario-detalle, .descuento', function () {
+    $(document).on('input', '.precio-unitario-detalle, .descuento, .cantidad-pedida-detalle', function () {
         const precioUnitario = $(this).closest('tr').find('.precio-unitario-detalle').val()
         const descuento = $(this).closest('tr').find('.descuento').val()
         const precioUnitarioConDescuento = precioUnitario * (1 - descuento / 100)
         $(this).closest('tr').find('.precio-unitario-total').val(precioUnitarioConDescuento.toFixed(2))
+
+        // Recalcular totales cuando cambien los valores
+        recalcularTotales()
     })
 
     // Verificar que jQuery y bootbox están disponibles
@@ -1982,6 +1985,8 @@ $(document).ready(async () => {
 
         // abrir modal de solicitud de cotizacion
         showModalSolicitudCotizacion(data.length)
+
+        recalcularTotales()
     })
 
     // ver detalle de agrupamiento de detalle de cotizacion
@@ -1997,6 +2002,7 @@ $(document).ready(async () => {
         const index = $element.data('index')
         detalleCotizacion[index] = null
         $element.remove()
+        recalcularTotales()
     })
 
     // ver historico de cotizaciones y ordenes de compra de un producto
@@ -2004,6 +2010,27 @@ $(document).ready(async () => {
         const producto = $(this).data('historico')
         initHistoricoByProducto(producto)
     })
+
+    function recalcularTotales() {
+        let subtotal = 0.00
+        let total = 0.00
+
+        $('#tbl-cotizaciones-materiales tbody tr').each(function () {
+            const precioUnitario = parseFloat($(this).find('.precio-unitario-detalle').val()) || 0.00
+            const descuento = parseFloat($(this).find('.descuento').val()) || 0.00
+            const cantidadPedida = parseFloat($(this).find('.cantidad-pedida-detalle').val()) || 0.00
+
+            // Subtotal = precio unitario * cantidad pedida SIN descuento
+            subtotal += precioUnitario * cantidadPedida
+
+            // Total = precio unitario con descuento * cantidad pedida  
+            const precioUnitarioConDescuento = precioUnitario * (1 - descuento / 100)
+            total += precioUnitarioConDescuento * cantidadPedida
+        })
+
+        $('#subtotalCotizacionInput').val(subtotal.toFixed(2))
+        $('#totalCotizacionInput').val(total.toFixed(2))
+    }
 
     // ----------- TRAER INFORMACION DE MONEDAS ----------
     const cargarTipoMonedas = async () => {
