@@ -2280,7 +2280,8 @@ $(document).ready(async () => {
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-guardar-cotizacion', async (event) => {
         const filas = $('#tbl-cotizaciones-materiales tbody tr')
         const filas_sin_codigo = filas.filter(function () {
-            return $(this).find('.codigo-material').text() === ''
+            const codigoMaterial = $(this).find('td:nth-child(3)').text().trim()
+            return codigoMaterial === 'N/A' || codigoMaterial === ''
         })
 
         if (filas_sin_codigo.length > 0) {
