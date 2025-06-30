@@ -24,6 +24,7 @@ use App\Trabajador;
 use App\Unidad;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class OrdenInternaMaterialesController extends Controller
 {
@@ -318,6 +319,11 @@ class OrdenInternaMaterialesController extends Controller
         // ordenamos la data de manera desc
         $query->where('odm_cantidadpendiente', '>', 0);
         $query->orderBy('odm_fecconsultareservacion', 'desc');
+
+        // DEBUGGING: Ver la query SQL
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+        Log::info('SQL Query LOGISTICA REQUERIMIENTOS: ', ['sql' => $sql, 'bindings' => $bindings]);
 
         $data = $query->get();
 
