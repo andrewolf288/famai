@@ -474,7 +474,7 @@ class CotizacionController extends Controller
             }
 
             // actualizamos total de cotizacion
-            $cotizacion->coc_total = round(floatval($total_cotizacion), 2);
+            $cotizacion->coc_total = round(floatval($total_cotizacion), 4);
             $cotizacion->save();
 
             // adjuntamos los archivos

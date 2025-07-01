@@ -466,13 +466,13 @@ $(document).ready(async () => {
                 <td class="text-center">
                     <div class="d-flex align-items-center justify-content-center">
                         <span class="moneda me-1"></span>
-                        ${precio_unitario.toFixed(2)}
+                        ${precio_unitario.toFixed(4)}
                     </div>
                 </td>
                 <td class="text-center">
                     <div class="d-flex align-items-center justify-content-center">
                         <span class="moneda me-1"></span>
-                        ${precio_total.toFixed(2)}
+                        ${precio_total.toFixed(4)}
                     </div>
                 </td>
                 <td class="text-center">
@@ -534,7 +534,7 @@ $(document).ready(async () => {
                 <td class="text-center align-middle total-input">
                     <div class="d-flex align-items-center justify-content-center">
                         <span class="moneda me-1"></span>
-                        ${ocd_total.toFixed(2)}
+                        ${ocd_total.toFixed(4)}
                     </div>
                 </td>
                 <td>${odm_observacion || 'N/A'}</td>
@@ -569,9 +569,9 @@ $(document).ready(async () => {
 
         total = subtotal + impuesto
 
-        $("#subtotalOrdenCompra").text(subtotal.toFixed(2))
-        $("#impuestoOrdenCompra").text(impuesto.toFixed(2))
-        $("#totalOrdenCompra").text(total.toFixed(2))
+        $("#subtotalOrdenCompra").text(subtotal.toFixed(4))
+        $("#impuestoOrdenCompra").text(impuesto.toFixed(4))
+        $("#totalOrdenCompra").text(total.toFixed(4))
     }
 
     // funcion para renderizar la vista
@@ -603,7 +603,7 @@ $(document).ready(async () => {
         // volvemos a renderizar
         const moneda = $(this).find('option:selected').text()
         const simboloMoneda = moneda.split(' ')[0]
-        const totalText = `${simboloMoneda} ${precioTotalDetalle.toFixed(2)}`
+        const totalText = `${simboloMoneda} ${precioTotalDetalle.toFixed(4)}`
         row.find('.total-input').text(totalText)
         // renderizamos las demas vistas
         renderizarAgrupadoOrdenCompra()

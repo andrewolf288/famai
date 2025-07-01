@@ -594,7 +594,7 @@ $(document).ready(async () => {
                     <td>${producto.pro_codigo}</td>
                     <td>${producto.pro_descripcion}</td>
                     <td class="text-center"></td>
-                    <td class="text-center">${parseFloat(prp_preciounitario).toFixed(2)}</td>
+                    <td class="text-center">${parseFloat(prp_preciounitario).toFixed(4)}</td>
                     <td class="text-center"></td>
                     </tr>
                 `
@@ -904,7 +904,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
                 </td>
                 <td class="text-center d-none label-precio-unitario-total">
-                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(2)}"/>
+                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(4)}"/>
                 </td>
                 <td class="text-center">
                     <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
@@ -954,7 +954,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
                 </td>
                 <td class="text-center d-none label-precio-unitario-total">
-                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(2)}"/>
+                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(4)}"/>
                 </td>
                 <td class="text-center">
                     <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
@@ -1034,7 +1034,7 @@ $(document).ready(async () => {
         const precioUnitario = $(this).closest('tr').find('.precio-unitario-detalle').val()
         const descuento = $(this).closest('tr').find('.descuento').val()
         const precioUnitarioConDescuento = precioUnitario * (1 - descuento / 100)
-        $(this).closest('tr').find('.precio-unitario-total').val(precioUnitarioConDescuento.toFixed(2))
+        $(this).closest('tr').find('.precio-unitario-total').val(precioUnitarioConDescuento.toFixed(4))
 
         // Recalcular totales cuando cambien los valores
         recalcularTotales()
@@ -2010,8 +2010,8 @@ $(document).ready(async () => {
             total += precioUnitarioConDescuento * cantidadPedida
         })
 
-        $('#subtotalCotizacionInput').val(subtotal.toFixed(2))
-        $('#totalCotizacionInput').val(total.toFixed(2))
+        $('#subtotalCotizacionInput').val(subtotal.toFixed(4))
+        $('#totalCotizacionInput').val(total.toFixed(4))
     }
 
     // ----------- TRAER INFORMACION DE MONEDAS ----------
@@ -2374,7 +2374,7 @@ $(document).ready(async () => {
 
             const observacion = $(this).find('.observacion-detalle').val().trim()
             let precioUnitario = proveedor_unico
-                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(2) * (1 - descuentoDetalle / 100)
+                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(4) * (1 - descuentoDetalle / 100)
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val()
@@ -2398,7 +2398,7 @@ $(document).ready(async () => {
                             cod_observacion: observacion,
                             cod_cantidad: detalle.odm_cantidad,
                             cod_preciounitario: precioUnitario,
-                            cod_total: parseFloat(detalle.odm_cantidad * precioUnitario).toFixed(2),
+                            cod_total: parseFloat(detalle.odm_cantidad * precioUnitario).toFixed(4),
                             cod_cantidadcotizada: cantidadPedida,
                             cod_fecentregaoc: fechaEntrega,
                             cod_descuento: descuentoDetalle
@@ -2414,7 +2414,7 @@ $(document).ready(async () => {
                         cod_observacion: observacion,
                         cod_cantidad: detalleIndex.odm_cantidad,
                         cod_preciounitario: precioUnitario,
-                        cod_total: parseFloat(detalleIndex.odm_cantidad * precioUnitario).toFixed(2),
+                        cod_total: parseFloat(detalleIndex.odm_cantidad * precioUnitario).toFixed(4),
                         cod_cantidadcotizada: cantidadPedida,
                         cod_fecentregaoc: fechaEntrega,
                         cod_descuento: descuentoDetalle
@@ -2430,7 +2430,7 @@ $(document).ready(async () => {
                     cod_observacion: $(this).find('.observacion-detalle').val(),
                     cod_cantidad: $(this).find('.cantidad-pedida-detalle').val(),
                     cod_preciounitario: precioUnitario,
-                    cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(2),
+                    cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(4),
                     cod_fecentregaoc: fechaEntrega,
                     cod_descuento: descuentoDetalle
                 })
@@ -2717,7 +2717,7 @@ $(document).ready(async () => {
                         <td>${producto.pro_codigo}</td>
                         <td>${producto.pro_descripcion}</td>
                         <td></td>
-                        <td>${parseFloat(prp_preciounitario).toFixed(2)}</td>
+                        <td>${parseFloat(prp_preciounitario).toFixed(4)}</td>
                         <td></td>
                     </tr>
                 `

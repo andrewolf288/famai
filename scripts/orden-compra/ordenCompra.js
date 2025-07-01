@@ -30,7 +30,7 @@ $(document).ready(() => {
     function initDataTable(data) {
         let content = ''
         data.forEach((ordenCompra, index) => {
-            const {moneda} = ordenCompra
+            const { moneda } = ordenCompra
 
             content += `
                 <tr>
@@ -39,9 +39,9 @@ $(document).ready(() => {
                     <td>${ordenCompra.proveedor?.prv_nrodocumento ?? 'No aplica'}</td>
                     <td>${ordenCompra.proveedor?.prv_nombre ?? 'No aplica'}</td>
                     <td class="text-center">${moneda?.mon_descripcion ?? 'No aplica'}</td>
-                    <td class="text-center">${moneda?.mon_simbolo ?? ''} ${parseFloat(ordenCompra.occ_subtotal).toFixed(2)}</td>
-                    <td class="text-center">${moneda?.mon_simbolo ?? ''} ${parseFloat(ordenCompra.occ_impuesto).toFixed(2)}</td>
-                    <td class="text-center">${moneda?.mon_simbolo ?? ''} ${parseFloat(ordenCompra.occ_total).toFixed(2)}</td>
+                    <td class="text-center">${moneda?.mon_simbolo ?? ''} ${parseFloat(ordenCompra.occ_subtotal).toFixed(4)}</td>
+                    <td class="text-center">${moneda?.mon_simbolo ?? ''} ${parseFloat(ordenCompra.occ_impuesto).toFixed(4)}</td>
+                    <td class="text-center">${moneda?.mon_simbolo ?? ''} ${parseFloat(ordenCompra.occ_total).toFixed(4)}</td>
                     <td class="text-center">${ordenCompra.occ_nrosap ?? ''}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-primary btn-ordencompra-detalle" data-ordencompra="${ordenCompra.occ_id}">
@@ -120,14 +120,14 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-ordencompra-detalle', async function () {
         const id = $(this).data('ordencompra')
         try {
-            const {data} = await client.get(`/ordencompra-detalle/${id}`)
+            const { data } = await client.get(`/ordencompra-detalle/${id}`)
             // llenamos la tabla con los datos
             $('#tbl-ordencompra-detalle tbody').empty()
             data.forEach(detalle => {
-                const {orden_compra, producto} = detalle
-                const {moneda} = orden_compra
-                const {detalle_material} = detalle
-                const {orden_interna_parte} = detalle_material
+                const { orden_compra, producto } = detalle
+                const { moneda } = orden_compra
+                const { detalle_material } = detalle
+                const { orden_interna_parte } = detalle_material
 
                 $('#tbl-ordencompra-detalle tbody').append(`
                     <tr>
@@ -146,12 +146,12 @@ $(document).ready(() => {
             // abrimos el modal
             const modalDetalleCotizacion = new bootstrap.Modal(document.getElementById('detalleOrdenCompraModal'))
             modalDetalleCotizacion.show()
-        } catch(error){
+        } catch (error) {
             console.log(error)
             alert('Error al obtener el detalle de la orde de compra')
         }
     })
-    
+
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
 
     // ANULAR ORDEN DE COMPRA

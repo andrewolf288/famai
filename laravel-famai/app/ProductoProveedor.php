@@ -28,7 +28,7 @@ class ProductoProveedor extends Model
     const UPDATED_AT = 'prp_fecmodificacion';
 
     protected $casts = [
-        'prp_preciounitario' => 'decimal:2',
+        'prp_preciounitario' => 'decimal:4',
         'prp_descuentoporcentaje' => 'decimal:2'
     ];
 
