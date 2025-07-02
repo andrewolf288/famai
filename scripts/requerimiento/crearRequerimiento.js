@@ -711,6 +711,7 @@ $(document).ready(function () {
 
                 if (tieneCodigo) {
                     // Buscar el producto en la base de datos
+                    // TODO: en local usa productosByQuery2 pero en produccion usa productosByQuery
                     try {
                         const { data } = await client.get(`/productosByQuery2?query=${encodeURIComponent(item.pro_codigo)}`)
                         if (data && data.length > 0) {
@@ -805,7 +806,7 @@ $(document).ready(function () {
     const buscarOrdenTrabajo = async () => {
         // Obtener el valor del campo de texto
         var otValue = $('#otInput').val().trim()
-        
+
 
         // Validar si el campo está vacío
         if (otValue.length === 0) {
@@ -823,7 +824,7 @@ $(document).ready(function () {
                             className: 'btn-danger'
                         }
                     },
-                    callback: function (result) { 
+                    callback: function (result) {
                         resolve(result)
                     }
                 });
@@ -859,7 +860,7 @@ $(document).ready(function () {
             $('#clienteInput').val("")
             $('#idClienteInput').val("")
             $('#equipoInput').val("")
-            
+
             throw new Error('Error en la búsqueda de orden de trabajo')
         } finally {
             $('#loader-ot').hide()
