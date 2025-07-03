@@ -1069,8 +1069,8 @@ $(document).ready(async () => {
 
         try {
             const queryEncoded = encodeURIComponent(query)
-            // TODO: cambiar a productosByQuery cuando se termine de testear
-            const { data } = await client.get(`/productosByQuery2?query=${queryEncoded}`)
+            // TODO: cambiar a productosByQuery2 para testear, en produccion usar productosByQuery
+            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
             // Limpiamos la lista
 
             limpiarListaValidacionCodigo()
