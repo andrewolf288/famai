@@ -212,6 +212,7 @@ class OrdenInternaMaterialesController extends Controller
         $tipoProceso = $request->input('oic_tipo', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+        $solped = $request->input('solped', null);
         $almacen_request = $request->input('alm_codigo', null);
         // multifilters
         $multifilter = $request->input('multifilter', null);
@@ -316,6 +317,11 @@ class OrdenInternaMaterialesController extends Controller
                 }
             }
         }
+
+        if ($solped !== null) {
+            $query->where('odm_solped', 'LIKE', '%' . $solped . '%');
+        }
+
         // ordenamos la data de manera desc
         $query->where('odm_cantidadpendiente', '>', 0);
         $query->orderBy('odm_fecconsultareservacion', 'desc');
