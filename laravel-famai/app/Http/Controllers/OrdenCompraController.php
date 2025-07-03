@@ -72,6 +72,7 @@ class OrdenCompraController extends Controller
         $page = $request->input('page', 1);
         $fechaDesde = $request->input('fecha_desde');
         $fechaHasta = $request->input('fecha_hasta');
+        $occ_numero = $request->input('occ_numero');
 
         $query = OrdenCompra::with(['proveedor', 'moneda', 'autorizador', 'elaborador'])
             ->where('sed_codigo', $sed_codigo);
@@ -79,7 +80,8 @@ class OrdenCompraController extends Controller
         $query->orderBy('occ_fecha', 'desc');
         $query->where('occ_fecha', '>=', $fechaDesde);
         $query->where('occ_fecha', '<=', $fechaHasta);
-
+        $query->where('occ_numero', 'like', '%' . $occ_numero . '%');
+        
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Se listan las ordenes de compra',
