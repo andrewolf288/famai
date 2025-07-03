@@ -315,6 +315,9 @@ $(document).ready(async () => {
                             </span>
                         </button>
                     </td>
+                    <td class="text-center">
+                        ${detalle[0].odm_solped || 'N/A'}
+                    </td>
                 </tr>
                 `
             })
