@@ -230,10 +230,6 @@
                     <span class="label">CONTACTO:</span>
                     <span class="value">{{ $proveedor['prv_contacto'] ? $proveedor['prv_contacto'] : '' }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="label">COTIZACIONES:</span>
-                    <span class="value">{{ $cotizaciones_string ?: 'Sin cotizaciones' }}</span>
-                </div>
             </td>
             {{-- Columna 2 --}}
             <td>
@@ -289,8 +285,7 @@
             <td>
                 <div class="info-row">
                     <span class="label">REFERENCIA:</span>
-                    <span
-                        class="value">{{ $ordencompra['occ_referencia'] ? $ordencompra['occ_referencia'] : '' }}</span>
+                    <span class="value">{{ $cotizaciones_string ?: '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">ACTIVO:</span>

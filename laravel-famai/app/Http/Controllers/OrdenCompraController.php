@@ -133,7 +133,7 @@ class OrdenCompraController extends Controller
                 'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
                 'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
                 'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
-                'cotizaciones_string' => $detalleordencomprafind
+                'cotizaciones_string' => "COT." . $detalleordencomprafind
                     ->pluck('detalleMaterial.cotizaciones.0.cotizacion.coc_numero')
                     ->filter()->unique()->implode(', ')
             ];
@@ -163,7 +163,7 @@ class OrdenCompraController extends Controller
                 'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
                 'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
                 'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
-                'cotizaciones_string' => $detalleordencomprafind
+                'cotizaciones_string' => "COT." . $detalleordencomprafind
                     ->pluck('detalleMaterial.cotizaciones.0.cotizacion.coc_numero')
                     ->filter()->unique()->implode(', ')
             ];
