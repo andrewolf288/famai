@@ -413,8 +413,8 @@ $(document).ready(async () => {
                     ...detalle_material,
                     ocd_porcentajedescuento: 0.00,
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
-                    ocd_preciounitario: parseFloat(precio_unitario_igv),
-                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv),
+                    ocd_preciounitario: parseFloat(precio_unitario_igv).toFixed(4),
+                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv).toFixed(4),
                     ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"]
                 }
                 formatData.push(formatDetalle)
@@ -461,6 +461,7 @@ $(document).ready(async () => {
 
         // construimos el HTML
         formatDataAgrupada.forEach((detalle, index) => {
+            console.log(detalle)
             const { pro_id, descripcion, codigo, unidad, cantidad_requerida, cantidad_pedida, precio_unitario, precio_total } = detalle
             content += `
             <tr data-index="${index}">
