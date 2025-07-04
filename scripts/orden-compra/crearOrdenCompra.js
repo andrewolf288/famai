@@ -392,33 +392,29 @@ $(document).ready(async () => {
         // obtenemos la información de detalle de materiales
         const { data } = await getInformacionDetalleMateriales(this)
 
-        const precioIncluyeIGV = data.cotizacion.coc_conigv == 1
         // cargamos la informacion de cotizacion
         initInformacionCotizacion(data.cotizacion)
         // cargamos la informacion del proveedor
         initInformacionProveedor(data.proveedor)
         // cargamos la informacion de la orden de compra
-        initInformacionOrdenCompra(data.detalles, precioIncluyeIGV)
+        initInformacionOrdenCompra(data.detalles)
         // abrimos el modal
         openDialogCrearOrdenCompra()
     })
 
-    const initInformacionOrdenCompra = (detalles, precioIncluyeIGV) => {
+    const initInformacionOrdenCompra = (detalles) => {
         const formatData = []
         detalles.forEach((detalle, index) => {
             const { detalles, precio_unitario } = detalle
-            let precioMostrar = precio_unitario || 0.00
-            if (precioIncluyeIGV) {
-                precioMostrar = (precio_unitario * 0.82).toFixed(2)
-            }
             detalles.forEach((detalleMaterial) => {
                 const { detalle_material } = detalleMaterial
+                const precio_unitario_igv = precio_unitario * (detalleMaterial.cotizacion.coc_conigv == 1 ? 0.82 : 1)
                 const formatDetalle = {
                     ...detalle_material,
                     ocd_porcentajedescuento: 0.00,
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
-                    ocd_preciounitario: parseFloat(precioMostrar),
-                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precioMostrar),
+                    ocd_preciounitario: parseFloat(precio_unitario_igv),
+                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv),
                     ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"]
                 }
                 formatData.push(formatDetalle)

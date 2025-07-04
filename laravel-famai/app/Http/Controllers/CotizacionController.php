@@ -1245,7 +1245,7 @@ class CotizacionController extends Controller
 
         $detalles = $detallesCotizaciones->map(function ($detalle) {
             // debemos buscar los detalles relacionados en la cotizacion
-            $detallesRelacionados = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto'])
+            $detallesRelacionados = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
                 ->where('pro_id', $detalle->pro_id)
                 ->where('coc_id', $detalle->coc_id)
                 ->get();
