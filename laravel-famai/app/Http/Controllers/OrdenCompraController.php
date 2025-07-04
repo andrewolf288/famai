@@ -100,7 +100,7 @@ class OrdenCompraController extends Controller
             ->where('occ_id', $occ_id)->first();
 
         // consultamos el detalle de orden de compra
-        $detalleordencomprafind = OrdenCompraDetalle::with('producto', 'detalleMaterial.usuarioCreador', 'detalleMaterial.ordenInternaParte.ordenInterna')
+        $detalleordencomprafind = OrdenCompraDetalle::with('producto', 'detalleMaterial.usuarioCreador', 'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.cotizaciones.cotizacion')
             ->where('occ_id', $occ_id)->get();
 
         // cuentas bancarias
@@ -133,6 +133,9 @@ class OrdenCompraController extends Controller
                 'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
                 'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
                 'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
+                'cotizaciones_string' => $detalleordencomprafind
+                    ->pluck('detalleMaterial.cotizaciones.0.cotizacion.coc_numero')
+                    ->filter()->unique()->implode(', ')
             ];
 
             return Pdf::loadView('orden-compra.ordencompradisgregado', $data);
@@ -160,6 +163,9 @@ class OrdenCompraController extends Controller
                 'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
                 'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
                 'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
+                'cotizaciones_string' => $detalleordencomprafind
+                    ->pluck('detalleMaterial.cotizaciones.0.cotizacion.coc_numero')
+                    ->filter()->unique()->implode(', ')
             ];
 
             return Pdf::loadView('orden-compra.ordencompra', $data);
