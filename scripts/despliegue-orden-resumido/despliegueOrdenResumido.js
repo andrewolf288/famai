@@ -878,11 +878,18 @@ $(document).ready(async () => {
     function renderRowCotizacion(detalle, index, proveedor) {
         let precioUnitario = 0.00
         let descuento = 0.00
+        let fechaUltimaCompra = 'N/A'
         try {
             precioUnitario = proveedor.precio_unitario
             descuento = proveedor.descuento_porcentaje
         } catch (error) {
             console.log(error)
+        }
+
+        try {
+            fechaUltimaCompra = parseDateSimple(proveedor.prp_fechaultimacompra)
+        } catch (error) {
+            fechaUltimaCompra = 'N/A'
         }
 
         if (descuento == null || descuento == undefined) {
@@ -918,6 +925,8 @@ $(document).ready(async () => {
                 <td class="text-center">
                     <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
                 </td>
+                <td class="text-center d-none label-ultimo-precio">${fechaUltimaCompra}</td>
+                <td class="text-center d-none label-ultimo-precio">${precioUnitario}</td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
                         <button class="btn btn-sm btn-primary btn-detalle me-1" title="Detalle Material">
@@ -968,6 +977,8 @@ $(document).ready(async () => {
                 <td class="text-center">
                     <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
                 </td>
+                <td class="text-center d-none label-ultimo-precio">${fechaUltimaCompra}</td>
+                <td class="text-center d-none label-ultimo-precio">${precioUnitario}</td>
                 <td class="text-center">
                     <div class="d-flex justify-content-center">
                         <button class="btn btn-sm btn-secondary me-1" disabled title="Detalle Material">
@@ -1607,12 +1618,14 @@ $(document).ready(async () => {
             $(".label-precio-unitario-detalle").removeClass('d-none')
             $(".label-descuento").removeClass('d-none')
             $(".label-precio-unitario-total").removeClass('d-none')
+            $(".label-ultimo-precio").removeClass('d-none')
         } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
             $(".label-precio-unitario-detalle").addClass('d-none')
             $(".label-descuento").addClass('d-none')
             $(".label-precio-unitario-total").addClass('d-none')
+            $(".label-ultimo-precio").addClass('d-none')
         }
     })
 
@@ -1724,7 +1737,6 @@ $(document).ready(async () => {
                 <input type="text" class="form-control telefono-proveedor" value="${prv_telefono || ''}" />
             </td>
             <td>${parseDateSimple(prp_fechaultimacompra) || ''}</td>
-            <td>${precio_unitario || ''}</td>
             <td>
                 <div class="d-flex justify-content-around">
                     <!--
@@ -2324,6 +2336,7 @@ $(document).ready(async () => {
         $("#checkProveedorUnico").prop('checked', false)
         $(".label-precio-unitario-total").addClass('d-none')
         $(".label-descuento").addClass('d-none')
+        $(".label-ultimo-precio").addClass('d-none')
         // vaceamos la variable de archivos adjuntos
         archivosAdjuntos = []
         // vaceamos la lista de archivos adjuntos
