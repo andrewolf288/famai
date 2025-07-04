@@ -126,6 +126,7 @@ $(document).ready(async () => {
         const { data } = await getInformacionDetalleMateriales(this)
         let content = ''
         let contentDetalle = ''
+        const precioIncluyeIGV = data.cotizacion.coc_conigv == 1
 
         $("#agrupadoDetalleMaterialesBody").empty()
         $("#disgregadoDetalleMaterialesBody").empty()
@@ -133,6 +134,10 @@ $(document).ready(async () => {
         let counterIndex = 0
         detalles.forEach((element, index) => {
             const { producto, precio_unitario, detalles, cantidad_requerida } = element
+            let precioMostrar = precio_unitario || 0.00
+            if (precioIncluyeIGV) {
+                precioMostrar = (precio_unitario * 0.82).toFixed(2)
+            }
             content += `
             <tr>
                 <td class="text-center">${index + 1}</td>
@@ -140,7 +145,7 @@ $(document).ready(async () => {
                 <td>${producto.pro_descripcion}</td>
                 <td class="text-center">${producto.uni_codigo}</td>
                 <td class="text-center">${cantidad_requerida}</td>
-                <td class="text-center">${precio_unitario || 0.00}</td>
+                <td class="text-center">${precioMostrar}</td>
             </tr>
             `
             detalles.forEach((detalle) => {
@@ -386,28 +391,34 @@ $(document).ready(async () => {
         await initInformacionMaestros()
         // obtenemos la información de detalle de materiales
         const { data } = await getInformacionDetalleMateriales(this)
+
+        const precioIncluyeIGV = data.cotizacion.coc_conigv == 1
         // cargamos la informacion de cotizacion
         initInformacionCotizacion(data.cotizacion)
         // cargamos la informacion del proveedor
         initInformacionProveedor(data.proveedor)
         // cargamos la informacion de la orden de compra
-        initInformacionOrdenCompra(data.detalles)
+        initInformacionOrdenCompra(data.detalles, precioIncluyeIGV)
         // abrimos el modal
         openDialogCrearOrdenCompra()
     })
 
-    const initInformacionOrdenCompra = (detalles) => {
+    const initInformacionOrdenCompra = (detalles, precioIncluyeIGV) => {
         const formatData = []
         detalles.forEach((detalle, index) => {
             const { detalles, precio_unitario } = detalle
+            let precioMostrar = precio_unitario || 0.00
+            if (precioIncluyeIGV) {
+                precioMostrar = (precio_unitario * 0.82).toFixed(2)
+            }
             detalles.forEach((detalleMaterial) => {
                 const { detalle_material } = detalleMaterial
                 const formatDetalle = {
                     ...detalle_material,
                     ocd_porcentajedescuento: 0.00,
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
-                    ocd_preciounitario: parseFloat(precio_unitario),
-                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario),
+                    ocd_preciounitario: parseFloat(precioMostrar),
+                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precioMostrar),
                     ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"]
                 }
                 formatData.push(formatDetalle)
