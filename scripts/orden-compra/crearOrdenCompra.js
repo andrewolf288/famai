@@ -336,6 +336,7 @@ $(document).ready(async () => {
     const initInformacionCotizacion = (cotizacion) => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
         $("#formaDePagoOrdenCompraInput option").each(function () {
+            if (!cotizacion.coc_formapago) return
             if (this.innerText.toLowerCase() === (cotizacion.coc_formapago.toLowerCase())) {
                 console.log(this.value)
                 $("#formaDePagoOrdenCompraInput").val(this.value)
