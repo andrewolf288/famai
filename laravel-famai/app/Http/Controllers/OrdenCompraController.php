@@ -118,9 +118,9 @@ class OrdenCompraController extends Controller
                         'pro_id' => $detalle->pro_id,
                         'ocd_descripcion' => $detalle->ocd_descripcion,
                         'ocd_observacion' => $detalle->detalleMaterial->odm_observacion,
-                        'ocd_preciounitario' => $detalle->ocd_preciounitario,
+                        'ocd_preciounitario' => number_format($detalle->ocd_preciounitario, 2, '.', ''),
                         'ocd_cantidad' => $detalle->ocd_cantidad,
-                        'ocd_total' => $detalle->ocd_total,
+                        'ocd_total' => number_format($detalle->ocd_total, 2, '.', ''),
                         'uni_codigo' => $detalle->producto ? $detalle->producto->uni_codigo : '',
                         'odt_numero' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->odt_numero ?? null,
                         'usu_nombre' => $detalle->detalleMaterial->usuarioCreador->usu_nombre ?? null
@@ -150,10 +150,10 @@ class OrdenCompraController extends Controller
                         'pro_id' => $group->first()->pro_id,
                         'ocd_descripcion' => $group->first()->ocd_descripcion,
                         'ocd_observacion' => $group->first()->detalleMaterial->odm_observacion,
-                        'ocd_preciounitario' => $group->first()->ocd_preciounitario,
+                        'ocd_preciounitario' => number_format($group->first()->ocd_preciounitario, 2, '.', ''),
                         'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
                         'ocd_cantidad' => $group->sum('ocd_cantidad'),
-                        'ocd_total' => $group->sum('ocd_total'),
+                        'ocd_total' => number_format($group->sum('ocd_total'), 2, '.', ''),
                     ];
                 })->values(),
                 'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
@@ -162,7 +162,7 @@ class OrdenCompraController extends Controller
                 'cuenta_banco_nacion' => $cuentas_bancarias['cuenta_banco_nacion'],
                 'cuenta_soles' => $cuentas_bancarias['cuenta_soles'],
                 'cuenta_dolares' => $cuentas_bancarias['cuenta_dolares'],
-                'total_format' => UtilHelper::convertirNumeroALetras($ordencomprafind->occ_total),
+                'total_format' => UtilHelper::convertirNumeroALetras(number_format($ordencomprafind->occ_total, 2, '.', '')),
                 'cotizaciones_string' => "COT." . $detalleordencomprafind
                     ->pluck('detalleMaterial.cotizaciones.0.cotizacion.coc_numero')
                     ->filter()->unique()->implode(', ')

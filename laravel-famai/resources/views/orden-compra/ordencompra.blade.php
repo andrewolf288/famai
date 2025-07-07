@@ -373,12 +373,12 @@
                                 <tr>
                                     <td style="text-align: left; padding: 0;">SUBTOT
                                         {{ $ordencompra['moneda']['mon_simbolo'] }}</td>
-                                    <td style="text-align: right; padding: 0;">{{ $ordencompra['occ_subtotal'] }}</td>
+                                    <td style="text-align: right; padding: 0;">{{ number_format($ordencompra['occ_subtotal'], 2, '.', '') }}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left; padding: 0;">I.G.V.
                                         {{ $ordencompra['occ_porcentajeimpuesto'] }}%</td>
-                                    <td style="text-align: right; padding: 0;">{{ $ordencompra['occ_impuesto'] }}</td>
+                                    <td style="text-align: right; padding: 0;">{{ number_format($ordencompra['occ_impuesto'], 2, '.', '') }}</td>
                                 </tr>
                             </table>
                         </td>
@@ -387,7 +387,7 @@
                         <td
                             style="height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
                             <span style="float: left;">TOTAL {{ $ordencompra['moneda']['mon_simbolo'] }}</span>
-                            <span style="float: right;">{{ $ordencompra['occ_total'] }}</span>
+                            <span style="float: right;">{{ number_format($ordencompra['occ_total'], 2, '.', '') }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -404,13 +404,13 @@
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Adelanto:</td>
                                     <td style="text-align: right; padding: 0;">
-                                        {{ $ordencompra['occ_adelanto'] ? $ordencompra['occ_adelanto'] : '' }}</td>
+                                        {{ $ordencompra['occ_adelanto'] ? number_format($ordencompra['occ_adelanto'], 2, '.', '') : '' }}</td>
                                 </tr>
                                 <br>
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Saldo:</td>
                                     <td style="text-align: right; padding: 0;">
-                                        {{ $ordencompra['occ_saldo'] ? $ordencompra['occ_saldo'] : '' }}</td>
+                                        {{ $ordencompra['occ_saldo'] ? number_format($ordencompra['occ_saldo'], 2, '.', '') : '' }}</td>
                                 </tr>
                             </table>
                         </td>
