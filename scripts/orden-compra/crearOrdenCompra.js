@@ -408,7 +408,7 @@ $(document).ready(async () => {
             const { detalles, precio_unitario } = detalle
             detalles.forEach((detalleMaterial) => {
                 const { detalle_material } = detalleMaterial
-                const precio_unitario_igv = precio_unitario * (detalleMaterial.cotizacion.coc_conigv == 1 ? 0.82 : 1)
+                const precio_unitario_igv = precio_unitario * (detalleMaterial.cotizacion.coc_conigv == 1 ? (1 / 1.18) : 1)
                 const formatDetalle = {
                     ...detalle_material,
                     ocd_porcentajedescuento: 0.00,
