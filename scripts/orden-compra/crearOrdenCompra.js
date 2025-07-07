@@ -328,8 +328,6 @@ $(document).ready(async () => {
         $("#cuentaBancoNacionProveedorInput").val(cuenta_banco_nacion?.pvc_numerocuenta || '')
         $("#idCuentaBancariaBancoNacion").val(cuenta_banco_nacion?.pvc_id || '')
 
-        // establecemos la forma de pago
-        if (forma_pago) $("#formaDePagoOrdenCompraInput").val(forma_pago || '')
         // establecemos el impuesto por defecto
         $("#impuestoOrdenCompraInput").val('IGV')
     }
