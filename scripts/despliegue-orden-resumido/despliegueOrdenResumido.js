@@ -1597,12 +1597,31 @@ $(document).ready(async () => {
         }
     }
 
+    // ----------- TRAER TIPO DE FORMAS DE PAGO ----------------
+    const cargasFormasPago = async () => {
+        try {
+            const { data } = await client.get('/formaspagoSimple')
+            const defaultOptionFormaPago = $('<option>').val('').text('Seleccione una forma de pago')
+            $("#formapagoCotizacionInput").empty()
+            $("#formapagoCotizacionInput").append(defaultOptionFormaPago)
+
+            data.forEach((formaPago) => {
+                const option = $('<option>').val(formaPago["fpa_descripcion"]).text(formaPago["fpa_descripcion"])
+                $("#formapagoCotizacionInput").append(option)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     // ----------- GESTIÓN DE PROVEEDORES ----------------
     $("#checkProveedorUnico").on('change', async function () {
         const checked = $(this).is(':checked')
         if (checked) {
             // cargamos información de monedas
             await cargarTipoMonedas()
+            // cargamos información de formas de pago
+            await cargasFormasPago()
             // establecemos manejador de fecha de validez
             $("#fechaValidezPicker").datepicker({
                 dateFormat: 'dd/mm/yy',
