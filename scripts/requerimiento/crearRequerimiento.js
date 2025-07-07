@@ -840,7 +840,7 @@ $(document).ready(function () {
             $('#searchButton').prop('disabled', true)
             $('#otInput').prop('disabled', true)
             const { data } = await client.get(`/ordenestrabajosByNumero/${otValue}`)
-            if (!data.length > 0) {
+            if (!data || !data.odt_numero) {
                 alert('No se encontro la orden de trabajo en la base de datos')
                 $('#otInput').val("")
                 throw new Error('Orden de trabajo no encontrada')
