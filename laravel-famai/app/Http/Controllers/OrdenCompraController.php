@@ -11,6 +11,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use App\Helpers\UtilHelper;
 use App\ProductoResponsable;
 use App\Proveedor;
@@ -180,38 +182,57 @@ class OrdenCompraController extends Controller
         try {
             DB::beginTransaction();
             $proveedorRequest = $request->input('proveedor');
-            // Valida de la orden de compra
-            $validatedData = validator($request->all(), [
-                'occ_fecha' => 'required|date',
-                'occ_fechaentrega' => 'nullable|date',
-                'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
-                'fpa_codigo' => 'required|numeric|exists:tblformaspago_fpa,fpa_codigo',
-                'occ_referencia' => 'nullable|string',
-                'tra_elaborado' => 'required|exists:tbltrabajadores_tra,tra_id',
-                'occ_notas' => 'nullable|string',
-                'occ_adelanto' => 'nullable|numeric|min:1',
-                'occ_saldo' => 'nullable|numeric|min:1',
-                'occ_observacionpago' => 'nullable|string',
-                'occ_subtotal' => 'required|numeric|min:1',
-                'occ_impuesto' => 'required|numeric|min:1',
-                'occ_total' => 'required|numeric|min:1',
-                'occ_tipo' => 'required|string',
-                'occ_esactivo' => 'required|boolean',
-                'imprimir_disgregado' => 'required|boolean',
-                'detalle_productos' => 'required|array|min:1',
-            ])->validate();
+            
+            // Validación de la orden de compra
+            try {
+                $validatedData = validator($request->all(), [
+                    'occ_fecha' => 'required|date',
+                    'occ_fechaentrega' => 'nullable|date',
+                    'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
+                    'fpa_codigo' => 'required|numeric|exists:tblformaspago_fpa,fpa_codigo',
+                    'occ_referencia' => 'nullable|string',
+                    'tra_elaborado' => 'required|exists:tbltrabajadores_tra,tra_id',
+                    'occ_notas' => 'nullable|string',
+                    'occ_adelanto' => 'nullable|numeric|min:1',
+                    'occ_saldo' => 'nullable|numeric|min:1',
+                    'occ_observacionpago' => 'nullable|string',
+                    'occ_subtotal' => 'required|numeric|min:1',
+                    'occ_impuesto' => 'required|numeric|min:1',
+                    'occ_total' => 'required|numeric|min:1',
+                    'occ_tipo' => 'required|string',
+                    'occ_esactivo' => 'required|boolean',
+                    'imprimir_disgregado' => 'required|boolean',
+                    'detalle_productos' => 'required|array|min:1',
+                ])->validate();
+            } catch (ValidationException $e) {
+                Log::error('Error de validación en orden de compra', [
+                    'errores' => $e->errors(),
+                    'datos_enviados' => $request->all(),
+                    'usuario' => $user->usu_codigo
+                ]);
+                throw $e;
+            }
 
-            // validacion de proveedor
-            $validatedDataProveedor = validator($proveedorRequest, [
-                'prv_id' => 'nullable|exists:tblproveedores_prv,prv_id',
-                'prv_nombre' => 'required|string',
-                'prv_nrodocumento' => 'required|string',
-                'prv_correo' => 'nullable|email',
-                'prv_direccion' => 'nullable|string',
-                'prv_contacto' => 'nullable|string',
-                'prv_whatsapp' => 'nullable|string',
-                'cuentas_bancarias' => 'required|array|min:1',
-            ])->validate();
+            // Validación de proveedor
+            try {
+                $validatedDataProveedor = validator($proveedorRequest, [
+                    'prv_id' => 'nullable|exists:tblproveedores_prv,prv_id',
+                    'prv_nombre' => 'required|string',
+                    'prv_nrodocumento' => 'required|string',
+                    'prv_correo' => 'nullable|email',
+                    'prv_direccion' => 'nullable|string',
+                    'prv_contacto' => 'nullable|string',
+                    'prv_whatsapp' => 'nullable|string',
+                    'cuentas_bancarias' => 'required|array|min:1',
+                ])->validate();
+            } catch (ValidationException $e) {
+                Log::error('Error de validación en datos del proveedor', [
+                    'errores' => $e->errors(),
+                    'datos_proveedor' => $proveedorRequest,
+                    'usuario' => $user->usu_codigo
+                ]);
+                throw $e;
+            }
 
             // primero validamos que no exista un registro con el mismo numero de documento de proveedor
             $proveedor = Proveedor::where('prv_nrodocumento', $validatedDataProveedor['prv_nrodocumento'])->first();

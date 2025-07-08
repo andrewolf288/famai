@@ -820,7 +820,26 @@ $(document).ready(async () => {
             window.location.href = `orden-compra`
         } catch (error) {
             console.log(error)
-            alert("Hubo un error al crear la orden de compra")
+
+            let mensajeError = "Error desconocido"
+
+            try {
+                if (error.response?.data) {
+                    // Si es blob, convertir a texto
+                    if (error.response.data instanceof Blob) {
+                        mensajeError = await error.response.data.text()
+                    } else {
+                        // Cualquier otra cosa, convertir a string
+                        mensajeError = JSON.stringify(error.response.data)
+                    }
+                } else {
+                    mensajeError = error.message || error.toString()
+                }
+            } catch {
+                mensajeError = "Error al procesar respuesta"
+            }
+
+            alert("Hubo un error al crear la orden de compra: " + mensajeError)
         }
     }
 
