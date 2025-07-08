@@ -294,7 +294,7 @@
             <td>
                 <div class="info-row">
                     <span class="label">REFERENCIA:</span>
-                    <span class="value">{{ $cotizaciones_string ?: '' }}</span>
+                    <span class="value">{{ $ordencompra['occ_referencia'] ? $ordencompra['occ_referencia'] : '' }}</span>
                 </div>
                 <div class="info-row">
                     <span class="label">ACTIVO:</span>
