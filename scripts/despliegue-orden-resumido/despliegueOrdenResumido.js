@@ -684,15 +684,29 @@ $(document).ready(async () => {
     $("#btn-seleccionar-cotizacion").on('click', async function () {
         const filasSeleccionadas = dataTableCotizaciones.rows({ selected: true }).nodes();
         const valoresSeleccionados = [];
+        let estadoCotizacion = '';
 
         // recolectamos las cotizaciones
         $(filasSeleccionadas).each(function (index, node) {
             const valor = $(node).find('.id-detalle-cotizacion').val();
+            const estado = $(node).find('td:nth-child(6) span').text().trim();
+            estadoCotizacion = estado;
             valoresSeleccionados.push(valor);
         });
 
         if (valoresSeleccionados.length === 0) {
             alert('Debe seleccionar una cotización')
+            return
+        }
+
+        if (estadoCotizacion === 'SOL') {
+            bootbox.alert({
+                title: '<span style="color:#dc3545;font-weight:bold;">Error</span>',
+                message: 'No se puede seleccionar una cotización que tiene un estado aun en SOLICITADO',
+                centerVertical: true,
+                backdrop: true,
+                className: 'bootbox-alert-modal'
+            })
             return
         }
 
