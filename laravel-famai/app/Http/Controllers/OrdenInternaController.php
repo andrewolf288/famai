@@ -24,6 +24,8 @@ use App\Reporte;
 use App\Trabajador;
 use DateTime;
 use App\HistoriaOrdenesInternasMat;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class OrdenInternaController extends Controller
 {
@@ -346,21 +348,29 @@ class OrdenInternaController extends Controller
             if ($trabajador) {
                 $sed_codigo = $trabajador->sed_codigo;
             }
-
-            $validator = Validator::make($request->all(), [
-                'odt_numero' => 'required|string',
-                'cli_id' => 'required|string',
-                'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
-                'oic_fecha' => 'required|date',
-                'oic_fechaaprobacion' => 'nullable|date',
-                'oic_fechaentregaestimada' => 'nullable|date',
-                'oic_fechaevaluacion' => 'nullable|date',
-                'tra_idalmacen' => 'nullable|integer|exists:tbltrabajadores_tra,tra_id',
-                'tra_idmaestro' => 'nullable|integer|exists:tbltrabajadores_tra,tra_id',
-                'tra_idorigen' => 'required|integer|exists:tbltrabajadores_tra,tra_id',
-                'oic_equipo_descripcion' => 'required|string',
-                'detalle_partes' => 'required|array|min:1',
-            ])->validate();
+            try {
+                $validator = Validator::make($request->all(), [
+                    'odt_numero' => 'required|string',
+                    'cli_id' => 'required|string',
+                    'are_codigo' => 'required|string|exists:tblareas_are,are_codigo',
+                    'oic_fecha' => 'required|date',
+                    'oic_fechaaprobacion' => 'nullable|date',
+                    'oic_fechaentregaestimada' => 'nullable|date',
+                    'oic_fechaevaluacion' => 'nullable|date',
+                    'tra_idalmacen' => 'nullable|integer|exists:tbltrabajadores_tra,tra_id',
+                    'tra_idmaestro' => 'nullable|integer|exists:tbltrabajadores_tra,tra_id',
+                    'tra_idorigen' => 'required|integer|exists:tbltrabajadores_tra,tra_id',
+                    'oic_equipo_descripcion' => 'required|string',
+                    'detalle_partes' => 'required|array|min:1',
+                ])->validate();
+            } catch (ValidationException $e) {
+                Log::error('Error de validación en orden interna', [
+                    'errores' => $e->errors(),
+                    'datos_enviados' => $request->all(),
+                    'usuario' => $user->usu_codigo
+                ]);
+                throw $e;
+            }
 
             // ---------- MANEJO DE INFORMACION DEL CLIENTE ----------
             $cli_id = null;
