@@ -756,7 +756,11 @@ $(document).ready(async () => {
         const errorsDetalle = validarDetalleOrdenCompra(formatDetalle)
 
         if (errorsDetalle.length > 0) {
-            alert(errorsDetalle)
+            bootbox.alert({
+                title: 'Error',
+                message: errorsDetalle.join('\n'),
+                className: 'bootbox-alert-modal'
+            })
             return
         }
 
