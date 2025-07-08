@@ -108,4 +108,46 @@ class OrdenTrabajoController extends Controller
 
         return response()->json($queryBuilder);
     }
+
+    public function findByNumeroRequerimiento($numero)
+    {
+        $queryBuilder = DB::connection('sqlsrv_secondary')
+            ->table('OWOR as OT')
+            ->leftJoin('OCRD as C', 'OT.CardCode', '=', 'C.CardCode')
+            ->select(
+                'OT.DocNum as odt_numero',
+                DB::raw('CAST(OT.PostDate AS DATE) as odt_fecha'),
+                'OT.CardCode as cli_nrodocumento',
+                'C.CardName as cli_nombre',  // Obtenemos el CardName con el LEFT JOIN
+                'OT.ProdName as odt_equipo',
+                DB::raw("
+                                CASE 
+                                    WHEN OT.U_EXX_TIPOSERV = 1 THEN 'Reparacion'
+                                    WHEN OT.U_EXX_TIPOSERV = 2 THEN 'Fabricacion'
+                                    WHEN OT.U_EXX_TIPOSERV = 3 THEN 'Compra/Venta'
+                                    WHEN OT.U_EXX_TIPOSERV = 4 THEN 'Garantia Total'
+                                    WHEN OT.U_EXX_TIPOSERV = 5 THEN 'Interno'
+                                    WHEN OT.U_EXX_TIPOSERV = 6 THEN 'Garantia Parcial'
+                                    WHEN OT.U_EXX_TIPOSERV = 7 THEN 'Sellos'
+                                    ELSE 'Otro'
+                                END as odt_trabajo
+                            "),
+                DB::raw("
+                                CASE 
+                                    WHEN OT.Status = 'L' THEN 'Cerrado'
+                                    WHEN OT.Status = 'R' THEN 'Abierto'
+                                    ELSE 'Planificado'
+                                END as odt_estado
+                            ")
+            )
+            ->where('OT.DocNum', $numero)
+            ->first();
+        if (!$queryBuilder) {
+            return response()->json([
+                'error' => 'Registro no encontrado.',
+            ], 404);
+        }
+
+        return response()->json($queryBuilder);
+    }
 }
