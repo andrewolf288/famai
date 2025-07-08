@@ -1854,10 +1854,17 @@ $(document).ready(async () => {
 
     // crear solicitud de cotizacion
     $('#tbl-cotizaciones-proveedores tbody').on('click', '.btn-guardar-cotizacion', async (event) => {
+        // debemos saber si la solicitud de cotización sera de proveedor unico
+        const proveedor_unico = $('#checkProveedorUnico').is(':checked')
+
         const filas = $('#tbl-cotizaciones-materiales tbody tr')
         const filas_sin_codigo = filas.filter(function () {
             const codigoMaterial = $(this).find('td:nth-child(3)').text().trim()
             return codigoMaterial === 'N/A' || codigoMaterial === ''
+        })
+        const filas_sin_precio = filas.filter(function () {
+            const precio = $(this).find('td:nth-child(9) input').val()
+            return precio === '' || precio === '0.00' || parseFloat(precio) <= 0
         })
 
         if (filas_sin_codigo.length > 0) {
@@ -1878,12 +1885,20 @@ $(document).ready(async () => {
             return
         }
 
+        if (filas_sin_precio.length > 0 && proveedor_unico) {
+            bootbox.alert({
+                title: '<span style="color:#dc3545;font-weight:bold;">Error</span>',
+                message: `<p>No se puede cotizar materiales con precio unitario igual a cero</p>`,
+                centerVertical: true,
+                backdrop: true,
+                className: 'bootbox-alert-modal'
+            })
+            return
+        }
+
         const row = $(event.currentTarget).closest('tr')
         const id_proveedor = row.data('id-proveedor')
         let flagPedidoMayorRequerido = false
-
-        // debemos saber si la solicitud de cotización sera de proveedor unico
-        const proveedor_unico = $('#checkProveedorUnico').is(':checked')
 
         // formamos la informacion de proveedor
         const proveedor = {
