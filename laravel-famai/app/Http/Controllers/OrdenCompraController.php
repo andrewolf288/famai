@@ -197,7 +197,7 @@ class OrdenCompraController extends Controller
                     'occ_saldo' => 'nullable|numeric|min:1',
                     'occ_observacionpago' => 'nullable|string',
                     'occ_subtotal' => 'required|numeric|min:1',
-                    'occ_impuesto' => 'required|numeric|min:1',
+                    'occ_impuesto' => 'required|numeric|min:0',
                     'occ_total' => 'required|numeric|min:1',
                     'occ_tipo' => 'required|string',
                     'occ_esactivo' => 'required|boolean',
