@@ -2229,7 +2229,7 @@ $(document).ready(async () => {
     const buscarOrdenTrabajo = async (otValue) => {
         try {
             const { data } = await client.get(`/ordenestrabajosByNumeroRequerimiento/${otValue}`)
-            if (!data.length > 0) {
+            if (!data || !data.odt_numero) {
                 alert('No se encontro la orden de trabajo en la base de datos')
                 throw new Error('Orden de trabajo no encontrada')
             }
