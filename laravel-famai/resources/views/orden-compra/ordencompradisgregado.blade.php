@@ -321,7 +321,7 @@
             @foreach ($detalle_ordencompra as $index => $detalle)
                 <tr>
                     <td class="col-item">{{ $loop->iteration }}</td>
-                    <td class="col-ot">{{ $detalle['odt_numero'] ? $detalle['odt_numero'] : '' }}</td>
+                    <td class="col-ot">{{ $detalle['oic_otsap'] ? $detalle['oic_otsap'] : '' }}</td>
                     <td class="col-creador">{{ $detalle['usu_nombre'] ? $detalle['usu_nombre'] : '' }}</td>
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }} {!! nl2br(e($detalle['ocd_observacion'])) !!}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>

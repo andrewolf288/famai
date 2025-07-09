@@ -749,7 +749,7 @@ $(document).ready(async () => {
 
         // formamos la información de detalle de la orden de compra
         const porcentajeImpuesto = obtenerImpuestoPorcentaje()
-        const formatDetalle = formatDetalleOrdenCompra(impuestoOrdenCompra, porcentajeImpuesto)
+        const { formatDetalle, formatDetalleExedentes } = formatDetalleOrdenCompra(impuestoOrdenCompra, porcentajeImpuesto)
         console.log(formatDetalle)
 
         // validamos que todos los datos del detalle de orden de compra
@@ -763,6 +763,70 @@ $(document).ready(async () => {
             })
             return
         }
+
+        let oic_otsap;
+        if (formatDetalleExedentes.length > 0) {
+            oic_otsap = await new Promise((resolve) => {
+                const modal = new bootstrap.Modal(document.getElementById('dialogPedirOT'), {
+                    backdrop: 'static',
+                    keyboard: false
+                })
+
+                $("#otInput").val('')
+
+                $("#continuar-ot").off('click').on('click', async function () {
+                    const otValue = $("#otInput").val().trim()
+
+                    if (otValue.length === 0) {
+                        bootbox.alert({
+                            title: 'Error',
+                            message: 'Debe ingresar un numero de orden de trabajo',
+                            className: 'bootbox-alert-modal'
+                        })
+                        return
+                    }
+
+                    $("#continuar-ot").prop('disabled', true)
+                    $("#continuar-ot").html('<i class="fa fa-spinner fa-spin"></i> Buscando...')
+                    try {
+                        const { data } = await client.get(`/ordenestrabajosByNumeroRequerimiento/${otValue}`)
+                        if (!data || !data.odt_numero) {
+                            bootbox.alert({
+                                title: 'Error',
+                                message: 'No se encontro la orden de trabajo en la base de datos',
+                                className: 'bootbox-alert-modal'
+                            })
+                            throw new Error('Orden de trabajo no encontrada')
+                        }
+                        resolve(otValue)
+                    } catch (error) {
+                        console.log(error)
+                        const { response } = error
+                        if (response && response.status === 404) {
+                            alert(response.data.error)
+                        } else {
+                            alert('Error al buscar la orden de trabajo')
+                        }
+                        throw new Error('Error en la búsqueda de orden de trabajo')
+                    } finally {
+                        $("#continuar-ot").prop('disabled', false)
+                        $("#continuar-ot").html('Continuar')
+                    }
+
+                    modal.hide()
+                    resolve(otValue)
+                })
+
+                $("#cancelar-ot").off('click').on('click', function () {
+                    modal.hide()
+                    resolve(null)
+                })
+
+                modal.show()
+            })
+        }
+
+        if (oic_otsap == null && formatDetalleExedentes.length > 0) return
 
         // verificamos la forma de impresión
         const confirmar = confirm('¿Deseas imprimir la orden de compra de manera disgregada?')
@@ -795,7 +859,9 @@ $(document).ready(async () => {
                 prv_direccion: direccionProveedorInput,
                 cuentas_bancarias: cuentas_bancarias
             },
-            imprimir_disgregado: confirmar
+            imprimir_disgregado: confirmar,
+            detalle_productos_exedentes: formatDetalleExedentes,
+            oic_otsap: oic_otsap
         }
 
         console.log(formatData)
@@ -885,19 +951,23 @@ $(document).ready(async () => {
     }
 
     function formatDetalleOrdenCompra(impuesto, porcentaje_impuesto) {
-        const formatDetalleOrdenCompra = []
+        const formatDetalle = []
+        const formatDetalleExedentes = []
+        let ocd_orden = 1
         detallesOrdenCompra.forEach((detalle, index) => {
             const odm_id = detalle.odm_id
             // buscamos en el dom del table disgregado
             const row = $(`#disgregadoDetalleOrdenCompraBody tr[data-detalle="${odm_id}"]`)
             const fecha_entrega = row.find('.fecha-entrega-input').val()
             const observacion = row.find('.observacion-input').val()
-            const formatDetalle = {
-                ocd_orden: index + 1, // orden
+            const cantidad_real = Math.min(obtenerValorNumerico(detalle.ocd_cantidad), obtenerValorNumerico(detalle.odm_cantidadpendiente))
+            const cantidad_exedente = obtenerValorNumerico(detalle.ocd_cantidad) - obtenerValorNumerico(detalle.odm_cantidadpendiente)
+            const formatDetalleItem = {
+                ocd_orden: ocd_orden++, // orden
                 odm_id: detalle.odm_id, // detalle material
                 pro_id: detalle.pro_id, // producto
                 ocd_descripcion: detalle.odm_descripcion, // descripcion
-                ocd_cantidad: detalle.ocd_cantidad, // cantidad
+                ocd_cantidad: cantidad_real, // cantidad
                 odm_cantidadpendiente: detalle.odm_cantidadpendiente,
                 ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario
                 ocd_total: detalle.ocd_total, // total
@@ -908,10 +978,32 @@ $(document).ready(async () => {
                 ocd_porcentajeimpuesto: porcentaje_impuesto // porcentaje impuesto
             }
 
-            formatDetalleOrdenCompra.push(formatDetalle)
+            if (cantidad_exedente > 0) {
+                const formatDetalleExedente = {
+                    ocd_orden: ocd_orden++, // orden
+                    odm_id: detalle.odm_id, // detalle material
+                    pro_id: detalle.pro_id, // producto
+                    ocd_descripcion: detalle.odm_descripcion, // descripcion
+                    ocd_cantidad: cantidad_exedente, // cantidad
+                    odm_cantidadpendiente: detalle.odm_cantidadpendiente,
+                    ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario
+                    ocd_total: detalle.ocd_total, // total
+                    ocd_porcentajedescuento: detalle.ocd_porcentajedescuento, // porcentaje descuento
+                    ocd_fechaentrega: transformarFecha(fecha_entrega), // fecha de entrega
+                    ocd_observacion: observacion, // observacion
+                    imp_codigo: impuesto, // impuesto
+                    ocd_porcentajeimpuesto: porcentaje_impuesto // porcentaje impuesto
+                }
+                formatDetalleExedentes.push(formatDetalleExedente)
+            }
+
+            formatDetalle.push(formatDetalleItem)
         })
 
-        return formatDetalleOrdenCompra
+        return {
+            formatDetalle,
+            formatDetalleExedentes
+        }
     }
 
     function validarDetalleOrdenCompra(detallesOrdenCompra) {
@@ -921,10 +1013,6 @@ $(document).ready(async () => {
             // validacion de cantidad
             if (!esValorNumericoValidoYMayorQueCero(detalle.ocd_cantidad)) {
                 messageErrorValidation += "- La cantidad pedida debe ser un número mayor que cero\n"
-            } else {
-                if (obtenerValorNumerico(detalle.ocd_cantidad) > obtenerValorNumerico(detalle.odm_cantidadpendiente)) {
-                    messageErrorValidation += "- La cantidad pedida debe ser menor o igual a la cantidad requerida\n"
-                }
             }
             // validacion de precio unitario
             if (!esValorNumericoValidoYMayorQueCero(detalle.ocd_preciounitario)) {

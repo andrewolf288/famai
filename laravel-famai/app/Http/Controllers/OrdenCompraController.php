@@ -21,6 +21,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use App\ProductoProveedor;
+use App\OrdenInterna;
+use App\Parte;
+use App\OrdenInternaMateriales;
+use App\OrdenInternaPartes;
 
 class OrdenCompraController extends Controller
 {
@@ -125,7 +129,8 @@ class OrdenCompraController extends Controller
                         'ocd_total' => number_format($detalle->ocd_total, 2, '.', ''),
                         'uni_codigo' => $detalle->producto ? $detalle->producto->uni_codigo : '',
                         'odt_numero' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->odt_numero ?? null,
-                        'usu_nombre' => $detalle->detalleMaterial->usuarioCreador->usu_nombre ?? null
+                        'usu_nombre' => $detalle->detalleMaterial->usuarioCreador->usu_nombre ?? null,
+                        'oic_otsap' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap ?? null
                     ];
                 }),
                 'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
@@ -203,6 +208,8 @@ class OrdenCompraController extends Controller
                     'occ_esactivo' => 'required|boolean',
                     'imprimir_disgregado' => 'required|boolean',
                     'detalle_productos' => 'required|array|min:1',
+                    'detalle_productos_exedentes' => 'nullable|array|min:0',
+                    'oic_otsap' => 'nullable|string',
                 ])->validate();
             } catch (ValidationException $e) {
                 Log::error('Error de validación en orden de compra', [
@@ -330,7 +337,7 @@ class OrdenCompraController extends Controller
                     'ocd_porcentajedescuento' => $detalle['ocd_porcentajedescuento'],
                     'ocd_cantidad' => $detalle['ocd_cantidad'],
                     'ocd_preciounitario' => $detalle['ocd_preciounitario'],
-                    'ocd_total' => $detalle['ocd_total'],
+                    'ocd_total' => $detalle['ocd_cantidad'] * $detalle['ocd_preciounitario'] * (1 - $detalle['ocd_porcentajedescuento'] / 100),
                     'imp_codigo' => $detalle['imp_codigo'],
                     'ocd_porcentajeimpuesto' => $detalle['ocd_porcentajeimpuesto'],
                     'ocd_fechaentrega' => $detalle['ocd_fechaentrega'],
@@ -359,6 +366,85 @@ class OrdenCompraController extends Controller
                         "pre_fecmodificacion" => null
                     ]);
                 }
+            }
+
+            // Logica si existe detalle de exedentes
+            if (!empty($validatedData['detalle_productos_exedentes'])) {
+                // Crear requerimiento adicional
+                $lastRequerimientoCabecera = OrdenInterna::where('sed_codigo', $sed_codigo)
+                    ->where('oic_tipo', 'REQ')
+                    ->orderBy('oic_id', 'desc')
+                    ->first();
+                    
+                $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 2)) + 1;
+
+                // Crear el requerimiento
+                $requerimiento_excedente = OrdenInterna::create([
+                    'odt_numero' => 'RQ' . str_pad($numero, 7, '0', STR_PAD_LEFT),
+                    'oic_fecha' => now(),
+                    'sed_codigo' => $sed_codigo,
+                    'oic_fechaentregaestimada' => now()->addDays(7),
+                    'are_codigo' => $trabajador->are_codigo,
+                    'tra_idorigen' => $trabajador->tra_id,
+                    'mrq_codigo' => 'STK', // Requerimiento de stock
+                    'oic_equipo_descripcion' => 'Requerimiento de excedente en orden de compra',
+                    'oic_tipo' => 'REQ',
+                    'oic_estado' => 'ENVIADO',
+                    'oic_usucreacion' => $user->usu_codigo,
+                    'oic_fecmodificacion' => null,
+                    'oic_otsap' => $validatedData['oic_otsap']
+                ]);
+
+                // Crear parte de requerimiento
+                $parteRequerimiento = Parte::where('oip_descripcion', 'REQUERIMIENTO')->first();
+                if (!$parteRequerimiento) {
+                    throw new Exception('No se encontró la parte requerimiento');
+                }
+
+                $detalleParte = OrdenInternaPartes::create([
+                    'oic_id' => $requerimiento_excedente->oic_id,
+                    'oip_id' => $parteRequerimiento->oip_id,
+                    'opd_usucreacion' => $user->usu_codigo,
+                    'opd_fecmodificacion' => null
+                ]);
+
+                // Crear materiales excedentes
+                foreach ($validatedData['detalle_productos_exedentes'] as $index => $material) {
+                    $ordenInternaMateriales = OrdenInternaMateriales::create([
+                        'opd_id' => $detalleParte->opd_id,
+                        'pro_id' => $material['pro_id'],
+                        'odm_item' => $index + 1,
+                        'odm_descripcion' => $material['ocd_descripcion'],
+                        'odm_cantidad' => $material['ocd_cantidad'],
+                        'odm_cantidadpendiente' => $material['odm_cantidadpendiente'],
+                        'odm_observacion' => $material['ocd_observacion'],
+                        'odm_tipo' => 1,
+                        'odm_usucreacion' => $user->usu_codigo,
+                        'odm_fecmodificacion' => null,
+                        'odm_estado' => 'REQ',
+                        'odm_fecconsultareservacion' => now()
+                    ]);
+
+                    OrdenCompraDetalle::create([
+                        'odm_id' => $ordenInternaMateriales->odm_id,
+                        'occ_id' => $ordencompra->occ_id,
+                        'ocd_orden' => $material['ocd_orden'],
+                        'pro_id' => $material['pro_id'],
+                        'ocd_descripcion' => $material['ocd_descripcion'],
+                        'ocd_observacion' => $material['ocd_observacion'],
+                        'ocd_porcentajedescuento' => $material['ocd_porcentajedescuento'],
+                        'ocd_cantidad' => $material['ocd_cantidad'],
+                        'ocd_preciounitario' => $material['ocd_preciounitario'],
+                        'ocd_total' => $material['ocd_cantidad'] * $material['ocd_preciounitario'] * (1 - $material['ocd_porcentajedescuento'] / 100),
+                        'imp_codigo' => $material['imp_codigo'],
+                        'ocd_porcentajeimpuesto' => $material['ocd_porcentajeimpuesto'],
+                        'ocd_fechaentrega' => $material['ocd_fechaentrega'],
+                        'ocd_activo' => 1,
+                        'ocd_usucreacion' => $user->usu_codigo,
+                        'ocd_fecmodificacion' => null
+                    ]);
+                }
+
             }
 
             DB::commit();
