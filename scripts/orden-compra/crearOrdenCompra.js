@@ -404,8 +404,9 @@ $(document).ready(async () => {
     const initInformacionOrdenCompra = (detalles) => {
         const formatData = []
         detalles.forEach((detalle, index) => {
-            const { detalles, precio_unitario } = detalle
+            const { detalles } = detalle
             detalles.forEach((detalleMaterial) => {
+                const precio_unitario = detalleMaterial.cod_preciounitario
                 const { detalle_material } = detalleMaterial
                 const precio_unitario_igv = precio_unitario * (detalleMaterial.cotizacion.coc_conigv == 1 ? (1 / 1.18) : 1)
                 const formatDetalle = {
