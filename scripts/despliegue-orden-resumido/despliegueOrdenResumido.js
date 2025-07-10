@@ -895,7 +895,7 @@ $(document).ready(async () => {
         let fechaUltimaCompra = 'N/A'
         try {
             precioUnitario = proveedor.precio_unitario
-            descuento = proveedor.descuento_porcentaje
+            // descuento = proveedor.descuento_porcentaje
         } catch (error) {
             console.log(error)
         }
