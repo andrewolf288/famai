@@ -99,6 +99,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'U_EXX_CORDOCOR',
             // 'TaxDate',
             'DocumentsOwner',
+            'U_FAM_USUEXT'
             // 'DocTotalFc',
             // 'VatPercent',
         ]);
@@ -118,6 +119,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'U_EXX_CORDOCOR',
             // 'TaxDate',
             'OwnerCode',
+            'U_FAM_USUEXT'
             // 'DocTotalFC',
             // 'VatPercent',
         ]);
@@ -187,7 +189,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 // 0, // DocTotalFC (Total en moneda extranjera)
                 // 0, // VatPercent 
                 $orden->occ_numero,
-                $orden->trabajador->tra_codigosap
+                $orden->trabajador->tra_codigosap,
+                $orden->occ_usucreacion
             ]);
             
             $ordenescompradetalle = OrdenCompraDetalle::with('producto', 'detalleMaterial.ordenInternaParte.ordenInterna')
