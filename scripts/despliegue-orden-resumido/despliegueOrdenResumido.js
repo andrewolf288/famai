@@ -925,7 +925,7 @@ $(document).ready(async () => {
                 <td class="text-center">${detalle.uni_codigo}</td>
                 <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
                 <td class="text-center">
-                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" max="${detalle.cantidad}"/>
+                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" />
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
@@ -977,7 +977,7 @@ $(document).ready(async () => {
                 <td class="text-center">${detalle.producto?.uni_codigo || 'N/A'}</td>
                 <td class="text-center cantidad-requerida-detalle">${detalle.odm_cantidad}</td>
                 <td class="text-center">
-                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}" max="${detalle.odm_cantidad}" />
+                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}"  />
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
                     <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
@@ -1347,7 +1347,7 @@ $(document).ready(async () => {
                     <td class="text-center unidad-detalle">${findProducto.uni_codigo}</td>
                     <td class="text-center cantidad-requerida-detalle">${valueCantidad}</td>
                     <td class="text-center">
-                        <input type="number" class="form-control cantidad-pedida-detalle" value="${valueCantidad}" max="${valueCantidad}" />
+                        <input type="number" class="form-control cantidad-pedida-detalle" value="${valueCantidad}" />
                     </td>
                     <td class="text-center d-none label-precio-unitario-detalle">
                         <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
