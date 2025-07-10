@@ -42,7 +42,7 @@ $(document).ready(function () {
                 const option = $('<option>').val(banco["eba_id"]).text(banco["eba_descripcion"])
                 $("#cuentaSolesProveedorSelect").append(option.clone())
                 $("#cuentaDolaresProveedorSelect").append(option.clone())
-                if(banco["eba_codigo"] === 'BN') {
+                if (banco["eba_codigo"] === 'BN') {
                     $("#cuentaBancoNacionProveedorSelect").append(option.clone())
                 }
             })
@@ -85,7 +85,10 @@ $(document).ready(function () {
             $("#cotizacionProveedorCotizacionInput").val(coc_cotizacionproveedor)
             $("#fechaValidezPicker").datepicker("setDate", coc_fechavalidez ? moment(coc_fechavalidez).toDate() : moment().toDate())
             $("#monedaCotizacionInput").val(mon_codigo || 'SOL')
-            $("#formapagoCotizacionInput").val(coc_formapago ? tipoFormaPago : 'CONTADO')
+
+            await cargasFormasPago()
+
+            $("#formapagoCotizacionInput").val(coc_formapago ? tipoFormaPago : '')
             $("#lugarEntregaCotizacionInput").val(coc_lugarentrega || '')
             $("#observacionFormapagoCotizacionInput").val(detalleFormaPago || '')
             $("#notasCotizacionInput").val(coc_notas)
@@ -216,6 +219,22 @@ $(document).ready(function () {
         }
     }
 
+    const cargasFormasPago = async () => {
+        try {
+            const { data } = await axios.get(`${config.BACK_URL}/formaspagoSimpleProveedor`)
+            const defaultOptionFormaPago = $('<option>').val('').text('Seleccione una forma de pago')
+            $("#formapagoCotizacionInput").empty()
+            $("#formapagoCotizacionInput").append(defaultOptionFormaPago)
+
+            data.forEach((formaPago) => {
+                const option = $('<option>').val(formaPago["fpa_descripcion"]).text(formaPago["fpa_descripcion"])
+                $("#formapagoCotizacionInput").append(option)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     traerInformacionCotizacion()
 
     // ---------- GESTION DE INCLUSION DE IGV ------------
@@ -249,12 +268,12 @@ $(document).ready(function () {
 
     // buscar banco de la nacion
     function compareStringsIgnoreCaseAndAccents(str1, str2) {
-        const normalize = (str) => 
+        const normalize = (str) =>
             str
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .toLowerCase();
-    
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
+
         return normalize(str1) === normalize(str2);
     }
 
@@ -282,11 +301,11 @@ $(document).ready(function () {
             const validoTiempoentrega = esValorNumericoValidoYMayorQueCero(tiempoentrega)
             if (!validoTotal || !validoTiempoentrega) {
                 const errores = []
-                if (!validoTotal){
+                if (!validoTotal) {
                     errores.push('El total debe ser un valor numérico mayor a 0')
                 }
 
-                if(!validoTiempoentrega){
+                if (!validoTiempoentrega) {
                     errores.push('El tiempo de entrega debe ser un valor numérico mayor a 0')
                 }
 
@@ -381,25 +400,25 @@ $(document).ready(function () {
         }
 
         try {
-            const {validos, errores} = validarDetalleCotizacion(detalle_productos)
+            const { validos, errores } = validarDetalleCotizacion(detalle_productos)
             let confirmarCotizacion = true
-            
-            if(errores.length > 0) {
+
+            if (errores.length > 0) {
                 const listaErrores = []
                 errores.forEach(detalleError => {
-                    const {descripcion, cantidad, error} = detalleError
+                    const { descripcion, cantidad, error } = detalleError
                     listaErrores.push(`- El detalle ${descripcion} con cantidad:  ${cantidad}, tiene los siguientes errores: ${error}`)
                 })
                 const mensajeError = "No se completaron los siguientes detalles de la cotización:\n" + listaErrores.join("\n") + "\n" + "¿Desea guardar la cotización?"
                 confirmarCotizacion = confirm(mensajeError)
             }
 
-            if(confirmarCotizacion){
+            if (confirmarCotizacion) {
                 const cuentasBancarias = []
                 const handleErrorsCuentasBancarias = []
 
                 // validamos cuenta en soles
-                if(entidadBancariaSolesInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaSolesInput)) {
+                if (entidadBancariaSolesInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaSolesInput)) {
                     cuentasBancarias.push({
                         pvc_id: idCuentaBancariaSolesInput.length != 0 ? idCuentaBancariaSolesInput : null,
                         eba_id: entidadBancariaSolesInput,
@@ -411,7 +430,7 @@ $(document).ready(function () {
                 }
 
                 // validamos cuenta en dolares
-                if(entidadBancariaDolaresInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaDolaresInput)) {
+                if (entidadBancariaDolaresInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaDolaresInput)) {
                     cuentasBancarias.push({
                         pvc_id: idCuentaBancariaDolaresInput.length != 0 ? idCuentaBancariaDolaresInput : null,
                         eba_id: entidadBancariaDolaresInput,
@@ -423,7 +442,7 @@ $(document).ready(function () {
                 }
 
                 // validamos cuenta del banco de la nacion
-                if(entidadBancariaBancoNacionInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaBancoNacionInput)) {
+                if (entidadBancariaBancoNacionInput.length != 0 && cuentaConSeparadoresRegex.test(cuentaBancariaBancoNacionInput)) {
                     cuentasBancarias.push({
                         pvc_id: idCuentaBancariaBancoNacionInput.length != 0 ? idCuentaBancariaBancoNacionInput : null,
                         eba_id: entidadBancariaBancoNacionInput,
@@ -434,19 +453,19 @@ $(document).ready(function () {
                     handleErrorsCuentasBancarias.push('La cuenta bancaria del banco de la nación es inválida')
                 }
 
-                if(cuentasBancarias.length == 0) {
+                if (cuentasBancarias.length == 0) {
                     alert('Debes agregar información válida de al menos una cuenta bancaria')
                     return
                 }
 
-                if(handleErrorsCuentasBancarias.length > 0) {
+                if (handleErrorsCuentasBancarias.length > 0) {
                     const mensajeErrorCuentas = "¿Deseas continuar?\nSe encontraron los siguientes errores en las cuentas bancarias:\n" + handleErrorsCuentasBancarias.join("\n")
-                    if(!confirm(mensajeErrorCuentas)){
+                    if (!confirm(mensajeErrorCuentas)) {
                         return
                     }
                 }
-                
-                if(validos.length > 0) {
+
+                if (validos.length > 0) {
                     const formatData = {
                         coc_conigv: $("#incluyeIGVCotizacion").is(':checked') ? 1 : 0,
                         mon_codigo: monedaCotizacionInput,
@@ -476,7 +495,7 @@ $(document).ready(function () {
                         },
                         responseType: 'blob'
                     })
-        
+
                     const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
                     const pdfUrl = URL.createObjectURL(pdfBlob);
                     const link = document.createElement('a');
@@ -486,7 +505,7 @@ $(document).ready(function () {
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(pdfUrl);
-        
+
                     // ocultamos el formulario
                     $('#formContent').fadeOut();
                     // mostramos cuador de exito de envio

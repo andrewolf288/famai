@@ -337,7 +337,8 @@ $(document).ready(async () => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
         $("#formaDePagoOrdenCompraInput option").each(function () {
             if (!cotizacion.coc_formapago) return
-            if (this.innerText.toLowerCase() === (cotizacion.coc_formapago.toLowerCase())) {
+            let formapago = cotizacion.coc_formapago.includes('-') ? cotizacion.coc_formapago.split('-')[0] : cotizacion.coc_formapago
+            if (this.innerText.toLowerCase() === (formapago.toLowerCase())) {
                 console.log(this.value)
                 $("#formaDePagoOrdenCompraInput").val(this.value)
             }

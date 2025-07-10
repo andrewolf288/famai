@@ -468,6 +468,7 @@ Route::get('pop', function () {
 });
 Route::get('cotizacion-proveedor/{id}', [CotizacionController::class, 'showCotizacionProveedor']);
 Route::put('cotizacion-proveedor/{id}', [CotizacionController::class, 'updateCotizacionProveedor']);
+Route::get('formaspagoSimpleProveedor', [FormaPagoController::class, 'indexSimple']);
 
 // Route::get('script-update', function () {
 //     $number = 142.67;
