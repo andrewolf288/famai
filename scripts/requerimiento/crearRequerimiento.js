@@ -713,7 +713,7 @@ $(document).ready(function () {
                     // Buscar el producto en la base de datos
                     // TODO: en local usa productosByQuery2 pero en produccion usa productosByQuery
                     try {
-                        const { data } = await client.get(`/productosByQuery2?query=${encodeURIComponent(item.pro_codigo)}`)
+                        const { data } = await client.get(`/productosByQuery?query=${encodeURIComponent(item.pro_codigo)}`)
                         if (data && data.length > 0) {
                             const producto = data[0]
                             item.pro_id = producto.pro_id
