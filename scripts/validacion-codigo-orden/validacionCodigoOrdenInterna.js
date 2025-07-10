@@ -218,7 +218,8 @@ $(document).ready(async () => {
 
         try {
             const queryEncoded = encodeURIComponent(query)
-            const { data } = await client.get(`/productosByQuery2?query=${queryEncoded}`)
+            // TODO: cambiar a productosByQuery en produccion, productosByQuery2 es para pruebas
+            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
             // Limpiamos la lista
             limpiarLista()
             // formamos la lista
