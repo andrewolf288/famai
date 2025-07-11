@@ -561,6 +561,11 @@ $(document).ready(async () => {
             $(rowItem).find('.fecha-entrega-input').datepicker({
                 dateFormat: 'dd/mm/yy',
             }).datepicker('setDate', moment(ocd_fechaentrega).toDate())
+
+            if (moment(ocd_fechaentrega).isBefore(moment($('#fechaEntregaOrdenCompraPicker').val()))) {
+                $('#fechaEntregaOrdenCompraPicker').val(moment(ocd_fechaentrega).format('DD/MM/YYYY'))
+            }
+
             $("#disgregadoDetalleOrdenCompraBody").append(rowItem)
         })
     }
