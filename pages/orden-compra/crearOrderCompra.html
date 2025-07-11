@@ -421,3 +421,26 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL IMPRIMIR -->
+<div class="modal fade" id="imprimirModal" tabindex="-1" aria-labelledby="imprimirModalLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="row">
+                    <input type="text" id="oc-id" value="" hidden>
+                    <h4 class="mb-3 text-center">Imprimir Orden de Compra</h4>
+                    <label>Formato de impresion:</label>
+                    <select id="formato-impresion" class="form-select">
+                    <option value="true">Disgregado</option>
+                    <option value="false">Resumen</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-imprimir">Continuar</button>
+            </div>
+        </div>
+    </div>
+</div>

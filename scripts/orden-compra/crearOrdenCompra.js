@@ -831,7 +831,19 @@ $(document).ready(async () => {
         if (oic_otsap == null && formatDetalleExedentes.length > 0) return
 
         // verificamos la forma de impresión
-        const confirmar = confirm('¿Deseas imprimir la orden de compra de manera disgregada?')
+        const confirmar = await new Promise((resolve) => {
+            const modal = new bootstrap.Modal(document.getElementById('imprimirModal'), {
+                backdrop: 'static',
+                keyboard: false
+            })
+            modal.show()
+
+            $("#btn-imprimir").off('click').on('click', function () {
+                resolve($("#formato-impresion").val())
+                modal.hide()
+            })
+
+        })
 
         // formamos la informacion de la orden de compra
         const formatData = {
@@ -861,12 +873,25 @@ $(document).ready(async () => {
                 prv_direccion: direccionProveedorInput,
                 cuentas_bancarias: cuentas_bancarias
             },
-            imprimir_disgregado: confirmar,
+            imprimir_disgregado: confirmar == 'true',
             detalle_productos_exedentes: formatDetalleExedentes,
             oic_otsap: oic_otsap
         }
 
         console.log(formatData)
+        const continuar = await new Promise((resolve) => {
+            bootbox.confirm({
+                title: 'Confirmar',
+                message: 'Se emitira la orden de compra, ¿Desea continuar?',
+                className: 'bootbox-confirm-modal',
+                callback: function (result) {
+                    resolve(result)
+                }
+            })
+        })
+
+        if (!continuar) return
+
         // return
         try {
             const response = await client.post('ordenescompra', formatData, {
