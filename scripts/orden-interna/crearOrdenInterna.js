@@ -34,9 +34,9 @@ $(document).ready(function () {
     $('#areaSelect').on('change', async function () {
         const are_codigo = $(this).val()
         try {
-            const {data} = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
+            const { data } = await client.get(`/partesSimple?are_codigo=${are_codigo}`)
             cargarTablaOrdenInterna(data)
-        } catch(error) {
+        } catch (error) {
             console.log(error)
         }
     })
@@ -230,8 +230,8 @@ $(document).ready(function () {
 
     // cargar informacion segun usuario
     const cargarInformacionUsuario = (data) => {
-        if(data){
-            if(data.are_codigo == 'HID' || data.are_codigo == 'CAR'){
+        if (data) {
+            if (data.are_codigo == 'HID' || data.are_codigo == 'CAR') {
                 $('#areaSelect').val(data.are_codigo)
             }
             $('#otInput').val(data.sed_codigo)
@@ -285,8 +285,23 @@ $(document).ready(function () {
     // inicializamos la data
     traerInformacionCreacionOrdenInterna()
 
+    const deshabilitarBoton = () => {
+        const $botonGuardar = $('#btn-guardar-orden-interna')
+        $botonGuardar.prop('disabled', true)
+        $botonGuardar.html('<i class="fa fa-spinner fa-spin"></i> Guardando...')
+    }
+
+    const habilitarBoton = () => {
+        const $botonGuardar = $('#btn-guardar-orden-interna')
+        $botonGuardar.prop('disabled', false)
+        $botonGuardar.html('Guardar')
+    }
+
     // Funcion de crear
     $('#btn-guardar-orden-interna').on('click', async () => {
+        if ($('#btn-guardar-orden-interna').prop('disabled')) return
+        deshabilitarBoton()
+
         let handleError = ''
         const $oiCliente = $('#idClienteInput').val().trim()
         const $otInput = $('#otInput').val().trim()
@@ -298,41 +313,34 @@ $(document).ready(function () {
         const $oiEncargadoMaestro = $('#responsableMaestro').val()
         const $oiEncargadoAlmacen = $('#responsableAlmacen').val()
 
-        if (
-            $oiCliente.length === 0 ||
-            $otInput.length < 7 ||
-            $oiValorEquipo.length === 0 ||
-            $oiCodigoArea.length === 0 ||
-            $oiFecha.length === 0 ||
-            $oiEncargadoOrigen.length === 0
-        ) {
-            if ($otInput.length < 7) {
-                handleError += '- Se debe ingresar información de orden trabajo con minimo 7 caracteres\n'
-            }
-            if ($oiCliente.length === 0) {
-                handleError += '- Se debe ingresar información del cliente\n'
-            }
-            if ($oiCodigoArea.length === 0) {
-                handleError += '- Se debe ingresar información del área\n'
-            }
-            if ($oiValorEquipo.length === 0) {
-                handleError += '- Se debe ingresar información del equipo\n'
-            }
-            if ($oiFecha.length === 0) {
-                handleError += '- Se debe ingresar información de la fecha\n'
-            }
-            if ($oiEncargadoOrigen.length === 0) {
-                handleError += '- Se debe ingresar información de encargado origen\n'
-            }
-            if (ordenInterna["detalle_partes"].length === 0) {
-                handleError += '- No hay detalle de partes. Esta área no tiene información de partes\n'
-            }
+        if ($otInput.length < 7) {
+            handleError += '- Se debe ingresar información de orden trabajo con minimo 7 caracteres\n'
+        }
+        if ($oiCodigoArea.length === 0) {
+            handleError += '- Se debe ingresar información del área\n'
+        }
+        if ($oiValorEquipo.length === 0) {
+            handleError += '- Se debe ingresar información del equipo\n'
+        }
+        if ($oiFecha.length === 0) {
+            handleError += '- Se debe ingresar información de la fecha\n'
+        }
+        if ($oiEncargadoOrigen.length === 0) {
+            handleError += '- Se debe ingresar información de encargado origen\n'
+        }
+        if (ordenInterna["detalle_partes"].length === 0) {
+            handleError += '- No hay detalle de partes. Esta área no tiene información de partes\n'
+        }
+        if ($oiCliente.length === 0) {
+            handleError += '- Se debe ingresar información del cliente\n'
         }
 
         if (handleError.length !== 0) {
             alert(handleError)
+            habilitarBoton()
             return
         }
+
 
         // generamos el format de la data
         const formatData = {
@@ -370,6 +378,7 @@ $(document).ready(function () {
             } else {
                 alert('Hubo un error en la creacion de orden interna')
             }
+            habilitarBoton()
         } finally {
             hideLoaderModal()
         }
