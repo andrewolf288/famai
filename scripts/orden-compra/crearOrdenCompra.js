@@ -336,14 +336,6 @@ $(document).ready(async () => {
     const initInformacionCotizacion = (cotizacion) => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
         $("#referenciaOrdenCompraInput").val(cotizacion.coc_cotizacionproveedor || '')
-        $("#formaDePagoOrdenCompraInput option").each(function () {
-            if (!cotizacion.coc_formapago) return
-            let formapago = cotizacion.coc_formapago.includes('-') ? cotizacion.coc_formapago.split('-')[0] : cotizacion.coc_formapago
-            if (this.innerText.toLowerCase() === (formapago.toLowerCase())) {
-                console.log(this.value)
-                $("#formaDePagoOrdenCompraInput").val(this.value)
-            }
-        })
     }
 
     // refresh informacion bancos
@@ -417,7 +409,8 @@ $(document).ready(async () => {
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
                     ocd_preciounitario: parseFloat(precio_unitario_igv).toFixed(4),
                     ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv).toFixed(4),
-                    ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"]
+                    ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"],
+                    coc_formapago: detalleMaterial.cotizacion.coc_formapago
                 }
                 formatData.push(formatDetalle)
             })
@@ -513,7 +506,7 @@ $(document).ready(async () => {
         $("#disgregadoDetalleOrdenCompraBody").empty()
         // recorremos el detalle material para completar la información
         detallesOrdenCompra.forEach((material, index) => {
-            const { odm_id, producto, orden_interna_parte, odm_descripcion, odm_observacion, odm_cantidadpendiente, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_fechaentrega, ocd_porcentajedescuento, imp_codigo } = material
+            const { odm_id, producto, orden_interna_parte, odm_descripcion, odm_observacion, odm_cantidadpendiente, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_fechaentrega, ocd_porcentajedescuento, imp_codigo, coc_formapago } = material
             const { orden_interna } = orden_interna_parte
             const { odt_numero } = orden_interna
 
@@ -566,6 +559,14 @@ $(document).ready(async () => {
             if (moment(ocd_fechaentrega).isBefore(moment($('#fechaEntregaOrdenCompraPicker').val()))) {
                 $('#fechaEntregaOrdenCompraPicker').val(moment(ocd_fechaentrega).format('DD/MM/YYYY'))
             }
+
+            $("#formaDePagoOrdenCompraInput option").each(function () {
+                if (!coc_formapago) return
+                let formapago = coc_formapago.includes('-') ? coc_formapago.split('-')[0] : coc_formapago
+                if (this.innerText.toLowerCase() === (formapago.toLowerCase())) {
+                    $("#formaDePagoOrdenCompraInput").val(this.value)
+                }
+            })
 
             $("#disgregadoDetalleOrdenCompraBody").append(rowItem)
         })
