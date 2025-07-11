@@ -335,6 +335,7 @@ $(document).ready(async () => {
     // inicializamos información de la cotización
     const initInformacionCotizacion = (cotizacion) => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
+        $("#referenciaOrdenCompraInput").val(cotizacion.coc_cotizacionproveedor || '')
         $("#formaDePagoOrdenCompraInput option").each(function () {
             if (!cotizacion.coc_formapago) return
             let formapago = cotizacion.coc_formapago.includes('-') ? cotizacion.coc_formapago.split('-')[0] : cotizacion.coc_formapago
