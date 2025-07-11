@@ -928,7 +928,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" />
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
+                    <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
                 </td>
                 <td class="text-center d-none label-descuento">
                     <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
@@ -980,7 +980,7 @@ $(document).ready(async () => {
                     <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}"  />
                 </td>
                 <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="${precioUnitario}"/>
+                    <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
                 </td>
                 <td class="text-center d-none label-descuento">
                     <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
