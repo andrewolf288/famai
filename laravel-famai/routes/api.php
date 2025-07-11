@@ -332,6 +332,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('sedes', [SedeController::class, 'index']);
     Route::get('sedesSimple', [SedeController::class, 'indexSimple']);
+    Route::get('sede-actual-trabajador', [SedeController::class, 'sedeActualTrabajador']);
+    Route::post('cambiar-sede-actual-trabajador', [SedeController::class, 'cambiarSedeActualTrabajador']);
 });
 
 // rutas de monedas

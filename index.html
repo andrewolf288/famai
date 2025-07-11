@@ -52,6 +52,19 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link text-white">Usuario: <span id="usuario-actual" class="fw-bold"></span></a>
+                        </li>
+                        <!-- Sedes disponibles Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="sedesDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Sede actual: <span id="sede-actual" class="fw-bold">N/A</span>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="sedesDropdown" id="sedesDropdownMenu">
+                                <!-- Se cargaran las sedes disponibles -->
+                            </ul>
+                        </li>
                         <!-- Catálogos Dropdown -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="catalogosDropdown" role="button"
@@ -181,6 +194,8 @@
     <!-- <script type="text/javascript" src="https://gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/dahttps://gyrocode.github.io/jquery-datatables-checkboxes/1.2.12/js/taTables.checkboxes.min.js"></script> -->
     <!-- script de bootbox para modales -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/6.0.0/bootbox.min.js"></script>
+    <!-- script de sedes -->
+    <script src="scripts/sedes/sedes.js"></script>
 </body>
 <script>
     let version = '250625.01';
