@@ -437,6 +437,13 @@ class OrdenInternaController extends Controller
                 throw new Exception('No se pudo encontrar un número de orden de trabajo válido para: ' . $odt_numero . ' Valor en la insercion: ' . $flagErrors);
             }
 
+            // verificar q no exista otro odt_numero igual en la base de datos
+            $ordenInternaExist = OrdenInterna::where('odt_numero', $odt_numero)->where('oic_tipo', 'OI')->first();
+            if ($ordenInternaExist) {
+                Log::error('Ya existe una orden interna con el número de orden de trabajo: ' . $odt_numero);
+                throw new Exception('Ya existe una orden interna con el número de orden de trabajo: ' . $odt_numero);
+            }
+
             // creamos la orden interna
             $ordeninterna = OrdenInterna::create([
                 'oic_fecha' => $request->input('oic_fecha'),
