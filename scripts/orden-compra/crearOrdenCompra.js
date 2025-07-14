@@ -791,11 +791,29 @@ $(document).ready(async () => {
                     const otValue = $("#otInput").val().trim()
 
                     if (otValue.length === 0) {
-                        bootbox.alert({
-                            title: 'Error',
-                            message: 'Debe ingresar un numero de orden de trabajo',
-                            className: 'bootbox-alert-modal'
+                        const continuarSinOT = await new Promise((resolve) => {
+                            const modal = new bootstrap.Modal(document.getElementById('continuarSinOTModal'), {
+                                backdrop: 'static',
+                                keyboard: false
+                            })
+
+                            $("#continuar-sin-ot").off('click').on('click', function () {
+                                modal.hide()
+                                resolve(true)
+                            })
+
+                            $("#cancelar-sin-ot").off('click').on('click', function () {
+                                modal.hide()
+                                resolve(false)
+                            })
+
+                            modal.show()
                         })
+                        console.log(continuarSinOT)
+                        if (!continuarSinOT) return
+
+                        resolve('')
+                        modal.hide()
                         return
                     }
 
@@ -812,6 +830,7 @@ $(document).ready(async () => {
                             throw new Error('Orden de trabajo no encontrada')
                         }
                         resolve(otValue)
+                        modal.hide()
                     } catch (error) {
                         console.log(error)
                         const { response } = error
@@ -825,9 +844,6 @@ $(document).ready(async () => {
                         $("#continuar-ot").prop('disabled', false)
                         $("#continuar-ot").html('Continuar')
                     }
-
-                    modal.hide()
-                    resolve(otValue)
                 })
 
                 $("#cancelar-ot").off('click').on('click', function () {
