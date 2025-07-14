@@ -2109,11 +2109,6 @@ $(document).ready(async () => {
                 $('#btn-guardar-requerimiento-excedente').off('click').on('click', async () => {
                     const ot_numero = $('#ot-numero-requerimiento').val()
 
-                    if (!ot_numero.trim()) {
-                        alert('Debe ingresar el número de orden de trabajo')
-                        return
-                    }
-
                     const $boton = $('#btn-guardar-requerimiento-excedente')
                     const textoOriginal = $boton.html()
 
@@ -2122,14 +2117,20 @@ $(document).ready(async () => {
                         Procesando...
                     `)
 
-                    try {
-                        await buscarOrdenTrabajo(ot_numero.trim())
+                    if (ot_numero.trim() !== '') {
+                        try {
+                            await buscarOrdenTrabajo(ot_numero.trim())
+                            $boton.prop('disabled', false).html(textoOriginal)
+                            $('#modalRequerimientoExcedente').modal('hide')
+                            resolve(ot_numero)
+                        } catch (error) {
+                            console.log(error)
+                            $boton.prop('disabled', false).html(textoOriginal)
+                        }
+                    } else {
                         $boton.prop('disabled', false).html(textoOriginal)
                         $('#modalRequerimientoExcedente').modal('hide')
-                        resolve(ot_numero)
-                    } catch (error) {
-                        console.log(error)
-                        $boton.prop('disabled', false).html(textoOriginal)
+                        resolve('sin-ot')
                     }
                 })
             })
@@ -2137,7 +2138,7 @@ $(document).ready(async () => {
             if (!resultadoModalExcedente) {
                 return
             }
-            formatData.ot_numero = resultadoModalExcedente
+            formatData.ot_numero = resultadoModalExcedente === 'sin-ot' ? null : resultadoModalExcedente
         }
 
         formData.append('cotizacion', JSON.stringify(formatData))
