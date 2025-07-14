@@ -382,6 +382,8 @@ $(document).ready(async () => {
     $("#data-container-body").on('click', '.btn-crear-orden-compra', async function () {
         // cargamos la información de maestros
         await initInformacionMaestros()
+        // resetar fecha de entrega
+        $('#fechaEntregaOrdenCompraPicker').val(moment().format('DD/MM/YYYY'))
         // obtenemos la información de detalle de materiales
         const { data } = await getInformacionDetalleMateriales(this)
 
@@ -555,9 +557,11 @@ $(document).ready(async () => {
             $(rowItem).find('.fecha-entrega-input').datepicker({
                 dateFormat: 'dd/mm/yy',
             }).datepicker('setDate', moment(ocd_fechaentrega).toDate())
+            const fechaActualPicker = $('#fechaEntregaOrdenCompraPicker').val()
+            const fechaEntregaDetalle = moment(ocd_fechaentrega).format('DD/MM/YYYY')
 
-            if (moment(ocd_fechaentrega).isBefore(moment($('#fechaEntregaOrdenCompraPicker').val()))) {
-                $('#fechaEntregaOrdenCompraPicker').val(moment(ocd_fechaentrega).format('DD/MM/YYYY'))
+            if (moment(ocd_fechaentrega).isAfter(moment(fechaActualPicker, 'DD/MM/YYYY'))) {
+                $('#fechaEntregaOrdenCompraPicker').val(fechaEntregaDetalle)
             }
 
             $("#formaDePagoOrdenCompraInput option").each(function () {
