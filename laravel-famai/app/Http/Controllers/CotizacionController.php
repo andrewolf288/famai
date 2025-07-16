@@ -323,9 +323,11 @@ class CotizacionController extends Controller
                     
                 $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 2)) + 1;
 
+                $prefijo = $trabajador->sed_codigo == '10' ? 'RQA' : 'RQL';
+
                 // Crear el requerimiento
                 $requerimiento_excedente = OrdenInterna::create([
-                    'odt_numero' => 'RQ' . str_pad($numero, 7, '0', STR_PAD_LEFT),
+                    'odt_numero' => $prefijo . str_pad($numero, 7, '0', STR_PAD_LEFT),
                     'oic_fecha' => now(),
                     'sed_codigo' => $sed_codigo,
                     'oic_fechaentregaestimada' => now()->addDays(7),
