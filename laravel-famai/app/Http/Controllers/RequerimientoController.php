@@ -204,7 +204,7 @@ class RequerimientoController extends Controller
             if (!$lastRequerimientoCabecera) {
                 $numero = 1;
             } else {
-                $numero = intval(substr($lastRequerimientoCabecera->odt_numero, 2)) + 1;
+                $numero = intval(substr($lastRequerimientoCabecera->odt_numero, 3)) + 1;
             }
 
             $prefijo = $trabajador->sed_codigo == '10' ? 'RQA' : 'RQL';

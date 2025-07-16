@@ -321,7 +321,7 @@ class CotizacionController extends Controller
                     ->orderBy('oic_id', 'desc')
                     ->first();
                     
-                $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 2)) + 1;
+                $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 3)) + 1;
 
                 $prefijo = $trabajador->sed_codigo == '10' ? 'RQA' : 'RQL';
 
