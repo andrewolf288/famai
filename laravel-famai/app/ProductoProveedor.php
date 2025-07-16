@@ -21,7 +21,8 @@ class ProductoProveedor extends Model
         'prp_feccreacion',
         'prp_usumodificacion',
         'prp_fecmodificacion',
-        'prp_descuentoporcentaje'
+        'prp_descuentoporcentaje',
+        'prp_moneda', // ALTER TABLE dbfamaiprod.dbo.tblproductosproveedores_prp ADD prp_moneda varchar(10) NULL;
     ];
 
     const CREATED_AT = 'prp_feccreacion';
