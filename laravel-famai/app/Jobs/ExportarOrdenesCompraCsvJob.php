@@ -57,7 +57,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             ]
         ];
         // Ruta donde se guardaran los archivos
-        $rutaDestino = "../";
+        $rutaDestino = "C:\\OrdenesCompra\\";
         // Verifica si la carpeta existe, si no la crea
         if (!file_exists($rutaDestino)) {
             mkdir($rutaDestino, 0777, true);
