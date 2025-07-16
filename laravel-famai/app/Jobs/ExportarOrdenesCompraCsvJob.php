@@ -57,7 +57,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             ]
         ];
         // Ruta donde se guardaran los archivos
-        $rutaDestino = "C:\\OrdenesCompra\\";
+        $rutaDestino = "../";
         // Verifica si la carpeta existe, si no la crea
         if (!file_exists($rutaDestino)) {
             mkdir($rutaDestino, 0777, true);
@@ -136,7 +136,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "Price",
             "Currency",
             "DiscountPercent",
-            // "TaxCode",
+            "TaxCode",
             "LineTotal",
             "TaxPercentagePerRow",
             "U_FAM_FECINOC",
@@ -154,7 +154,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "Price",
             "Currency",
             "DiscPrcnt",
-            // "TaxCode",
+            "TaxCode",
             "LineTotal",
             "VatPrcnt",
             "U_FAM_FECINOC",
@@ -209,7 +209,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     $detalle->ocd_preciounitario, // Price
                     $orden->mon_codigo, // Currency
                     $detalle->ocd_porcentajedescuento,
-                    // $detalle->imp_codigo, // TaxCode
+                    $detalle->imp_codigo, // TaxCode
                     $detalle->ocd_total, // LineTotal
                     $detalle->ocd_porcentajeimpuesto, // VatPrcnt
                     // $detalle->ocd_total, // GrossTotal
