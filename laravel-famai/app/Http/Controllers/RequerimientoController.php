@@ -39,6 +39,11 @@ class RequerimientoController extends Controller
             
             // Eliminar los registros relacionados en cascada
             foreach ($requerimiento->partes as $parte) {
+                // Eliminar historial relacionado
+                foreach ($parte->historial as $historial) {
+                    $historial->delete();
+                }
+
                 // Eliminar los adjuntos de materiales
                 foreach ($parte->materiales as $material) {
                     $material->detalleAdjuntos()->delete();

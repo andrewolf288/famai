@@ -45,4 +45,10 @@ class OrdenInternaPartes extends Model
     {
         return $this->hasMany(OrdenInternaProcesos::class, 'opd_id');
     }
+
+    // relacion con historial
+    public function historial()
+    {
+        return $this->hasMany(HistoriaOrdenesInternasMat::class, 'opd_id');
+    }
 }
