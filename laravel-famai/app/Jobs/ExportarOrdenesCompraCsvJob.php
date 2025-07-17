@@ -190,7 +190,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 // 0, // VatPercent 
                 $orden->occ_numero,
                 $orden->trabajador->tra_codigosap,
-                $orden->occ_usucreacion
+                trim($orden->occ_usucreacion)
             ]);
             
             $ordenescompradetalle = OrdenCompraDetalle::with('producto', 'detalleMaterial.ordenInternaParte.ordenInterna')
