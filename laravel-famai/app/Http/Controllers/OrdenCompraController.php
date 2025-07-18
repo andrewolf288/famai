@@ -29,6 +29,40 @@ use App\OrdenInternaPartes;
 class OrdenCompraController extends Controller
 {
 
+    public function sincronizarAnulados()
+    {
+        $user = auth()->user();
+        try {
+            DB::beginTransaction();
+            
+            $ordenesAnuladas = DB::select('EXEC dbo.getOrdenesAnuladas');
+            
+            foreach ($ordenesAnuladas as $orden) {
+                $ordencompra = OrdenCompra::find($orden->occ_id);
+                
+                if ($ordencompra) {
+                    $ordencompra->update([
+                        'occ_estado' => 'ANU',
+                        'occ_usumodificacion' => $user->usu_codigo,
+                        'occ_fecmodificacion' => Carbon::now(),
+                        'occ_total' => 0.00,
+                        'occ_subtotal' => 0.00,
+                        'occ_impuesto' => 0.00
+                    ]);
+                    
+                    // eliminamos los detalles de la orden de compra
+                    OrdenCompraDetalle::where('occ_id', $orden->occ_id)->delete();
+                }
+            }
+            
+            DB::commit();
+            return ['message' => 'Órdenes de compra sincronizadas y anuladas correctamente', 'total' => count($ordenesAnuladas)];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return ['error' => $e->getMessage()];
+        }
+    }
+
     public function anular(Request $request, $id)
     {
         $user = auth()->user();
@@ -73,6 +107,9 @@ class OrdenCompraController extends Controller
         } catch (Exception $e) {
             $resultadoSap = $e->getMessage();
         }
+
+        // Sincronizar órdenes de compra anuladas
+        $this->sincronizarAnulados();
 
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
