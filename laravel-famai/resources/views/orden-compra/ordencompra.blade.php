@@ -62,16 +62,16 @@
         }
 
         .label {
-            display: table-cell;
+            display: inline;
             width: 20%;
             font-weight: bold;
             font-size: 10px
         }
 
         .value {
-            display: table-cell;
+            display: inline;
             width: 66.66%;
-            font-size: 11px
+            font-size: 12px
         }
 
         .table-factura-cabecera {
