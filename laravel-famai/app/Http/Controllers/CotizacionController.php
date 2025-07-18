@@ -467,7 +467,9 @@ class CotizacionController extends Controller
                     'cod_cantidadcotizada' => $detalle['cod_cantidadcotizada'],
                     'cod_fecentregaoc' => $detalle['cod_fecentregaoc'],
                     'cod_descuento' => $detalle['cod_descuento'],
-                    'cod_cotizar' => $proveedor_unico ? 1 : 0
+                    'cod_cotizar' => $proveedor_unico ? 1 : 0,
+                    'cod_impuesto' => $detalle['cod_impuesto'],
+                    'cod_precioconigv' => $detalle['cod_precioconigv']
                 ]);
 
                 $detalleMaterial->odm_estado = 'COT';

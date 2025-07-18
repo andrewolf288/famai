@@ -593,7 +593,7 @@ $(document).ready(async () => {
             // llenamos la data
             let content = ''
             data.forEach(item => {
-                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra } = item
+                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra, prp_moneda } = item
                 content += `
                     <tr>
                     <td>${parseDateSimple(prp_fechaultimacompra)}</td>
@@ -604,6 +604,7 @@ $(document).ready(async () => {
                     <td>${producto.pro_descripcion}</td>
                     <td class="text-center"></td>
                     <td class="text-center">${parseFloat(prp_preciounitario).toFixed(4)}</td>
+                    <td class="text-center">${prp_moneda ? prp_moneda : ''}</td>
                     <td class="text-center"></td>
                     </tr>
                 `
@@ -914,109 +915,143 @@ $(document).ready(async () => {
             const observacion = unionObservaciones(detalle.detalle)
             const rowsObs = observacion.split('\n').length
 
-            return `<tr data-index="${index}">
-                <input type="hidden" value="${detalle.pro_id}" />
-                <td></td>
-                <td>${detalle.pro_codigo}</td>
-                <td>${detalle.pro_descripcion}</td>
-                <td>
-                    <textarea class="form-control observacion-detalle" rows="${Math.max(1, rowsObs)}">${observacion}</textarea>
-                </td>
-                <td class="text-center">${detalle.uni_codigo}</td>
-                <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
-                <td class="text-center">
-                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.cantidad.toFixed(2)}" />
-                </td>
-                <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
-                </td>
-                <td class="text-center d-none label-descuento">
-                    <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
-                </td>
-                <td class="text-center d-none label-precio-unitario-total">
-                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(4)}"/>
-                </td>
-                <td class="text-center">
-                    <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
-                </td>
-                <td class="text-center d-none label-ultimo-precio">${fechaUltimaCompra}</td>
-                <td class="text-center d-none label-ultimo-precio">${precioUnitario}</td>
-                <td class="text-center">
-                    <div class="d-flex justify-content-center">
-                        <button class="btn btn-sm btn-primary btn-detalle me-1" title="Detalle Material">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}" title="Historico Detalle Material">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                                <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                                <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 155px;">Reasignar Código</button>
-                    </div>
-                </td>
-            </tr>`
+            return `
+                <tr data-index="${index}">
+                    <input type="hidden" value="${detalle.pro_id}" />
+                    <td></td>
+                    <td>${detalle.pro_codigo}</td>
+                    <td>${detalle.pro_descripcion}</td>
+                    <td>
+                        <textarea class="form-control observacion-detalle" rows="${Math.max(1, rowsObs)}">${observacion}</textarea>
+                    </td>
+                    <td class="text-center">${detalle.uni_codigo}</td>
+                    <td class="text-center cantidad-requerida-detalle">${detalle.cantidad.toFixed(2)}</td>
+                    <td class="text-center">
+                        <input type="number" class="form-control cantidad-pedida-detalle hide-number-arrows" value="${detalle.cantidad.toFixed(2)}" />
+                    </td>
+                    <td class="text-center d-none label-valor-unitario hide-number-arrows">
+                        <input type="number" class="form-control valor-unitario" style="width: 90px" value="${(0).toFixed(2)}"/>
+                    </td>
+                    <td class="text-center d-none label-precio-unitario-detalle">
+                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00"/>
+                    </td>
+                    <td class="text-center d-none label-descuento">
+                        <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 90px"/>
+                    </td>
+                    <td class="text-center d-none label-impuesto">
+                        <select class="form-select impuesto-detalle" style="width: 90px;">
+                            <option value="igv" selected>IGV</option>
+                            <option value="exo">EXO</option>
+                        </select>
+                    </td>
+                    <td class="text-center d-none label-valor-unitario-total">
+                        <input type="number" readonly class="form-control valor-unitario-total hide-number-arrows" style="width: 90px" value="${(0).toFixed(4)}"/>
+                    </td>
+                    <td class="text-center">
+                        <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
+                    </td>
+                    <td class="text-center d-none label-ultimo-precio">${fechaUltimaCompra}</td>
+                    <td class="text-center d-none label-ultimo-precio">${precioUnitario}</td>
+                    <td class="text-center">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="d-flex justify-content-center" style="margin-left: 10px; margin-right: 10px;">
+                                    <button class="btn btn-sm btn-primary btn-detalle me-1" title="Detalle Material">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}" title="Historico Detalle Material">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                                            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                                            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                                            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 155px;">Reasignar Código</button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
         } else {
-            return `<tr data-index="${index}">
-                <input type="hidden" value="${detalle.pro_id}" />
-                <td>${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
-                <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
-                <td>${detalle.odm_descripcion}</td>
-                <td>
-                    <textarea class="form-control observacion-detalle" rows="1">${detalle.odm_observacion || ""}</textarea>
-                </td>
-                <td class="text-center">${detalle.producto?.uni_codigo || 'N/A'}</td>
-                <td class="text-center cantidad-requerida-detalle">${detalle.odm_cantidad}</td>
-                <td class="text-center">
-                    <input type="number" class="form-control cantidad-pedida-detalle" value="${detalle.odm_cantidad}"  />
-                </td>
-                <td class="text-center d-none label-precio-unitario-detalle">
-                    <input type="number" class="form-control precio-unitario-detalle" value="0.00"/>
-                </td>
-                <td class="text-center d-none label-descuento">
-                    <input type="number" class="form-control descuento" value="${descuento}" style="min-width: 150px;"/>
-                </td>
-                <td class="text-center d-none label-precio-unitario-total">
-                    <input type="number" readonly class="form-control precio-unitario-total" style="width: 130px;" value="${(precioUnitario * (1 - descuento / 100)).toFixed(4)}"/>
-                </td>
-                <td class="text-center">
-                    <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
-                </td>
-                <td class="text-center d-none label-ultimo-precio">${fechaUltimaCompra}</td>
-                <td class="text-center d-none label-ultimo-precio">${precioUnitario}</td>
-                <td class="text-center">
-                    <div class="d-flex justify-content-center">
-                        <button class="btn btn-sm btn-secondary me-1" disabled title="Detalle Material">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm ${detalle.producto ? 'btn-primary' : 'btn-secondary'} btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}" ${detalle.producto ? '' : 'disabled'} title="Historico Detalle Material">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
-                                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                                <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                                <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 155px;">Reasignar Código</button>
-                    </div>
-                </td>
-            </tr>`
+            return `
+                <tr data-index="${index}">
+                    <input type="hidden" value="${detalle.pro_id}" />
+                    <td>${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                    <td>${detalle.producto?.pro_codigo || 'N/A'}</td>
+                    <td>${detalle.odm_descripcion}</td>
+                    <td>
+                        <textarea class="form-control observacion-detalle" rows="1">${detalle.odm_observacion || ""}</textarea>
+                    </td>
+                    <td class="text-center">${detalle.producto?.uni_codigo || 'N/A'}</td>
+                    <td class="text-center cantidad-requerida-detalle">${detalle.odm_cantidad}</td>
+                    <td class="text-center">
+                        <input type="number" class="form-control cantidad-pedida-detalle hide-number-arrows" style="width: 90px" value="${detalle.odm_cantidad}"  />
+                    </td>
+                    <td class="text-center d-none label-valor-unitario hide-number-arrows">
+                        <input type="number" class="form-control valor-unitario hide-number-arrows" style="width: 90px" value="${(0).toFixed(2)}"/>
+                    </td>
+                    <td class="text-center d-none label-precio-unitario-detalle">
+                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00" style="width: 90px"/>
+                    </td>
+                    <td class="text-center d-none label-descuento">
+                        <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 90px"/>
+                    </td>
+                    <td class="text-center d-none label-impuesto">
+                        <select class="form-select impuesto-detalle" style="width: 90px;">
+                            <option value="igv" selected>IGV</option>
+                            <option value="exo">EXO</option>
+                        </select>
+                    </td>
+                    <td class="text-center d-none label-valor-unitario-total">
+                        <input type="number" readonly class="form-control valor-unitario-total hide-number-arrows" style="width: 90px" value="${(0).toFixed(4)}"/>
+                    </td>
+                    <td class="text-center">
+                        <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
+                    </td>
+                    <td class="text-center d-none label-ultimo-precio">${fechaUltimaCompra}</td>
+                    <td class="text-center d-none label-ultimo-precio">${precioUnitario}</td>
+                    <td class="text-center">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="d-flex justify-content-center" style="margin-left: 10px; margin-right: 10px;">
+                                    <button class="btn btn-sm btn-secondary me-1" disabled title="Detalle Material">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm ${detalle.producto ? 'btn-primary' : 'btn-secondary'} btn-historico-detalle-material me-1" data-historico="${detalle.pro_id}" ${detalle.producto ? '' : 'disabled'} title="Historico Detalle Material">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+                                            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+                                            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+                                            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger btn-delete-detalle-material me-1" title="Eliminar Detalle Material">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-primary asignar-codigo" data-odm-id="${detalle.odm_id}" style="width: 155px;">Reasignar Código</button>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `
         }
     }
 
@@ -1064,15 +1099,47 @@ $(document).ready(async () => {
     })
 
     // Evento para recalcular precio unitario total
-    $(document).on('input', '.precio-unitario-detalle, .descuento, .cantidad-pedida-detalle', function () {
-        const precioUnitario = $(this).closest('tr').find('.precio-unitario-detalle').val()
-        const descuento = $(this).closest('tr').find('.descuento').val()
-        const precioUnitarioConDescuento = precioUnitario * (1 - descuento / 100)
-        $(this).closest('tr').find('.precio-unitario-total').val(precioUnitarioConDescuento.toFixed(4))
+    $(document).on('input', '.precio-unitario-detalle, .valor-unitario, .descuento, .cantidad-pedida-detalle, .impuesto-detalle', 'cantidad-pedida-detalle', function () {
+        const $row = $(this).closest('tr');
+        const igv = 0.18;
+        let valorUnitario = parseFloat($row.find('.valor-unitario').val()) || 0;
+        let precioUnitario = parseFloat($row.find('.precio-unitario-detalle').val()) || 0;
+        let descuento = parseFloat($row.find('.descuento').val()) || 0;
+        let cantidad = parseFloat($row.find('.cantidad-pedida-detalle').val()) || 0;
+        let impuesto = $row.find('.impuesto-detalle').val();
 
-        // Recalcular totales cuando cambien los valores
-        recalcularTotales()
-    })
+        if ($(this).hasClass('valor-unitario')) {
+            if (impuesto === 'igv') {
+                precioUnitario = valorUnitario * (1 + igv);
+            } else {
+                precioUnitario = valorUnitario;
+            }
+            $row.find('.precio-unitario-detalle').val(precioUnitario.toFixed(2));
+        } else if ($(this).hasClass('precio-unitario-detalle')) {
+            if (impuesto === 'igv') {
+                valorUnitario = precioUnitario / (1 + igv);
+            } else {
+                valorUnitario = precioUnitario;
+            }
+            $row.find('.valor-unitario').val(valorUnitario.toFixed(2));
+        } else if ($(this).hasClass('impuesto-detalle')) {
+            if (impuesto === 'igv') {
+                precioUnitario = valorUnitario * (1 + igv);
+                $row.find('.precio-unitario-detalle').val(precioUnitario.toFixed(2));
+            } else {
+                precioUnitario = valorUnitario;
+                $row.find('.precio-unitario-detalle').val(precioUnitario.toFixed(2));
+            }
+        }
+
+        const valorUnitarioConDescuento = valorUnitario * (1 - descuento / 100);
+        $row.find('.valor-unitario-total').val(valorUnitarioConDescuento.toFixed(2));
+
+        const total = valorUnitarioConDescuento * cantidad;
+        $row.find('.valor-unitario-total').val(total.toFixed(2));
+
+        recalcularTotales();
+    });
 
     // Verificar que jQuery y bootbox están disponibles
 
@@ -1568,20 +1635,13 @@ $(document).ready(async () => {
         let total = 0.00
 
         $('#tbl-cotizaciones-materiales tbody tr').each(function () {
-            const precioUnitario = parseFloat($(this).find('.precio-unitario-detalle').val()) || 0.00
-            const descuento = parseFloat($(this).find('.descuento').val()) || 0.00
-            const cantidadPedida = parseFloat($(this).find('.cantidad-pedida-detalle').val()) || 0.00
-
-            // Subtotal = precio unitario * cantidad pedida SIN descuento
-            subtotal += precioUnitario * cantidadPedida
-
-            // Total = precio unitario con descuento * cantidad pedida  
-            const precioUnitarioConDescuento = precioUnitario * (1 - descuento / 100)
-            total += precioUnitarioConDescuento * cantidadPedida
+            const totalxItem = parseFloat($(this).find('.valor-unitario-total').val()) || 0.00
+            subtotal += totalxItem;
         })
 
         $('#subtotalCotizacionInput').val(subtotal.toFixed(4))
-        $('#totalCotizacionInput').val(total.toFixed(4))
+        $('#igvCotizacionInput').val((subtotal * 0.18).toFixed(4))
+        $('#totalCotizacionInput').val((subtotal * 1.18).toFixed(4))
     }
 
     // ----------- TRAER INFORMACION DE MONEDAS ----------
@@ -1650,15 +1710,21 @@ $(document).ready(async () => {
             $(".label-precio-unitario").removeClass('d-none')
             $(".label-precio-unitario-detalle").removeClass('d-none')
             $(".label-descuento").removeClass('d-none')
-            $(".label-precio-unitario-total").removeClass('d-none')
+            $(".label-valor-unitario-total").removeClass('d-none')
             $(".label-ultimo-precio").removeClass('d-none')
+            $(".label-valor-unitario").removeClass('d-none')
+            $(".label-impuesto").removeClass('d-none')
+            $("#div-totales-cotizacion").removeClass('d-none')
         } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
             $(".label-precio-unitario-detalle").addClass('d-none')
             $(".label-descuento").addClass('d-none')
-            $(".label-precio-unitario-total").addClass('d-none')
+            $(".label-valor-unitario-total").addClass('d-none')
             $(".label-ultimo-precio").addClass('d-none')
+            $(".label-valor-unitario").addClass('d-none')
+            $(".label-impuesto").addClass('d-none')
+            $("#div-totales-cotizacion").addClass('d-none')
         }
     })
 
@@ -1979,10 +2045,12 @@ $(document).ready(async () => {
 
             const observacion = $(this).find('.observacion-detalle').val().trim()
             let precioUnitario = proveedor_unico
-                ? parseFloat($(this).find('.precio-unitario-detalle').val().trim()).toFixed(4) * (1 - descuentoDetalle / 100)
+                ? parseFloat($(this).find('.valor-unitario').val().trim()).toFixed(4) * (1 - descuentoDetalle / 100)
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val()
+            const tipoImpuesto = $(this).find('.impuesto-detalle').val()
+            const precioConIgv = $(this).find(".precio-unitario-detalle").val()
             // valores detalle de cotizacion
 
             if (+cantidadPedida > +$(this).find('.cantidad-requerida-detalle').text()) {
@@ -2001,12 +2069,14 @@ $(document).ready(async () => {
                             uni_codigo: detalle.producto.uni_codigo,
                             cod_descripcion: detalle.producto.pro_descripcion,
                             cod_observacion: observacion,
-                            cod_cantidad: detalle.odm_cantidad,
+                            cod_cantidad: proveedor_unico ? cantidadPedida : detalle.odm_cantidad,
                             cod_preciounitario: precioUnitario,
-                            cod_total: parseFloat(detalle.odm_cantidad * precioUnitario).toFixed(4),
+                            cod_total: parseFloat((proveedor_unico ? cantidadPedida : detalle.odm_cantidad) * precioUnitario).toFixed(4),
                             cod_cantidadcotizada: cantidadPedida,
                             cod_fecentregaoc: fechaEntrega,
-                            cod_descuento: descuentoDetalle
+                            cod_descuento: descuentoDetalle,
+                            cod_impuesto: tipoImpuesto,
+                            cod_precioconigv: precioConIgv
                         })
                     })
                 } else {
@@ -2017,12 +2087,14 @@ $(document).ready(async () => {
                         uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
                         cod_descripcion: detalleIndex.odm_descripcion,
                         cod_observacion: observacion,
-                        cod_cantidad: detalleIndex.odm_cantidad,
+                        cod_cantidad: proveedor_unico ? cantidadPedida : detalleIndex.odm_cantidad,
                         cod_preciounitario: precioUnitario,
-                        cod_total: parseFloat(detalleIndex.odm_cantidad * precioUnitario).toFixed(4),
+                        cod_total: parseFloat((proveedor_unico ? cantidadPedida : detalleIndex.odm_cantidad) * precioUnitario).toFixed(4),
                         cod_cantidadcotizada: cantidadPedida,
                         cod_fecentregaoc: fechaEntrega,
-                        cod_descuento: descuentoDetalle
+                        cod_descuento: descuentoDetalle,
+                        cod_impuesto: tipoImpuesto,
+                        cod_precioconigv: precioConIgv
                     })
                 }
             } else {
@@ -2037,7 +2109,9 @@ $(document).ready(async () => {
                     cod_preciounitario: precioUnitario,
                     cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(4),
                     cod_fecentregaoc: fechaEntrega,
-                    cod_descuento: descuentoDetalle
+                    cod_descuento: descuentoDetalle,
+                    cod_impuesto: tipoImpuesto,
+                    cod_precioconigv: precioConIgv
                 })
             }
             cod_orden++
@@ -2383,7 +2457,7 @@ $(document).ready(async () => {
     function clearDataCotizacion() {
         // deshabilitamos la opción de proveedor único
         $("#checkProveedorUnico").prop('checked', false)
-        $(".label-precio-unitario-total").addClass('d-none')
+        $(".label-valor-unitario-total").addClass('d-none')
         $(".label-descuento").addClass('d-none')
         $(".label-ultimo-precio").addClass('d-none')
         // vaceamos la variable de archivos adjuntos
@@ -2394,6 +2468,8 @@ $(document).ready(async () => {
         $("#div-cotizacion").addClass('d-none')
         $(".label-precio-unitario").addClass('d-none')
         $(".label-precio-unitario-detalle").addClass('d-none')
+        $(".label-impuesto").addClass('d-none')
+        $(".label-valor-unitario").addClass('d-none')
         // los valores de precios unitarios reseteamos a 0
         $(".precio-unitario-detalle").val(0)
     }

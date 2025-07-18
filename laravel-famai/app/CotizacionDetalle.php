@@ -32,7 +32,9 @@ class CotizacionDetalle extends Model
         'cod_usumodificacion',
         'cod_fecmodificacion',
         'cod_fecentregaoc', // ALTER TABLE tblcotizacionesdet_cod ADD cod_fecentregaoc DATE NULL;
-        'cod_descuento' // ALTER TABLE tblcotizacionesdet_cod ADD cod_descuento DECIMAL(10,2) NULL;
+        'cod_descuento', // ALTER TABLE tblcotizacionesdet_cod ADD cod_descuento DECIMAL(10,2) NULL;
+        'cod_impuesto', // ALTER TABLE tblcotizacionesdet_cod ADD cod_impuesto VARCHAR(10) NULL;
+        'cod_precioconigv', // ALTER TABLE tblcotizacionesdet_cod ADD cod_precioconigv DECIMAL(10,4) NULL;
     ];
 
     const CREATED_AT = 'cod_feccreacion';

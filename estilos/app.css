@@ -169,3 +169,5 @@
 .bootbox-modal + .modal-backdrop {
     z-index: 1059 !important;
 }
+
+.hide-number-arrows::-webkit-outer-spin-button, .hide-number-arrows::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } .hide-number-arrows[type=number] { -moz-appearance: textfield; }

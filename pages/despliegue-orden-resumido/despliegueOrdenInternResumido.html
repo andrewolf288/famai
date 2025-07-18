@@ -284,12 +284,14 @@
                                 <th class="col-1">Código</th>
                                 <th class="col-3">Descripción</th>
                                 <th class="col-3">Observación</th>
-                                <th class="col-1 text-center">Unidad</th>
+                                <th class="col-1 text-center">Uni</th>
                                 <th class="col-1 text-center">Cant. Req</th>
                                 <th class="col-1 text-center">Cant. Ped</th>
-                                <th class="col-1 text-center d-none label-precio-unitario">Prec. Uni</th>
+                                <th class="col-1 text-center d-none label-valor-unitario">Valor Unit. (Sin IGV)</th>
+                                <th class="col-1 text-center d-none label-precio-unitario">Prec. Uni (Con IGV)</th>
                                 <th class="col-1 text-center d-none label-descuento">Dsct (%)</th>
-                                <th class="col-1 text-center d-none label-precio-unitario-total">Prec. Unit. Total</th>
+                                <th class="col-1 text-center d-none label-impuesto">Impuesto</th>
+                                <th class="col-1 text-center d-none label-valor-unitario-total">Total</th>
                                 <th class="col-1 text-center">Fec. Entrega</th>
                                 <th class="col-1 text-center d-none label-ultimo-precio">Ult. Fec</th>
                                 <th class="col-1 text-center d-none label-ultimo-precio">Ult. Precio</th>
@@ -301,10 +303,14 @@
                     </table>
 
                     <div class="d-flex justify-content-end mt-2">
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 d-none" id="div-totales-cotizacion">
                             <div>
                                 <label for="subtotalCotizacionInput">Subtotal</label>
                                 <input type="text" id="subtotalCotizacionInput" class="form-control" value="0.00" readonly>
+                            </div>
+                            <div>
+                                <label for="igvCotizacionInput">IGV 18%</label>
+                                <input type="text" id="igvCotizacionInput" class="form-control" value="0.00" readonly>
                             </div>
                             <div>
                                 <label for="totalCotizacionInput">Total</label>
@@ -705,6 +711,7 @@
                                 <th>Descripción</th>
                                 <th class="text-center">Cantidad</th>
                                 <th class="text-center">Precio unitario</th>
+                                <th class="text-center">Moneda</th>
                                 <th class="text-center">Total</th>
                             </tr>
                         </thead>
