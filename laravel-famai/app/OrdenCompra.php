@@ -40,7 +40,8 @@ class OrdenCompra extends Model
         'occ_feccreacion',
         'occ_usumodificacion',
         'occ_fecmodificacion',
-        'occ_nrosap'
+        'occ_nrosap',
+        'occ_sedesap'
     ];
 
     const CREATED_AT = 'occ_feccreacion';

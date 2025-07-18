@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF de Prueba</title>
+    <title>{{ 'Orden de compra ' . $ordencompra['occ_numero'] }}</title>
     <style>
         * {
             margin: 0;
@@ -63,7 +63,7 @@
 
         .label {
             display: table-cell;
-            width: 33.33%;
+            width: 20%;
             font-weight: bold;
             font-size: 10px
         }
@@ -208,7 +208,7 @@
                         </tr>
                         <tr style="border: 1px solid black;">
                             <td style="text-align: center;font-weight: bold;font-size: 12px;padding: 3px;">
-                                {{ substr($ordencompra['occ_numero'], 0, 1) . '-' . substr($ordencompra['occ_numero'], 1) }}
+                                {{ $ordencompra['occ_sedesap'] . '-' . $ordencompra['occ_nrosap'] }}
                             </td>
                         </tr>
                     </table>
@@ -216,7 +216,16 @@
             </tr>
         </table>
         <hr style="margin-top: 5px">
-        <p style="font-size: 12px">Arequipa, {{ $occ_fecha_formateada }}</p>
+        <table class="table-encabezado">
+            <tr>
+                <td style="width: 50%; text-align: left;">
+                    <p style="font-size: 12px">Arequipa, {{ $occ_fecha_formateada }}</p>
+                </td>
+                <td style="width: 50%; text-align: right;">
+                    <p style="font-size: 12px">{{ $ordencompra['occ_numero'] }}</p>
+                </td>
+            </tr>
+        </table>
     </header>
     <div class="section-title">DATOS DEL PROVEEDOR</div>
     {{-- Table de datos del proveedor --}}
@@ -250,17 +259,17 @@
                 </div>
                 <div class="info-row">
                     <span class="label">CTA S/:</span>
-                    <span class="value">{{ $cuenta_soles ? $cuenta_soles['pvc_numerocuenta'] . ' (' . $cuenta_soles['entidadBancaria']['eba_descripcion'] . ')' : '' }}</span>
+                    <span class="value">{{ $cuenta_soles ? '(' . strtoupper($cuenta_soles['entidadBancaria']['eba_descripcion']) . ') ' . $cuenta_soles['pvc_numerocuenta'] : '' }}</span>
                 </div>
                 {{-- <p style="font-size: 8px">{{$cuenta_soles ? $cuenta_soles['entidadBancaria']['eba_descripcion'] : ''}}</p> --}}
                 <div class="info-row">
                     <span class="label">CTA $/:</span>
-                    <span class="value">{{ $cuenta_dolares ? $cuenta_dolares['pvc_numerocuenta'] . ' (' . $cuenta_dolares['entidadBancaria']['eba_descripcion'] . ')' : '' }}</span>
+                    <span class="value">{{ $cuenta_dolares ? '(' . strtoupper($cuenta_dolares['entidadBancaria']['eba_descripcion']) . ') ' . $cuenta_dolares['pvc_numerocuenta'] : '' }}</span>
                 </div>
                 {{-- <p style="font-size: 8px">{{$cuenta_dolares ? $cuenta_dolares['entidadBancaria']['eba_descripcion'] : ''}}</p> --}}
                 <div class="info-row">
                     <span class="label">CTA BCO NACION S/:</span>
-                    <span class="value">{{ $cuenta_banco_nacion ? $cuenta_banco_nacion['pvc_numerocuenta'] . ' (' . $cuenta_banco_nacion['entidadBancaria']['eba_descripcion'] . ')' : '' }}</span>                </div>
+                    <span class="value">{{ $cuenta_banco_nacion ? strtoupper($cuenta_banco_nacion['pvc_numerocuenta']) : '' }}</span>              </div>
                 {{-- <p style="font-size: 8px">{{$cuenta_banco_nacion ? $cuenta_banco_nacion['entidadBancaria']['eba_descripcion'] : ''}}</p> --}}
             </td>
         </tr>
