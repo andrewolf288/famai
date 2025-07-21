@@ -2,7 +2,7 @@ $(document).ready(async () => {
     let dataInformacion = []
     let detallesOrdenCompra = []
     let impuestos = []
-    const cuentaConSeparadoresRegex = /^[\d\- ]{8,30}$/
+    const cuentaConSeparadoresRegex = /^.*$/
     const filterSolicitante = $('#filtrar-solicitante')
     const apiUrl = 'cotizacion-proveedores'
 
