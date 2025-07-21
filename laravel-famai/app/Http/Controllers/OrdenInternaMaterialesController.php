@@ -230,17 +230,17 @@ class OrdenInternaMaterialesController extends Controller
         }
 
         // se necesita agregar informacion de procedimiento almacenado
-        $query = OrdenInternaMateriales::with(
-            [
-                'responsable',
-                'producto' => function($q) {
-                    $q->with('proveedores'); // Contar proveedores aquí
-                    $q->with('unidad');         // Cargar unidad aquí
-                },
-                'ordenInternaParte.ordenInterna',
-                'detalleAdjuntos'
-            ]
-        );
+        $query = OrdenInternaMateriales::with([
+            'responsable',
+            'producto' => function($q) {
+                $q->with(['proveedores' => function($q2) {
+                    $q2->select('prv_id', 'pro_id');
+                }]);
+                $q->with('unidad');
+            },
+            'ordenInternaParte.ordenInterna',
+            'detalleAdjuntos'
+        ]);
         $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
             $q->where('sed_codigo', $sed_codigo)
                 ->where(function ($query) {
