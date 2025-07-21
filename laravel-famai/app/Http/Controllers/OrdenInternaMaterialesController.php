@@ -234,7 +234,7 @@ class OrdenInternaMaterialesController extends Controller
             [
                 'responsable',
                 'producto' => function($q) {
-                    $q->withCount('proveedores'); // Contar proveedores aquí
+                    $q->with('proveedores'); // Contar proveedores aquí
                     $q->with('unidad');         // Cargar unidad aquí
                 },
                 'ordenInternaParte.ordenInterna',
@@ -340,15 +340,13 @@ class OrdenInternaMaterialesController extends Controller
             ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo) {
 
                 $producto = $grupo->first()->producto;
-                if (!$producto) {
-                    return null;
-                }
+                if (!$producto) { return null; }
+
                 $producto_codigo = $producto->pro_codigo;
                 // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
-                $totalProveedores = $producto->proveedores_count ?? 0;
-                if ($totalProveedores > 5) {
-                    $totalProveedores = 5;
-                }
+                $totalProveedores = $producto
+                    ? $producto->proveedores->pluck('prv_id')->unique()->count()
+                    : 0;
 
                 $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
                 $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)
@@ -385,7 +383,7 @@ class OrdenInternaMaterialesController extends Controller
                     'tiene_adjuntos' => $grupo->some(function ($item) {
                         return $item->detalleAdjuntos->isNotEmpty();
                     }),
-                    'proveedores_count' => $totalProveedores,
+                    'proveedores_count' => $totalProveedores > 5 ? 5 : $totalProveedores,
                 ];
             })
             ->filter() // Añadir filter para remover posibles valores null si el producto no se cargó

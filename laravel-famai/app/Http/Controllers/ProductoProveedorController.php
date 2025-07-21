@@ -203,12 +203,23 @@ class ProductoProveedorController extends Controller
     public function findOrdenCompraByProducto(Request $request)
     {
         $producto = $request->input('producto', null);
-        $data = ProductoProveedor::with('producto', 'proveedor')
-            ->where('pro_id', $producto)
-            ->orderBy('prp_fechaultimacompra', 'desc')
+
+        $latestPurchaseIds = ProductoProveedor::select('prp_id')
+            ->whereIn('prp_id', function ($query) use ($producto) {
+                $query->selectRaw('MAX(prp_id)')
+                    ->from('tblproductosproveedores_prp')
+                    ->where('pro_id', $producto)
+                    ->groupBy('prv_id');
+            })
+            ->orderByDesc('prp_fechaultimacompra')
             ->limit(5)
+            ->pluck('prp_id');
+
+        $result = ProductoProveedor::with(['producto', 'proveedor'])
+            ->whereIn('prp_id', $latestPurchaseIds)
+            ->orderByDesc('prp_fechaultimacompra')
             ->get();
 
-        return response()->json($data);
+        return response()->json($result);
     }
 }
