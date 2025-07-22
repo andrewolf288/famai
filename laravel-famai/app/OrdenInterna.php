@@ -91,4 +91,11 @@ class OrdenInterna extends Model
     {
         return $this->belongsTo(MotivoRequerimiento::class, 'mrq_codigo')->selectFields();
     }
+
+    // almacen
+    public function almacen()
+    {
+        return $this->belongsTo(Almacen::class, 'sed_codigo', 'sed_codigo')
+            ->where('alm_esprincipal', 1);
+    }
 }

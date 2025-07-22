@@ -242,12 +242,18 @@ class OrdenInternaMaterialesController extends Controller
             'detalleAdjuntos'
         ]);
         $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
-            $q->where('sed_codigo', $sed_codigo)
-                ->where(function ($query) {
+            $q->where(function ($query) {
                     $query->where('oic_estado', 'PROCESO')
                         ->orWhere('oic_tipo', 'REQ');
                 });
         });
+
+        if ($almacen_codigo == null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
+                $q->where('sed_codigo', $sed_codigo);
+            });
+        }
+
         $query->whereNotIn('odm_tipo', [3, 4, 5]);
         $query->whereNotNull('odm_estado');
         $query->where('odm_estado', '!=', 'ODC');
@@ -263,6 +269,13 @@ class OrdenInternaMaterialesController extends Controller
         if ($tipoProceso !== null) {
             $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($tipoProceso) {
                 $q->where('oic_tipo', $tipoProceso);
+            });
+        }
+
+        // almacen
+        if ($almacen_request !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna.almacen', function ($q) use ($almacen_request) {
+                $q->where('alm_codigo', $almacen_request);
             });
         }
 
