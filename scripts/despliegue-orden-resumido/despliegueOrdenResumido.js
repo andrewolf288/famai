@@ -1032,7 +1032,7 @@ $(document).ready(async () => {
                         <input type="number" class="form-control valor-unitario" style="width: 90px" value="${(0).toFixed(2)}"/>
                     </td>
                     <td class="text-center d-none label-precio-unitario-detalle">
-                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00"/>
+                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00" style="width: 90px"/>
                     </td>
                     <td class="text-center d-none label-descuento">
                         <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 90px"/>
