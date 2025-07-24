@@ -1751,6 +1751,10 @@ class OrdenInternaMaterialesController extends Controller
                     throw new Exception('Material no encontrado en la base de datos secundaria');
                 }
             } else {
+                try {
+                    $sql = "EXEC dbo.actualizarProductoSAP @pro_codigo = ?";
+                    DB::statement($sql, [$request['pro_codigo']]);
+                } catch (\Throwable $th) {}
                 // en el caso que se encuentre el producto en base de datos dbfamai
                 $pro_id = $findMaterial->pro_id;
                 $pro_descripcion = $findMaterial->pro_descripcion;
