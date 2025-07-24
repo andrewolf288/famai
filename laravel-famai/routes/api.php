@@ -405,6 +405,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('cotizacion-detalle-masivo', [CotizacionDetalleController::class, 'informacionMaterialesMasivo']);
     Route::get('cotizacion-detalle-findByProducto', [CotizacionDetalleController::class, 'findCotizacionByProducto']);
     Route::put('cotizacion-detalle/seleccionar/{id}', [CotizacionDetalleController::class, 'seleccionarCotizacionDetalle']);
+    Route::post('cotizacion-detalle/copiar/{id}', [CotizacionDetalleController::class, 'copiarCotizacionDetalle']);
 });
 
 // rutas de detalle de archivo de cotizacion
@@ -447,6 +448,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ultimas-compras/producto', [ProductoProveedorController::class, 'findByProductoUltimaCompra']);
     Route::get('comprasByProductoProveedor', [ProductoProveedorController::class, 'findOrdenCompraByProveedorProducto']);
     Route::get('comprasByProducto', [ProductoProveedorController::class, 'findOrdenCompraByProducto']);
+    Route::get('cotizacionesByProducto', [ProductoProveedorController::class, 'findCotizacionesByProducto']);
 });
 
 // rutas de movimientos de almacen

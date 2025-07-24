@@ -217,7 +217,7 @@
                                     <div class="col-md-2">
                                         <input type="text" id="formapagoCotizacionInputHidden" hidden>
                                         <label for="formapagoCotizacionInput">Forma de pago </label>
-                                        <select id="formapagoCotizacionInput" class="form-select">
+                                        <select id="formapagoCotizacionInput" class="form-select" data-formapago="">
                                             <option value="">Seleccione una forma de pago</option>
                                         </select>
                                     </div>
@@ -695,11 +695,12 @@
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content" style="z-index: 1056;">
             <div class="modal-header">
-                <h5 class="modal-title" id="previewTXTModalLabel">Información orden compra productos proveedor</h5>
+                <h5 class="modal-title" id="previewTXTModalLabel">Información orden compra productos proveedor: <span class="fw-bold" id="spanNombreProducto"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div>
+                    <h1 class="text-center fs-2 text-uppercase">Ordenes de compra</h1>
                     <table id="tbl-proveedor-productos" class="table mt-3 table-striped nowrap">
                         <thead>
                             <tr>
@@ -707,15 +708,38 @@
                                 <th>Num. Ord. Compra</th>
                                 <th>Doc. proveedor</th>
                                 <th>Raz. social proveedor</th>
-                                <th>Cod. producto</th>
-                                <th>Descripción</th>
                                 <th class="text-center">Cantidad</th>
                                 <th class="text-center">Precio unitario</th>
                                 <th class="text-center">Moneda</th>
                                 <th class="text-center">Total</th>
+                                <th class="text-center">Nro cotizacion</th>
+                                <th class="text-center">Cotiz. Fecha validez</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="tbl-proveedor-productos-body">
+                        </tbody>
+                    </table>
+
+                    <hr class="my-4 border-1">
+
+                    <h1 class="text-center fs-2 text-uppercase">Cotizaciones</h1>
+                    <table class="table mt-3 table-striped nowrap">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Fecha Cotizacion</th>
+                                <th>Num. Cotizacion</th>
+                                <th>Doc. proveedor</th>
+                                <th>Raz. social proveedor</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Precio unitario</th>
+                                <th class="text-center">Moneda</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Fecha validez</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-cotizacion-productos-body">
                         </tbody>
                     </table>
                 </div>

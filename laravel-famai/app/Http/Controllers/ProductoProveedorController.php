@@ -6,6 +6,7 @@ use App\Producto;
 use App\ProductoProveedor;
 use App\Proveedor;
 use App\OrdenCompra;
+use App\Cotizacion;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,21 @@ use App\FormaPago;
 
 class ProductoProveedorController extends Controller
 {
+    public function findCotizacionesByProducto(Request $request)
+    {
+        $producto = $request->input('producto', null);
+
+        $cotizaciones = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion'])
+            ->whereHas('detalleCotizacion', function ($query) use ($producto) {
+                $query->where('pro_id', $producto);
+            })
+            ->orderBy('coc_feccreacion', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json($cotizaciones);
+    }
+
     public function comprasByProducto(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -219,6 +235,25 @@ class ProductoProveedorController extends Controller
             ->whereIn('prp_id', $latestPurchaseIds)
             ->orderByDesc('prp_fechaultimacompra')
             ->get();
+
+        $result->each(function ($item) {
+            $customQuery = DB::select("
+                SELECT coc.coc_numero, coc.coc_fechavalidez, coc.coc_id
+                FROM tblproductosproveedores_prp prp 
+                INNER JOIN tblordencompracab_occ occ 
+                    ON occ.occ_numero = prp.prp_nroordencompra 
+                INNER JOIN tblordencompradet_ocd ocd 
+                    ON ocd.occ_id = occ.occ_id 
+                    AND ocd.pro_id = prp.pro_id
+                INNER JOIN tblcotizacionesdet_cod as cod 
+                    ON cod.odm_id = ocd.odm_id AND prp.pro_id = cod.pro_id
+                INNER JOIN tblcotizacionescab_coc as coc
+                    ON coc.coc_id = cod.coc_id
+                WHERE prp.prp_id = ?
+            ", [$item->prp_id]);
+    
+            $item->cotizacion = $customQuery;
+        });
 
         return response()->json($result);
     }

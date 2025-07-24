@@ -585,39 +585,138 @@ $(document).ready(async () => {
         const formatData = {
             producto: producto
         }
-
+        
         try {
             const { data } = await client.get('comprasByProducto', { params: formatData })
+            const { data: cotizaciones} = await client.get('cotizacionesByProducto', { params: formatData })
             // vaciamos la tabla
             $("#tbl-proveedor-productos-body").empty()
+            $("#tbl-cotizacion-productos-body").empty()
+            $("#spanNombreProducto").text('')
             // llenamos la data
             let content = ''
+            let contentCotizacion = ''
             data.forEach(item => {
-                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra, prp_moneda } = item
+                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra, prp_moneda, cotizacion, pro_id } = item
+                $("#spanNombreProducto").text(producto.pro_descripcion)
+                let fechaCotizacion = 'N/A'
+                let numeroCotizacion = 'N/A'
+                let coc_id = ''
+                let esFechaValida = false
+                if (cotizacion.length > 0) {
+                    fechaCotizacion = cotizacion[0].coc_fechavalidez ? parseDateSimple(cotizacion[0].coc_fechavalidez) : 'N/A'
+                    numeroCotizacion = cotizacion[0].coc_numero || 'N/A'
+                    coc_id = cotizacion[0].coc_id || ''
+                    esFechaValida = cotizacion[0].coc_fechavalidez ? moment(cotizacion[0].coc_fechavalidez).isSameOrAfter(moment()) : false
+                }
                 content += `
                     <tr>
-                    <td>${parseDateSimple(prp_fechaultimacompra)}</td>
-                    <td>${prp_nroordencompra}</td>
-                    <td>${proveedor.prv_nrodocumento}</td>
-                    <td>${proveedor.prv_nombre}</td>
-                    <td>${producto.pro_codigo}</td>
-                    <td>${producto.pro_descripcion}</td>
-                    <td class="text-center"></td>
-                    <td class="text-center">${parseFloat(prp_preciounitario).toFixed(4)}</td>
-                    <td class="text-center">${prp_moneda ? prp_moneda : ''}</td>
-                    <td class="text-center"></td>
+                        <td>${parseDateSimple(prp_fechaultimacompra)}</td>
+                        <td>${prp_nroordencompra}</td>
+                        <td>${proveedor.prv_nrodocumento}</td>
+                        <td>${proveedor.prv_nombre}</td>
+                        <td class="text-center"></td>
+                        <td class="text-center">${parseFloat(prp_preciounitario).toFixed(4)}</td>
+                        <td class="text-center">${prp_moneda ? prp_moneda : ''}</td>
+                        <td class="text-center"></td>
+                        <td class="text-center">
+                            ${numeroCotizacion}
+                        </td>
+                        <td class="text-center">
+                            ${fechaCotizacion}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${pro_id}" ${!coc_id || !esFechaValida ? 'disabled' : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="24" height="24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `
+            })
+
+            cotizaciones.forEach(cotizacion => {
+                const { proveedor, moneda, coc_fechavalidez, coc_numero, coc_fechacotizacion, coc_id, detalle_cotizacion } = cotizacion
+                const esFechaValida = coc_fechavalidez ? moment(coc_fechavalidez).isSameOrAfter(moment()) : false
+                console.log(esFechaValida)
+                contentCotizacion += `
+                    <tr>
+                        <td>${parseDateSimple(coc_fechacotizacion)}</td>
+                        <td>${coc_numero}</td>
+                        <td>${proveedor.prv_nrodocumento}</td>
+                        <td>${proveedor.prv_nombre}</td>
+                        <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_cantidad).toFixed(4) || 'N/A'}</td>
+                        <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_preciounitario).toFixed(4) || 'N/A'}</td>
+                        <td class="text-center">${moneda ? moneda.mon_codigo : ''}</td>
+                        <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_total).toFixed(4) || 'N/A'}</td>
+                        <td class="text-center">${coc_fechavalidez ? parseDateSimple(coc_fechavalidez) : 'N/A'}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${producto}" ${!esFechaValida ? 'disabled' : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="24" height="24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+                                </svg>
+                            </button>
+                        </td>
+                        
                     </tr>
                 `
             })
 
             // renderizamos la información
             $("#tbl-proveedor-productos-body").html(content)
+            $("#tbl-cotizacion-productos-body").html(contentCotizacion)
             // abrimos el modal correspondiente
             showModalProveedorProductosCompras()
         } catch (error) {
             console.log(error)
         }
     })
+
+    $(document).on('click', '.btn-copiar-cotizacion', async function () {
+        const producto = $(this).data('producto');
+        const cotizacionId = $(this).data('cotizacion');
+        try {
+            const result = await new Promise(resolve => {
+                bootbox.confirm({
+                    title: '<span class="text-warning">Advertencia</span>',
+                    message: '¿Está seguro de usar esta cotización para el material seleccionado?',
+                    backdrop: true,
+                    className: 'bootbox-alert-modal',
+                    callback: async function (result) {
+                        resolve(result);
+                    }
+                });
+            });
+
+            if (!result) return;
+
+            await client.post(`/cotizacion-detalle/copiar/${cotizacionId}`, {
+                pro_id: producto
+            });
+
+            bootbox.alert({
+                title: '<span class="text-success">Cotización</span>',
+                message: 'Cotizacion generada correctamente',
+                centerVertical: true,
+                backdrop: true,
+                className: 'bootbox-alert-modal'
+            })
+
+            const modalProductosProveedor = bootstrap.Modal.getInstance(document.getElementById('productosProveedorModal'))
+            modalProductosProveedor.hide()
+        } catch (error) {
+            console.log(error);
+            bootbox.alert({
+                title: '<span class="text-danger">Error</span>',
+                message: 'Ocurrio un error al generar la cotización',
+                centerVertical: true,
+                backdrop: true,
+                className: 'bootbox-alert-modal'
+            })
+        }
+    });
 
     // ------------- GESTION DE RESERVACION -------------
     $("#data-container-body").on('click', '.btn-reservado', function () {
@@ -1602,6 +1701,8 @@ $(document).ready(async () => {
             dateFormat: 'dd/mm/yy'
         });
 
+        $("#formapagoCotizacionInput").attr("data-formapago", data[0].fpa_codigo)
+
         // abrir modal de solicitud de cotizacion
         showModalSolicitudCotizacion(data.length)
 
@@ -1678,11 +1779,15 @@ $(document).ready(async () => {
             const defaultOptionFormaPago = $('<option>').val('').text('Seleccione una forma de pago')
             $("#formapagoCotizacionInput").empty()
             $("#formapagoCotizacionInput").append(defaultOptionFormaPago)
-
+            let formapagoDefault = ""
             data.forEach((formaPago) => {
                 const option = $('<option>').val(formaPago["fpa_descripcion"]).text(formaPago["fpa_descripcion"])
                 $("#formapagoCotizacionInput").append(option)
+                if (formaPago["fpa_codigo"] == $("#formapagoCotizacionInput").attr('data-formapago')) {
+                    formapagoDefault = formaPago["fpa_descripcion"]
+                }
             })
+            $("#formapagoCotizacionInput").val(formapagoDefault)
         } catch (error) {
             console.log(error)
         }
@@ -2421,6 +2526,11 @@ $(document).ready(async () => {
 
     // Gestionamos el cierre del modal de seleccion de cotizaciones
     $('#cotizadoModal').on('hide.bs.modal', function (e) {
+        const filteredURL = obtenerFiltrosActuales()
+        initDataTable(filteredURL)
+    })
+
+    $('#productosProveedorModal').on('hide.bs.modal', function (e) {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })

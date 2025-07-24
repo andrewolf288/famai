@@ -5,11 +5,61 @@ namespace App\Http\Controllers;
 use App\Cotizacion;
 use App\CotizacionDetalle;
 use App\Proveedor;
+use App\Trabajador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CotizacionDetalleController extends Controller
 {
+
+    public function copiarCotizacionDetalle(Request $request, $id)
+    {
+        $user = auth()->user();
+        $sed_codigo = "10";
+
+        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
+        if ($trabajador) {
+            $sed_codigo = $trabajador->sed_codigo;
+        }
+
+        $cotizacionOriginal = Cotizacion::where('coc_id', $id)->firstOrFail();
+        $detalles = CotizacionDetalle::where('coc_id', $id)
+            ->where('pro_id', $request->pro_id)
+            ->get();
+
+        if ($detalles->isEmpty()) {
+            return response()->json(['error' => 'No existen detalles para ese producto en la cotización.'], 404);
+        }
+
+        $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
+        $nuevoNumero = $lastCotizacion ? str_pad(intval($lastCotizacion->coc_numero) + 1, 7, '0', STR_PAD_LEFT) : '0000001';
+
+        $nuevaCotizacion = $cotizacionOriginal->replicate();
+        $nuevaCotizacion->coc_numero = $nuevoNumero;
+        $nuevaCotizacion->coc_fechacotizacion = now();
+        $nuevaCotizacion->save();
+        $nuevaCotizacion->sed_codigo = $user->sed_codigo;
+
+        foreach ($detalles as $detalle) {
+            $nuevoDetalle = $detalle->replicate();
+            $nuevoDetalle->coc_id = $nuevaCotizacion->coc_id;
+            $nuevoDetalle->cod_feccreacion = now();
+            $nuevoDetalle->cod_usucreacion = $user->usu_codigo;
+            $nuevoDetalle->cod_fecmodificacion = null;
+            $nuevoDetalle->cod_usumodificacion = null;
+            $nuevoDetalle->save();
+        }
+
+        $nuevaCotizacion->load(['detalleCotizacion' => function ($query) use ($request) {
+            $query->where('pro_id', $request->pro_id);
+        }]);
+
+        return response()->json([
+            'message' => 'Cotización copiada correctamente',
+            'cotizacion' => $nuevaCotizacion
+        ], 201);
+    }
 
     public function findDetalleByEstadoPendiente()
     {
