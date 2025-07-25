@@ -28,4 +28,9 @@ class Sede extends Model
     {
         return $query->select('sed_codigo', 'sed_nombre');
     }
+
+    public function almacenPrincipal()
+    {
+        return $this->hasOne(Almacen::class, 'sed_codigo', 'sed_codigo')->where('alm_esprincipal', 1);
+    }
 }

@@ -75,7 +75,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         // }
 
         // debemos buscar aquellas ordenes de compra que no se han importado aún
-        $ordenescompra = OrdenCompra::with('proveedor', 'moneda', 'trabajador')
+        $ordenescompra = OrdenCompra::with('proveedor', 'moneda', 'trabajador', 'sede.almacenPrincipal')
             ->where('occ_importacion', 0)
             ->where('occ_estado', '!=', 'ANU')
             ->get();
@@ -141,7 +141,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "TaxPercentagePerRow",
             "U_FAM_FECINOC",
             "ItemDetails",
-            "U_EXF_DOCNUMOT"
+            "U_EXF_DOCNUMOT",
+            'WarehouseCode'
             // "GrossTotal"
             // "TaxTotal"
         ]);
@@ -159,7 +160,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "VatPrcnt",
             "U_FAM_FECINOC",
             "Text",
-            "U_EXF_DOCNUMOT"
+            "U_EXF_DOCNUMOT",
+            'WhsCode'
             // "GTotal"
             // "VatSum"
         ]);
@@ -171,6 +173,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             $occ_tipo = $orden->occ_tipo;
             $serie = UtilHelper::getSerieValue($series, $sed_codigo, $occ_tipo);
             $tipo_documento = 'I';
+            $almacen = $orden->sede->almacenPrincipal->alm_codigo;
             
             $csvCabecera->insertOne([
                 $contador, // DocNum
@@ -217,6 +220,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
                     UtilHelper::cleanForCSV($detalle->ocd_observacion),
                     $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap,
+                    $almacen
                 ]);
 
                 $contadorDetalle++;
