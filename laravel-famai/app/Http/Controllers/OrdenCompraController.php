@@ -128,8 +128,6 @@ class OrdenCompraController extends Controller
         if ($occ_nrosap) {
             $query->where('occ_nrosap', 'like', '%' . $occ_nrosap . '%');
         }
-        Log::info($query->toSql());
-        Log::info($query->getBindings());
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Se listan las ordenes de compra',
