@@ -47,6 +47,7 @@ $(document).ready(() => {
                     <td>${cotizacion.coc_cotizacionproveedor || 'No aplica'}</td>
                     <td class="text-left">${cotizacion.proveedor?.prv_nrodocumento || 'No aplica'}</td>
                     <td>${cotizacion.proveedor?.prv_nombre || 'No aplica'}</td>
+                    <td>${cotizacion.coc_fechavalidez !== null ? parseDateSimple(cotizacion.coc_fechavalidez) : 'N/A'}</td>
                     <td class="text-center">${moneda?.mon_descripcion || 'No aplica'}</td>
                     <td class="text-center">${moneda?.mon_simbolo || ''} ${cotizacion.coc_total || 'No aplica'}</td>
                     <td class="text-center">
