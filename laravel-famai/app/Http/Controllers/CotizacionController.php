@@ -573,8 +573,73 @@ class CotizacionController extends Controller
                 'cod_usumodificacion' => $user->usu_codigo,
             ]);
 
-            foreach ($validatedData['detalle_productos'] as $detalle) {
-                $cotizacionDetalle = CotizacionDetalle::create([
+            $requerimiento_excedente = null;
+            $detalleParte = null;
+            $itemIndex = 1;
+
+            foreach ($validatedData['detalle_productos'] as $i => $detalle) {
+                if (!$requerimiento_excedente) {
+                    $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+                    if (!$trabajador) {
+                        throw new Exception('El usuario no tiene un trabajador asignado');
+                    }
+                    $sed_codigo = $trabajador->sed_codigo;
+                    
+                    // Buscar el último requerimiento para generar el número
+                    $lastRequerimientoCabecera = OrdenInterna::where('sed_codigo', $sed_codigo)
+                        ->where('oic_tipo', 'COT')
+                        ->orderBy('oic_id', 'desc')
+                        ->first();
+                    $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 3)) + 1;
+                    $prefijo = $trabajador->sed_codigo == '10' ? 'RQA' : 'RQL';
+                    
+                    $requerimiento_excedente = OrdenInterna::create([
+                        'odt_numero' => $prefijo . str_pad($numero, 7, '0', STR_PAD_LEFT),
+                        'oic_fecha' => now(),
+                        'sed_codigo' => $sed_codigo,
+                        'oic_fechaentregaestimada' => now()->addDays(7),
+                        'are_codigo' => $trabajador->are_codigo,
+                        'tra_idorigen' => $trabajador->tra_id,
+                        'mrq_codigo' => 'STK',
+                        'oic_equipo_descripcion' => 'Requerimiento generado automáticamente por productos nuevos en cotización',
+                        'oic_tipo' => 'REQ',
+                        'oic_estado' => 'ENVIADO',
+                        'oic_usucreacion' => $user->usu_codigo,
+                        'oic_fecmodificacion' => null,
+                    ]);
+
+                    // Crear parte de requerimiento
+                    $parteRequerimiento = Parte::where('oip_descripcion', 'REQUERIMIENTO')->first();
+                    if (!$parteRequerimiento) {
+                        throw new Exception('No se encontró la parte requerimiento');
+                    }
+                    
+                    $detalleParte = OrdenInternaPartes::create([
+                        'oic_id' => $requerimiento_excedente->oic_id,
+                        'oip_id' => $parteRequerimiento->oip_id,
+                        'opd_usucreacion' => $user->usu_codigo,
+                        'opd_fecmodificacion' => null
+                    ]);
+                }
+
+                // Crear material para cada producto
+                $odm = OrdenInternaMateriales::create([
+                    'opd_id' => $detalleParte->opd_id,
+                    'pro_id' => $detalle['pro_id'],
+                    'odm_item' => $itemIndex++,
+                    'odm_descripcion' => $detalle['cod_descripcion'],
+                    'odm_cantidad' => $detalle['cod_cantidad'],
+                    'odm_cantidadpendiente' => $detalle['cod_cantidad'],
+                    'odm_observacion' => $detalle['cod_observacion'] ?? null,
+                    'odm_tipo' => 1,
+                    'odm_usucreacion' => $user->usu_codigo,
+                    'odm_fecmodificacion' => null,
+                    'odm_estado' => 'COT',
+                    'odm_fecconsultareservacion' => now()
+                ]);
+
+                // Crear detalle de cotización con el odm_id asignado
+                $cotizacionDetalleData = [
                     'pro_id' => $detalle['pro_id'],
                     'coc_id' => $cotizacion->coc_id,
                     'cod_orden' => $detalle['cod_orden'],
@@ -582,10 +647,14 @@ class CotizacionController extends Controller
                     'cod_cantidad' => $detalle['cod_cantidad'],
                     'cod_preciounitario' => $detalle['cod_preciounitario'],
                     'cod_total' => $detalle['cod_total'],
+                    'odm_id' => $odm->odm_id,
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
-                    'cod_fecmodificacion' => null
-                ]);
+                    'cod_fecmodificacion' => null,
+                    'cod_estado' => 'SML'
+                ];
+
+                CotizacionDetalle::create($cotizacionDetalleData);
             }
 
             $detalle_descripcion = $validatedData['detalle_descripciones'];
