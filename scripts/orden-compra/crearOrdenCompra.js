@@ -200,7 +200,10 @@ $(document).ready(async () => {
             $("#formaDePagoOrdenCompraInput").append(defaultOptionFormaPago)
 
             data.forEach((formaPago) => {
-                const option = $('<option>').val(formaPago["fpa_codigo"]).text(formaPago["fpa_descripcion"])
+                const option = $('<option>')
+                    .val(formaPago["fpa_codigo"])
+                    .text(formaPago["fpa_descripcion"])
+                    .attr('data-adelanto', formaPago["fpa_porcadelanto"] || 0);
                 $("#formaDePagoOrdenCompraInput").append(option)
             })
         } catch (error) {
@@ -601,6 +604,15 @@ $(document).ready(async () => {
         renderizarResumenOrdenCompra()
     }
 
+    // CUANDO CAMBIE EL INPUT DE LA FORMA DE PAGO
+    $("#formaDePagoOrdenCompraInput").on('change', function () {
+        const total = $("#totalOrdenCompra").text()
+        console.log($("#formaDePagoOrdenCompraInput option:selected").attr('data-adelanto'))
+        const adelanto = +total * $("#formaDePagoOrdenCompraInput option:selected").attr('data-adelanto') / 100
+        $("#adelantoOrdenCompraInput").val(adelanto.toFixed(4))
+        $("#saldoOrdenCompraInput").val((total - adelanto).toFixed(4))
+    })
+
     // -----------GESTION DE CAMBIOS DE ORDEN DE COMPRA -----------
 
     // escuchamos los cambios en los inputs de cantidad y de precio unitario
@@ -628,6 +640,11 @@ $(document).ready(async () => {
         // renderizamos las demas vistas
         renderizarAgrupadoOrdenCompra()
         renderizarResumenOrdenCompra()
+
+        // calculamos el adelanto
+        const adelanto = total * $("#formaDePagoOrdenCompraInput option:selected").attr('data-adelanto') / 100
+        $("#adelantoOrdenCompraInput").val(adelanto.toFixed(4))
+        $("#saldoOrdenCompraInput").val((total - adelanto).toFixed(4))
     })
 
     // gestionamos la funcion de eliminacion

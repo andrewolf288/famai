@@ -21,7 +21,7 @@ class FormaPagoController extends Controller
         } catch (\Throwable $th) {
             // 
         }
-        $formasPago = FormaPago::where('fpa_activo', 1)->select('fpa_codigo', 'fpa_descripcion')->get();
+        $formasPago = FormaPago::where('fpa_activo', 1)->select('fpa_codigo', 'fpa_descripcion', 'fpa_porcadelanto')->get();
         return response()->json($formasPago);
     }
 }
