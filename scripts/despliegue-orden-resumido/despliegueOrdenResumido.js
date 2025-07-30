@@ -1701,7 +1701,11 @@ $(document).ready(async () => {
             dateFormat: 'dd/mm/yy'
         });
 
-        $("#formapagoCotizacionInput").attr("data-formapago", data[0].fpa_codigo)
+        try {
+            $("#formapagoCotizacionInput").attr("data-formapago", data[0].fpa_codigo)
+        } catch (error) {
+            console.log(error)
+        }
 
         // abrir modal de solicitud de cotizacion
         showModalSolicitudCotizacion(data.length)
