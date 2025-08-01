@@ -78,14 +78,33 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <label for="monedaOrdenCompraInput">Moneda</label>
                         <select name="moneda" id="monedaOrdenCompraInput" class="form-select">
                         </select>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-4">
                         <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
-                        <input type="text" id="formaDePagoOrdenCompraInput" class="form-control">
+                        <select name="forma_pago" id="formaDePagoOrdenCompraInput" class="form-select">
+                            <option value="" selected>Seleccione una forma de pago</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="tipoOrdenCompraSelect">Tipo:</label>
+                        <select id="tipoOrdenCompraSelect" class="form-select">
+                            <option value="SUM" selected>Suministro</option>
+                            <option value="SER">Servicio</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input me-2" type="checkbox" id="activoOrdenCompra">
+                            <label class="form-check-label" for="activoOrdenCompra">
+                                Es activo
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="row mt-2">

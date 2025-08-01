@@ -528,9 +528,6 @@ class OrdenCompraController extends Controller
                 'tra_solicitado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
                 'tra_autorizado' => 'nullable|exists:tbltrabajadores_tra,tra_id',
                 'occ_notas' => 'nullable|string',
-                'occ_total' => 'required|numeric|min:1',
-                'occ_subtotal' => 'required|numeric|min:1',
-                'occ_impuesto' => 'required|numeric|min:1',
                 'occ_observacionpago' => 'nullable|string',
                 'occ_adelanto' => 'nullable|numeric|min:1',
                 'occ_saldo' => 'nullable|numeric|min:1',
@@ -554,30 +551,133 @@ class OrdenCompraController extends Controller
                 'tra_solicitado' => $validatedData['tra_solicitado'],
                 'tra_autorizado' => $validatedData['tra_autorizado'],
                 'occ_notas' => $validatedData['occ_notas'],
-                'occ_total' => $validatedData['occ_total'],
-                'occ_subtotal' => $validatedData['occ_subtotal'],
-                'occ_impuesto' => $validatedData['occ_impuesto'],
                 'occ_observacionpago' => $validatedData['occ_observacionpago'],
                 'occ_adelanto' => $validatedData['occ_adelanto'],
                 'occ_saldo' => $validatedData['occ_saldo'],
                 'occ_tipo' => $validatedData['occ_tipo'],
                 'occ_esactivo' => $validatedData['occ_esactivo'],
-                'occ_estado' => '1',
                 'occ_usumodificacion' => $user->usu_codigo,
             ]);
 
-            foreach ($validatedData['detalle_productos'] as $detalle) {
-                $ordencompraDetalle = OrdenCompraDetalle::create([
-                    'pro_id' => $detalle['pro_id'],
-                    'occ_id' => $ordencompra->occ_id,
-                    'ocd_orden' => $detalle['ocd_orden'],
-                    'ocd_descripcion' => $detalle['ocd_descripcion'],
-                    'ocd_cantidad' => $detalle['ocd_cantidad'],
-                    'ocd_preciounitario' => $detalle['ocd_preciounitario'],
-                    'ocd_total' => $detalle['ocd_total'],
-                    'ocd_activo' => 1,
-                    'ocd_usucreacion' => $user->usu_codigo,
-                    'ocd_fecmodificacion' => null
+            if (!empty($validatedData['detalle_productos'])) {
+                $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+                if (!$trabajador) {
+                    throw new Exception('El usuario no tiene un trabajador asignado');
+                }
+                $sed_codigo = $trabajador->sed_codigo;
+                
+                // Buscar el último requerimiento para generar el número
+                $lastRequerimientoCabecera = OrdenInterna::where('sed_codigo', $sed_codigo)
+                    ->where('oic_tipo', 'REQ')
+                    ->orderBy('oic_id', 'desc')
+                    ->first();
+                $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 3)) + 1;
+                $prefijo = $trabajador->sed_codigo == '10' ? 'RQA' : 'RQL';
+                
+                $requerimiento_excedente = OrdenInterna::create([
+                    'odt_numero' => $prefijo . str_pad($numero, 7, '0', STR_PAD_LEFT),
+                    'oic_fecha' => now(),
+                    'sed_codigo' => $sed_codigo,
+                    'oic_fechaentregaestimada' => now()->addDays(7),
+                    'are_codigo' => $trabajador->are_codigo,
+                    'tra_idorigen' => $trabajador->tra_id,
+                    'mrq_codigo' => 'STK',
+                    'oic_equipo_descripcion' => 'Requerimiento generado automáticamente por productos nuevos en orden de compra',
+                    'oic_tipo' => 'REQ',
+                    'oic_estado' => 'ENVIADO',
+                    'oic_usucreacion' => $user->usu_codigo,
+                    'oic_fecmodificacion' => null,
+                ]);
+
+                $parteRequerimiento = Parte::where('oip_descripcion', 'REQUERIMIENTO')->first();
+                if (!$parteRequerimiento) {
+                    throw new Exception('No se encontró la parte requerimiento');
+                }
+                
+                $detalleParte = OrdenInternaPartes::create([
+                    'oic_id' => $requerimiento_excedente->oic_id,
+                    'oip_id' => $parteRequerimiento->oip_id,
+                    'opd_usucreacion' => $user->usu_codigo,
+                    'opd_fecmodificacion' => null
+                ]);
+
+                $itemIndex = 1;
+                foreach ($validatedData['detalle_productos'] as $detalle) {
+
+                    $detalleValidated = validator($detalle, [
+                        'pro_id' => 'required|exists:tblproductos_pro,pro_id',
+                        'ocd_orden' => 'required|integer',
+                        'ocd_descripcion' => 'required|string',
+                        'ocd_cantidad' => 'required|numeric|min:0.01',
+                        'ocd_preciounitario' => 'required|numeric|min:0.01',
+                        'ocd_porcentajedescuento' => 'nullable|numeric|min:0|max:100',
+                        'imp_codigo' => 'nullable|string|exists:tblimpuestos_imp,imp_codigo',
+                        'ocd_porcentajeimpuesto' => 'nullable|numeric|min:0|max:100',
+                        'ocd_fechaentrega' => 'nullable|date',
+                    ])->validate();
+
+                    $odm = OrdenInternaMateriales::create([
+                        'opd_id' => $detalleParte->opd_id,
+                        'pro_id' => $detalleValidated['pro_id'],
+                        'odm_item' => $itemIndex++,
+                        'odm_descripcion' => $detalleValidated['ocd_descripcion'],
+                        'odm_cantidad' => $detalleValidated['ocd_cantidad'],
+                        'odm_cantidadpendiente' => $detalleValidated['ocd_cantidad'],
+                        'odm_observacion' => $detalleValidated['ocd_observacion'] ?? null,
+                        'odm_tipo' => 1,
+                        'odm_usucreacion' => $user->usu_codigo,
+                        'odm_fecmodificacion' => null,
+                        'odm_estado' => 'ODC', // Orden de Compra
+                        'odm_fecconsultareservacion' => now()
+                    ]);
+
+                    // Calcular total del item
+                    $subtotalItem = $detalleValidated['ocd_cantidad'] * $detalleValidated['ocd_preciounitario'];
+                    $descuentoItem = $subtotalItem * ($detalleValidated['ocd_porcentajedescuento'] ?? 0) / 100;
+                    $subtotalConDescuentoItem = $subtotalItem - $descuentoItem;
+                    $impuestoItem = $subtotalConDescuentoItem * ($detalleValidated['ocd_porcentajeimpuesto'] ?? 0) / 100;
+                    $totalItem = $subtotalConDescuentoItem + $impuestoItem;
+
+                    // Crear detalle de orden de compra con el odm_id generado
+                    OrdenCompraDetalle::create([
+                        'odm_id' => $odm->odm_id,
+                        'occ_id' => $ordencompra->occ_id,
+                        'pro_id' => $detalleValidated['pro_id'],
+                        'ocd_orden' => $detalleValidated['ocd_orden'],
+                        'ocd_descripcion' => $detalleValidated['ocd_descripcion'],
+                        'ocd_observacion' => $detalleValidated['ocd_observacion'] ?? null,
+                        'ocd_cantidad' => $detalleValidated['ocd_cantidad'],
+                        'ocd_preciounitario' => $detalleValidated['ocd_preciounitario'],
+                        'ocd_total' => $totalItem, // Total del item individual
+                        'ocd_porcentajedescuento' => $detalleValidated['ocd_porcentajedescuento'] ?? 0,
+                        'imp_codigo' => $detalleValidated['imp_codigo'] ?? null,
+                        'ocd_porcentajeimpuesto' => $detalleValidated['ocd_porcentajeimpuesto'] ?? 0,
+                        'ocd_fechaentrega' => $detalleValidated['ocd_fechaentrega'] ?? null,
+                        'ocd_activo' => 1,
+                        'ocd_usucreacion' => $user->usu_codigo,
+                        'ocd_fecmodificacion' => null,
+                    ]);
+                }
+
+                $detallesOrden = OrdenCompraDetalle::where('occ_id', $ordencompra->occ_id)->get();
+                
+                $subtotal = $detallesOrden->sum('ocd_total');
+                
+                $impuesto = $detallesOrden->sum(function($detalle) {
+                    $subtotalItem = $detalle->ocd_cantidad * $detalle->ocd_preciounitario;
+                    $descuentoItem = $subtotalItem * ($detalle->ocd_porcentajedescuento ?? 0) / 100;
+                    $subtotalConDescuentoItem = $subtotalItem - $descuentoItem;
+                    return $subtotalConDescuentoItem * ($detalle->ocd_porcentajeimpuesto ?? 0) / 100;
+                });
+                
+                $total = $subtotal + $impuesto;
+
+                $ordencompra->update([
+                    'occ_subtotal' => $subtotal,
+                    'occ_impuesto' => $impuesto,
+                    'occ_total' => $total,
+                    'occ_usumodificacion' => $user->usu_codigo,
+                    'occ_fecmodificacion' => now()
                 ]);
             }
 

@@ -6,6 +6,23 @@ $(document).ready(() => {
     const id = segments.pop()
     let dataOrdenCompra = {}
 
+    // cargar formas de pago
+    const cargarFormasPago = async () => {
+        try {
+            const { data } = await axios.get(`${config.BACK_URL}/formaspagoSimpleProveedor`)
+            const defaultOptionFormaPago = $('<option>').val('').text('Seleccione una forma de pago')
+            $("#formaDePagoOrdenCompraInput").empty()
+            $("#formaDePagoOrdenCompraInput").append(defaultOptionFormaPago)
+
+            data.forEach((formaPago) => {
+                const option = $('<option>').val(formaPago["fpa_codigo"]).text(formaPago["fpa_descripcion"])
+                $("#formaDePagoOrdenCompraInput").append(option)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     // cargar areas
     const cargarTipoMonedas = async () => {
         try {
@@ -62,7 +79,9 @@ $(document).ready(() => {
         $('#whatsappProveedorInput').val(data.proveedor.prv_whatsapp || '')
         // DATOS DE LA ORDEN DE COMPRA
         $("#monedaOrdenCompraInput").val(data.moneda.mon_codigo)
-        $("#formaDePagoOrdenCompraInput").val(data.occ_formapago || '')
+        $("#formaDePagoOrdenCompraInput").val(data.fpa_codigo || '')
+        $("#tipoOrdenCompraSelect").val(data.occ_tipo || '')
+        $("#activoOrdenCompra").prop('checked', data.occ_activo == 1)
         $("#fechaOrdenCompraPicker").datepicker({
             dateFormat: 'dd/mm/yy',
         }).datepicker("setDate", moment(data.occ_fecha).toDate())
@@ -83,7 +102,9 @@ $(document).ready(() => {
             const { ocd_id, ocd_cantidad, ocd_descripcion, ocd_orden, ocd_preciounitario, ocd_total, pro_id } = detalle
             const producto_id = pro_id ? pro_id : obtenerIdUnico()
             const rowItem = document.createElement('tr')
-            rowItem.classList.add(pro_id ? '' : 'sin-asociar');
+            if (!pro_id) {
+                rowItem.classList.add('sin-asociar');
+            }
             //debemos indicar que son ediciones directas en base de datos
             rowItem.classList.add('row-editable');
             rowItem.classList.add('table-primary')
@@ -167,9 +188,11 @@ $(document).ready(() => {
             await Promise.all([
                 cargarTipoMonedas(),
                 cargarTrabajadores(),
+                cargarFormasPago(),
             ])
             await cargarOrdenCompra()
         } catch (error) {
+            console.log(error)
             alert("Error al cargar los datos")
         }
     }
@@ -600,8 +623,8 @@ $(document).ready(() => {
 
                 // agregamos al detalle general
                 const rowItem = document.createElement('tr')
-                rowItem.classList.add(rowData.ocd_asociar ? '' : 'sin-asociar');
-                rowItem.classList.add('table-warning')
+                if (!rowData.ocd_asociar) rowItem.classList.add('sin-asociar');
+                rowItem.classList.add('table-warning');
                 rowItem.innerHTML = `
                 <input class="producto-id" value="${rowData.pro_id}" type="hidden"/>
                 <td class="orden">${rowData.ocd_orden}</td>
@@ -749,6 +772,8 @@ $(document).ready(() => {
             occ_adelanto: occ_adelanto || null,
             occ_saldo: occ_saldo || null,
             occ_observacionpago: occ_observacionpago || null,
+            occ_tipo: $('#tipoOrdenCompraSelect').val(),
+            occ_esactivo: $('#activoOrdenCompra').is(':checked') ? 1 : 0,
             detalle_productos: formatDetalleProductos,
         }
         console.log(data)

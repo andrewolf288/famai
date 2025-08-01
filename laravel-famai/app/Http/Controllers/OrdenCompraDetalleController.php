@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\CotizacionDetalle;
 use App\OrdenCompraDetalle;
+use App\OrdenCompra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class OrdenCompraDetalleController extends Controller
 {
@@ -40,6 +43,23 @@ class OrdenCompraDetalleController extends Controller
             'ocd_usumodificacion' => $user->usu_codigo,
         ]);
 
+        // Recalcular totales de la cabecera
+        $detalles = OrdenCompraDetalle::where('occ_id', $ordencompra->occ_id)->get();
+        $subtotal = $detalles->sum('ocd_total');
+        $impuesto = $detalles->sum(function($detalle) {
+            return ($detalle->ocd_total * $detalle->ocd_porcentajeimpuesto) / 100;
+        });
+        $total = $subtotal + $impuesto;
+
+        // Actualizar la cabecera
+        $ordenCompraCabecera = OrdenCompra::find($ordencompra->occ_id);
+        $ordenCompraCabecera->update([
+            'occ_subtotal' => $subtotal,
+            'occ_impuesto' => $impuesto,
+            'occ_total' => $total,
+            'occ_usumodificacion' => $user->usu_codigo,
+        ]);
+
         return response()->json($ordencompra, 200);
     }
 
@@ -52,22 +72,71 @@ class OrdenCompraDetalleController extends Controller
     // eliminamos un detalle de cotizacion
     public function destroy($id)
     {
-        $ordencompra = OrdenCompraDetalle::find($id);
-        $ordencompraID = $ordencompra->occ_id;
+        $user = auth()->user();
+        
+        try {
+            DB::beginTransaction();
+            
+            $ordencompra = OrdenCompraDetalle::find($id);
+            $ordencompraID = $ordencompra->occ_id;
 
-        $ordencompra->delete();
+            $ordencompra->delete();
 
-        // arreglamos el orden de la cotizacion
-        $ordenescompra = OrdenCompraDetalle::where('occ_id', $ordencompraID)->get();
-        $numeroOrden = 1;
+            // arreglamos el orden de la cotizacion
+            $ordenescompra = OrdenCompraDetalle::where('occ_id', $ordencompraID)->get();
+            $numeroOrden = 1;
 
-        foreach ($ordenescompra as $detalle) {
-            $detalle->update([
-                'ocd_orden' => $numeroOrden
-            ]);
-            $numeroOrden++;
+            foreach ($ordenescompra as $detalle) {
+                $detalle->update([
+                    'ocd_orden' => $numeroOrden
+                ]);
+                $numeroOrden++;
+            }
+
+            // Recalcular totales de la orden de compra
+            $detallesOrden = OrdenCompraDetalle::where('occ_id', $ordencompraID)->get();
+            
+            if ($detallesOrden->count() > 0) {
+                // Calcular subtotal sumando los totales de cada item
+                $subtotal = $detallesOrden->sum('ocd_total');
+                
+                // Calcular impuesto total sumando los impuestos de cada item
+                $impuesto = $detallesOrden->sum(function($detalle) {
+                    $subtotalItem = $detalle->ocd_cantidad * $detalle->ocd_preciounitario;
+                    $descuentoItem = $subtotalItem * ($detalle->ocd_porcentajedescuento ?? 0) / 100;
+                    $subtotalConDescuentoItem = $subtotalItem - $descuentoItem;
+                    return $subtotalConDescuentoItem * ($detalle->ocd_porcentajeimpuesto ?? 0) / 100;
+                });
+                
+                $total = $subtotal + $impuesto;
+
+                // Actualizar totales en la cabecera
+                $ordenCompra = OrdenCompra::find($ordencompraID);
+                $ordenCompra->update([
+                    'occ_subtotal' => $subtotal,
+                    'occ_impuesto' => $impuesto,
+                    'occ_total' => $total,
+                    'occ_usumodificacion' => $user->usu_codigo,
+                    'occ_fecmodificacion' => now()
+                ]);
+            } else {
+                // Si no quedan detalles, poner totales en cero
+                $ordenCompra = OrdenCompra::find($ordencompraID);
+                $ordenCompra->update([
+                    'occ_subtotal' => 0,
+                    'occ_impuesto' => 0,
+                    'occ_total' => 0,
+                    'occ_usumodificacion' => $user->usu_codigo,
+                    'occ_fecmodificacion' => now()
+                ]);
+            }
+
+            DB::commit();
+            return response()->json(['success' => 'Orden de compra eliminada correctamente.'], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        return response()->json(['success' => 'Orden de compra eliminada correctamente.'], 200);
     }
 
     // traer informacion de cotizacion detalle asociado
