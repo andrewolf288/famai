@@ -238,7 +238,7 @@ class OrdenCompraController extends Controller
                     'occ_referencia' => 'nullable|string',
                     'tra_elaborado' => 'required|exists:tbltrabajadores_tra,tra_id',
                     'occ_notas' => 'nullable|string',
-                    'occ_adelanto' => 'nullable|numeric|min:1',
+                    'occ_adelanto' => 'nullable|numeric|min:0',
                     'occ_saldo' => 'nullable|numeric|min:1',
                     'occ_observacionpago' => 'nullable|string',
                     'occ_subtotal' => 'required|numeric|min:1',
