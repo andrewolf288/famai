@@ -19,9 +19,129 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class RequerimientoController extends Controller
 {
+    public function updateMaterialRequerimiento(Request $request, $id) {
+        try {
+            DB::beginTransaction();
+            $user = auth()->user();
+            $material = OrdenInternaMateriales::findOrFail($id);
+
+            // No se puede actualizar el material a menos cantidad de lo ya cotizado
+            $cantidadCotizada = $material->cotizaciones->sum('cod_cantidad');
+            Log::info($cantidadCotizada);
+            if ($request->odm_cantidad < $cantidadCotizada) {
+                throw new Exception('No se puede actualizar el material, la cantidad a actualizar es menor a la cantidad cotizada');
+            }
+
+            $material->update([
+                'odm_descripcion' => $request->odm_descripcion,
+                'odm_cantidad' => $request->odm_cantidad,
+                'odm_observacion' => $request->odm_observacion,
+                'odm_fecmodificacion' => now(),
+                'odm_usumodificacion' => $user->usu_codigo,
+            ]);
+            DB::commit();
+            return response()->json(['message' => 'Material actualizado correctamente'], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // funcion para actualizar un requerimiento
+    public function updateRequerimiento(Request $request, $id) {
+        try {
+            DB::beginTransaction();
+            $user = auth()->user();
+            $requerimiento = OrdenInterna::findOrFail($id);
+            $requerimiento->update([
+                'oic_fecha' => $request->oic_fecha,
+                'oic_fechaentregaestimada' => $request->oic_fechaentregaestimada,
+                'are_codigo' => $request->are_codigo,
+                'tra_idorigen' => $request->tra_idorigen,
+                'oic_otsap' => $request->oic_otsap,
+                'mrq_codigo' => $request->mrq_codigo,
+                'oic_equipo_descripcion' => $request->oic_equipo_descripcion,
+                'oic_fecmodificacion' => now(),
+                'oic_usumodificacion' => $user->usu_codigo
+            ]);
+
+            // contar registros de materiales
+            $countMateriales = OrdenInternaMateriales::where('opd_id', $requerimiento->partes[0]->opd_id)->count();
+
+            foreach ($request->detalle_requerimiento as $detalle) {
+                OrdenInternaMateriales::create([
+                    'opd_id' => $requerimiento->partes[0]->opd_id,
+                    'pro_id' => $detalle['pro_id'],
+                    'odm_item' => $countMateriales + 1,
+                    'odm_descripcion' => $detalle['odm_descripcion'],
+                    'odm_cantidad' => $detalle['odm_cantidad'],
+                    'odm_cantidadpendiente' => $detalle['odm_cantidad'],
+                    'odm_observacion' => $detalle['odm_observacion'],
+                    'odm_tipo' => $detalle['odm_tipo'],
+                    'odm_usucreacion' => $user->usu_codigo,
+                    'odm_fecmodificacion' => null,
+                    'tra_responsable' => $request->tra_idorigen,
+                    'odm_estado' => $request->mrq_codigo === 'STK' ? 'REQ' : null,
+                    'odm_fecconsultareservacion' => $request->mrq_codigo === 'STK' ? Carbon::now() : null
+                ]);
+
+                $countMateriales++;
+            }
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+        return response()->json(['message' => 'Requerimiento actualizado correctamente'], 200);
+    }
+
+    // funcion para eliminar un material
+    public function destroyMaterial($id) {
+        try {
+            DB::beginTransaction();
+            $material = OrdenInternaMateriales::findOrFail($id);
+
+            // buscar cotizaciones u ordenes de compra
+            $cotizaciones = $material->cotizaciones;
+            $ordenesCompra = $material->ordenesCompra;
+            if ($cotizaciones->count() > 0) {
+                throw new Exception('No se puede eliminar el material, tiene cotizaciones asociadas');
+            }
+            if ($ordenesCompra->count() > 0) {  
+                throw new Exception('No se puede eliminar el material, tiene ordenes de compra asociadas');
+            }
+
+            // eliminar los adjuntos
+            $material->detalleAdjuntos()->delete();
+
+            // eliminar el material
+            $material->delete();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+        return response()->json(['message' => 'Material eliminado correctamente'], 200);
+    }
+
+    // funcion para mostrar un requerimiento
+    public function show($id) {
+        $requerimiento = OrdenInterna::with([
+            'area', 
+            'trabajadorOrigen', 
+            'motivoRequerimiento',
+            'partes.materiales.producto',
+        ])->findOrFail($id);
+        return response()->json([
+            'message' => 'Se muestra el requerimiento',
+            'data' => $requerimiento
+        ]);
+    }
+
     // funcion para eliminar un requerimiento
     public function destroy($id) {
         try {

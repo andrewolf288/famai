@@ -251,6 +251,10 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('requerimientos', [RequerimientoController::class, 'store']);
     Route::get('requerimiento/exportarPDF', [RequerimientoController::class, 'exportarPDF']);
     Route::delete('requerimiento/{id}', [RequerimientoController::class, 'destroy']);
+    Route::get('requerimiento/{id}', [RequerimientoController::class, 'show']);
+    Route::delete('requerimiento/materiales/{id}', [RequerimientoController::class, 'destroyMaterial']);
+    Route::put('requerimiento/{id}', [RequerimientoController::class, 'updateRequerimiento']);
+    Route::put('requerimiento/materiales/{id}', [RequerimientoController::class, 'updateMaterialRequerimiento']);
 });
 
 // rutas de requerimientos detalles
