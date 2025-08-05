@@ -201,7 +201,13 @@ $(document).ready(async () => {
     const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material;
     const findProducto = detalle_requerimiento.find((element) => element.pro_id == pro_id);
 
-    const estaEnTabla = $("#tbl-requerimientos tbody").find("tr").find("td:first").text() === pro_codigo;
+    let estaEnTabla = false;
+    $("#tbl-requerimientos tbody tr").each(function () {
+      if ($(this).find("td:first").text().trim() === pro_codigo) {
+        estaEnTabla = true;
+        return false;
+      }
+    });
 
     // Excepcion de validacion
     if (findProducto || estaEnTabla) {
