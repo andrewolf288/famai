@@ -1047,7 +1047,10 @@ class CotizacionController extends Controller
                     $cantidadCotizadaDetalle = min($cantidadCotizadaTotal, $cantidadRequerida);
 
                     $precioUnitario = round(floatval($detalle['cod_preciounitario']), 2);
+                    $precioUnitarioSinDescuento = round($precioUnitario / (1 - $detalle['cod_descuento'] / 100), 2);
                     $total = round($cantidadCotizadaDetalle * $precioUnitario, 2);
+
+                    $tieneIgvIncluido = $validatedData['coc_conigv'] == 1;
 
                     $detalleResumido->update([
                         'cod_cantidadcotizada' => $cantidadCotizadaDetalle,
@@ -1056,6 +1059,8 @@ class CotizacionController extends Controller
                         'cod_preciounitario' => $precioUnitario,
                         'cod_total' => $total,
                         'cod_cotizar' => 1,
+                        'cod_descuento' => $detalle['cod_descuento'],
+                        'cod_precioconigv' => $tieneIgvIncluido ? $precioUnitarioSinDescuento : $precioUnitarioSinDescuento * 1.18,
                     ]);
 
                     $cantidadCotizadaTotal -= $cantidadCotizadaDetalle;

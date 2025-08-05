@@ -163,7 +163,7 @@ $(document).ready(function () {
                     </td>
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center">
-                            <input style="pointer-events: none; width: 100px;" type="number" class="form-control descuento-input" disabled value='${detalle.detalle[0].cod_descuento == '.00' ? '0.00' : parseFloat(detalle.detalle[0].cod_descuento).toFixed(2)}' /> %
+                            <input style="width: 100px;" type="number" class="form-control descuento-input" value='${detalle.detalle[0].cod_descuento == '.00' ? '0.00' : parseFloat(detalle.detalle[0].cod_descuento).toFixed(2)}' /> %
                         </div >
                     </td >
                     <td class="text-center">
@@ -176,9 +176,13 @@ $(document).ready(function () {
                     if (coc_estado === 'SOL') {
                         const cantidadDetalle = rowItem.querySelector('.cantidadcotizada-input')
                         const precioDetalle = rowItem.querySelector('.precio-input')
+                        const descuentoDetalle = rowItem.querySelector('.descuento-input')
 
                         cantidadDetalle.addEventListener('input', function () {
-                            const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                            const descuento = parseFloat(descuentoDetalle.value)
+                            const precio = parseFloat(precioDetalle.value)
+                            const total = precio * (1 - descuento / 100) * parseFloat(cantidadDetalle.value)
+
                             if (!isNaN(total)) {
                                 rowItem.querySelector('.total-input').textContent = total.toFixed(2);
                             } else {
@@ -188,7 +192,10 @@ $(document).ready(function () {
                         })
 
                         precioDetalle.addEventListener('input', function () {
-                            const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                            const descuento = parseFloat(descuentoDetalle.value)
+                            const precio = parseFloat(precioDetalle.value)
+                            const total = precio * (1 - descuento / 100) * parseFloat(cantidadDetalle.value)
+
                             if (!isNaN(total)) {
                                 rowItem.querySelector('.total-input').textContent = total.toFixed(2);
                             } else {
@@ -196,6 +203,19 @@ $(document).ready(function () {
                             }
                             calcularResumenCotizacion()
                         });
+
+                        descuentoDetalle.addEventListener('input', function () {
+                            const descuento = parseFloat(descuentoDetalle.value)
+                            const precio = parseFloat(precioDetalle.value)
+                            const total = precio * (1 - descuento / 100) * parseFloat(cantidadDetalle.value)
+
+                            if (!isNaN(total)) {
+                                rowItem.querySelector('.total-input').textContent = total.toFixed(2)
+                            } else {
+                                rowItem.querySelector('.total-input').textContent = '';
+                            }
+                            calcularResumenCotizacion()
+                        })
                     }
 
                     $('#productosCotizacionTable tbody').append(rowItem)
@@ -322,9 +342,10 @@ $(document).ready(function () {
                     cod_observacionproveedor: $(this).find('.observacionproveedor-input').val(),
                     cod_tiempoentrega: $(this).find('.tiempoentrega-input').val(),
                     cod_cantidadcotizada: $(this).find('.cantidadcotizada-input').val(),
-                    cod_preciounitario: $(this).find('.precio-input').val(),
+                    cod_preciounitario: $(this).find('.precio-input').val() * (1 - $(this).find('.descuento-input').val() / 100),
                     cod_total: $(this).find('.total-input').text(),
                     cod_cotizar: 1,
+                    cod_descuento: $(this).find('.descuento-input').val()
                 }
                 detalleCotizacionValidos.push(formatDetalle)
             }

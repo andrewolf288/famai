@@ -407,13 +407,14 @@ $(document).ready(async () => {
             detalles.forEach((detalleMaterial) => {
                 const precio_unitario = detalleMaterial.cod_preciounitario
                 const { detalle_material } = detalleMaterial
-                const precio_unitario_igv = precio_unitario * (detalleMaterial.cotizacion.coc_conigv == 1 ? (1 / 1.18) : 1)
+                const precio_real = precio_unitario / (1 - detalleMaterial.cod_descuento / 100)
+                const precio_unitario_igv = precio_real * (detalleMaterial.cotizacion.coc_conigv == 1 ? (1 / 1.18) : 1)
                 const formatDetalle = {
                     ...detalle_material,
-                    ocd_porcentajedescuento: 0.00,
+                    ocd_porcentajedescuento: detalleMaterial.cod_descuento,
                     ocd_cantidad: detalle_material["odm_cantidadpendiente"],
                     ocd_preciounitario: parseFloat(precio_unitario_igv).toFixed(4),
-                    ocd_total: parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv).toFixed(4),
+                    ocd_total: (parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv).toFixed(4)) * (1 - detalleMaterial.cod_descuento / 100),
                     ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"],
                     coc_formapago: detalleMaterial.cotizacion.coc_formapago
                 }
