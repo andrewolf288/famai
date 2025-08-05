@@ -82,86 +82,6 @@ $(document).ready(async () => {
   const cargarRequerimiento = async () => {
     try {
       const response = await client.get(`/requerimiento/${oic_id}`);
-      // const requerimiento = {
-      //     "oic_id": 21339,
-      //     "oic_fecha": "2025-08-01",
-      //     "odt_numero": "RQA0000002",
-      //     "cli_id": null,
-      //     "are_codigo": "HID",
-      //     "oic_equipo_descripcion": "Requerimiento generado automáticamente por productos nuevos en orden de compra",
-      //     "tra_idorigen": "177",
-      //     "tra_idmaestro": null,
-      //     "tra_idalmacen": null,
-      //     "oic_usucreacion": "ADMIN   ",
-      //     "oic_feccreacion": "2025-08-01T07:48:33.907000Z",
-      //     "oic_usumodificacion": null,
-      //     "oic_fecmodificacion": null,
-      //     "oic_activo": "1",
-      //     "oic_estado": "ENVIADO",
-      //     "oic_fechaaprobacion": null,
-      //     "oic_fechaentregaestimada": "2025-08-08",
-      //     "oic_componente": null,
-      //     "oic_fechaevaluacion": null,
-      //     "oic_tipo": "REQ",
-      //     "sed_codigo": "10",
-      //     "mrq_codigo": "STK",
-      //     "oic_otsap": null,
-      //     "area": {
-      //         "are_codigo": "HID",
-      //         "are_descripcion": "Hidraulica"
-      //     },
-      //     "trabajador_origen": {
-      //         "tra_id": 177,
-      //         "tra_nombre": "LEO SANCA CAHUANA",
-      //         "tra_codigosap": "406"
-      //     },
-      //     "motivo_requerimiento": {
-      //         "mrq_codigo": "STK",
-      //         "mrq_descripcion": "Stock"
-      //     },
-      //     "partes": [
-      //         {
-      //             "opd_id": 29150,
-      //             "oip_id": "12",
-      //             "oic_id": "21339",
-      //             "opd_usucreacion": "ADMIN   ",
-      //             "opd_feccreacion": "2025-08-01T07:48:33.947000Z",
-      //             "opd_usumodificacion": null,
-      //             "opd_fecmodificacion": null,
-      //             "materiales": [
-      //                 {
-      //                     "odm_id": 30729,
-      //                     "opd_id": "29150",
-      //                     "pro_id": "359",
-      //                     "odm_item": "1",
-      //                     "odm_descripcion": "(04-A-05-//) PASTA ANTIOXIDANTE PENETROX ¨A¨",
-      //                     "odm_cantidad": "1.00",
-      //                     "odm_observacion": null,
-      //                     "odm_tipo": "1",
-      //                     "odm_estado": "COT",
-      //                     "odm_usucreacion": "ADMIN   ",
-      //                     "odm_feccreacion": "2025-08-01T07:48:33.953000Z",
-      //                     "odm_usumodificacion": null,
-      //                     "odm_fecmodificacion": null,
-      //                     "tra_responsable": null,
-      //                     "odm_notapresupuesto": null,
-      //                     "odm_adjuntopresupuesto": null,
-      //                     "odm_fecasignacionresponsable": null,
-      //                     "odm_cantidadreservada": null,
-      //                     "odm_cantidadordenada": ".00",
-      //                     "odm_cantidadpendiente": "1.00",
-      //                     "odm_cantidadatendida": null,
-      //                     "odm_cantidadajuste": null,
-      //                     "odm_cantidaddespachada": null,
-      //                     "odm_fecconsultareservacion": "2025-08-01 02:48:33.953",
-      //                     "odm_solped": null,
-      //                     "ordenes_compra": [],
-      //                     "cotizaciones": []
-      //                 }
-      //             ]
-      //         }
-      //     ]
-      // };
       const requerimiento = response.data.data;
 
       // CABECERA
@@ -291,7 +211,7 @@ $(document).ready(async () => {
       $("#productosInput").val("");
 
       const data = {
-        pro_id,
+        pro_id: null,
         pro_codigo,
         odm_descripcion: pro_descripcion,
         odm_cantidad: 1.0,
@@ -488,6 +408,7 @@ $(document).ready(async () => {
         detalle_requerimiento,
       });
       bootbox.alert("Requerimiento actualizado correctamente");
+      window.location.href = "requerimiento";
     } catch (error) {
       bootbox.alert("Error al guardar el requerimiento");
       console.error("Error al guardar el requerimiento:", error);

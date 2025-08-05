@@ -73,9 +73,27 @@ class RequerimientoController extends Controller
             $countMateriales = OrdenInternaMateriales::where('opd_id', $requerimiento->partes[0]->opd_id)->count();
 
             foreach ($request->detalle_requerimiento as $detalle) {
+
+                // Obtener pro_id
+                $pro_id = Producto::where('pro_codigo', $detalle['pro_codigo'])->first()->pro_id;
+                if ($pro_id === null) {
+                    $productoCreado = Producto::create([
+                        'pro_codigo' => $detalle['pro_codigo'],
+                        'pro_descripcion' => $detalle['pro_descripcion'],
+                        'uni_codigo' => trim($detalle['uni_codigo']),
+                        'pgi_codigo' => 'SIN',
+                        'pfa_codigo' => 'SIN',
+                        'psf_codigo' => 'SIN',
+                        'pma_codigo' => 'SIN',
+                        'pro_usucreacion' => $user->usu_codigo,
+                        'pro_fecmodificacion' => null
+                    ]);
+                    $pro_id = $productoCreado->pro_id;
+                }
+
                 OrdenInternaMateriales::create([
                     'opd_id' => $requerimiento->partes[0]->opd_id,
-                    'pro_id' => $detalle['pro_id'],
+                    'pro_id' => $pro_id,
                     'odm_item' => $countMateriales + 1,
                     'odm_descripcion' => $detalle['odm_descripcion'],
                     'odm_cantidad' => $detalle['odm_cantidad'],
