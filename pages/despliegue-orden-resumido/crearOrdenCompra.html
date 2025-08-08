@@ -1,0 +1,451 @@
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+  <h2 class="mb-3 fs-4">Crear Orden de Compra</h2>
+</div>
+
+<div class="modal-body">
+  <div class="row">
+      <!-- Columna para Proveedor -->
+      <div class="col-md-6 col-12">
+          <div class="card">
+              <div class="card-header">
+                  <div class="d-flex justify-content-between">
+                      <h5 class="card-title">Proveedor</h5>
+                      <button class="btn btn-sm btn-success" id="refresh-bancos">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                            </svg>
+                      </button>
+                  </div>
+              </div>
+              <div class="card-body">
+                  <div class="row mt-2">
+                      <input type="text" id="idProveedorOrdenCompraInput" value="" hidden>
+                      <div class="col-md-3">
+                          <label for="documentoProveedorInput">Documento</label>
+                          <input type="text" id="documentoProveedorInput" value="" class="form-control"
+                              readonly disabled />
+                      </div>
+                      <div class="col-md-9">
+                          <label for="razonSocialProveedorInput">Nombre</label>
+                          <input type="text" id="razonSocialProveedorInput" value="" class="form-control"
+                              readonly disabled />
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-4">
+                          <label for="correoProveedorInput">Correo</label>
+                          <input type="email" id="correoProveedorInput" class="form-control" />
+                      </div>
+                      <div class="col-md-4">
+                          <label for="contactoProveedorInput">Contacto</label>
+                          <input type="text" id="contactoProveedorInput" class="form-control" />
+                      </div>
+                      <div class="col-md-4">
+                          <label for="whatsappProveedorInput">Whatsapp</label>
+                          <input type="text" id="whatsappProveedorInput" class="form-control" />
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-12">
+                          <label for="direccionProveedorInput">Dirección</label>
+                          <textarea id="direccionProveedorInput" class="form-control"></textarea>
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-12">
+                          <label for="cuentaSolesProveedorLabel">Cuenta Soles</label>
+                          <div class="row">
+                              <input type="text" id="idCuentaBancariaSoles" value="" hidden>
+                              <div class="col-md-6">
+                                  <select class="form-select" id="cuentaSolesProveedorSelect"></select>
+                              </div>
+                              <div class="col-md-6">
+                                  <input class="form-control" type="text" id="cuentaSolesProveedorInput">
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-12 mt-1">
+                          <label for="cuentaDolaresProveedorLabel">Cuenta Dolares</label>
+                          <div class="row">
+                              <input type="text" id="idCuentaBancariaDolares" value="" hidden>
+                              <div class="col-md-6">
+                                  <select class="form-select" id="cuentaDolaresProveedorSelect"></select>
+                              </div>
+                              <div class="col-md-6">
+                                  <input class="form-control" type="text"
+                                      id="cuentaDolaresProveedorInput">
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-12 mt-1">
+                          <label for="cuentaBancoNacionProveedorLabel">Cuenta Banco de la Nación</label>
+                          <div class="row">
+                              <input type="text" id="idCuentaBancariaBancoNacion" value="" hidden>
+                              <div class="col-md-6">
+                                  <select class="form-select"
+                                      id="cuentaBancoNacionProveedorSelect"></select>
+                              </div>
+                              <div class="col-md-6">
+                                  <input class="form-control" type="text"
+                                      id="cuentaBancoNacionProveedorInput">
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <!-- Columna para datos de Orden de Compra -->
+      <div class="col-md-6 col-12">
+          <div class="card">
+              <div class="card-header">
+                  <h5 class="card-title">Cabecera orden de compra</h5>
+              </div>
+              <div class="card-body">
+                  <div class="row">
+                      <div class="col-md-4">
+                          <label for="monedaOrdenCompraInput">Moneda</label>
+                          <select id="monedaOrdenCompraInput" class="form-select">
+                          </select>
+                      </div>
+                      <div class="col-md-6">
+                          <label for="formaDePagoOrdenCompraInput">Forma de pago</label>
+                          <select id="formaDePagoOrdenCompraInput" class="form-select">
+                          </select>
+                      </div>
+                      <div class="col-md-2 d-flex align-items-center">
+                          <div class="form-check">
+                              <input class="form-check-input me-2" type="checkbox" id="activoOrdenCompra">
+                              <label class="form-check-label" for="activoOrdenCompra">
+                                  Es activo
+                              </label>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-4">
+                          <label for="adelantoOrdenCompraInput">Adelanto:</label>
+                          <input type="number" id="adelantoOrdenCompraInput" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="saldoOrdenCompraInput">Saldo:</label>
+                          <input type="number" id="saldoOrdenCompraInput" class="form-control">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="tipoOrdenCompraSelect">Tipo:</label>
+                          <select id="tipoOrdenCompraSelect" class="form-select">
+                              <option value="SUM" selected>Suministro</option>
+                              <option value="SER">Servicio</option>
+                          </select>
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-12">
+                          <label for="observacionPagoOrdenCompraInput">Observación de pago</label>
+                          <textarea id="observacionPagoOrdenCompraInput" class="form-control"
+                              rows="2"></textarea>
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-6">
+                          <label for="fechaOrdenCompraPicker">Fecha orden de compra</label>
+                          <input type="text" id="fechaOrdenCompraPicker" class="form-control">
+                      </div>
+                      <div class="col-md-6">
+                          <label for="fechaEntregaOrdenCompraPicker">Fecha entrega</label>
+                          <input type="text" id="fechaEntregaOrdenCompraPicker" class="form-control">
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-4">
+                          <label for="referenciaOrdenCompraInput">Referencia</label>
+                          <input type="text" id="referenciaOrdenCompraInput" class="form-control">
+                      </div>
+                      <div class="col-md-8">
+                          <label for="elaboradoOrdenCompraInput">Elaborado por:</label>
+                          <select id="elaboradoOrdenCompraInput" class="form-select">
+                          </select>
+                      </div>
+                  </div>
+                  <div class="row mt-2">
+                      <div class="col-md-12">
+                          <label for="impuestoOrdenCompraInput">Impuesto:</label>
+                          <select class="form-select" id="impuestoOrdenCompraInput">
+                          </select>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  <!-- Nota de Orden de Compra -->
+  <div class="row mt-3">
+      <div class="col">
+          <div class="card">
+              <div class="card-header">
+                  <h5 class="card-title">Nota</h5>
+              </div>
+              <div class="card-body">
+                  <textarea id="notaOrdenCompraInput" class="form-control" rows="3"></textarea>
+              </div>
+          </div>
+      </div>
+  </div>
+  <!-- Agrupado Detalle Materiales -->
+  <div class="row mt-3">
+      <div class="col">
+          <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="card-title">Agrupado detalle orden</h5>
+              </div>
+              <div class="card-body">
+                  <table class="table" id="agrupadoDetalleOrdenCompraTable">
+                      <thead>
+                          <tr>
+                              <th class="text-center col-1">Item</th>
+                              <th class="col-1">Código</th>
+                              <th class="col-4">Descripción</th>
+                              <th class="text-center col-1">Unidad</th>
+                              <th class="text-center col-1">Cant. req.</th>
+                              <th class="text-center col-1">Cant. ped.</th>
+                              <th class="text-center col-1">Prec. unitario s/IGV</th>
+                              <th class="text-center col-1">Prec. total s/IGV</th>
+                              <th class="text-center col-1">Acciones</th>
+                          </tr>
+                      </thead>
+                      <tbody id="agrupadoDetalleOrdenCompraBody">
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+  </div>
+  <!-- Disgregado Detalle Materiales -->
+  <div class="row mt-3">
+      <div class="col">
+          <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="card-title">Disgregado detalle orden</h5>
+                  <!-- <button class="btn btn-success" id="addProductBtn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                          <path
+                              d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                      </svg>
+                  </button> -->
+              </div>
+              <div class="card-body">
+                  <div class="table-container-sticky">
+                      <table class="table table-sticky" id="disgregadoDetalleOrdenCompraTable">
+                          <thead>
+                              <tr>
+                                  <th class="text-center" style="width: 10px;">Item</th>
+                                  <th class="text-center" style="width: 50px;">OT</th>
+                                  <th class="text-center" style="width: 100px;">% Desc.</th>
+                                  <th style="width: 120px;">Fec. Entega</th>
+                                  <th style="width: 300px;">Producto</th>
+                                  <th class="text-center" style="width: 10px;">Und.</th>
+                                  <th class="text-center" style="width: 120px;">Cant. Req.</th>
+                                  <th class="text-center" style="width: 120px;">Cant. Ped.</th>
+                                  <th class="text-center" style="width: 120px;">Precio s/IGV</th>
+                                  <th class="text-center" style="width: 120px;">Total s/IGV</th>
+                                  <th style="width: 240px;">Obs. Detalle</th>
+                                  <th style="width: 240px;">Observación</th>
+                                  <th class="text-center" style="width: 20px;">Acciones</th>
+                              </tr>
+                          </thead>
+                          <tbody id="disgregadoDetalleOrdenCompraBody">
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Resumen de OrdenCompra -->
+  <div class="d-flex justify-content-end mt-4">
+      <div class="col-md-6 col-lg-4">
+          <div class="card">
+              <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="fw-bold">Subtotal:</span>
+                      <span>
+                          <span class="moneda ms-1"></span>
+                          <span id="subtotalOrdenCompra"></span>
+                      </span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="fw-bold">Impuesto:</span>
+                      <span>
+                          <span class="moneda ms-1"></span>
+                          <span id="impuestoOrdenCompra"></span>
+                      </span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                      <span class="fw-bold">Total:</span>
+                      <span>
+                          <span class="moneda ms-1"></span>
+                          <span id="totalOrdenCompra"></span>
+                      </span>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<div class="mt-2 d-flex justify-content-end">
+  <button class="btn btn-primary" id="guardar-orden-compra">Guardar</button>
+</div>
+
+<!-- Modal para detalle de materiales de orden de compra -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Detalle de materiales</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <!-- Agrupado Detalle Materiales -->
+              <div class="card mt-3">
+                  <div class="card">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                          <h5 class="card-title">Agrupado detalle orden</h5>
+                      </div>
+                      <div class="card-body">
+
+                          <table class="table" id="agrupadoDetalleMaterialesTable">
+                              <thead>
+                                  <tr>
+                                      <th class="text-center col-1">Item</th>
+                                      <th class="col-2">Código</th>
+                                      <th class="col-6">Descripción</th>
+                                      <th class="text-center col-1">Unidad</th>
+                                      <th class="text-center col-1">Cant. Req.</th>
+                                      <th class="text-center col-1">Prec. unitario</th>
+                                  </tr>
+                              </thead>
+                              <tbody id="agrupadoDetalleMaterialesBody">
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Disgregado Detalle Materiales -->
+              <div class="card mt-3">
+                  <div class="card">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                          <h5 class="card-title">Disgregado detalle orden</h5>
+                      </div>
+                      <div class="card-body">
+                          <table class="table" id="disgregadoDetalleMaterialesable">
+                              <thead>
+                                  <tr>
+                                      <th class="text-center col-1">Item</th>
+                                      <th class="text-center col-1">OT</th>
+                                      <th class="col-1">Fec. Creación</th>
+                                      <th class="col-3">Producto</th>
+                                      <th class="col-4">Obs Producto</th>
+                                      <th class="text-center col-1">Und.</th>
+                                      <th class="text-center col-1">Cant. Req.</th>
+                                  </tr>
+                              </thead>
+                              <tbody id="disgregadoDetalleMaterialesBody">
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- DIALOG PEDIR OT -->
+<div class="modal fade" id="dialogPedirOT" tabindex="-1" aria-labelledby="dialogPedirOTLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-lg" >
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Cantidad excedente</h5>
+          </div>
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-12">
+                      <p>La cantidad pedida es mayor a la cantidad requerida, se procedera a crear un requerimiento para la cantidad excedente.</p>
+                      <p class="text-danger fw-bold">Si es asi, ingrese la orden de trabajo que se asignara al requerimiento</p>
+                      <input type="text" id="otInput" class="form-control" placeholder="Ingrese el número de orden de trabajo">
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" id="cancelar-ot">Cancelar</button>
+              <button type="button" class="btn btn-primary" id="continuar-ot">Continuar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- MODAL IMPRIMIR -->
+<div class="modal fade" id="imprimirModal" tabindex="-1" aria-labelledby="imprimirModalLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-body">
+              <div class="row">
+                  <input type="text" id="oc-id" value="" hidden>
+                  <h4 class="mb-3 text-center">Imprimir Orden de Compra</h4>
+                  <label>Formato de impresion:</label>
+                  <select id="formato-impresion" class="form-select">
+                  <option value="true">Disgregado</option>
+                  <option value="false">Resumen</option>
+                  </select>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-primary" id="btn-imprimir">Continuar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- MODAL CONTINUAR SIN OT -->
+<div class="modal fade" id="continuarSinOTModal" tabindex="-1" aria-labelledby="continuarSinOTModalLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-12">
+                      <p>¿Desea continuar sin ingresar un numero de orden de trabajo?</p>
+                      <p class="text-danger fw-bold">Si es asi, se procedera a crear el requerimiento excedente sin numero de orden de trabajo</p>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="cancelar-sin-ot" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-primary" id="continuar-sin-ot">Continuar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- LOADER -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-body">
+              <div class="d-flex justify-content-center flex-column align-items-center">
+                  <div class="spinner-border" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <div class="text-center">
+                      <h5>Cargando información...</h5>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+

@@ -397,6 +397,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacion-proveedores', [CotizacionController::class, 'obtenerProveedoresCotizaciones']);
     Route::post('cotizacion-proveedores-detalles', [CotizacionController::class, 'obtenerDetallesProveedoresCotizaciones']);
     Route::get('cotizacion-solicitantes', [CotizacionController::class, 'obtenerSolicitantes']);
+    Route::post('cotizacionesByProveedor', [CotizacionController::class, 'obtenerCotizacionesProveedor']);
 });
 
 // rutas de detalle de cotizacion
@@ -453,6 +454,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('comprasByProductoProveedor', [ProductoProveedorController::class, 'findOrdenCompraByProveedorProducto']);
     Route::get('comprasByProducto', [ProductoProveedorController::class, 'findOrdenCompraByProducto']);
     Route::get('cotizacionesByProducto', [ProductoProveedorController::class, 'findCotizacionesByProducto']);
+    Route::post('ProveedoresByOrdenInternaMateriales', [ProductoProveedorController::class, 'findProveedoresByOrdenInternaMateriales']);
 });
 
 // rutas de movimientos de almacen

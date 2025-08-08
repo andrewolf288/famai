@@ -1,10 +1,5 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
     <h2 class="mb-3 fs-4">Logística requerimientos</h2>
-    <div class="col-auto">
-        <a href="orden-compra/crear" class="btn btn-agregar">
-            Crear Orden de Compra
-        </a>
-    </div>
 </div>
 <div class="row mb-3 mt-2">
     <!-- Filtro SOLPED -->
@@ -73,6 +68,7 @@
 
 <div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
     <div class="w-auto me-4">
+        <button class="btn btn-success me-2" id="btn-crear-orden-compra-masivo">Crear Orden de Compra</button>
         <button class="btn btn-success me-2" id="btn-asignar-responsable">Asignar Responsable</button>
         <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
     </div>
@@ -847,6 +843,45 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="btn-guardar-requerimiento-excedente">Continuar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA PROVEEDORES DISTINTOS EN ORDEN DE COMPRA -->
+<div class="modal fade" id="modalProveedoresDistintos" tabindex="-1" aria-labelledby="modalProveedoresDistintosLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalProveedoresDistintosLabel">Seleccion de proveedor y cotizaciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-2">
+                <div class="row mb-3">
+                    <label for="proveedor-selector" class="form-label">
+                        Seleccione el proveedor para la orden de compra
+                    </label>
+                    <select class="form-select" id="proveedor-selector">
+                        <option value="">Seleccione un proveedor</option>
+                    </select>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-materiales-oc" class="table table-striped mt-3">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">Código</th>
+                                <th style="width: 300px;">Material</th>
+                                <th>Cotizaciones Disponibles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-materiales-oc-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" disabled id="btn-confirmar-proveedores">Continuar</button>
             </div>
         </div>
     </div>

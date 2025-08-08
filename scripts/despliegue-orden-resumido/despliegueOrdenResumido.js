@@ -1713,6 +1713,186 @@ $(document).ready(async () => {
         recalcularTotales()
     })
 
+    // crear orden de compra masivo
+    $("#btn-crear-orden-compra-masivo").on('click', async function () {
+        try {
+            detalleCotizacion = [];
+            detalleCotizacionPro_ids = [];
+
+            const filasSeleccionadas = dataTable.rows({ selected: true }).nodes();
+            const indicesSeleccionados = [];
+            $(filasSeleccionadas).each(function (index, node) {
+                const valor = $(node).data('index');
+                indicesSeleccionados.push(valor);
+            });
+
+
+            if (indicesSeleccionados.length === 0) {
+                bootbox.alert('Debe seleccionar al menos un material');
+                return;
+            }
+
+            const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index));
+
+            dataSeleccionada.forEach(materialOriginal => {
+                materialOriginal.detalle.forEach(detalle => {
+                    detalleCotizacion.push(detalle.odm_id)
+                    if (!detalleCotizacionPro_ids.includes(detalle.pro_id)) {
+                        detalleCotizacionPro_ids.push(detalle.pro_id)
+                    }
+                })
+            });
+
+            const { data: proveedores } = await client.post(`/ProveedoresByOrdenInternaMateriales`, {
+                materiales: detalleCotizacion
+            });
+
+            const cotizacionesElegidas = await new Promise((resolve, reject) => {
+                const modal = new bootstrap.Modal(
+                    document.getElementById('modalProveedoresDistintos'),
+                    {
+                        backdrop: 'static',
+                        keyboard: false
+                    }
+                );
+
+                let cotizacionesSeleccionadas = {
+                    prv_id: null,
+                    cotizaciones: []
+                }
+
+                $('#proveedor-selector').empty();
+                $('#tbl-materiales-oc-body').empty()
+                $('#proveedor-selector').append('<option value="" disabled selected>Seleccione un proveedor</option>')
+                $('#btn-confirmar-proveedores').prop('disabled', true)
+
+                proveedores.forEach(proveedor => {
+                    const option = $(`<option value="${proveedor.prv_id}">${proveedor.prv_nombre}</option>`)
+                    $('#proveedor-selector').append(option)
+                })
+
+                $('#proveedor-selector').off('change').on('change', async function () {
+                    const proveedorSeleccionado = $(this).val()
+
+                    const { data } = await client.post(`/cotizacionesByProveedor`, {
+                        proveedor: proveedorSeleccionado,
+                        odm_ids: detalleCotizacion,
+                        pro_ids: detalleCotizacionPro_ids
+                    })
+
+                    $('#tbl-materiales-oc-body').empty()
+
+                    Object.keys(data).forEach(proId => {
+                        const producto = data[proId]
+                        const row = $(`
+                            <tr>
+                                <td>${producto.pro_codigo}</td>
+                                <td>${producto.pro_descripcion}</td>
+                                <td>
+                                    <div class="cotizaciones-container">
+                                        ${producto.cotizaciones.map((cotizacion, index) => `
+                                            <div class="form-check mb-2 p-2 rounded border shadow-sm bg-light d-flex align-items-center" style="transition: box-shadow 0.2s;">
+                                                <input class="form-check-input cotizacion-radio" 
+                                                       type="radio" 
+                                                       name="cotizacion_${producto.pro_id}" 
+                                                       id="cotizacion_${producto.pro_id}_${cotizacion.coc_id}"
+                                                       value="${cotizacion.coc_id}"
+                                                       data-pro-id="${producto.pro_id}"
+                                                       data-cotizacion='${JSON.stringify(cotizacion)}'
+                                                       style="margin-right: 0.5rem;">
+                                                <label class="form-check-label w-100" for="cotizacion_${producto.pro_id}_${cotizacion.coc_id}">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="fw-semibold" style="font-size: 1.05rem;">
+                                                            <i class="bi bi-file-earmark-text" style="font-size:1.1rem;vertical-align:middle;"></i>
+                                                            ${cotizacion.coc_numero}
+                                                        </span>
+                                                        <span class="text-secondary" style="font-size: 0.95rem;">
+                                                            ${moment(cotizacion.coc_fechacotizacion).format('DD/MM/YYYY')}
+                                                        </span>
+                                                        <span class="fw-bold" style="font-size: 1.05rem;">
+                                                            ${cotizacion.mon_codigo} ${cotizacion.coc_total}
+                                                        </span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mt-1">
+                                                        <span class="text-muted small">
+                                                            <i class="bi bi-list-ul"></i> ${cotizacion.detalles.length} detalle(s)
+                                                        </span>
+                                                        <span class="text-muted small">
+                                                            <i class="bi bi-credit-card"></i> Forma pago: ${cotizacion.coc_formapago || 'No especificado'}
+                                                        </span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </td>
+                            </tr>
+                        `)
+                        
+                        $('#tbl-materiales-oc-body').append(row)
+                    })
+
+                    $('.cotizacion-radio').off('change').on('change', function() {
+                        const proId = $(this).data('pro-id')
+                        const cotizacionData = $(this).data('cotizacion')
+                        
+                        // Actualizar el prv_id
+                        cotizacionesSeleccionadas.prv_id = proveedorSeleccionado
+                        
+                        // Buscar si ya existe una cotización para este producto
+                        const existingIndex = cotizacionesSeleccionadas.cotizaciones.findIndex(
+                            cot => cot.pro_id === proId
+                        )
+                        
+                        const cotizacionSeleccionada = {
+                            coc_id: cotizacionData.coc_id,
+                            cod_ids: cotizacionData.detalles.map(detalle => detalle.cod_id),
+                            pro_id: proId
+                        }
+                        
+                        if (existingIndex !== -1) {
+                            // Actualizar la cotización existente
+                            cotizacionesSeleccionadas.cotizaciones[existingIndex] = cotizacionSeleccionada
+                        } else {
+                            // Agregar nueva cotización
+                            cotizacionesSeleccionadas.cotizaciones.push(cotizacionSeleccionada)
+                        }
+                        
+                        const productosConCotizacion = cotizacionesSeleccionadas.cotizaciones.length
+                        const totalProductos = Object.keys(data).length
+                        
+                        $('#btn-confirmar-proveedores').prop('disabled', productosConCotizacion !== totalProductos)
+                    })
+                });
+
+                $('#btn-confirmar-proveedores').on('click', function () {
+                    modal.hide();
+                    resolve(cotizacionesSeleccionadas);
+                });
+
+                $('#modalProveedoresDistintos').on('hidden.bs.modal', function () {
+                    resolve(null);
+                });
+
+                modal.show();
+            });
+
+            if (cotizacionesElegidas.cotizaciones.length > 0) {
+                const url = `/logistica-requerimiento/crear/orden-compra?proveedor=${cotizacionesElegidas.prv_id}&cotizaciones=${JSON.stringify(cotizacionesElegidas.cotizaciones)}`
+                router.navigate(url)
+            }
+
+        } catch (error) {
+            console.log(error)
+            const { data, status } = error.response
+            if (status === 400) {
+                bootbox.alert(data.error)
+            } else {
+                bootbox.alert('Ocurrió un error al procesar las cotizaciones')
+            }
+        }
+    });
+
     // ver detalle de agrupamiento de detalle de cotizacion
     $('#tbl-cotizaciones-materiales tbody').on('click', '.btn-detalle', (event) => {
         const $element = $(event.currentTarget).closest('tr')

@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Crear instancia de Navigo
     const router = new Navigo(`/${config.XAMPP_CARPET}`, {hash: false})
+    
+    // Hacer el router disponible globalmente
+    window.router = router
 
     // Función para cargar contenido en el elemento #content
     const loadContent = (path, scriptURL) => {
@@ -116,6 +119,13 @@ document.addEventListener('DOMContentLoaded', () => {
     router.on('/logistica-requerimiento', () => {
         privateRoute(() => {
             loadContent('pages/despliegue-orden-resumido/despliegueOrdenInternResumido.html', 'scripts/despliegue-orden-resumido/despliegueOrdenResumido.js')
+        })
+    })
+
+    // Ruta para crear orden compra desde logistica requerimiento
+    router.on('/logistica-requerimiento/crear/orden-compra', () => {
+        privateRoute(() => {
+            loadContent('pages/despliegue-orden-resumido/crearOrdenCompra.html', 'scripts/despliegue-orden-resumido/crearOrdenCompra.js')
         })
     })
 

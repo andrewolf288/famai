@@ -13,6 +13,7 @@ use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
 use App\Parte;
+use App\Producto;
 use App\Proveedor;
 use App\ProveedorCuentaBanco;
 use App\Trabajador;
@@ -27,6 +28,75 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class CotizacionController extends Controller
 {
+    public function obtenerCotizacionesProveedor(Request $request)
+    {
+        $proveedor = $request->input('proveedor');
+        $odm_ids = $request->input('odm_ids');
+        $pro_ids = $request->input('pro_ids');
+
+        // Obtener productos con sus cotizaciones y detalles
+        $productosConCotizaciones = Producto::with([
+            'cotizaciones' => function ($query) use ($proveedor, $odm_ids, $pro_ids) {
+                $query->whereHas('cotizacion', function ($q) use ($proveedor) {
+                    $q->where('prv_id', $proveedor)
+                      ->where('coc_estado', 'RPR');
+                })
+                ->whereIn('odm_id', $odm_ids)
+                ->with(['cotizacion' => function ($q) use ($proveedor) {
+                    $q->select('coc_id', 'coc_numero', 'coc_fechacotizacion', 'mon_codigo', 'coc_formapago', 'coc_total', 'coc_estado')
+                      ->where('prv_id', $proveedor)
+                      ->where('coc_estado', 'RPR');
+                }]);
+            }
+        ])
+        ->select('pro_id', 'pro_codigo', 'pro_descripcion', 'uni_codigo')
+        ->whereIn('pro_id', $pro_ids)
+        ->get();
+
+        $resultado = [];
+        foreach ($productosConCotizaciones as $producto) {
+            if ($producto->cotizaciones->isNotEmpty()) {
+                // Agrupar detalles por cotización para evitar repetición de cabeceras
+                $cotizacionesAgrupadas = $producto->cotizaciones->groupBy('coc_id');
+                
+                $cotizacionesFinales = [];
+                foreach ($cotizacionesAgrupadas as $coc_id => $detalles) {
+                    $primerDetalle = $detalles->first();
+                    $cotizacion = $primerDetalle->cotizacion;
+                    
+                    $cotizacionesFinales[] = [
+                        'coc_id' => $cotizacion->coc_id,
+                        'coc_numero' => $cotizacion->coc_numero,
+                        'coc_fechacotizacion' => $cotizacion->coc_fechacotizacion,
+                        'mon_codigo' => $cotizacion->mon_codigo,
+                        'coc_formapago' => $cotizacion->coc_formapago,
+                        'coc_total' => $cotizacion->coc_total,
+                        'coc_estado' => $cotizacion->coc_estado,
+                        'detalles' => $detalles->map(function ($detalle) {
+                            return [
+                                'cod_id' => $detalle->cod_id,
+                                'odm_id' => $detalle->odm_id,
+                                'cod_cantidad' => $detalle->cod_cantidad,
+                                'cod_preciounitario' => $detalle->cod_preciounitario,
+                                'cod_subtotal' => $detalle->cod_subtotal
+                            ];
+                        })->toArray()
+                    ];
+                }
+                
+                $resultado[$producto->pro_id] = [
+                    'pro_id' => $producto->pro_id,
+                    'pro_codigo' => $producto->pro_codigo,
+                    'pro_descripcion' => $producto->pro_descripcion,
+                    'uni_codigo' => $producto->uni_codigo,
+                    'cotizaciones' => $cotizacionesFinales
+                ];
+            }
+        }
+
+        return response()->json($resultado);
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -1312,8 +1382,9 @@ class CotizacionController extends Controller
         // buscamos informacion de proveedor
         $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'formaPago'])
             ->findOrFail($proveedor);
-        // buscamos las cotizaciones detalle correspondientes
-        $detallesCotizaciones = CotizacionDetalle::whereIn('cod_id', $detalles)
+        // buscamos las cotizaciones detalle correspondientes con todas las relaciones necesarias
+        $detallesCotizaciones = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
+            ->whereIn('cod_id', $detalles)
             ->get();
 
         $cotizacion = null;
@@ -1322,18 +1393,17 @@ class CotizacionController extends Controller
             $cotizacion = Cotizacion::findOrFail($coc_id);
         }
 
-        $detalles = $detallesCotizaciones->map(function ($detalle) {
-            // debemos buscar los detalles relacionados en la cotizacion
-            $detallesRelacionados = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
-                ->where('pro_id', $detalle->pro_id)
-                ->where('coc_id', $detalle->coc_id)
-                ->get();
-
+        // Agrupamos por producto para evitar duplicaciones, pero mantenemos las relaciones
+        $detallesAgrupados = $detallesCotizaciones->groupBy('pro_id');
+        
+        $detalles = $detallesAgrupados->map(function ($grupoDetalles, $pro_id) {
+            $primerDetalle = $grupoDetalles->first();
+            
             return [
-                "producto" => $detalle->detalleMaterial->producto,
-                "detalles" => $detallesRelacionados,
-                "cantidad_requerida" => $detallesRelacionados->sum('detalleMaterial.odm_cantidadpendiente'),
-                "precio_unitario" => $detalle->cod_preciounitario,
+                "producto" => $primerDetalle->detalleMaterial->producto,
+                "detalles" => $grupoDetalles->values(),
+                "cantidad_requerida" => $grupoDetalles->sum('detalleMaterial.odm_cantidadpendiente'),
+                "precio_unitario" => $primerDetalle->cod_preciounitario,
             ];
         })->values();
 

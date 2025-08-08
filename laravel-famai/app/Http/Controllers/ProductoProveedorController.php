@@ -12,9 +12,99 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\FormaPago;
+use App\OrdenInternaMateriales;
+use App\CotizacionDetalle;
 
 class ProductoProveedorController extends Controller
 {
+    public function findProveedoresByOrdenInternaMateriales(Request $request)
+    {
+        $materiales = $request->input('materiales', []);
+
+        $materialesConProducto = OrdenInternaMateriales::select('odm_id', 'pro_id')
+            ->whereIn('odm_id', $materiales)
+            ->get();
+
+        $gruposPorProducto = $materialesConProducto->groupBy('pro_id');
+
+        $productosSinCotizacion = [];
+        $cotizacionesPorGrupo = [];
+
+        foreach ($gruposPorProducto as $pro_id => $materialesDelGrupo) {
+            $odmIdsDelGrupo = $materialesDelGrupo->pluck('odm_id')->toArray();
+            
+            $cotizacionesDelGrupo = CotizacionDetalle::with([
+                'cotizacion' => function ($query) {
+                    $query->select('coc_id', 'prv_id');
+                },
+                'cotizacion.proveedor' => function ($query) {
+                    $query->select('prv_id', 'prv_nombre');
+                }
+            ])
+                ->select('cod_id', 'odm_id', 'coc_id', 'pro_id')
+                ->whereIn('odm_id', $odmIdsDelGrupo)
+                ->get();
+
+            if ($cotizacionesDelGrupo->isEmpty()) {
+                $productosSinCotizacion[] = $pro_id;
+            } else {
+                $cotizacionesPorGrupo[$pro_id] = $cotizacionesDelGrupo;
+            }
+        }
+
+        // Si algún grupo no tiene cotizaciones, retornar error
+        if (!empty($productosSinCotizacion)) {
+            return response()->json([
+                'error' => 'Algunos productos no tienen cotizaciones registradas',
+                'productos_sin_cotizacion' => $productosSinCotizacion
+            ], 400);
+        }
+
+        // Obtener todos los prv_id únicos por grupo
+        $proveedoresPorGrupo = [];
+        foreach ($cotizacionesPorGrupo as $pro_id => $cotizaciones) {
+            $proveedoresPorGrupo[$pro_id] = $cotizaciones->pluck('cotizacion.proveedor.prv_id')->unique()->toArray();
+        }
+
+        // Encontrar el prv_id común entre todos los grupos
+        $prvIdsComunes = null;
+        foreach ($proveedoresPorGrupo as $pro_id => $proveedores) {
+            if ($prvIdsComunes === null) {
+                $prvIdsComunes = $proveedores;
+            } else {
+                $prvIdsComunes = array_intersect($prvIdsComunes, $proveedores);
+            }
+        }
+
+        // Si no hay prv_id común, retornar error
+        if (empty($prvIdsComunes)) {
+            $proveedoresDiferentes = [];
+            foreach ($proveedoresPorGrupo as $pro_id => $proveedores) {
+                $proveedoresDiferentes = array_merge($proveedoresDiferentes, $proveedores);
+            }
+            $proveedoresDiferentes = array_unique($proveedoresDiferentes);
+
+            return response()->json([
+                'error' => 'Los productos seleccionados tienen diferentes proveedores. No se puede crear una orden de compra con múltiples proveedores.',
+                'proveedores_diferentes' => $proveedoresDiferentes
+            ], 400);
+        }
+
+        // Obtener información de los proveedores comunes
+        $proveedoresComunes = Proveedor::select('prv_id', 'prv_nombre')
+            ->whereIn('prv_id', $prvIdsComunes)
+            ->get()
+            ->map(function ($proveedor) {
+                return [
+                    'prv_id' => $proveedor->prv_id,
+                    'prv_nombre' => $proveedor->prv_nombre
+                ];
+            })
+            ->toArray();
+
+        return response()->json($proveedoresComunes);
+    }
+
     public function findCotizacionesByProducto(Request $request)
     {
         $producto = $request->input('producto', null);
