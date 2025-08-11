@@ -1126,6 +1126,7 @@ class CotizacionController extends Controller
                         'cod_cantidadcotizada' => $cantidadCotizadaDetalle,
                         'cod_observacionproveedor' => $detalle['cod_observacionproveedor'],
                         'cod_tiempoentrega' => $detalle['cod_tiempoentrega'],
+                        'cod_fecentregaoc' =>  Carbon::now()->addDays(intval($detalle['cod_tiempoentrega'])),
                         'cod_preciounitario' => $precioUnitario,
                         'cod_total' => $total,
                         'cod_cotizar' => 1,
