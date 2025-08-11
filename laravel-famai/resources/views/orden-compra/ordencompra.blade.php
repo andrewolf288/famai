@@ -74,6 +74,22 @@
             font-size: 12px
         }
 
+        .value-multiline {
+            display: block !important;
+            width: 100% !important;
+            word-wrap: break-word !important;
+            word-break: break-all !important;
+            white-space: pre-wrap !important;
+            overflow-wrap: break-word !important;
+            max-width: 100% !important;
+        }
+
+        .info-row-multiline {
+            display: block !important;
+            width: 100% !important;
+            margin-bottom: 10px !important;
+        }
+
         .table-factura-cabecera {
             width: 100%;
             border-collapse: collapse;
@@ -261,6 +277,11 @@
                     <span class="label">CTA BCO NACION S/:</span>
                     <span class="value">{{ $cuenta_banco_nacion ? strtoupper($cuenta_banco_nacion['pvc_numerocuenta']) : '' }}</span>
                 </div>
+                <div class="info-row">
+                    <span class="label">BIC/SWIFT:</span>
+                    <span class="value">{{ $cuenta_dolares ? strtoupper($cuenta_dolares['pvc_BIC_SWIFT']) : '' }}</span>
+                </div>
+                <div class="value">{{ $cuenta_dolares ? strtoupper($cuenta_dolares['pvc_DirBanco']) : '' }}</div>
                 {{-- <p style="font-size: 8px">{{$cuenta_banco_nacion ? $cuenta_banco_nacion['entidadBancaria']['eba_descripcion'] : ''}}</p> --}}
             </td>
         </tr>

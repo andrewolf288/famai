@@ -331,56 +331,42 @@ class CotizacionController extends Controller
                     'prv_activo' => 1,
                 ]);
             }
-            try {
-                // Actualizar o crear los datos bancarios del proveedor
-                $mapaBancos = [
-                    'BANCO DE CREDITO DEL PERU' => 1,
-                'SCOTIABANK' => 2,
-                'BBVA' => 4,
-                'INTERBANK' => 5,
-                'BANCO DE LA NACIÓN' => 3,
-                ];
 
-                $cuentas = [
-                    [
-                        'numero' => $data['proveedor']['prv_account_sol'] ?? null,
-                        'banco' => $data['proveedor']['prv_banco_sol'] ?? null,
-                        'moneda' => 'SOL',
-                    ],
-                    [
-                        'numero' => $data['proveedor']['prv_account_usd'] ?? null,
-                        'banco' => $data['proveedor']['prv_banco_usd'] ?? null,
-                        'moneda' => 'USD',
-                    ],
-                    [
-                        'numero' => $data['proveedor']['prv_account_nacion'] ?? null,
-                        'banco' => 'BANCO DE LA NACIÓN',
-                        'moneda' => 'SOL',
-                    ],
-                ];
+            // USAR FAM_LOG_Proveedores para buscar bancos del proveedor
+            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parRUC = ?", [$proveedor->prv_nrodocumento]);
 
+            if (count($bancos) > 1) {
+                throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
+            } elseif (count($bancos) === 1) {
+                $bancoInfo = $bancos[0];
                 
-                foreach ($cuentas as $cuenta) {
-                    if (!$cuenta['numero']) continue;
-                    $existe = ProveedorCuentaBanco::where('prv_id', $proveedor->prv_id)
-                        ->where('pvc_numerocuenta', $cuenta['numero'])
-                        ->first();
-                    if (!$existe) {
-                        $bancoNombre = strtoupper(trim($cuenta['banco']));
-                        $eba_id = $mapaBancos[$bancoNombre] ?? 1;
-                        ProveedorCuentaBanco::create([
-                            'prv_id' => $proveedor->prv_id,
-                            'mon_codigo' => $cuenta['moneda'],
-                            'eba_id' => $eba_id,
-                            'pvc_numerocuenta' => $cuenta['numero'],
-                            'pvc_activo' => 1,
-                            'pvc_usucreacion' => $user->usu_codigo,
-                            'pvc_tipocuenta' => 'Corriente',
-                        ]);
-                    }
+                $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
+                
+                if (!empty($bancoInfo->account_sol) && !empty($bancoInfo->banco_sol)) {
+                    $this->procesarCuentaBancaria(
+                        $proveedor->prv_id,
+                        $bancoInfo->account_sol,
+                        $bancoInfo->banco_sol,
+                        'SOL',
+                        $bancosDisponibles,
+                        $user->usu_codigo
+                    );
                 }
-            } catch (Exception $e) {
+                
+                if (!empty($bancoInfo->account_usd) && !empty($bancoInfo->banco_usd)) {
+                    $this->procesarCuentaBancaria(
+                        $proveedor->prv_id,
+                        $bancoInfo->account_usd,
+                        $bancoInfo->banco_usd,
+                        'USD',
+                        $bancosDisponibles,
+                        $user->usu_codigo,
+                        $bancoInfo->BIC_SWIFT ?? null,
+                        $bancoInfo->DirBanco ?? null
+                    );
+                }
             }
+            
 
             // Crear requerimiento para productos excedentes si existen
             $requerimiento_excedente = null;
@@ -1423,5 +1409,71 @@ class CotizacionController extends Controller
         $result = Trabajador::whereIn('tra_id', $tra_ids)->get();
 
         return response()->json($result);
+    }
+
+    private function procesarCuentaBancaria($prv_id, $numeroCuenta, $nombreBanco, $moneda, $bancosDisponibles, $usu_codigo, $bicSwift = null, $dirBanco = null)
+    {
+        $nombreBancoNormalizado = $this->normalizarTexto($nombreBanco);
+        
+        // Buscar el banco en la lista de bancos disponibles
+        $bancoEncontrado = $bancosDisponibles->first(function ($banco) use ($nombreBancoNormalizado) {
+            $descripcionNormalizada = $this->normalizarTexto($banco->eba_descripcion);
+            return stripos($descripcionNormalizada, $nombreBancoNormalizado) !== false || 
+                   stripos($nombreBancoNormalizado, $descripcionNormalizada) !== false;
+        });
+        
+        if (!$bancoEncontrado) {
+            $bancoEncontrado = EntidadBancaria::create([
+                'eba_descripcion' => $nombreBanco,
+                'eba_usucreacion' => $usu_codigo,
+                'eba_activo' => 1
+            ]);
+        }
+        
+        $cuentaExistente = ProveedorCuentaBanco::where('prv_id', $prv_id)
+            ->where('eba_id', $bancoEncontrado->eba_id)
+            ->where('mon_codigo', $moneda)
+            ->first();
+        
+        if ($cuentaExistente) {
+            $cuentaExistente->update([
+                'pvc_numerocuenta' => $numeroCuenta,
+                'pvc_BIC_SWIFT' => $bicSwift,
+                'pvc_DirBanco' => $dirBanco,
+                'pvc_usumodificacion' => $usu_codigo,
+                'pvc_fecmodificacion' => now(),
+            ]);
+        } else {
+            ProveedorCuentaBanco::create([
+                'prv_id' => $prv_id,
+                'mon_codigo' => $moneda,
+                'eba_id' => $bancoEncontrado->eba_id,
+                'pvc_numerocuenta' => $numeroCuenta,
+                'pvc_BIC_SWIFT' => $bicSwift,
+                'pvc_DirBanco' => $dirBanco,
+                'pvc_activo' => 1,
+                'pvc_usucreacion' => $usu_codigo,
+                'pvc_tipocuenta' => 'Corriente',
+            ]);
+        }
+    }
+    
+    private function normalizarTexto($texto)
+    {
+        $texto = mb_strtolower($texto, 'UTF-8');
+        
+        $texto = str_replace(
+            ['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', 'à', 'è', 'ì', 'ò', 'ù'],
+            ['a', 'e', 'i', 'o', 'u', 'n', 'u', 'a', 'e', 'i', 'o', 'u'],
+            $texto
+        );
+        
+        $texto = str_replace(
+            ['Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', 'Ü', 'À', 'È', 'Ì', 'Ò', 'Ù'],
+            ['a', 'e', 'i', 'o', 'u', 'n', 'u', 'a', 'e', 'i', 'o', 'u'],
+            $texto
+        );
+        
+        return $texto;
     }
 }

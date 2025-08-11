@@ -269,7 +269,13 @@
                 {{-- <p style="font-size: 8px">{{$cuenta_dolares ? $cuenta_dolares['entidadBancaria']['eba_descripcion'] : ''}}</p> --}}
                 <div class="info-row">
                     <span class="label">CTA BCO NACION S/:</span>
-                    <span class="value">{{ $cuenta_banco_nacion ? strtoupper($cuenta_banco_nacion['pvc_numerocuenta']) : '' }}</span>              </div>
+                    <span class="value">{{ $cuenta_banco_nacion ? strtoupper($cuenta_banco_nacion['pvc_numerocuenta']) : '' }}</span>              
+                </div>
+                <div class="info-row">
+                    <span class="label">BIC/SWIFT:</span>
+                    <span class="value">{{ $cuenta_dolares ? strtoupper($cuenta_dolares['pvc_BIC_SWIFT']) : '' }}</span>
+                </div>
+                <div class="value">{{ $cuenta_dolares ? strtoupper($cuenta_dolares['pvc_DirBanco']) : '' }}</div>
                 {{-- <p style="font-size: 8px">{{$cuenta_banco_nacion ? $cuenta_banco_nacion['entidadBancaria']['eba_descripcion'] : ''}}</p> --}}
             </td>
         </tr>

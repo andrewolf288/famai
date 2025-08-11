@@ -21,7 +21,9 @@ class ProveedorCuentaBanco extends Model
         'pvc_feccreacion',
         'pvc_usumodificacion',
         'pvc_fecmodificacion',
-        'pvc_activo'
+        'pvc_activo',
+        'pvc_BIC_SWIFT', // ALTER TABLE tblproveedorctasbancos_pvc ADD pvc_BIC_SWIFT VARCHAR(255) NULL;
+        'pvc_DirBanco' // ALTER TABLE tblproveedorctasbancos_pvc ADD pvc_DirBanco VARCHAR(255) NULL;
     ];
 
     const CREATED_AT = 'pvc_feccreacion';
