@@ -1,84 +1,88 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
     <h2 class="mb-3 fs-4">Logística requerimientos</h2>
 </div>
-<div class="row mb-3 mt-2">
-    <!-- Filtro SOLPED -->
-    <div class="d-flex flex-column flex-md-row align-items-end justify-content-end">
-        <label for="inputSOLPED" class="form-label me-2">SOLPED:</label>
-        <input type="text" id="inputSOLPED" class="form-control" placeholder="Ingrese SOLPED">
-        <button id="filter-SOLPED" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
-                viewBox="0 0 16 16">
-                <path
-                    d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+
+<!-- SECCIÓN DE FILTROS CONSOLIDADOS -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h6 class="card-title mb-0 text-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-funnel me-2" viewBox="0 0 16 16">
+                <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
             </svg>
-        </button>
+            Filtros de búsqueda
+        </h6>
     </div>
-
-    <!-- Filtros de fechas -->
-    <div class="col-12 col-md-3 mb-3 mb-md-0">
-        <div class="d-flex flex-column flex-md-row align-items-end">
-            <div class="me-3">
-                <label for="fechaDesde" class="form-label">Fecha Desde</label>
-                <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
+    <div class="card-body py-3">
+        <div class="row g-2 align-items-end">
+            <!-- SOLPED -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-1">
+                <label for="inputSOLPED" class="form-label mb-1">SOLPED</label>
+                <input type="text" id="inputSOLPED" class="form-control">
             </div>
-            <div>
-                <label for="fechaHasta" class="form-label">Fecha Hasta</label>
-                <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
+            
+            <!-- Fechas -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-1">
+                <label for="fechaDesde" class="form-label mb-1">Desde</label>
+                <input type="text" id="fechaDesde" class="form-control" placeholder="DD/MM/AA">
             </div>
-            <button id="filter-dates" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
-                    viewBox="0 0 16 16">
-                    <path
-                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Filtro input  -->
-    <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-        <div class="d-flex flex-column flex-md-row">
-            <select id="filter-selector" class="form-select w-100 w-md-auto">
-                <option value="">Seleccione un filtro</option>
-                <option value="odt_numero" selected>Orden trabajo/N°Req</option>
-            </select>
-
-            <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
-                placeholder="Buscar...">
-
-            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
-        </div>
-    </div>
-
-    <!-- Filtro multiselect -->
-    <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-        <div class="d-flex flex-column flex-md-row mt-3 w-100">
-            <div class="col-10">
-                <select id="filterMultipleSelector" class="form-select" multiple>
-                    <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
-                    <option value="pendiente_emitir_cotizacion">Pendiente de emitir cotización</option>
-                    <option value="material_sin_codigo">Material sin codigo</option>
+            
+            <div class="col-12 col-sm-6 col-md-4 col-lg-1">
+                <label for="fechaHasta" class="form-label mb-1">Hasta</label>
+                <input type="text" id="fechaHasta" class="form-control" placeholder="DD/MM/AA">
+            </div>
+            
+            <!-- Campo de búsqueda -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <label for="filter-selector" class="form-label mb-1">Tipo</label>
+                <select id="filter-selector" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="odt_numero" selected>Orden trabajo</option>
                 </select>
             </div>
-            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
+            
+            <!-- Valor a buscar -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <label for="filter-input" class="form-label mb-1"></label>
+                <input type="text" id="filter-input" class="form-control" placeholder="Ingrese texto del tipo seleccionado">
+            </div>
+            
+            <!-- Estado -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <label for="filterMultipleSelector" class="form-label mb-1">Estado</label>
+                <select id="filterMultipleSelector" class="form-select" multiple>
+                    <option value="pendiente_emitir_orden_compra">Pendiente orden compra</option>
+                    <option value="pendiente_emitir_cotizacion">Pendiente cotización</option>
+                    <option value="material_sin_codigo">Sin código</option>
+                </select>
+            </div>
+            
+            <!-- Almacén -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                <label for="almacenStock" class="form-label mb-1">Almacén</label>
+                <select name="almacen" id="almacenStock" class="form-select">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            
+            <!-- Botón de búsqueda -->
+            <div class="col-12 col-sm-6 col-md-4 col-lg-1">
+                <button class="btn btn-primary w-100" id="btn-buscar-general">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search me-1" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                    Buscar
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
+<!-- SECCIÓN DE ACCIONES -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
     <div class="w-auto me-4">
         <button class="btn btn-success me-2" id="btn-crear-orden-compra-masivo">Crear Orden de Compra</button>
         <button class="btn btn-success me-2" id="btn-asignar-responsable">Asignar Responsable</button>
         <button class="btn btn-success me-2" id="btn-cotizar-materiales">Cotizar</button>
-    </div>
-    <div class="w-25 me-4">
-        <select name="almacen" id="almacenStock" class="form-select">
-            <option value="">Selecciona un almacén</option>
-        </select>
-    </div>
-    <div class="w-auto me-4">
-        <button id="filtrar-responsable" class="btn btn-sm btn-primary ms-2">Filtrar</button>
     </div>
     <div class="w-auto">
         <button class="btn btn-success" id="btn-exportar-materiales">

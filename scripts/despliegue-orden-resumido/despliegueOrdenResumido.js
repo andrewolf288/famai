@@ -19,10 +19,7 @@ $(document).ready(async () => {
     // referencias de filtros
     const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
-    const filterButton = $('#filter-button')
-    const filterFechas = $('#filter-dates')
-    const filterMultiselect = $('#filtermultiselect-button')
-    const filterResponsable = $('#filtrar-responsable')
+    const filterButton = $('#btn-buscar-general')
 
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
@@ -307,46 +304,24 @@ $(document).ready(async () => {
     await initInformacionMaestros()
     initDataTable(obtenerFiltrosActuales())
 
-    $('#almacenStock').on('change', () => {
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}${getValueAlmacen()}`
-        initDataTable(filteredURL)
-    })
-
-    // ------------ ADMINISTRACION DE FILTROS ---------------
-    // filter SOLPED
-    $('#filter-SOLPED').on('click', () => {
-        const filteredURL = obtenerFiltrosActuales()
-        initDataTable(filteredURL)
-    })
-
-    // filter fechas
-    filterFechas.on('click', () => {
-        const filteredURL = obtenerFiltrosActuales()
-        initDataTable(filteredURL)
-    })
-
-    // filter input
     filterButton.on('click', () => {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
-    // filtro multi select
-    filterMultiselect.on('click', async () => {
+    $('#almacenStock').on('change', () => {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
-    // filtro de responsables
-    $(filterResponsable).on('click', function () {
-        const filterField = obtenerFiltrosActuales()
-        initDataTable(filterField)
+    $('#inputSOLPED, #filter-input, #fechaHasta, #fechaDesde, #filter-selector').on('keypress', function(e) {
+        if (e.which === 13) {
+            const filteredURL = obtenerFiltrosActuales()
+            initDataTable(filteredURL)
+        }
     })
 
     // ---------- ADMINISTRACIÓN DE DETALLE DE DATOS ------------
-
     function initDetalleMaterialAgrupado(data) {
         $("#tbl-despliegue-materiales-body").empty()
         let cantidadTotal = 0;
@@ -2736,27 +2711,44 @@ $(document).ready(async () => {
     function obtenerFiltrosActuales(urlAPI = apiURL) {
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
-        const responsables = $("#responsableSelect").val()
         const solped = $('#inputSOLPED').val().trim()
+        const filters = $('#filterMultipleSelector').val()
+        const fecha_desde = transformarFecha($('#fechaDesde').val())
+        const fecha_hasta = transformarFecha($('#fechaHasta').val())
+        const almacen = getValueAlmacen()
+        
         let filteredURL = urlAPI
+        let params = []
 
-        // si existen filtros de combobox, estos no dependen de filtros de fechas ni filtros multiples
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}${getValueAlmacen()}`
-        } else {
-            const filters = $('#filterMultipleSelector').val()
-            const fecha_desde = transformarFecha($('#fechaDesde').val())
-            const fecha_hasta = transformarFecha($('#fechaHasta').val())
-            filteredURL += `?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}${getValueAlmacen()}`
-
-            if (filters.length !== 0) {
-                filteredURL += `&multifilter=${filters.join('OR')}`
-            }
-
+        // Agregar filtro de fechas (siempre se aplican)
+        if (fecha_desde && fecha_hasta) {
+            params.push(`fecha_desde=${fecha_desde}`)
+            params.push(`fecha_hasta=${fecha_hasta}`)
         }
 
+        // Agregar filtro de almacén (siempre se aplica)
+        if (almacen) {
+            params.push(almacen.replace('&', ''))
+        }
+
+        // Agregar filtro de búsqueda por campo específico
+        if (filterField.length !== 0 && filterValue.length !== 0) {
+            params.push(`${filterField}=${encodeURIComponent(filterValue)}`)
+        }
+
+        // Agregar filtro de SOLPED
         if (solped.length !== 0) {
-            filteredURL += `&solped=${solped}`
+            params.push(`solped=${solped}`)
+        }
+
+        // Agregar filtros múltiples de estado
+        if (filters && filters.length !== 0) {
+            params.push(`multifilter=${filters.join('OR')}`)
+        }
+
+        // Construir URL final
+        if (params.length > 0) {
+            filteredURL += '?' + params.join('&')
         }
 
         return filteredURL
