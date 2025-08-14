@@ -43,6 +43,9 @@ class ProductoProveedorController extends Controller
             ])
                 ->select('cod_id', 'odm_id', 'coc_id', 'pro_id')
                 ->whereIn('odm_id', $odmIdsDelGrupo)
+                ->whereHas('cotizacion', function ($query) {
+                    $query->where('coc_estado', 'RPR');
+                })
                 ->get();
 
             if ($cotizacionesDelGrupo->isEmpty()) {

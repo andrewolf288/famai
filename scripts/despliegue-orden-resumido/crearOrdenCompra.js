@@ -171,7 +171,9 @@ $(document).ready(async () => {
       $("#idCuentaBancariaBancoNacion").val(cuenta_banco_nacion?.pvc_id || '')
 
       // establecemos el impuesto por defecto
-      $("#impuestoOrdenCompraInput").val('IGV')
+      if ($("#impuestoOrdenCompraInput").val() === '') {
+          $("#impuestoOrdenCompraInput").val('IGV')
+      }
   }
 
   // inicializamos información de la cotización
@@ -179,6 +181,9 @@ $(document).ready(async () => {
       $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
       $("#referenciaOrdenCompraInput").val(cotizacion.coc_cotizacionproveedor || '')
       $("#notaOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento.mrq_descripcion)
+      if (cotizacion.detalle_cotizacion[0].cod_impuesto) {
+          $("#impuestoOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].cod_impuesto.toUpperCase())
+      }
   }
 
   // refresh informacion bancos

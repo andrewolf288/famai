@@ -1379,7 +1379,7 @@ class CotizacionController extends Controller
             $coc_id = $detallesCotizaciones[0]->coc_id;
             $cotizacion = Cotizacion::with([
                 'detalleCotizacion' => function ($query) {
-                    $query->select('cod_id', 'coc_id', 'odm_id');
+                    $query->select('cod_id', 'coc_id', 'odm_id', 'cod_impuesto');
                 },
                 'detalleCotizacion.detalleMaterial' => function ($query) {
                     $query->select('odm_id', 'opd_id');
