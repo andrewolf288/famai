@@ -279,26 +279,6 @@ class OrdenInternaMaterialesController extends Controller
             });
         }
 
-        // filtro de responsables
-        if ($responsables !== null) {
-            if (in_array('SRE', $responsables)) {
-                if (count($responsables) === 1) {
-                    $query->whereNull('tra_responsable');
-                } else {
-                    $responsables_new = array_diff($responsables, ['SRE']);
-                    $query->where(function ($q) use ($responsables_new) {
-                        $q->whereIn('tra_responsable', $responsables_new)
-                            ->orWhereNull('tra_responsable');
-                    });
-                }
-            } else {
-                if (!is_array($responsables)) {
-                    $responsables = [$responsables];
-                }
-                $query->whereIn('tra_responsable', $responsables);
-            }
-        }
-
         // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
             $query->whereDate('odm_fecconsultareservacion', '>=', $fecha_desde)

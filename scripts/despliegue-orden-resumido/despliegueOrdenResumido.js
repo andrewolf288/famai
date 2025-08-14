@@ -167,18 +167,6 @@ $(document).ready(async () => {
         },
     }
 
-    // declaracion de multiselect
-    $('#responsableSelect').multiselect({
-        selectAll: true,
-        search: true,
-        texts: {
-            selectAll: "Seleccionar todos",
-            search: "Buscar",
-            unselectAll: "Deseleccionar todos",
-            placeholder: "Seleccionar responsables"
-        }
-    })
-
     // gestion de multiselect
     $('#filterMultipleSelector').multiselect({
         texts: {
@@ -196,33 +184,9 @@ $(document).ready(async () => {
         })
     }
 
-    // traer informacion de responsables
-    async function traerInformacionResponsables() {
-        const usu_codigo = decodeJWT(localStorage.getItem('authToken')).usu_codigo
-        const { data } = await client.get('/producto-responsable/responsables')
-        const options = []
-        // agregamos opcion de materiales sin responsable
-        options.push({
-            name: "Materiales sin responsable",
-            value: "SRE",
-            checked: false
-        })
-        data.forEach(responsable => {
-            options.push({
-                name: responsable["tra_nombre"],
-                value: responsable["tra_id"],
-                checked: usu_codigo == responsable['usu_codigo']
-            })
-        })
-        $('#responsableSelect').multiselect('loadOptions', options);
-    }
-
     const initInformacionMaestros = async () => {
         return Promise.all(
-            [
-                traerInformacionAlmacenes(),
-                traerInformacionResponsables()
-            ]
+            [traerInformacionAlmacenes()]
         )
     }
 
@@ -2789,12 +2753,6 @@ $(document).ready(async () => {
                 filteredURL += `&multifilter=${filters.join('OR')}`
             }
 
-        }
-
-        if (responsables.length !== 0) {
-            responsables.forEach((responsable) => {
-                filteredURL += `&responsables[]=${responsable}`
-            })
         }
 
         if (solped.length !== 0) {
