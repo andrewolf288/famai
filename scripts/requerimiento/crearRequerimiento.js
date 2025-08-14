@@ -506,14 +506,14 @@ $(document).ready(function () {
                 })
             })
 
-            await client.post('/requerimientos', formData, {
+            const { data } = await client.post('/requerimientos', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             })
             bootbox.dialog({
                 title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Requerimiento creado correctamente</span>',
-                message: "El requerimiento fue creado con éxito.",
+                message: `El requerimiento con el número ${data.nroRequerimiento} fue creado con éxito.`,
                 centerVertical: true,
                 className: 'bootbox-confirm-modal',
                 closeButton: false,
