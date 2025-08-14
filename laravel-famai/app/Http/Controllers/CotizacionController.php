@@ -338,8 +338,9 @@ class CotizacionController extends Controller
             if (count($bancos) > 1) {
                 throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
             } elseif (count($bancos) === 1) {
-                $bancoInfo = $bancos[0];
+                ProveedorCuentaBanco::where('prv_id', $proveedor->prv_id)->delete();
                 
+                $bancoInfo = $bancos[0];
                 $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
                 
                 if (!empty($bancoInfo->account_sol) && !empty($bancoInfo->banco_sol)) {
@@ -1446,32 +1447,17 @@ class CotizacionController extends Controller
             ]);
         }
         
-        $cuentaExistente = ProveedorCuentaBanco::where('prv_id', $prv_id)
-            ->where('eba_id', $bancoEncontrado->eba_id)
-            ->where('mon_codigo', $moneda)
-            ->first();
-        
-        if ($cuentaExistente) {
-            $cuentaExistente->update([
-                'pvc_numerocuenta' => $numeroCuenta,
-                'pvc_BIC_SWIFT' => $bicSwift,
-                'pvc_DirBanco' => $dirBanco,
-                'pvc_usumodificacion' => $usu_codigo,
-                'pvc_fecmodificacion' => now(),
-            ]);
-        } else {
-            ProveedorCuentaBanco::create([
-                'prv_id' => $prv_id,
-                'mon_codigo' => $moneda,
-                'eba_id' => $bancoEncontrado->eba_id,
-                'pvc_numerocuenta' => $numeroCuenta,
-                'pvc_BIC_SWIFT' => $bicSwift,
-                'pvc_DirBanco' => $dirBanco,
-                'pvc_activo' => 1,
-                'pvc_usucreacion' => $usu_codigo,
-                'pvc_tipocuenta' => 'Corriente',
-            ]);
-        }
+        ProveedorCuentaBanco::create([
+            'prv_id' => $prv_id,
+            'mon_codigo' => $moneda,
+            'eba_id' => $bancoEncontrado->eba_id,
+            'pvc_numerocuenta' => $numeroCuenta,
+            'pvc_BIC_SWIFT' => $bicSwift,
+            'pvc_DirBanco' => $dirBanco,
+            'pvc_activo' => 1,
+            'pvc_usucreacion' => $usu_codigo,
+            'pvc_tipocuenta' => 'Corriente',
+        ]);
     }
     
     private function normalizarTexto($texto)
