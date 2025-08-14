@@ -180,7 +180,9 @@ $(document).ready(async () => {
             $almacenes.append(option)
         })
 
-        $almacenes.val(document.getElementById('almacen-actual').value)
+        if (document.getElementById('almacen-actual').value) {
+            $almacenes.val(document.getElementById('almacen-actual').value)
+        }
     }
 
     const initInformacionMaestros = async () => {
