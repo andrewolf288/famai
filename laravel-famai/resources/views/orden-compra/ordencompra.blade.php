@@ -329,6 +329,7 @@
         <thead>
             <tr>
                 <th class="col-item">ITEM</th>
+                <th class="col-codigo">CODIGO</th>
                 <th class="col-descripcion">DESCRIPCIÓN</th>
                 <th class="col-cantidad">CANTID</th>
                 <th class="col-und">UND</th>
@@ -340,6 +341,7 @@
             @foreach ($detalle_ordencompra as $index => $detalle)
                 <tr>
                     <td class="col-item">{{ $loop->iteration }}</td>
+                    <td class="col-codigo">{{ $detalle['pro_codigo'] ? $detalle['pro_codigo'] : '' }}</td>
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }} {!! nl2br(e($detalle['ocd_observacion'])) !!}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
                     <td class="col-und">{{ $detalle['uni_codigo'] ? $detalle['uni_codigo'] : '' }}</td>

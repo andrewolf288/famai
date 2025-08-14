@@ -325,6 +325,7 @@
                 <th class="col-item">ITEM</th>
                 <th class="col-ot">OT</th>
                 <th class="col-creador">Creador</th>
+                <th class="col-codigo">CODIGO</th>
                 <th class="col-descripcion">DESCRIPCIÓN</th>
                 <th class="col-cantidad">CANTID</th>
                 <th class="col-und">UND</th>
@@ -338,6 +339,7 @@
                     <td class="col-item">{{ $loop->iteration }}</td>
                     <td class="col-ot">{{ $detalle['oic_otsap'] ? $detalle['oic_otsap'] : '' }}</td>
                     <td class="col-creador">{{ $detalle['usu_nombre'] ? $detalle['usu_nombre'] : '' }}</td>
+                    <td class="col-codigo">{{ $detalle['pro_codigo'] ? $detalle['pro_codigo'] : '' }}</td>
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }} {!! nl2br(e($detalle['ocd_observacion'])) !!}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
                     <td class="col-und">{{ $detalle['uni_codigo'] ? $detalle['uni_codigo'] : '' }}</td>

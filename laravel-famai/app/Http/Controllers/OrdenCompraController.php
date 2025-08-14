@@ -162,6 +162,7 @@ class OrdenCompraController extends Controller
                 'detalle_ordencompra' => $detalleordencomprafind->map(function ($detalle) {
                     return [
                         'pro_id' => $detalle->pro_id,
+                        'pro_codigo' => $detalle->producto->pro_codigo,
                         'ocd_descripcion' => $detalle->ocd_descripcion,
                         'ocd_observacion' => $detalle->detalleMaterial->odm_observacion,
                         'ocd_preciounitario' => number_format($detalle->ocd_preciounitario, 2, '.', ''),
@@ -195,6 +196,7 @@ class OrdenCompraController extends Controller
                 })->map(function ($group) {
                     return [
                         'pro_id' => $group->first()->pro_id,
+                        'pro_codigo' => $group->first()->producto->pro_codigo,
                         'ocd_descripcion' => $group->first()->ocd_descripcion,
                         'ocd_observacion' => $group->first()->detalleMaterial->odm_observacion,
                         'ocd_preciounitario' => number_format($group->first()->ocd_preciounitario, 2, '.', ''),
