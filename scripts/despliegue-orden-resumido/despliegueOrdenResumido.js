@@ -179,6 +179,8 @@ $(document).ready(async () => {
             const option = $('<option>').val(almacen["alm_codigo"]).text(almacen["alm_descripcion"])
             $almacenes.append(option)
         })
+
+        $almacenes.val(document.getElementById('almacen-actual').value)
     }
 
     const initInformacionMaestros = async () => {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Almacen;
 use App\Sede;
 use App\Trabajador;
 use Illuminate\Http\Request;
@@ -25,7 +26,13 @@ class SedeController extends Controller
     {
         $user = auth()->user();
         $sede = Trabajador::with('sede')->where('usu_codigo', $user->usu_codigo)->first();
-        return response()->json($sede->sede);
+
+        $almacen = Almacen::where('sed_codigo', $sede->sed_codigo)->where('alm_esprincipal', 1)->first();
+        return response()->json([
+            'sed_codigo' => $sede->sed_codigo,
+            'sed_nombre' => $sede->sede->sed_nombre,
+            'alm_codigo' => $almacen->alm_codigo
+        ]);
     }
 
     public function cambiarSedeActualTrabajador(Request $request)

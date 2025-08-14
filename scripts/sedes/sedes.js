@@ -33,12 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
   async function cargarSedeActual() {
     try {
       const sedeActual = document.getElementById('sede-actual')
+      const inputAlmacen = document.getElementById('almacen-actual')
       const { data } = await client.get('/sede-actual-trabajador')
 
       if (!data || !data.sed_nombre) {
         sedeActual.textContent = 'N/A'
       } else {
+
         sedeActual.textContent = data.sed_nombre
+        inputAlmacen.value = data.alm_codigo
       }
     } catch (error) {
       console.log(error)
