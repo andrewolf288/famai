@@ -1377,7 +1377,23 @@ class CotizacionController extends Controller
         $cotizacion = null;
         if (count($detallesCotizaciones) > 0) {
             $coc_id = $detallesCotizaciones[0]->coc_id;
-            $cotizacion = Cotizacion::findOrFail($coc_id);
+            $cotizacion = Cotizacion::with([
+                'detalleCotizacion' => function ($query) {
+                    $query->select('cod_id', 'coc_id', 'odm_id');
+                },
+                'detalleCotizacion.detalleMaterial' => function ($query) {
+                    $query->select('odm_id', 'opd_id');
+                },
+                'detalleCotizacion.detalleMaterial.ordenInternaParte' => function ($query) {
+                    $query->select('opd_id', 'oic_id');
+                },
+                'detalleCotizacion.detalleMaterial.ordenInternaParte.ordenInterna' => function ($query) {
+                    $query->select('oic_id', 'mrq_codigo');
+                },
+                'detalleCotizacion.detalleMaterial.ordenInternaParte.ordenInterna.motivoRequerimiento' => function ($query) {
+                    $query->select('mrq_codigo', 'mrq_descripcion');
+                }
+            ])->findOrFail($coc_id);
         }
 
         // Agrupamos por producto para evitar duplicaciones, pero mantenemos las relaciones

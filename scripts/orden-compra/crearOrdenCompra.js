@@ -339,6 +339,7 @@ $(document).ready(async () => {
     const initInformacionCotizacion = (cotizacion) => {
         $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
         $("#referenciaOrdenCompraInput").val(cotizacion.coc_cotizacionproveedor || '')
+        $("#notaOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento.mrq_descripcion)
     }
 
     // refresh informacion bancos
