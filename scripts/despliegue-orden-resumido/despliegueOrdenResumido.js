@@ -39,6 +39,7 @@ $(document).ready(async () => {
         lengthMenu: [50, 100, 250, 500],
         searching: true,
         info: true,
+        order: [[13, 'desc']],
         language: {
             lengthMenu: "Mostrar _MENU_ registros por página",
             info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
@@ -282,6 +283,9 @@ $(document).ready(async () => {
                     </td>
                     <td class="text-center">
                         ${detalle[0].odm_solped || 'N/A'}
+                    </td>
+                    <td class="text-center">
+                        ${detalle[0].odm_fecconsultareservacion ? moment(detalle[0].odm_fecconsultareservacion).format('DD/MM/YYYY HH:mm') : 'N/A'}
                     </td>
                 </tr>
                 `
