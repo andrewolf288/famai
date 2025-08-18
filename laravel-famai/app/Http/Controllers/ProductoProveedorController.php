@@ -117,7 +117,7 @@ class ProductoProveedorController extends Controller
                 $query->where('pro_id', $producto);
             })
             ->orderBy('coc_feccreacion', 'desc')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         return response()->json($cotizaciones);
