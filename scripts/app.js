@@ -129,6 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta para ver historial de un material
+    router.on('/logistica-requerimiento/historial/:id', () => {
+        privateRoute(() => {
+            loadContent('pages/despliegue-orden-resumido/historialMaterial.html', 'scripts/despliegue-orden-resumido/historialMaterial.js')
+        })
+    })
+
     // Ruta para proveedores
     router.on('/proveedores', () => {
         privateRoute(() => {

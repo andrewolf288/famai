@@ -1,0 +1,75 @@
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-4 text-small">Histórico de material: <span id="historico-material-nombre" class="fw-bold"></span></h4>
+            <!-- HISTORICO DE ORDENES DE COMPRA -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <p class="fw-bold">Ordenes de compra</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+                            <div class="pagination-container" id="pagination-container-historico-ordencompra"></div>
+                        </div>
+                    </div>
+                    <div class="overflow-auto" style="height: 50%;">
+                        <table id="historico-ordenescompra-container" class="table table-striped nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">Fecha Ord. Compra</th>
+                                    <th>Num. Ord. Compra</th>
+                                    <!-- <th>Estado</th> -->
+                                    <th>Doc. proveedor</th>
+                                    <th>Raz. social proveedor</th>
+                                    <th>Cod. producto</th>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Precio unitario</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historico-ordenescompra-container-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- HISTORICO DE COTIZACIONES -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <p class="fw-bold">Cotizaciones</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-end">
+                            <div class="pagination-container" id="pagination-container-historico-cotizacion"></div>
+                        </div>
+                    </div>
+                    <div class="overflow-auto" style="height: 50%;">
+                        <table id="historico-cotizaciones-container" class="table table-striped nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">Fecha Cot.</th>
+                                    <th>Nro cotización</th>
+                                    <th>Nro Cot proveedor</th>
+                                    <!-- <th>Estado</th> -->
+                                    <th>Doc. proveedor</th>
+                                    <th>Raz. social proveedor</th>
+                                    <th>Cod. producto</th>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Precio unitario</th>
+                                    <th class="text-center">Total</th>
+                                    <th>Tmp. entrega</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historico-cotizaciones-container-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
