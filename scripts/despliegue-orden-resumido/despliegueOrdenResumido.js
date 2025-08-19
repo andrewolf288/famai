@@ -1613,7 +1613,8 @@ $(document).ready(async () => {
 
         // Setear valor de forma de pago y moneda de data
         try {
-            $("#formapagoCotizacionInputHidden").val(data[0].fpa_descripcion ? data[0].fpa_descripcion : 'CONTADO')
+            console.log(data[0].CodFormaPago)
+            $("#formapagoCotizacionInputHidden").val(data[0].CodFormaPago ? data[0].CodFormaPago : 'CONTADO')
             $("#monedaCotizacionInputHidden").val(data[0].mon_codigo ? data[0].mon_codigo : '')
         } catch (error) {
             console.log(error)
@@ -1650,7 +1651,7 @@ $(document).ready(async () => {
         });
 
         try {
-            $("#formapagoCotizacionInput").attr("data-formapago", data[0].fpa_codigo)
+            $("#formapagoCotizacionInput").attr("data-formapago", data[0].CodFormaPago)
         } catch (error) {
             console.log(error)
         }
@@ -1894,11 +1895,7 @@ $(document).ready(async () => {
 
             // Setear valor de moneda de data y forma de pago
             $("#monedaCotizacionInput").val($("#monedaCotizacionInputHidden").val())
-            if ($("#formapagoCotizacionInputHidden").val().toUpperCase() === "CREDITO") {
-                $("#formapagoCotizacionInput").val("CREDITO")
-            } else {
-                $("#formapagoCotizacionInput").val("CONTADO")
-            }
+            
         } catch (error) {
             console.log(error)
         }

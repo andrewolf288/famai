@@ -268,17 +268,26 @@ class ProductoProveedorController extends Controller
                 return $group->first();
             });
 
-        $dataProveedores = $data->map(function ($item) {
+        $dataProveedores = $data->map(function ($item, $key) use (&$data) {
             // Buscar la orden de compra para obtener el mon_codigo
             $ordenCompra = OrdenCompra::where('occ_numero', $item->prp_nroordencompra)->first();
             $formaPago = null;
-            
             if ($ordenCompra) {
                 $formaPago = FormaPago::where('fpa_codigo', $ordenCompra->fpa_codigo)->first();
             }
-            
+
+            $proveedorArray = $item->proveedor->toArray();
+            // Solo para el primer proveedor, ejecuta el stored procedure y agrega CodFormaPago
+            if ($key === array_key_first($data->toArray())) {
+                $ruc = $item->proveedor->prv_nrodocumento;
+                $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parRUC = ?", [$ruc]);
+                $primerBanco = count($bancos) > 0 ? $bancos[0] : null;
+                $codFormaPago = $primerBanco ? ($primerBanco->CodFormaPago ?? null) : null;
+                $proveedorArray['CodFormaPago'] = $codFormaPago;
+            }
+
             return array_merge(
-                $item->proveedor->toArray(),
+                $proveedorArray,
                 [
                     'precio_unitario' => $item->prp_preciounitario,
                     'descuento_porcentaje' => $item->prp_descuentoporcentaje,
