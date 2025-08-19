@@ -960,6 +960,8 @@ class CotizacionController extends Controller
             ->groupBy('pro_id')
             ->map(function ($detalle) {
                 return [
+                    'pro_id' => $detalle->first()->pro_id,
+                    'coc_id' => $detalle->first()->coc_id,
                     'identificadores' => $detalle->pluck('odm_id')->toArray(),
                 ];
             });
@@ -969,7 +971,9 @@ class CotizacionController extends Controller
             ->whereNull('pro_id')
             ->map(function ($detalle) {
                 return [
-                    'identificadores' => [$detalle->odm_id]
+                    'pro_id' => null,
+                    'coc_id' => $detalle->first()->coc_id,
+                    'identificadores' => [$detalle->first()->odm_id]
                 ];
             });
 
@@ -978,6 +982,8 @@ class CotizacionController extends Controller
         # recorremos los identificadores por producto
         foreach ($identificadores_union as $identificador) {
             $identificadores_id = $identificador['identificadores'];
+            $pro_id = $identificador['pro_id'];
+            $coc_id = $identificador['coc_id'];
             $cotizacionesDetalle = CotizacionDetalle::whereIn('odm_id', $identificadores_id)
                 ->distinct()
                 ->count('coc_id');
@@ -1003,9 +1009,9 @@ class CotizacionController extends Controller
                     ->where('cod_estado', 'SAT')
                     ->count() == 0
                 ) {
-                    // seleccionamos cualquier detalle de cotizacion como seleccionado automaticamente
-                    CotizacionDetalle::whereIn('odm_id', $identificadores_id)
-                        ->first()
+                    // seleccionamos todos los detalles de cotizacion de ese material y cotizacion como seleccionado automaticamente
+                    CotizacionDetalle::where('coc_id', $coc_id)
+                        ->where('pro_id', $pro_id)
                         ->update(['cod_estado' => 'SAT']);
                 }
             }

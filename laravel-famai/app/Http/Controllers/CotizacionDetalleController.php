@@ -257,28 +257,20 @@ class CotizacionDetalleController extends Controller
     {
         $cotizacionDetalle = CotizacionDetalle::findOrFail($id);
 
-        $arreglo_identificadores = [];
-
         if ($cotizacionDetalle->pro_id !== null) {
-            $cotizacionesDetalleRelacionadas = CotizacionDetalle::where('coc_id', $cotizacionDetalle->coc_id)
+            // Desmarcar todos los detalles de ese material en la cotización seleccionada
+            CotizacionDetalle::where('coc_id', $cotizacionDetalle->coc_id)
                 ->where('pro_id', $cotizacionDetalle->pro_id)
-                ->get();
+                ->update(['cod_estado' => null]);
 
-            $arreglo_identificadores = $cotizacionesDetalleRelacionadas->pluck('odm_id')->toArray();
+            // Marcar todos los detalles de ese material en la cotización seleccionada como SML
+            CotizacionDetalle::where('coc_id', $cotizacionDetalle->coc_id)
+                ->where('pro_id', $cotizacionDetalle->pro_id)
+                ->update(['cod_estado' => 'SML']);
         } else {
-            $arreglo_identificadores = [$cotizacionDetalle->odm_id];
+            CotizacionDetalle::where('odm_id', $cotizacionDetalle->odm_id)
+                ->update(['cod_estado' => 'SML']);
         }
-
-        // buscamos todos los registros de cotizacion detalle con los identificadores obtenidos
-        CotizacionDetalle::whereIn('odm_id', $arreglo_identificadores)
-            ->update([
-            'cod_estado' => null
-        ]);
-
-        // actualizamos el detalle de cotizacion con el estado de "SELECCIONANDO MANUALMENTE"
-        $cotizacionDetalle->update([
-            'cod_estado' => 'SML'
-        ]);
 
         return response()->json(['success' => 'Cotizacion seleccionada correctamente.'], 200);
     }
