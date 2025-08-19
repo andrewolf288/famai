@@ -180,7 +180,9 @@ $(document).ready(async () => {
   const initInformacionCotizacion = (cotizacion) => {
       $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
       $("#referenciaOrdenCompraInput").val(cotizacion.coc_cotizacionproveedor || '')
-      $("#notaOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento.mrq_descripcion)
+      if (cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento) {
+          $("#notaOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento.mrq_descripcion)
+      }
       if (cotizacion.detalle_cotizacion[0].cod_impuesto) {
           $("#impuestoOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].cod_impuesto.toUpperCase())
       }
