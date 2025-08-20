@@ -1,7 +1,7 @@
 const FLAG_LOCAL = window.location.hostname === "localhost"
 const API_LOCAL_FRONT = "http://localhost/logistica"
 const API_PUBLIC_FRONT = "http://logistica.famaisealjet.com:8080/logistica"
-const API_LOCAL_BACK = "http://localhost:8080/api"
+const API_LOCAL_BACK = "http://localhost:8000/api"
 const API_PUBLIC_BACK = "http://logistica.famaisealjet.com:8083/api"
 const API_STORAGE_LOCAL = "http://localhost:8080/storage/"
 const API_STORAGE_PUBLIC = "http://logistica.famaisealjet.com:8083/storage/"
