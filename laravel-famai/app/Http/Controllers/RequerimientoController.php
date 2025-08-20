@@ -416,7 +416,7 @@ class RequerimientoController extends Controller
                                 } else {
                                     Log::info('Unidad no encontrada en la base de datos local', ['unidad' => $uni_codigo_secondary]);
                                     // Crear la unidad si no existe en la tabla local
-                                    $unidadCreated = Unidad::insertGetId([
+                                    $unidadCreated = Unidad::insert([
                                         'uni_codigo' => $uni_codigo_secondary,
                                         'uni_descripcion' => $uni_codigo_secondary,
                                         'uni_activo' => 1,
@@ -424,6 +424,8 @@ class RequerimientoController extends Controller
                                         'uni_feccreacion' => now(),
                                         'uni_fecmodificacion' => null
                                         ]);
+
+                                    $unidadCreated = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
                                     Log::info('Unidad creada', ['unidad' => $unidadCreated]);
                                     $uni_codigo = $unidadCreated;
                                 }
