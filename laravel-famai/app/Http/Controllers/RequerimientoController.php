@@ -411,19 +411,23 @@ class RequerimientoController extends Controller
                             if (!empty($uni_codigo_secondary)) {
                                 $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
                                 if ($unidadFound) {
+                                    Log::info('Unidad encontrada en la base de datos local', ['unidad' => $unidadFound]);
                                     $uni_codigo = $unidadFound->uni_codigo;
                                 } else {
+                                    Log::info('Unidad no encontrada en la base de datos local', ['unidad' => $uni_codigo_secondary]);
                                     // Crear la unidad si no existe en la tabla local
                                     $unidadCreated = Unidad::create([
                                         'uni_codigo' => $uni_codigo_secondary,
                                         'uni_descripcion' => $uni_codigo_secondary,
                                         'uni_activo' => 1,
                                         'uni_usucreacion' => $user->usu_codigo,
-                                        'uni_fecmodificacion' => null
-                                    ]);
+                                            'uni_fecmodificacion' => null
+                                        ]);
+                                    Log::info('Unidad creada', ['unidad' => $unidadCreated]);
                                     $uni_codigo = $unidadCreated->uni_codigo;
                                 }
                             }
+                            Log::info('Unidad usada', ['unidad' => $uni_codigo]);
                             // creamos el producto con los valores correspondientes
                             $productoCreado = Producto::create([
                                 'pro_codigo' => $productoSecondary->pro_codigo,
