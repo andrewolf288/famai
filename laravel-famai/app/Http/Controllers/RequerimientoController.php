@@ -407,11 +407,13 @@ class RequerimientoController extends Controller
                             // debemos hacer validaciones de la unidad
                             $uni_codigo = 'SIN';
                             $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
-                            if (!empty($uni_codigo)) {
+                            
+                            if (!empty($uni_codigo_secondary)) {
                                 $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
                                 if ($unidadFound) {
                                     $uni_codigo = $unidadFound->uni_codigo;
                                 } else {
+                                    // Crear la unidad si no existe en la tabla local
                                     $unidadCreated = Unidad::create([
                                         'uni_codigo' => $uni_codigo_secondary,
                                         'uni_descripcion' => $uni_codigo_secondary,
