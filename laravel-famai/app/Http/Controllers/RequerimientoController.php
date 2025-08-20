@@ -320,8 +320,6 @@ class RequerimientoController extends Controller
             // Decodifica los datos JSON
             $data = json_decode($request->input('data'), true);
 
-            throw new Exception('Error de validación en store de requerimiento');
-
             $validator = Validator::make($data, [
                 'oic_fecha' => 'required|date',
                 'oic_fechaentregaestimada' => 'required|date',
