@@ -427,7 +427,7 @@ class RequerimientoController extends Controller
 
                                     $unidadCreated = Unidad::where('uni_codigo', trim($uni_codigo_secondary))->first();
                                     Log::info('Unidad creada', ['unidad' => $unidadCreated]);
-                                    $uni_codigo = trim($unidadCreated);
+                                    $uni_codigo = trim($unidadCreated->uni_codigo);
                                 }
                             }
                             Log::info('Unidad usada', ['unidad' => $uni_codigo]);
