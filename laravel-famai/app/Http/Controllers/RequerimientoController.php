@@ -304,35 +304,38 @@ class RequerimientoController extends Controller
     // Funcion multipart para guardar requeriminetos
     public function store(Request $request)
     {
-        $user = auth()->user();
-        $sed_codigo = "10";
-        // Valida la solicitud JSON y el FormData
-        $validator = Validator::make($request->all(), [
-            'data' => 'required|json'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
-
-        // Decodifica los datos JSON
-        $data = json_decode($request->input('data'), true);
-
-        $validator = Validator::make($data, [
-            'oic_fecha' => 'required|date',
-            'oic_fechaentregaestimada' => 'required|date',
-            'are_codigo' => 'required|exists:tblareas_are,are_codigo',
-            'tra_idorigen' => 'required|exists:tbltrabajadores_tra,tra_id',
-            'oic_equipo_descripcion' => 'nullable|string',
-            'oic_otsap' => 'nullable|string',
-            'mrq_codigo' => 'required|exists:tblmotivorequerimiento_mrq,mrq_codigo'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
-
         try {
+
+            $user = auth()->user();
+            $sed_codigo = "10";
+            // Valida la solicitud JSON y el FormData
+            $validator = Validator::make($request->all(), [
+                'data' => 'required|json'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
+
+            // Decodifica los datos JSON
+            $data = json_decode($request->input('data'), true);
+
+            throw new Exception('Error de validación en store de requerimiento');
+
+            $validator = Validator::make($data, [
+                'oic_fecha' => 'required|date',
+                'oic_fechaentregaestimada' => 'required|date',
+                'are_codigo' => 'required|exists:tblareas_are,are_codigo',
+                'tra_idorigen' => 'required|exists:tbltrabajadores_tra,tra_id',
+                'oic_equipo_descripcion' => 'nullable|string',
+                'oic_otsap' => 'nullable|string',
+                'mrq_codigo' => 'required|exists:tblmotivorequerimiento_mrq,mrq_codigo'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['error' => $validator->errors()], 422);
+            }
+
             DB::beginTransaction();
             $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
             if ($trabajador) {
@@ -495,6 +498,12 @@ class RequerimientoController extends Controller
             return response()->json(['message' => 'Requerimiento creado correctamente', "nroRequerimiento" => $requerimiento->odt_numero], 200);
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Error en al guardar requerimiento', [
+                'user' => $user->usu_codigo,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data
+            ]);
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }

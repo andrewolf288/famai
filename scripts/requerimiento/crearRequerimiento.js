@@ -532,7 +532,15 @@ $(document).ready(function () {
         } catch (error) {
             console.log(error)
             if (error.message === 'Cancelado') return
-            alert("Error al crear el requerimiento")
+            let errorMessage = "Error al crear el requerimiento"
+            
+            if (error.response && error.response.data) {
+                errorMessage = `Error del servidor:\n${JSON.stringify(error.response.data, null, 2)}`
+            } else {
+                errorMessage = `Error: ${error.message || 'Error desconocido'}`
+            }
+            
+            bootbox.alert(errorMessage)
         } finally {
             $('#btn-guardar-requerimiento').prop('disabled', false)
         }
