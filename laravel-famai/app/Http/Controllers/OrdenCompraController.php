@@ -171,7 +171,8 @@ class OrdenCompraController extends Controller
                         'uni_codigo' => $detalle->producto ? $detalle->producto->uni_codigo : '',
                         'odt_numero' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->odt_numero ?? null,
                         'usu_nombre' => $detalle->detalleMaterial->usuarioCreador->usu_nombre ?? null,
-                        'oic_otsap' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap ?? null
+                        'oic_otsap' => $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap ?? null,
+                        'ocd_observacionOC' => $detalle->ocd_observacion ?? null
                     ];
                 }),
                 'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
@@ -203,6 +204,7 @@ class OrdenCompraController extends Controller
                         'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
                         'ocd_cantidad' => $group->sum('ocd_cantidad'),
                         'ocd_total' => number_format($group->sum('ocd_total'), 2, '.', ''),
+                        'ocd_observacionOC' => $group->first()->ocd_observacion ?? null
                     ];
                 })->values(),
                 'occ_fecha_formateada' => DateHelper::parserFecha($ordencomprafind->occ_fecha),
