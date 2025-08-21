@@ -208,7 +208,10 @@ class OrdenInternaMaterialesController extends Controller
         // incializamos el servicio
         $productoService = new ProductoService();
 
-        $ordenTrabajo = $request->input('odt_numero', null);
+        $odt_numero = $request->input('odt_numero', null);
+        $odt_numero = $odt_numero ? explode(',', $odt_numero) : [];
+
+
         $tipoProceso = $request->input('oic_tipo', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
@@ -259,9 +262,13 @@ class OrdenInternaMaterialesController extends Controller
         $query->where('odm_estado', '!=', 'ODC');
 
         // filtro de orden de trabajo
-        if ($ordenTrabajo !== null) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
-                $q->where('odt_numero', $ordenTrabajo);
+        // local.ERROR: Array to string conversion {"userId":"ADMIN   "
+        Log::info('odt_numero: ' . json_encode($odt_numero));
+
+
+        if ($odt_numero !== null && count($odt_numero) > 0) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero) {
+                $q->whereIn('odt_numero', $odt_numero);
             });
         }
 
