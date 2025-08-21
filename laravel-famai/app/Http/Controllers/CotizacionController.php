@@ -1390,8 +1390,10 @@ class CotizacionController extends Controller
                 
                 $bancoInfo = $bancos[0];
                 $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
-                
+                Log::info(json_encode($bancoInfo));
+                Log::info(json_encode($proveedor));
                 if (!empty($bancoInfo->account_sol) && !empty($bancoInfo->banco_sol)) {
+                    Log::info("Se encontro cuenta sol");
                     $this->procesarCuentaBancaria(
                         $proveedor->prv_id,
                         $bancoInfo->account_sol,
@@ -1403,6 +1405,7 @@ class CotizacionController extends Controller
                 }
                 
                 if (!empty($bancoInfo->account_usd) && !empty($bancoInfo->banco_usd)) {
+                    Log::info("Se encontro cuenta usd");
                     $this->procesarCuentaBancaria(
                         $proveedor->prv_id,
                         $bancoInfo->account_usd,
