@@ -294,14 +294,14 @@ class ProductoProveedorController extends Controller
             if ($proveedorSAP) {
                 $proveedor = $item->proveedor;
                 $proveedor->update([
-                    'prv_nrodocumento' => $proveedorSAP->RUC ?? $proveedor->prv_nrodocumento,
-                    'prv_nombre' => $proveedorSAP->RazSocial ?? $proveedor->prv_nombre,
-                    'prv_direccion' => $proveedorSAP->Direccion ?? $proveedor->prv_direccion,
-                    'prv_contacto' => $proveedorSAP->Contacto ?? $proveedor->prv_contacto,
-                    'prv_telefono' => $proveedorSAP->Telefono ?? $proveedor->prv_telefono,
-                    'prv_whatsapp' => $proveedorSAP->Celular ?? $proveedor->prv_whatsapp,
-                    'prv_correo' => $proveedorSAP->E_Mail ?? $proveedor->prv_correo,
-                    'prv_usumodificacion' => auth()->user()->usu_codigo ?? null,
+                    'prv_nrodocumento' => $proveedorSAP->RUC,
+                    'prv_nombre' => $proveedorSAP->RazSocial,
+                    'prv_direccion' => $proveedorSAP->Direccion,
+                    'prv_contacto' => $proveedorSAP->Contacto,
+                    'prv_telefono' => $proveedorSAP->Telefono,
+                    'prv_whatsapp' => $proveedorSAP->Celular,
+                    'prv_correo' => $proveedorSAP->E_Mail,
+                    'prv_usumodificacion' => auth()->user()->usu_codigo,
                     'prv_fecmodificacion' => now(),
                 ]);
                 
