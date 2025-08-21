@@ -1414,6 +1414,9 @@ class CotizacionController extends Controller
                         $bancoInfo->DirBanco ?? null
                     );
                 }
+
+                $proveedor->refresh();
+                $proveedor->load(['cuentasBancarias.entidadBancaria', 'formaPago']);
             }
 
             // buscamos las cotizaciones detalle correspondientes con todas las relaciones necesarias
