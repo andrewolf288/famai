@@ -99,9 +99,11 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'U_EXX_CORDOCOR',
             // 'TaxDate',
             'DocumentsOwner',
-            'U_FAM_USUEXT'
+            'U_FAM_USUEXT',
             // 'DocTotalFc',
             // 'VatPercent',
+            'DocDueDate',
+            'NumAtCard'
         ]);
         $csvCabecera->insertOne([
             'DocNum',
@@ -119,9 +121,11 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'U_EXX_CORDOCOR',
             // 'TaxDate',
             'OwnerCode',
-            'U_FAM_USUEXT'
+            'U_FAM_USUEXT',
             // 'DocTotalFC',
             // 'VatPercent',
+            'DocDueDate',
+            'NumAtCard'
         ]);
 
         // creamos el detalle del csv
@@ -193,7 +197,9 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 // 0, // VatPercent 
                 $orden->occ_numero,
                 $orden->trabajador->tra_codigosap,
-                trim($orden->occ_usucreacion)
+                trim($orden->occ_usucreacion),
+                UtilHelper::formatDateExportSAP($orden->occ_fechaentrega),
+                $orden->occ_referencia
             ]);
             
             $ordenescompradetalle = OrdenCompraDetalle::with('producto', 'detalleMaterial.ordenInternaParte.ordenInterna')
