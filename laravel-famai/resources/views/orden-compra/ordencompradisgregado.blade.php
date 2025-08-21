@@ -327,6 +327,7 @@
                 <th class="col-creador">Creador</th>
                 <th class="col-codigo">CODIGO</th>
                 <th class="col-descripcion">DESCRIPCIÓN</th>
+                <th class="col-observacion">OBSERVACIÓN</th>
                 <th class="col-cantidad">CANTID</th>
                 <th class="col-und">UND</th>
                 <th class="col-precio">PRECIO s/IGV</th>
@@ -341,6 +342,7 @@
                     <td class="col-creador">{{ $detalle['usu_nombre'] ? $detalle['usu_nombre'] : '' }}</td>
                     <td class="col-codigo">{{ $detalle['pro_codigo'] ? $detalle['pro_codigo'] : '' }}</td>
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }} {!! nl2br(e($detalle['ocd_observacion'])) !!}</td>
+                    <td class="col-observacion">{{ $detalle['ocd_observacion'] }}</td>
                     <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
                     <td class="col-und">{{ $detalle['uni_codigo'] ? $detalle['uni_codigo'] : '' }}</td>
                     <td class="col-precio">{{ $detalle['ocd_preciounitario'] }}</td>
