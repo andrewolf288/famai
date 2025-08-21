@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Illuminate\Support\Facades\Log;
 
 class CotizacionController extends Controller
 {
@@ -1370,60 +1371,109 @@ class CotizacionController extends Controller
 
     public function obtenerDetallesProveedoresCotizaciones(Request $request)
     {
-        // obtenemos las cotizaciones detalles
-        $detalles = $request["detalles"];
-        $proveedor = $request["proveedor"];
-        // buscamos informacion de proveedor
-        $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'formaPago'])
-            ->findOrFail($proveedor);
-        // buscamos las cotizaciones detalle correspondientes con todas las relaciones necesarias
-        $detallesCotizaciones = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
-            ->whereIn('cod_id', $detalles)
-            ->get();
+        DB::beginTransaction();
+        try {
+            $user = auth()->user();
+            // obtenemos las cotizaciones detalles
+            $detalles = $request["detalles"];
+            $proveedor = $request["proveedor"];
+            // buscamos informacion de proveedor
+            $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'formaPago'])
+                ->findOrFail($proveedor);
 
-        $cotizacion = null;
-        if (count($detallesCotizaciones) > 0) {
-            $coc_id = $detallesCotizaciones[0]->coc_id;
-            $cotizacion = Cotizacion::with([
-                'detalleCotizacion' => function ($query) {
-                    $query->select('cod_id', 'coc_id', 'odm_id', 'cod_impuesto');
-                },
-                'detalleCotizacion.detalleMaterial' => function ($query) {
-                    $query->select('odm_id', 'opd_id');
-                },
-                'detalleCotizacion.detalleMaterial.ordenInternaParte' => function ($query) {
-                    $query->select('opd_id', 'oic_id');
-                },
-                'detalleCotizacion.detalleMaterial.ordenInternaParte.ordenInterna' => function ($query) {
-                    $query->select('oic_id', 'mrq_codigo');
-                },
-                'detalleCotizacion.detalleMaterial.ordenInternaParte.ordenInterna.motivoRequerimiento' => function ($query) {
-                    $query->select('mrq_codigo', 'mrq_descripcion');
+            // USAR FAM_LOG_Proveedores para buscar bancos del proveedor
+            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parRUC = ?", [$proveedor->prv_nrodocumento]);
+            if (count($bancos) > 1) {
+                throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
+            } elseif (count($bancos) === 1) {
+                ProveedorCuentaBanco::where('prv_id', $proveedor->prv_id)->delete();
+                
+                $bancoInfo = $bancos[0];
+                $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
+                
+                if (!empty($bancoInfo->account_sol) && !empty($bancoInfo->banco_sol)) {
+                    $this->procesarCuentaBancaria(
+                        $proveedor->prv_id,
+                        $bancoInfo->account_sol,
+                        $bancoInfo->banco_sol,
+                        'SOL',
+                        $bancosDisponibles,
+                        $user->usu_codigo
+                    );
                 }
-            ])->findOrFail($coc_id);
-        }
+                
+                if (!empty($bancoInfo->account_usd) && !empty($bancoInfo->banco_usd)) {
+                    $this->procesarCuentaBancaria(
+                        $proveedor->prv_id,
+                        $bancoInfo->account_usd,
+                        $bancoInfo->banco_usd,
+                        'USD',
+                        $bancosDisponibles,
+                        $user->usu_codigo,
+                        $bancoInfo->BIC_SWIFT ?? null,
+                        $bancoInfo->DirBanco ?? null
+                    );
+                }
+            }
 
-        // Agrupamos por producto para evitar duplicaciones, pero mantenemos las relaciones
-        $detallesAgrupados = $detallesCotizaciones->groupBy('pro_id');
-        
-        $detalles = $detallesAgrupados->map(function ($grupoDetalles, $pro_id) {
-            $primerDetalle = $grupoDetalles->first();
+            // buscamos las cotizaciones detalle correspondientes con todas las relaciones necesarias
+            $detallesCotizaciones = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
+                ->whereIn('cod_id', $detalles)
+                ->get();
+
+            $cotizacion = null;
+            if (count($detallesCotizaciones) > 0) {
+                $coc_id = $detallesCotizaciones[0]->coc_id;
+                $cotizacion = Cotizacion::with([
+                    'detalleCotizacion' => function ($query) {
+                        $query->select('cod_id', 'coc_id', 'odm_id', 'cod_impuesto');
+                    },
+                    'detalleCotizacion.detalleMaterial' => function ($query) {
+                        $query->select('odm_id', 'opd_id');
+                    },
+                    'detalleCotizacion.detalleMaterial.ordenInternaParte' => function ($query) {
+                        $query->select('opd_id', 'oic_id');
+                    },
+                    'detalleCotizacion.detalleMaterial.ordenInternaParte.ordenInterna' => function ($query) {
+                        $query->select('oic_id', 'mrq_codigo');
+                    },
+                    'detalleCotizacion.detalleMaterial.ordenInternaParte.ordenInterna.motivoRequerimiento' => function ($query) {
+                        $query->select('mrq_codigo', 'mrq_descripcion');
+                    }
+                ])->findOrFail($coc_id);
+            }
+
+            // Agrupamos por producto para evitar duplicaciones, pero mantenemos las relaciones
+            $detallesAgrupados = $detallesCotizaciones->groupBy('pro_id');
             
-            return [
-                "producto" => $primerDetalle->detalleMaterial->producto,
-                "detalles" => $grupoDetalles->values(),
-                "cantidad_requerida" => $grupoDetalles->sum('detalleMaterial.odm_cantidadpendiente'),
-                "precio_unitario" => $primerDetalle->cod_preciounitario,
-            ];
-        })->values();
+            $detalles = $detallesAgrupados->map(function ($grupoDetalles, $pro_id) {
+                $primerDetalle = $grupoDetalles->first();
+                
+                return [
+                    "producto" => $primerDetalle->detalleMaterial->producto,
+                    "detalles" => $grupoDetalles->values(),
+                    "cantidad_requerida" => $grupoDetalles->sum('detalleMaterial.odm_cantidadpendiente'),
+                    "precio_unitario" => $primerDetalle->cod_preciounitario,
+                ];
+            })->values();
 
-        $formatData = array(
-            "proveedor" => $proveedor,
-            "detalles" => $detalles,
-            "cotizacion" => $cotizacion
-        );
-
-        return response()->json($formatData);
+            $formatData = array(
+                "proveedor" => $proveedor,
+                "detalles" => $detalles,
+                "cotizacion" => $cotizacion
+            );
+            DB::commit();
+            return response()->json($formatData);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error en al obtener detalles de proveedores cotizaciones', [
+                'user' => $user->usu_codigo,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $detalles
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function obtenerSolicitantes()
