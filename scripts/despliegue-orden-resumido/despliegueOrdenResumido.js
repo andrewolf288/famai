@@ -310,7 +310,7 @@ $(document).ready(async () => {
     }
 
     await initInformacionMaestros()
-    initDataTable(obtenerFiltrosActuales())
+    // initDataTable(obtenerFiltrosActuales())
 
     filterButton.on('click', () => {
         const filteredURL = obtenerFiltrosActuales()
