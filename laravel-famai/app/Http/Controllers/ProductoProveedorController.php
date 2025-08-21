@@ -276,7 +276,41 @@ class ProductoProveedorController extends Controller
                 $formaPago = FormaPago::where('fpa_codigo', $ordenCompra->fpa_codigo)->first();
             }
 
+            // Obtener datos actualizados del proveedor desde SAP
+            $cardCode = $item->proveedor->prv_codigo;
+            $proveedorSAP = null;
+            
+            if ($cardCode) {
+                try {
+                    $proveedorSAP = DB::select("EXEC dbo.FAM_LOG_Proveedores @parCardCode = ?", [$cardCode]);
+                    $proveedorSAP = $proveedorSAP[0] ?? null;
+                } catch (\Exception $e) {
+                    // Log del error si es necesario
+                    $proveedorSAP = null;
+                }
+            }
+
+            // Actualizar el proveedor en la base de datos si se obtuvieron datos de SAP
+            if ($proveedorSAP) {
+                $proveedor = $item->proveedor;
+                $proveedor->update([
+                    'prv_nrodocumento' => $proveedorSAP->RUC ?? $proveedor->prv_nrodocumento,
+                    'prv_nombre' => $proveedorSAP->RazSocial ?? $proveedor->prv_nombre,
+                    'prv_direccion' => $proveedorSAP->Direccion ?? $proveedor->prv_direccion,
+                    'prv_contacto' => $proveedorSAP->Contacto ?? $proveedor->prv_contacto,
+                    'prv_telefono' => $proveedorSAP->Telefono ?? $proveedor->prv_telefono,
+                    'prv_whatsapp' => $proveedorSAP->Celular ?? $proveedor->prv_whatsapp,
+                    'prv_correo' => $proveedorSAP->E_Mail ?? $proveedor->prv_correo,
+                    'prv_usumodificacion' => auth()->user()->usu_codigo ?? null,
+                    'prv_fecmodificacion' => now(),
+                ]);
+                
+                // Recargar el modelo para obtener los datos actualizados
+                $proveedor->refresh();
+            }
+
             $proveedorArray = $item->proveedor->toArray();
+
             // Solo para el primer proveedor, ejecuta el stored procedure y agrega CodFormaPago
             if ($key === array_key_first($data->toArray())) {
                 $ruc = $item->proveedor->prv_nrodocumento;
