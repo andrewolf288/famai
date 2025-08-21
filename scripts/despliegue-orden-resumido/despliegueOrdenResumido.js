@@ -1188,6 +1188,15 @@ $(document).ready(async () => {
         recalcularTotales();
     });
 
+    $(document).on('change', '#selectImpuestoCotizacion', function () {
+        const impuesto = $(this).val()
+        $('.form-select.impuesto-detalle').each(function () {
+            $(this).val(impuesto)
+            // Disparar el evento input que sí ejecuta el recálculo
+            $(this).trigger('input')
+        })
+    })
+
     // Verificar que jQuery y bootbox están disponibles
 
     // buscador de productos a validar - usando delegación para bootbox

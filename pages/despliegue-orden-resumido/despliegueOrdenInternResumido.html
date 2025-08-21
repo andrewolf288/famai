@@ -287,7 +287,13 @@
                                 <th class="col-1 text-center d-none label-valor-unitario">Valor Unit. (Sin IGV)</th>
                                 <th class="col-1 text-center d-none label-precio-unitario">Prec. Uni (Con IGV)</th>
                                 <th class="col-1 text-center d-none label-descuento">Dsct (%)</th>
-                                <th class="col-1 text-center d-none label-impuesto">Impuesto</th>
+                                <th class="col-1 text-center d-none label-impuesto">
+                                    <span>Impuesto</span>
+                                    <select id="selectImpuestoCotizacion" class="form-select">
+                                        <option value="igv" selected>IGV</option>
+                                        <option value="exo">EXO</option>
+                                    </select>
+                                </th>
                                 <th class="col-1 text-center d-none label-valor-unitario-total">Total</th>
                                 <th class="col-1 text-center">Fec. Entrega</th>
                                 <th class="col-1 text-center d-none label-ultimo-precio">Ult. Fec</th>
