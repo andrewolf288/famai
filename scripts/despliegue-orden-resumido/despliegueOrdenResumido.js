@@ -1192,7 +1192,6 @@ $(document).ready(async () => {
         const impuesto = $(this).val()
         $('.form-select.impuesto-detalle').each(function () {
             $(this).val(impuesto)
-            // Disparar el evento input que sí ejecuta el recálculo
             $(this).trigger('input')
         })
     })
@@ -1875,16 +1874,25 @@ $(document).ready(async () => {
 
     function recalcularTotales() {
         let subtotal = 0.00
-        let total = 0.00
+        let totalIgv = 0.00
 
         $('#tbl-cotizaciones-materiales tbody tr').each(function () {
             const totalxItem = parseFloat($(this).find('.valor-unitario-total').val()) || 0.00
+            const tipoImpuesto = $(this).find('.impuesto-detalle').val()
+            
+            // Acumular subtotal
             subtotal += totalxItem;
+            
+            // Calcular IGV solo para items que lo aplican
+            if (tipoImpuesto === 'igv') {
+                totalIgv += (totalxItem * 0.18);
+            }
         })
 
+        // Establecer valores en los inputs
         $('#subtotalCotizacionInput').val(subtotal.toFixed(4))
-        $('#igvCotizacionInput').val((subtotal * 0.18).toFixed(4))
-        $('#totalCotizacionInput').val((subtotal * 1.18).toFixed(4))
+        $('#igvCotizacionInput').val(totalIgv.toFixed(4))
+        $('#totalCotizacionInput').val((subtotal + totalIgv).toFixed(4))
     }
 
     // ----------- TRAER INFORMACION DE MONEDAS ----------
