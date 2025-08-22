@@ -700,6 +700,22 @@ class OrdenCompraController extends Controller
         return response()->json($ordencompra);
     }
 
+    public function showDetalles($id)
+    {
+        $ordencompra = OrdenCompra::with([
+            'proveedor.tipoDocumento', 
+            'proveedor.cuentasBancarias.entidadBancaria',
+            'moneda', 
+            'elaborador', 
+            'solicitador', 
+            'autorizador',
+            'formaPago',
+            'detalleOrdenCompra.producto.unidad',
+            'detalleOrdenCompra.impuesto'
+        ])->findOrFail($id);
+        return response()->json($ordencompra);
+    }
+
     public function exportarPDF(Request $request)
     {
         $user = auth()->user();

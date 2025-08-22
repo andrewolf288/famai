@@ -429,6 +429,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::post('ordenescompra', [OrdenCompraController::class, 'store']);
     Route::get('ordenescompra/exportarPDF', [OrdenCompraController::class, 'exportarPDF']);
     Route::get('ordencompra/{id}', [OrdenCompraController::class, 'show']);
+    Route::get('ordencompra-detalles/{id}', [OrdenCompraController::class, 'showDetalles']);
     Route::put('ordencompra/{id}', [OrdenCompraController::class, 'update']);
     Route::post('ordencompra/aprobar-masivo', [OrdenCompraController::class, 'aprobarMasivo']);
     Route::get('ordencompra-pendientes-ingresar', [OrdenCompraController::class, 'ordenesCompraPorEmitirNotaIngreso']);

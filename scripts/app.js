@@ -195,6 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     })
 
+    // Ruta ver orden de compra
+    router.on('/orden-compra/ver/:id', () => {
+        privateRoute(() => {
+            loadContent('pages/orden-compra/verOrdenCompra.html', 'scripts/orden-compra/verOrdenCompra.js')
+        })
+    })
+
     // Ruta de aprobacion de orden de compra
     router.on('/aprobacion-orden-compra', () => {
         privateRoute(() => {
