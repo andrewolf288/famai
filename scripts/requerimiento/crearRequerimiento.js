@@ -237,61 +237,82 @@ $(document).ready(function () {
         }
     }
 
-    function seleccionarMaterial(material) {
+    async function seleccionarMaterial(material) {
         const { pro_id, pro_codigo, pro_descripcion, uni_codigo } = material
         const findProducto = detalle_requerimiento.find(element => element.pro_id == pro_id)
+        let continuarProductoDuplicado = true
 
-        // Excepcion de validacion
         if (findProducto) {
-            alert('Este producto ya fué agregado')
-        } else {
-            limpiarLista()
-            $('#productosInput').val('')
-
-            const data = {
-                pro_id,
-                pro_codigo,
-                odm_descripcion: pro_descripcion,
-                odm_cantidad: 1.00,
-                uni_codigo,
-                odm_observacion: "",
-                odm_tipo: 1,
-                odm_asociar: true,
-                detalle_adjuntos: []
-            }
-
-            const row = `
-            <tr data-producto="${data["pro_id"]}">
-                <td>${data["pro_codigo"]}</td>
-                <td>
-                    <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"].replace(/'/g, "&#39;")}' />
-                </td>
-                <td>
-                    <input type="number" class="form-control cantidad-input" value='${data["odm_cantidad"]}'/>
-                </td>
-                <td>${data["uni_codigo"] ?? ''}</td>
-                <td>
-                    <input type="text" class="form-control observacion-input" value='${data["odm_observacion"].replace(/'/g, "&#39;")}' />
-                </td>
-                <td>
-                    <div class="d-flex justify-content-around">
-                        <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data["pro_id"]}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
-                                <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
-                            </svg>
-                         </button>
-                    </div>
-                </td>
-            </tr>`
-
-            $('#tbl-requerimientos tbody').append(row)
-            detalle_requerimiento.push(data)
+            continuarProductoDuplicado = false
+            continuarProductoDuplicado = await new Promise(resolve => {
+                bootbox.confirm({
+                    title: 'Confirmación',
+                    message: 'El producto ya existe en el requerimiento. ¿Desea continuar?',
+                    callback: (result) => {
+                        resolve(result)
+                    },
+                    buttons: {
+                        cancel: {
+                            label: 'Cancelar',
+                            className: 'btn-secondary'
+                        },
+                        confirm: {
+                            label: 'Continuar',
+                            className: 'btn-primary'
+                        }
+                    }
+                })
+            })
         }
+
+        if (!continuarProductoDuplicado) return
+
+        limpiarLista()
+        $('#productosInput').val('')
+
+        const data = {
+            pro_id,
+            pro_codigo,
+            odm_descripcion: pro_descripcion,
+            odm_cantidad: 1.00,
+            uni_codigo,
+            odm_observacion: "",
+            odm_tipo: 1,
+            odm_asociar: true,
+            detalle_adjuntos: []
+        }
+
+        const row = `
+        <tr data-producto="${data["pro_id"]}">
+            <td>${data["pro_codigo"]}</td>
+            <td>
+                <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"].replace(/'/g, "&#39;")}' />
+            </td>
+            <td>
+                <input type="number" class="form-control cantidad-input" value='${data["odm_cantidad"]}'/>
+            </td>
+            <td>${data["uni_codigo"] ?? ''}</td>
+            <td>
+                <input type="text" class="form-control observacion-input" value='${data["odm_observacion"].replace(/'/g, "&#39;")}' />
+            </td>
+            <td>
+                <div class="d-flex justify-content-around">
+                    <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data["pro_id"]}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                        </svg>
+                        </button>
+                </div>
+            </td>
+        </tr>`
+
+        $('#tbl-requerimientos tbody').append(row)
+        detalle_requerimiento.push(data)
     }
 
     $('#tbl-requerimientos').on('change', '.cantidad-input, .observacion-input, .descripcion-input', function () {
