@@ -233,16 +233,48 @@ class OrdenInternaMaterialesController extends Controller
         }
 
         // se necesita agregar informacion de procedimiento almacenado
-        $query = OrdenInternaMateriales::with([
-            'responsable',
-            'producto' => function($q) {
-                $q->with(['proveedores' => function($q2) {
-                    $q2->select('prv_id', 'pro_id');
-                }]);
-                $q->with('unidad');
+        $query = OrdenInternaMateriales::select([
+            'odm_id',
+            'opd_id',
+            'pro_id',
+            'tra_responsable',
+            'odm_descripcion',
+            'odm_cantidadpendiente',
+            'odm_cantidad',
+            'odm_solped',
+            'odm_fecconsultareservacion',
+            'odm_estado'
+        ])->with([
+            'responsable' => function($q) {
+                $q->select('tra_id', 'tra_nombre');
             },
-            'ordenInternaParte.ordenInterna',
-            'detalleAdjuntos'
+            'producto' => function($q) {
+                $q->select('pro_id', 'pro_codigo', 'pro_descripcion', 'uni_codigo')
+                  ->with([
+                      'proveedores' => function($q2) {
+                          $q2->select('prv_id', 'pro_id');
+                      },
+                      'unidad' => function($q3) {
+                          $q3->select('uni_codigo');
+                      }
+                  ]);
+            },
+            'ordenInternaParte' => function($q) {
+                $q->select('opd_id', 'oic_id')
+                  ->with([
+                      'ordenInterna' => function($q2) {
+                          $q2->select('oic_id', 'odt_numero', 'oic_estado', 'oic_tipo', 'sed_codigo')
+                            ->with([
+                                'almacen' => function($q3) {
+                                    $q3->select('alm_id', 'alm_codigo', 'sed_codigo');
+                                }
+                            ]);
+                      }
+                  ]);
+            },
+            'detalleAdjuntos' => function($q) {
+                $q->select('oma_id', 'odm_id'); // Solo necesitamos verificar si existen
+            }
         ]);
         $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
             $q->where(function ($query) {
@@ -333,38 +365,68 @@ class OrdenInternaMaterialesController extends Controller
 
         $data = $query->get();
 
+        $todos_odm_ids = $data->pluck('odm_id')->toArray();
+        
+        $cotizaciones_counts = CotizacionDetalle::select('odm_id', DB::raw('COUNT(DISTINCT coc_id) as count'))
+            ->whereIn('odm_id', $todos_odm_ids)
+            ->groupBy('odm_id')
+            ->pluck('count', 'odm_id')->toArray();
+
+        $ordenes_compra_counts = OrdenCompraDetalle::select('odm_id', DB::raw('COUNT(DISTINCT occ_id) as count'))
+            ->whereIn('odm_id', $todos_odm_ids)
+            ->groupBy('odm_id')
+            ->pluck('count', 'odm_id')->toArray();
+
+        $cotizaciones_seleccionadas = CotizacionDetalle::with([
+                'cotizacion' => function($q) {
+                    $q->select('coc_id', 'prv_id', 'mon_codigo')
+                      ->with([
+                          'proveedor' => function($q2) {
+                              $q2->select('prv_id', 'prv_nombre');
+                          },
+                          'moneda' => function($q2) {
+                              $q2->select('mon_codigo', 'mon_simbolo');
+                          }
+                      ]);
+                }
+            ])
+            ->select('cod_id', 'odm_id', 'coc_id', 'cod_estado', 'cod_preciounitario')
+            ->whereIn('odm_id', $todos_odm_ids)
+            ->where(function ($query) {
+                $query->where('cod_estado', "SAT")
+                    ->orWhere('cod_estado', "SML");
+            })
+            ->get()
+            ->keyBy('odm_id');
+
         // debemos agrupar la información
         $agrupados = $data
             ->whereNotNull('pro_id')
             ->groupBy('pro_id')
-            ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo) {
+            ->map(function ($grupo, $pro_id) use ($productoService, $almacen_codigo, $cotizaciones_counts, $ordenes_compra_counts, $cotizaciones_seleccionadas) {
 
                 $producto = $grupo->first()->producto;
                 if (!$producto) { return null; }
 
                 $producto_codigo = $producto->pro_codigo;
-                // $productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
                 $totalProveedores = $producto
                     ? $producto->proveedores->pluck('prv_id')->unique()->count()
                     : 0;
 
                 $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
-                $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)
-                    // ->where('cod_cotizar', 1)
-                    ->distinct()
-                    ->count('coc_id');
-
-                $ordenes_compra_count = OrdenCompraDetalle::whereIn('odm_id', $identificadores_materiales)
-                    ->distinct()
-                    ->count('occ_id');
-
-                $cotizacion_seleccionada = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
-                    ->whereIn('odm_id', $identificadores_materiales)
-                    ->where(function ($query) {
-                        $query->where('cod_estado', "SAT")
-                            ->orWhere('cod_estado', "SML");
-                    })
-                    ->first();
+                
+                // Sumar los counts optimizados
+                $cotizaciones_count = array_sum(array_intersect_key($cotizaciones_counts, array_flip($identificadores_materiales)));
+                $ordenes_compra_count = array_sum(array_intersect_key($ordenes_compra_counts, array_flip($identificadores_materiales)));
+                
+                // Obtener cotización seleccionada (tomar la primera que encuentre de los materiales del grupo)
+                $cotizacion_seleccionada = null;
+                foreach ($identificadores_materiales as $odm_id) {
+                    if (isset($cotizaciones_seleccionadas[$odm_id])) {
+                        $cotizacion_seleccionada = $cotizaciones_seleccionadas[$odm_id];
+                        break;
+                    }
+                }
 
                 return [
                     'pro_id' => $pro_id,
@@ -391,26 +453,12 @@ class OrdenInternaMaterialesController extends Controller
 
         $sinAgrupar = $data
             ->whereNull('pro_id')
-            ->map(function ($item) {
+            ->map(function ($item) use ($cotizaciones_counts, $ordenes_compra_counts, $cotizaciones_seleccionadas) {
 
-                $identificadores_materiales = [$item->odm_id];
-                $cotizaciones_count = CotizacionDetalle::whereIn('odm_id', $identificadores_materiales)
-                    // ->where('cod_cotizar', 1)
-                    ->distinct()
-                    ->count('coc_id');
-
-                $ordenes_compra_count = OrdenCompraDetalle::whereIn('odm_id', $identificadores_materiales)
-                    ->distinct()
-                    ->count('occ_id');
-
-                // debemos buscar alguna cotizacion detalle que haya sido seleccionada de manera manual o automatica
-                $cotizacion_seleccionada = CotizacionDetalle::with(['cotizacion.proveedor', 'cotizacion.moneda'])
-                    ->where('odm_id', $item->odm_id)
-                    ->where(function ($query) {
-                        $query->where('cod_estado', "SAT")
-                            ->orWhere('cod_estado', "SML");
-                    })
-                    ->first();
+                $odm_id = $item->odm_id;
+                $cotizaciones_count = $cotizaciones_counts[$odm_id] ?? 0;
+                $ordenes_compra_count = $ordenes_compra_counts[$odm_id] ?? 0;
+                $cotizacion_seleccionada = $cotizaciones_seleccionadas[$odm_id] ?? null;
 
                 return [
                     'pro_id' => null,
