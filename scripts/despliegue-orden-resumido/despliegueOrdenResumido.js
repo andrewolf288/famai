@@ -3118,4 +3118,21 @@ $(document).ready(async () => {
             alert('Error al actualizar la información de cotización, cierre el modal y vuelva a abrirlo');
         }
     }
+
+    $(document).on('change', '#chk-cotizaciones-disponibles', async function () {
+        const isChecked = $(this).is(':checked')
+        if (isChecked) {
+            // Seleccionar la primera cotización disponible por material en la tabla tbl-materiales-oc-body
+            $('#tbl-materiales-oc-body .cotizaciones-container').each(function() {
+                const $container = $(this);
+                const $firstRadio = $container.find('.cotizacion-radio').first();
+                if ($firstRadio.length > 0) {
+                    $firstRadio.prop('checked', true).trigger('change');
+                }
+            });
+        } else {
+            // Deseleccionar todas las cotizaciones
+            $('#tbl-materiales-oc-body .cotizacion-radio').prop('checked', false).trigger('change');
+        }
+    })
 })
