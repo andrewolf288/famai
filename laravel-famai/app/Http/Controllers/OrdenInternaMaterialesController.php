@@ -409,6 +409,7 @@ class OrdenInternaMaterialesController extends Controller
                 if (!$producto) { return null; }
 
                 $producto_codigo = $producto->pro_codigo;
+                //$productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
                 $totalProveedores = $producto
                     ? $producto->proveedores->pluck('prv_id')->unique()->count()
                     : 0;
