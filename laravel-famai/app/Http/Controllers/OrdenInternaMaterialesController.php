@@ -276,9 +276,6 @@ class OrdenInternaMaterialesController extends Controller
             'producto' => function($q) {
                 $q->select('pro_id', 'pro_codigo', 'pro_descripcion', 'uni_codigo')
                   ->with([
-                      'proveedores' => function($q2) {
-                          $q2->select('prv_id', 'pro_id');
-                      },
                       'unidad' => function($q3) {
                           $q3->select('uni_codigo');
                       }
@@ -473,7 +470,11 @@ class OrdenInternaMaterialesController extends Controller
                 $producto_codigo = $producto->pro_codigo;
                 //$productoStock = $productoService->findProductoBySAP($almacen_codigo, $producto_codigo);
                 $totalProveedores = $producto
-                    ? $producto->proveedores->pluck('prv_id')->unique()->count()
+                    ? DB::table('tblproductosproveedores_prp')
+                        ->where('pro_id', $producto->pro_id)
+                        ->distinct()
+                        ->limit(6) // Limitamos a 6 para saber si hay más de 5
+                        ->count('prv_id')
                     : 0;
 
                 $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
