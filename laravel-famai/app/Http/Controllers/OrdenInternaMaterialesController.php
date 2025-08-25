@@ -214,6 +214,8 @@ class OrdenInternaMaterialesController extends Controller
         $odt_numero = $request->input('odt_numero', null);
         $odt_numero = $odt_numero ? explode(',', $odt_numero) : [];
 
+        $oic_otsap = $request->input('oic_otsap', null);
+        $oic_otsap = $oic_otsap ? explode(',', $oic_otsap) : [];
 
         $tipoProceso = $request->input('oic_tipo', null);
         $fecha_desde = $request->input('fecha_desde', null);
@@ -323,6 +325,12 @@ class OrdenInternaMaterialesController extends Controller
         if ($odt_numero !== null && count($odt_numero) > 0) {
             $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero) {
                 $q->whereIn('odt_numero', $odt_numero);
+            });
+        }
+
+        if ($oic_otsap !== null && count($oic_otsap) > 0) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($oic_otsap) {
+                $q->whereIn('oic_otsap', $oic_otsap);
             });
         }
 
