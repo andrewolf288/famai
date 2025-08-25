@@ -3,7 +3,7 @@ $(document).ready(function () {
     const urlParams = new URLSearchParams(new URL(url).search);
     const coc_id = urlParams.get('coc_id');
 
-    const cuentaConSeparadoresRegex = /^[\d\- ]{8,30}$/
+    const cuentaConSeparadoresRegex = /^.*$/
 
     $("#fechaValidezPicker").datepicker({
         dateFormat: 'dd/mm/yy',
