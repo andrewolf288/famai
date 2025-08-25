@@ -1723,7 +1723,55 @@ $(document).ready(async () => {
             const { data: proveedores } = await client.post(`/ProveedoresByOrdenInternaMateriales`, {
                 materiales: detalleCotizacion
             });
-
+            
+            if (proveedores.length === 1) {
+                const proveedorUnico = proveedores[0];
+                // Obtener las cotizaciones de este proveedor
+                const { data: cotizacionesProveedor } = await client.post(`/cotizacionesByProveedor`, {
+                    proveedor: proveedorUnico.prv_id,
+                    odm_ids: detalleCotizacion,
+                    pro_ids: detalleCotizacionPro_ids
+                });
+                
+                // Verificar si cada material tiene exactamente una cotización
+                const productos = Object.keys(cotizacionesProveedor);
+                const totalProductos = productos.length;
+                
+                // Verificar que todos los productos requeridos tienen cotización
+                if (totalProductos === detalleCotizacionPro_ids.length) {
+                    // Verificar que cada producto tiene exactamente una cotización
+                    let todosProductosUnicaCotizacion = true;
+                    let cotizacionesSeleccionadasAuto = {
+                        prv_id: proveedorUnico.prv_id,
+                        cotizaciones: []
+                    };
+                    
+                    for (const proId of productos) {
+                        const producto = cotizacionesProveedor[proId];
+                        if (producto.cotizaciones.length !== 1) {
+                            todosProductosUnicaCotizacion = false;
+                            break;
+                        }
+                        
+                        // Agregar esta única cotización a la selección automática
+                        const cotizacion = producto.cotizaciones[0];
+                        cotizacionesSeleccionadasAuto.cotizaciones.push({
+                            coc_id: cotizacion.coc_id,
+                            cod_ids: cotizacion.detalles.map(detalle => detalle.cod_id),
+                            pro_id: proId
+                        });
+                    }
+                    
+                    // Si todos los productos tienen una única cotización, crear OC directamente
+                    if (todosProductosUnicaCotizacion) {
+                        const url = `/logistica-requerimiento/crear/orden-compra?proveedor=${cotizacionesSeleccionadasAuto.prv_id}&cotizaciones=${JSON.stringify(cotizacionesSeleccionadasAuto.cotizaciones)}`;
+                        router.navigate(url);
+                        return;
+                    }
+                }
+            }
+            
+            // Si no se cumplieron las condiciones para automatización, mostrar el modal normal
             const cotizacionesElegidas = await new Promise((resolve, reject) => {
                 const modal = new bootstrap.Modal(
                     document.getElementById('modalProveedoresDistintos'),
@@ -1854,7 +1902,7 @@ $(document).ready(async () => {
                 modal.show();
             });
 
-            if (cotizacionesElegidas.cotizaciones.length > 0) {
+            if (cotizacionesElegidas && cotizacionesElegidas.cotizaciones.length > 0) {
                 const url = `/logistica-requerimiento/crear/orden-compra?proveedor=${cotizacionesElegidas.prv_id}&cotizaciones=${JSON.stringify(cotizacionesElegidas.cotizaciones)}`
                 router.navigate(url)
             }
