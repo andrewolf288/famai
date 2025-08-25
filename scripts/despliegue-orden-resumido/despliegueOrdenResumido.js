@@ -329,6 +329,17 @@ $(document).ready(async () => {
         }
     })
 
+    $('#filter-selector').on('change', () => {
+        const selectedValue = $('#filter-selector').val()
+        if (selectedValue === '') {
+            $('#filter-input').attr('disabled', true)
+            $('#filter-input').val('')
+        } else {
+            $('#filter-input').removeAttr('disabled')
+            $('#filter-input').val('')
+        }
+    })
+
     // ---------- ADMINISTRACIÓN DE DETALLE DE DATOS ------------
     function initDetalleMaterialAgrupado(data) {
         $("#tbl-despliegue-materiales-body").empty()
