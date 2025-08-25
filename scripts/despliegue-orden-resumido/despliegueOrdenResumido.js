@@ -2242,6 +2242,13 @@ $(document).ready(async () => {
         $('#proveedoresInput').val('')
 
         const row = renderRowProveedor(mapProveedor)
+
+        if ($('#checkProveedorUnico').is(':checked')) {
+            $("#formapagoCotizacionInput").val(proveedor.DesFormaPago)
+        } else {
+            $("#formapagoCotizacionInput").attr("data-formapago", proveedor.CodFormaPago)
+        }
+
         $('#tbl-cotizaciones-proveedores tbody').append(row)
     }
 
