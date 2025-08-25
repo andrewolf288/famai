@@ -186,6 +186,9 @@ class OrdenInternaMaterialesController extends Controller
     // index resumido
     public function indexResumido(Request $request)
     {
+        $startTime = microtime(true);
+        Log::info('INDEXRESUMIDO - INICIO', ['timestamp' => now(), 'memory_usage' => memory_get_usage(true)]);
+        
         // lo primero que hacemos es ejecutar el procedimiento almacenado
         // DB::statement('EXEC dbo.ActualizarDetalleMaterialesOT');
 
@@ -225,11 +228,32 @@ class OrdenInternaMaterialesController extends Controller
         if ($almacen_request !== null) {
             $almacen_codigo = $almacen_request;
         }
+        
+        $stepTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 1: Configuración inicial completada', [
+            'elapsed_time' => round(($stepTime - $startTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'params' => [
+                'sed_codigo' => $sed_codigo,
+                'almacen_codigo' => $almacen_codigo,
+                'odt_numero_count' => count($odt_numero),
+                'multifilter' => $multifilter
+            ]
+        ]);
 
         try {
             DB::statement('EXEC dbo.SincronizarProductosProveedores');
+            $syncTime = microtime(true);
+            Log::info('INDEXRESUMIDO - PASO 2: SincronizarProductosProveedores completado', [
+                'elapsed_time' => round(($syncTime - $stepTime) * 1000, 2) . 'ms',
+                'memory_usage' => memory_get_usage(true)
+            ]);
         } catch (\Throwable $th) {
-            // 
+            $syncTime = microtime(true);
+            Log::info('INDEXRESUMIDO - PASO 2: SincronizarProductosProveedores falló (continuando)', [
+                'elapsed_time' => round(($syncTime - $stepTime) * 1000, 2) . 'ms',
+                'error' => $th->getMessage()
+            ]);
         }
 
         // se necesita agregar informacion de procedimiento almacenado
@@ -358,14 +382,34 @@ class OrdenInternaMaterialesController extends Controller
         $query->where('odm_cantidadpendiente', '>', 0);
         $query->orderBy('odm_fecconsultareservacion', 'desc');
 
+        $queryBuildTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 3: Construcción de consulta principal completada', [
+            'elapsed_time' => round(($queryBuildTime - $syncTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true)
+        ]);
+
         // DEBUGGING: Ver la query SQL
         $sql = $query->toSql();
         $bindings = $query->getBindings();
         Log::info('SQL Query LOGISTICA REQUERIMIENTOS: ', ['sql' => $sql, 'bindings' => $bindings]);
 
         $data = $query->get();
+        
+        $queryExecutionTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 4: Ejecución de consulta principal completada', [
+            'elapsed_time' => round(($queryExecutionTime - $queryBuildTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'records_count' => $data->count()
+        ]);
 
         $todos_odm_ids = $data->pluck('odm_id')->toArray();
+        
+        $additionalQueriesStartTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 5: Iniciando consultas adicionales', [
+            'elapsed_time' => round(($additionalQueriesStartTime - $queryExecutionTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'odm_ids_count' => count($todos_odm_ids)
+        ]);
         
         $cotizaciones_counts = CotizacionDetalle::select('odm_id', DB::raw('COUNT(DISTINCT coc_id) as count'))
             ->whereIn('odm_id', $todos_odm_ids)
@@ -398,8 +442,25 @@ class OrdenInternaMaterialesController extends Controller
             })
             ->get()
             ->keyBy('odm_id');
+            
+        $additionalQueriesEndTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 6: Consultas adicionales completadas', [
+            'elapsed_time' => round(($additionalQueriesEndTime - $additionalQueriesStartTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'cotizaciones_count' => count($cotizaciones_counts),
+            'ordenes_compra_count' => count($ordenes_compra_counts),
+            'cotizaciones_seleccionadas_count' => $cotizaciones_seleccionadas->count()
+        ]);
 
         // debemos agrupar la información
+        $processingStartTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 7: Iniciando procesamiento y agrupación de datos', [
+            'elapsed_time' => round(($processingStartTime - $additionalQueriesEndTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'data_with_product_count' => $data->where('pro_id', '!=', null)->count(),
+            'data_without_product_count' => $data->where('pro_id', '=', null)->count()
+        ]);
+        
         $agrupados = $data
             ->whereNotNull('pro_id')
             ->groupBy('pro_id')
@@ -480,7 +541,23 @@ class OrdenInternaMaterialesController extends Controller
             ->values();
 
         // Combinar los resultados
+        $combinationStartTime = microtime(true);
+        Log::info('INDEXRESUMIDO - PASO 8: Combinando resultados finales', [
+            'elapsed_time' => round(($combinationStartTime - $processingStartTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'agrupados_count' => $agrupados->count(),
+            'sin_agrupar_count' => $sinAgrupar->count()
+        ]);
+        
         $resultado = $agrupados->concat($sinAgrupar);
+        
+        $finalTime = microtime(true);
+        Log::info('INDEXRESUMIDO - COMPLETADO', [
+            'elapsed_time' => round(($finalTime - $combinationStartTime) * 1000, 2) . 'ms',
+            'total_elapsed_time' => round(($finalTime - $startTime) * 1000, 2) . 'ms',
+            'memory_usage' => memory_get_usage(true),
+            'total_results_count' => $resultado->count()
+        ]);
 
         return response()->json($resultado);
     }
