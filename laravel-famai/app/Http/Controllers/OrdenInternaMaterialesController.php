@@ -218,6 +218,7 @@ class OrdenInternaMaterialesController extends Controller
         $tipoProceso = $request->input('oic_tipo', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+        $fecha_activo = $request->input('fecha_activo', false);
         $solped = $request->input('solped', null);
         $almacen_request = $request->input('alm_codigo', null);
         // multifilters
@@ -343,7 +344,7 @@ class OrdenInternaMaterialesController extends Controller
         }
 
         // filtro de fecha
-        if ($fecha_desde !== null && $fecha_hasta !== null) {
+        if ($fecha_desde !== null && $fecha_hasta !== null && $fecha_activo) {
             $query->whereDate('odm_fecconsultareservacion', '>=', $fecha_desde)
                 ->whereDate('odm_fecconsultareservacion', '<=', $fecha_hasta);
         }

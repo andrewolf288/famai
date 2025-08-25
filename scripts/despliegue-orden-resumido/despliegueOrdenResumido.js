@@ -1209,6 +1209,17 @@ $(document).ready(async () => {
         }
     }))
 
+    $(document).on('change', '#fechaActivo', function () {
+        const fechaActivo = $(this).is(':checked')
+        if (fechaActivo) {
+            $('#fechaDesde').prop('disabled', false)
+            $('#fechaHasta').prop('disabled', false)
+        } else {
+            $('#fechaDesde').prop('disabled', true)
+            $('#fechaHasta').prop('disabled', true)
+        }
+    })
+
     async function buscarMateriales(query) {
 
         if (abortController) {
@@ -2739,6 +2750,7 @@ $(document).ready(async () => {
         const fecha_desde = transformarFecha($('#fechaDesde').val())
         const fecha_hasta = transformarFecha($('#fechaHasta').val())
         const almacen = getValueAlmacen()
+        const fecha_activo = $('#fechaActivo').is(':checked')
         
         let filteredURL = urlAPI
         let params = []
@@ -2767,6 +2779,10 @@ $(document).ready(async () => {
         // Agregar filtros múltiples de estado
         if (filters && filters.length !== 0) {
             params.push(`multifilter=${filters.join('OR')}`)
+        }
+
+        if (fecha_activo) {
+            params.push(`fecha_activo=${fecha_activo}`)
         }
 
         // Construir URL final
