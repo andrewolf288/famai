@@ -270,7 +270,12 @@ class OrdenInternaMaterialesController extends Controller
             'odm_cantidad',
             'odm_solped',
             'odm_fecconsultareservacion',
-            'odm_estado'
+            'odm_estado',
+            'odm_feccreacion',
+            'odm_usucreacion',
+            'odm_fecmodificacion',
+            'odm_usumodificacion',
+            'odm_observacion'
         ])->with([
             'responsable' => function($q) {
                 $q->select('tra_id', 'tra_nombre');
