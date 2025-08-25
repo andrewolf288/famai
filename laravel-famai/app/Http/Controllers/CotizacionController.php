@@ -115,6 +115,8 @@ class CotizacionController extends Controller
         $coc_estado = $request->input('coc_estado', null);
         $fechaDesde = $request->input('fecha_desde', null);
         $fechaHasta = $request->input('fecha_hasta', null);
+        $cod_descripcion = $request->input('cod_descripcion', null);
+        $prv_nombre = $request->input('prv_nombre', null);
 
         // Ajustar fecha_hasta para incluir toda la fecha si no viene con hora
         if ($fechaHasta !== null && strlen($fechaHasta) === 10) { // formato YYYY-MM-DD
@@ -129,6 +131,18 @@ class CotizacionController extends Controller
         }
         if ($coc_estado !== null) {
             $query->where('coc_estado', $coc_estado);
+        }
+
+        if ($cod_descripcion !== null) {
+            $query->whereHas('detalleCotizacion', function ($q) use ($cod_descripcion) {
+                $q->where('cod_descripcion', 'like', '%' . $cod_descripcion . '%');
+            });
+        }
+
+        if ($prv_nombre !== null) {
+            $query->whereHas('proveedor', function ($q) use ($prv_nombre) {
+                $q->where('prv_nombre', 'like', '%' . $prv_nombre . '%');
+            });
         }
 
         $query->orderBy('coc_fechacotizacion', 'desc');
