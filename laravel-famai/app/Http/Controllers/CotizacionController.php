@@ -44,7 +44,7 @@ class CotizacionController extends Controller
                 })
                 ->whereIn('odm_id', $odm_ids)
                 ->with(['cotizacion' => function ($q) use ($proveedor) {
-                    $q->select('coc_id', 'coc_numero', 'coc_fechacotizacion', 'mon_codigo', 'coc_formapago', 'coc_total', 'coc_estado')
+                    $q->select('coc_id', 'coc_numero', 'mon_codigo')
                       ->where('prv_id', $proveedor)
                       ->where('coc_estado', 'RPR');
                 }]);
@@ -57,7 +57,7 @@ class CotizacionController extends Controller
         $resultado = [];
         foreach ($productosConCotizaciones as $producto) {
             if ($producto->cotizaciones->isNotEmpty()) {
-                // Agrupar detalles por cotización para evitar repetición de cabeceras
+                // Agrupar detalles por cotización para mostrar información relevante del ítem
                 $cotizacionesAgrupadas = $producto->cotizaciones->groupBy('coc_id');
                 
                 $cotizacionesFinales = [];
@@ -65,14 +65,22 @@ class CotizacionController extends Controller
                     $primerDetalle = $detalles->first();
                     $cotizacion = $primerDetalle->cotizacion;
                     
+                    // Calcular totales específicos del ítem en esta cotización
+                    $cantidadTotalItem = $detalles->sum('cod_cantidad');
+                    // Calcular subtotal usando precio unitario y cantidad ya que cod_subtotal puede ser null
+                    $subtotalTotalItem = $detalles->sum(function($detalle) {
+                        return floatval($detalle->cod_cantidad) * floatval($detalle->cod_preciounitario);
+                    });
+                    $precioUnitarioPromedio = $cantidadTotalItem > 0 ? $subtotalTotalItem / $cantidadTotalItem : 0;
+                    
                     $cotizacionesFinales[] = [
                         'coc_id' => $cotizacion->coc_id,
                         'coc_numero' => $cotizacion->coc_numero,
-                        'coc_fechacotizacion' => $cotizacion->coc_fechacotizacion,
                         'mon_codigo' => $cotizacion->mon_codigo,
-                        'coc_formapago' => $cotizacion->coc_formapago,
-                        'coc_total' => $cotizacion->coc_total,
-                        'coc_estado' => $cotizacion->coc_estado,
+                        // Datos específicos del ítem/material
+                        'cantidad_item' => $cantidadTotalItem,
+                        'precio_unitario_item' => round($precioUnitarioPromedio, 4),
+                        'subtotal_item' => round($subtotalTotalItem, 4),
                         'detalles' => $detalles->map(function ($detalle) {
                             return [
                                 'cod_id' => $detalle->cod_id,

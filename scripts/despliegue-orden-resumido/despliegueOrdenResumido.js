@@ -1828,14 +1828,14 @@ $(document).ready(async () => {
                                                 <label class="form-check-label w-100" for="cotizacion_${producto.pro_id}_${cotizacion.coc_id}">
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <span class="fw-semibold" style="font-size: 1.05rem;">
-                                                            <i class="bi bi-file-earmark-text" style="font-size:1.1rem;vertical-align:middle;"></i>
-                                                            ${cotizacion.coc_numero}
+                                                            <i class="bi bi-package" style="font-size:1.1rem;vertical-align:middle;"></i>
+                                                            Cotización ${cotizacion.coc_numero}
                                                         </span>
                                                         <span class="text-secondary" style="font-size: 0.95rem;">
-                                                            ${moment(cotizacion.coc_fechacotizacion).format('DD/MM/YYYY')}
+                                                            Cant: ${cotizacion.cantidad_item}
                                                         </span>
                                                         <span class="fw-bold" style="font-size: 1.05rem;">
-                                                            ${cotizacion.mon_codigo} ${cotizacion.coc_total}
+                                                            ${cotizacion.mon_codigo} ${cotizacion.precio_unitario_item.toFixed(4)}/u
                                                         </span>
                                                     </div>
                                                     <div class="d-flex justify-content-between mt-1">
@@ -1843,7 +1843,7 @@ $(document).ready(async () => {
                                                             <i class="bi bi-list-ul"></i> ${cotizacion.detalles.length} detalle(s)
                                                         </span>
                                                         <span class="text-muted small">
-                                                            <i class="bi bi-credit-card"></i> Forma pago: ${cotizacion.coc_formapago || 'No especificado'}
+                                                            <i class="bi bi-cash-coin"></i> Subtotal ítem: ${cotizacion.mon_codigo} ${cotizacion.subtotal_item.toFixed(4)}
                                                         </span>
                                                     </div>
                                                 </label>
