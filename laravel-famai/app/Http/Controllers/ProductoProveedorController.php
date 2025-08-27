@@ -377,7 +377,7 @@ class ProductoProveedorController extends Controller
                 SELECT coc.coc_numero, coc.coc_fechavalidez, coc.coc_id
                 FROM tblproductosproveedores_prp prp 
                 INNER JOIN tblordencompracab_occ occ 
-                    ON occ.occ_numero = prp.prp_nroordencompra 
+                    ON occ.occ_nrosap = prp.prp_nroordencompra 
                 INNER JOIN tblordencompradet_ocd ocd 
                     ON ocd.occ_id = occ.occ_id 
                     AND ocd.pro_id = prp.pro_id
