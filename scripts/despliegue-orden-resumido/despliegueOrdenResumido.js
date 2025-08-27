@@ -649,17 +649,20 @@ $(document).ready(async () => {
 
             if (!result) return;
 
-            await client.post(`/cotizacion-detalle/copiar/${cotizacionId}`, {
+            const { data } = await client.post(`/cotizacion-detalle/copiar/${cotizacionId}`, {
                 pro_id: producto
             });
 
             bootbox.alert({
                 title: '<span class="text-success">Cotización</span>',
-                message: 'Cotizacion generada correctamente',
+                message: `Cotizacion numero ${data.cotizacion.coc_numero} generada correctamente`,
                 centerVertical: true,
                 backdrop: true,
                 className: 'bootbox-alert-modal'
             })
+
+            const filteredURL = obtenerFiltrosActuales()
+            initDataTable(filteredURL)
 
             const modalProductosProveedor = bootstrap.Modal.getInstance(document.getElementById('productosProveedorModal'))
             modalProductosProveedor.hide()
@@ -2747,11 +2750,6 @@ $(document).ready(async () => {
 
     // Gestionamos el cierre del modal de seleccion de cotizaciones
     $('#cotizadoModal').on('hide.bs.modal', function (e) {
-        const filteredURL = obtenerFiltrosActuales()
-        initDataTable(filteredURL)
-    })
-
-    $('#productosProveedorModal').on('hide.bs.modal', function (e) {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
