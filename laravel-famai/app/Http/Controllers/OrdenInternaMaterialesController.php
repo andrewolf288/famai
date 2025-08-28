@@ -377,10 +377,6 @@ class OrdenInternaMaterialesController extends Controller
         $query->orderBy('odm_fecconsultareservacion', 'desc');
 
         $queryBuildTime = microtime(true);
-        Log::info('INDEXRESUMIDO - PASO 3: Construcción de consulta principal completada', [
-            'elapsed_time' => round(($queryBuildTime - $syncTime) * 1000, 2) . 'ms',
-            'memory_usage' => memory_get_usage(true)
-        ]);
 
         // DEBUGGING: Ver la query SQL
         $sql = $query->toSql();
