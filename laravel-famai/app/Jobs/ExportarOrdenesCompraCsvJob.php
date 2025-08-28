@@ -215,7 +215,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     $detalle->producto->pro_codigo, // ItemCode
                     $detalle->ocd_cantidad, // Quantity
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // ShipDate
-                    $detalle->ocd_preciounitario, // Price
+                    $detalle->ocd_preciounitario / (1 - $detalle->ocd_porcentajedescuento / 100), // Price
                     $orden->mon_codigo, // Currency
                     $detalle->ocd_porcentajedescuento,
                     $detalle->imp_codigo, // TaxCode
