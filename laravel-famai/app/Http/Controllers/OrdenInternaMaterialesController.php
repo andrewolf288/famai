@@ -189,10 +189,8 @@ class OrdenInternaMaterialesController extends Controller
         $startTime = microtime(true);
         Log::info('INDEXRESUMIDO - INICIO', ['timestamp' => now(), 'memory_usage' => memory_get_usage(true)]);
         
-        // lo primero que hacemos es ejecutar el procedimiento almacenado
-        // DB::statement('EXEC dbo.ActualizarDetalleMaterialesOT');
-
-        // ejecutamos lo demas del controlador
+        // El procedimiento EXEC dbo.ActualizarDetalleMaterialesOT2 se ejecuta como job en sql server cada 5 minutos
+        
         $user = auth()->user();
         $sed_codigo = "10";
 
