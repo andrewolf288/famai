@@ -190,7 +190,7 @@ class OrdenInternaMaterialesController extends Controller
         Log::info('INDEXRESUMIDO - INICIO', ['timestamp' => now(), 'memory_usage' => memory_get_usage(true)]);
         
         // El procedimiento EXEC dbo.ActualizarDetalleMaterialesOT2 se ejecuta como job en sql server cada 5 minutos
-        
+
         $user = auth()->user();
         $sed_codigo = "10";
 
@@ -241,21 +241,6 @@ class OrdenInternaMaterialesController extends Controller
                 'multifilter' => $multifilter
             ]
         ]);
-
-        try {
-            DB::statement('EXEC dbo.SincronizarProductosProveedores');
-            $syncTime = microtime(true);
-            Log::info('INDEXRESUMIDO - PASO 2: SincronizarProductosProveedores completado', [
-                'elapsed_time' => round(($syncTime - $stepTime) * 1000, 2) . 'ms',
-                'memory_usage' => memory_get_usage(true)
-            ]);
-        } catch (\Throwable $th) {
-            $syncTime = microtime(true);
-            Log::info('INDEXRESUMIDO - PASO 2: SincronizarProductosProveedores falló (continuando)', [
-                'elapsed_time' => round(($syncTime - $stepTime) * 1000, 2) . 'ms',
-                'error' => $th->getMessage()
-            ]);
-        }
 
         // se necesita agregar informacion de procedimiento almacenado
         $query = OrdenInternaMateriales::select([
