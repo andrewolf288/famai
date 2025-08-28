@@ -418,7 +418,7 @@ $(document).ready(() => {
 
         try {
             const queryEncoded = encodeURIComponent(query)
-            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
+            const { data } = await client.get(`/productosByQuery2?query=${queryEncoded}`)
             // Limpiamos la lista
             limpiarLista()
             // formamos la lista
@@ -594,7 +594,9 @@ $(document).ready(() => {
 
                 // agregamos al detalle general
                 const rowItem = document.createElement('tr')
-                rowItem.classList.add(rowData.cod_asociar ? '' : 'sin-asociar');
+                if (rowData.cod_asociar) {
+                    rowItem.classList.add('sin-asociar');
+                }
                 rowItem.classList.add('table-warning')
                 rowItem.innerHTML = `
                 <input class="producto-id" value="${rowData.pro_id}" type="hidden"/>
