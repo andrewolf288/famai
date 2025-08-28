@@ -356,7 +356,7 @@ class CotizacionController extends Controller
             }
 
             // USAR FAM_LOG_Proveedores para buscar bancos del proveedor
-            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parRUC = ?", [$proveedor->prv_nrodocumento]);
+            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parCardCode = ?", [$proveedor->prv_codigo]);
 
             if (count($bancos) > 1) {
                 throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
@@ -1404,7 +1404,7 @@ class CotizacionController extends Controller
                 ->findOrFail($proveedor);
 
             // USAR FAM_LOG_Proveedores para buscar bancos del proveedor
-            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parRUC = ?", [$proveedor->prv_nrodocumento]);
+            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parCardCode = ?", [$proveedor->prv_codigo]);
             if (count($bancos) > 1) {
                 throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
             } elseif (count($bancos) === 1) {
