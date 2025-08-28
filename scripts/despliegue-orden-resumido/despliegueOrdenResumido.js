@@ -225,8 +225,12 @@ $(document).ready(async () => {
                 // if (material.detalle !== undefined) {
                 const { proveedores_count, pro_id, pro_codigo, pro_descripcion, uni_codigo, cantidad, stock, cotizaciones_count, ordenes_compra_count, detalle, cotizacion_seleccionada, tiene_adjuntos } = material
                 let sePuedeCotizar = true
+                const reqUoi = []
                 detalle.forEach(item => {
                     if (item.orden_interna_parte.orden_interna.mrq_codigo !== 'RPR' && pro_codigo == null) sePuedeCotizar = false
+                    if (!reqUoi.includes(item.orden_interna_parte.orden_interna.oic_id)) {
+                        reqUoi.push(item.orden_interna_parte.orden_interna.oic_id)
+                    }
                 })
                 content += `
                 <tr data-index="${index}" data-se-puede-cotizar="${sePuedeCotizar}">
@@ -253,7 +257,7 @@ $(document).ready(async () => {
                         </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico position-relative" data-historico="${pro_id}" ${pro_id ? '' : 'disabled'}>
+                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico position-relative" data-historico="${pro_id}" ${pro_id ? '' : 'disabled' } data-req-uoi="${reqUoi.length}">
                             Ver histórico
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 ${proveedores_count}
@@ -537,6 +541,7 @@ $(document).ready(async () => {
 
     $("#data-container-body").on('click', '.btn-historico', async function () {
         const producto = $(this).data('historico')
+        const reqUoi = $(this).data('req-uoi')
         // initHistoricoByProducto(producto)
         const formatData = {
             producto: producto
@@ -582,7 +587,7 @@ $(document).ready(async () => {
                             ${fechaCotizacion}
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${pro_id}" data-fecha="${esFechaValida}" ${!coc_id ? 'disabled' : ''}>
+                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${pro_id}" data-fecha="${esFechaValida}" data-req-uoi="${reqUoi}" ${!coc_id ? 'disabled' : ''}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="24" height="24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
                                 </svg>
@@ -609,7 +614,7 @@ $(document).ready(async () => {
                         <td class="text-center">${coc_fechavalidez ? parseDateSimple(coc_fechavalidez) : 'N/A'}
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${producto}" data-fecha="${esFechaValida}">
+                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${producto}" data-fecha="${esFechaValida}" data-req-uoi="${reqUoi}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="24" height="24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
                                 </svg>
@@ -634,6 +639,7 @@ $(document).ready(async () => {
         const producto = $(this).data('producto');
         const cotizacionId = $(this).data('cotizacion');
         const esFechaValida = $(this).data('fecha');
+        const reqUoi = $(this).data('req-uoi');
         try {
             const result = await new Promise(resolve => {
                 bootbox.confirm({
@@ -650,12 +656,13 @@ $(document).ready(async () => {
             if (!result) return;
 
             const { data } = await client.post(`/cotizacion-detalle/copiar/${cotizacionId}`, {
-                pro_id: producto
+                pro_id: producto,
+                reqUoi: reqUoi
             });
 
             bootbox.alert({
                 title: '<span class="text-success">Cotización</span>',
-                message: `Cotizacion numero ${data.cotizacion.coc_numero} generada correctamente`,
+                message: `Se generaron las cotizaciones correspondientes para el material seleccionado`,
                 centerVertical: true,
                 backdrop: true,
                 className: 'bootbox-alert-modal'
