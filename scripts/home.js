@@ -27,7 +27,7 @@ $(document).ready(() => {
   let colorIndex = 0;
   procesos.forEach(proceso => {
     container.innerHTML += createCard(proceso.mol_descripcion, proceso.mol_url, colorIndex);
-    if (proceso.mol_descripcion === 'Despliegue OT-Materiales') return colorIndex = 1
+    if (proceso.mol_url === 'despliegue-orden') return colorIndex = 1
     if (proceso.mol_descripcion === 'OIs Validación Códigos') return colorIndex = 2
   });
 

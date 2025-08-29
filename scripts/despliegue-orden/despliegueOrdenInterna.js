@@ -6,13 +6,6 @@ $(document).ready(() => {
     // URL ENDPOINT
     const apiURL = '/detalleMaterialesOrdenInterna'
 
-    // referencias de filtros
-    const filterSelector = $('#filter-selector')
-    const filterInput = $('#filter-input')
-    const filterButton = $('#filter-button')
-    const filterFechas = $('#filter-dates')
-    const filterMultiselect = $('#filtermultiselect-button')
-
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
@@ -47,7 +40,7 @@ $(document).ready(() => {
         },
         columnDefs: [
             {targets: [5, 6], searchable: true},
-            {targets: [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], searchable: false},
+            {targets: [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13], searchable: false},
         ],
         order: [[6, 'desc']],
     }
@@ -59,9 +52,6 @@ $(document).ready(() => {
         searching: false,
         info: true,
     }
-
-    // gestion de multiselect
-    $('select[multiple]').multiselect()
 
     // Inicializacion de data table
     async function initDataTable(URL = apiURL) {
@@ -108,6 +98,7 @@ $(document).ready(() => {
                     <td>${odt_numero || 'N/A'}</td>
                     <td>${parseDate(material.odm_feccreacion)}</td>
                     <td>${material.odm_estado || 'N/A'}</td>
+                    <td>${orden_interna.oic_estado || 'N/A'}</td>
                     <td class="text-center">
                         ${material.odm_tipo == 1 ? 'R' : 'A'}
                     </td>
@@ -126,11 +117,6 @@ $(document).ready(() => {
                             </svg>
                         </button>
                     </td>
-                    <td>
-                        <button class="btn btn-primary btn-responsable" data-detalle="${material.odm_id}">
-                                ${material.tra_responsable ? material.responsable.tra_nombre : 'Sin responsable'}
-                        </button>
-                    </td>
                     <td class="text-center">
                         <button class="btn btn-primary position-relative btn-cotizado" data-detalle="${material.odm_id}">
                             Cotizaciones
@@ -147,15 +133,6 @@ $(document).ready(() => {
                             </span>
                         </button>
                     </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-reservado">0.00</button>
-                    </td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-atendido">0.00</button>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary btn-presupuesto" data-notapresupuesto="${material.odm_notapresupuesto}" data-adjuntopresupuesto="${material.odm_adjuntopresupuesto}" data-detalle="${material.odm_id}">Presupuesto</button>
-                    </td>
                 `
                 $('#data-container-body').append(rowItem)
             })
@@ -171,41 +148,40 @@ $(document).ready(() => {
     // ------------ INCIIALIZAMOS EL DATATABLE ------------
     initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`)
 
-    // ------------ ADMINISTRACION DE FILTROS ---------------
-    // filter fechas
-    filterFechas.on('click', () => {
+    $('#btn-buscar').on('click', () => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?alm_id=1&fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        initDataTable(filteredURL)
-    })
+        const filterField = $('#filter-selector').val().trim()
+        const filterValue = $('#filter-input').val().trim()
+        const sedId = $('#sed_id').val().trim()
 
-    // filter input
-    filterButton.on('click', () => {
-        const filterField = filterSelector.val().trim()
-        const filterValue = filterInput.val().trim()
-        let filteredURL = apiURL
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
+        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+        if (filterField) {
+            filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
+        }
+        if (sedId) {
+            filteredURL += `&sed_id=${sedId}`
         }
         initDataTable(filteredURL)
     })
 
-    // filtro multi select
-    filterMultiselect.on('click', async () => {
-        const filters = $('select[multiple]').val()
-        if (filters.length === 0) {
-            alert('No se ha seleccionado ningun filtro')
-            return
+    $('#filter-selector').on('change', () => {
+        const filterField = $('#filter-selector').val().trim()
+        if (filterField) {
+            $('#filter-input').attr('disabled', false)
+        } else {
+            $('#filter-input').attr('disabled', true)
         }
-        const fecha_desde = transformarFecha($('#fechaDesde').val())
-        const fecha_hasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}&multifilter=${filters.join('OR')}`
+    })
 
-        initDataTable(filteredURL)
+    $('#filter-input').on('keypress', (e) => {
+        if (e.which === 13) {
+            $('#btn-buscar').click()
+        }
+    })
+
+    $('#sed_id').on('change', () => {
+        $('#btn-buscar').click()
     })
 
     // ------------- GESTION DE HISTORICO --------------

@@ -1,68 +1,67 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
-    <h2 class="mb-3 fs-4">despliegue OT seguimiento</h2>
-    <button class="btn btn-success mt-2 mt-md-0 ms-md-2" id="btn-export-data">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-            class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
-            <path
-                d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M5.884 6.68 8 9.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 10l2.233 2.68a.5.5 0 0 1-.768.64L8 10.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 10 5.116 7.32a.5.5 0 1 1 .768-.64" />
-        </svg>
-    </button>
-    <button class="btn btn-success ms-2" id="btn-export-data-presupuesto">Excel Presupuesto</button>
+    <h2 class="mb-3 fs-4">Seguimiento Sol.Materiales</h2>
+    
     <!-- <button class="btn btn-success ms-2" id="btn-export-data-almacen">Excel Almacen</button> -->
 </div>
 <div class="row mb-3 mt-2">
-    <!-- Filtros de fechas -->
-    <div class="col-12 col-md-3 mb-3 mb-md-0">
-        <div class="d-flex flex-column flex-md-row align-items-end">
-            <div class="me-3">
+    <!-- Filtros -->
+    <div class="mb-3 mb-md-0 d-flex flex-column flex-md-row justify-content-between align-items-end gap-2">
+        <!-- Filtros -->
+        <div class="d-flex flex-column flex-md-row align-items-end gap-2">
+            <div>
                 <label for="fechaDesde" class="form-label">Fecha Desde</label>
                 <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
             </div>
+
             <div>
                 <label for="fechaHasta" class="form-label">Fecha Hasta</label>
                 <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
             </div>
-            <button id="filter-dates" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
-                    viewBox="0 0 16 16">
-                    <path
-                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                </svg>
-            </button>
-        </div>
-    </div>
 
-    <!-- Filtro input  -->
-    <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-        <div class="d-flex flex-column flex-md-row">
-            <select id="filter-selector" class="form-select w-100 w-md-auto">
-                <option value="">Seleccione un filtro</option>
-                <option value="odt_numero">Orden trabajo</option>
-                <option value="oic_tipo">Tipo proceso</option>
-                <option value="tra_nombre">Responsable</option>
-            </select>
-
-            <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
-                placeholder="Buscar...">
-
-            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
-        </div>
-    </div>
-
-    <!-- Filtro multiselect -->
-    <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-        <div class="d-flex flex-column flex-md-row mt-3 w-100">
-            <div class="col-10">
-                <select id="filterMultipleSelector" class="form-select" multiple>
-                    <option value="pendiente_emitir_orden_compra">Pendiente de emitir orden de compra</option>
-                    <option value="pendiente_emitir_cotizacion">Pendiente de emitir cotización</option>
-                    <option value="material_sin_codigo">Material sin codigo</option>
-                    <option value="material_sin_compra">Material sin compra</option>
+            <div>
+                <label for="filter-selector" class="form-label">Tipo</label>
+                <select id="filter-selector" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="oic_otsap">Orden trabajo</option>
+                    <option value="odt_numero">Requerimiento</option>
+                    <option value="odm_descripcion">Material</option>
                 </select>
             </div>
-            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
+
+            <div>
+                <label for="filter-input" class="form-label">Buscar</label>
+                <input type="text" id="filter-input" class="form-control" placeholder="Buscar..." disabled>
+            </div>
+
+            <div>
+                <label for="sed_id" class="form-label">Sede</label>
+                <select id="sed_id" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="10">Arequipa</option>
+                    <option value="20">Lima</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="btn-buscar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search me-1" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
+                </svg>
+                Buscar
+            </button>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex flex-row align-items-end">
+            <button class="btn btn-success mt-2 mt-md-0 ms-md-2" id="btn-export-data">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
+                    <path
+                        d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M5.884 6.68 8 9.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 10l2.233 2.68a.5.5 0 0 1-.768.64L8 10.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 10 5.116 7.32a.5.5 0 1 1 .768-.64" />
+                </svg>
+            </button>
+            <button class="btn btn-success ms-2" id="btn-export-data-presupuesto">Excel Presupuesto</button>
         </div>
     </div>
+
 </div>
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
@@ -71,6 +70,7 @@
         <th class="text-center">OT</th>
         <th>Fec. Det OI</th>
         <th class="text-center">Estado</th>
+        <th class="text-center">Estado OI</th>
         <th class="text-center">Tipo</th>
         <th>Cod Producto</th>
         <th>Producto</th>
@@ -79,12 +79,8 @@
         <th class="text-center">Und.</th>
         <th class="text-center">Stock Alm</th>
         <th class="text-center">Histórico</th>
-        <th>Responsable</th>
         <th class="text-center">Cotizado</th>
         <th class="text-center">Orden compra</th>
-        <th class="text-center">Reservado</th>
-        <th class="text-center">Atendido</th>
-        <th>Presupuesto</th>
     </thead>
     <tbody id="data-container-body">
     </tbody>

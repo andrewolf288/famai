@@ -62,21 +62,15 @@ class OrdenInternaMaterialesController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $sed_codigo = "10";
 
         $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
 
-        if ($trabajador) {
-            $sed_codigo = $trabajador->sed_codigo;
-        }
-
-        $ordenTrabajo = $request->input('odt_numero', null);
-        $tipoProceso = $request->input('oic_tipo', null);
-        $responsable = $request->input('tra_nombre', null);
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
-        // multifilters
-        $multifilter = $request->input('multifilter', null);
+        $oic_otsap = $request->input('oic_otsap', null);
+        $odt_numero = $request->input('odt_numero', null);
+        $sed_id = $request->input('sed_id', null);
+        $odm_descripcion = $request->input('odm_descripcion', null);
 
         // se necesita agregar informacion de procedimiento almacenado
         $query = OrdenInternaMateriales::with(
@@ -88,93 +82,36 @@ class OrdenInternaMaterialesController extends Controller
         )
             ->withCount('cotizaciones')
             ->withCount('ordenesCompra')
-            ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_codigo) {
-                $q->where('sed_codigo', $sed_codigo);
-            })
             ->whereNotIn('odm_tipo', [3, 4, 5])
             ->whereNotNull('odm_estado');
 
-        // filtro de orden de trabajo
-        if ($ordenTrabajo !== null) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
-                $q->where('odt_numero', $ordenTrabajo);
+        
+        if ($odt_numero !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero) {
+                $q->where('odt_numero', $odt_numero);
             });
         }
 
-        // filtro de tipo de proceso
-        if ($tipoProceso !== null) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($tipoProceso) {
-                $q->where('oic_tipo', $tipoProceso);
-            });
-        }
-
-        if ($responsable !== null) {
-            $query->whereHas('responsable', function ($q) use ($responsable) {
-                $q->whereRaw("tra_nombre COLLATE SQL_Latin1_General_CP1_CI_AI LIKE ?", ['%' . $responsable . '%']);
-            });
-        }
-
-        // filtro de fecha
         if ($fecha_desde !== null && $fecha_hasta !== null) {
             $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
                 ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
         }
 
 
-        // Procesar el parámetro multiselect
-        if ($multifilter !== null) {
-            // Separar el string por "OR" y crear un array con cada palabra
-            $palabras = explode('OR', $request->input('multifilter'));
+        if ($oic_otsap !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($oic_otsap) {
+                $q->where('oic_otsap', $oic_otsap);
+            });
+        }
 
-            // Agregar el grupo de condiciones OR
-            // $query->where(function ($q) use ($palabras, $almID) {
-            foreach ($palabras as $palabra) {
-                // pendiente de emision de orden de compra
-                if ($palabra === 'pendiente_emitir_orden_compra') {
-                    $query->where('odm_estado', 'COT');
-                }
-                // pendiente de emision de cotizacion
-                if ($palabra === 'pendiente_emitir_cotizacion') {
-                    $query->where('odm_estado', 'REQ');
-                }
-                // material sin codigo
-                if ($palabra === 'material_sin_codigo') {
-                    $query->where('pro_id', null);
-                }
-                // material sin compra
-                if ($palabra === 'material_sin_compra') {
-                    $query->whereNotNull('pro_id');
-                    $query->orderBy('odm_feccreacion', 'desc');
+        if ($odm_descripcion !== null) {
+            $query->where('odm_descripcion', 'LIKE', '%' . $odm_descripcion . '%');
+        }
 
-                    $data = $query->get();
-                    $dataFiltrada = [];
-
-                    foreach ($data as $item) {
-                        $productoCodigo = $item->producto->pro_codigo;
-
-                        $subconsultaOPDN = DB::connection('sqlsrv_secondary')->table('OPDN')
-                            ->join('PDN1', 'OPDN.DocEntry', '=', 'PDN1.DocEntry')
-                            ->select(DB::raw('MAX(OPDN.DocDate) as ultima_fecha_compra'))
-                            ->where('PDN1.ItemCode', '=', $productoCodigo)
-                            ->first();
-
-                        // Comprobar si ultima_fecha_compra es null
-                        if (!$subconsultaOPDN || $subconsultaOPDN->ultima_fecha_compra === null) {
-                            $subconsultaOIGN = DB::connection('sqlsrv_secondary')->table('OIGN')
-                                ->join('IGN1', 'OIGN.DocEntry', '=', 'IGN1.DocEntry')
-                                ->select(DB::raw('MAX(OIGN.DocDate) as ultima_fecha_compra'))
-                                ->where('IGN1.ItemCode', '=', $productoCodigo)
-                                ->first();
-
-                            if (!$subconsultaOIGN || $subconsultaOIGN->ultima_fecha_compra === null) {
-                                $dataFiltrada[] = $item;
-                            }
-                        }
-                    }
-
-                    return response($dataFiltrada);
-                }
-            }
+        if ($sed_id !== null) {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_id) {
+                $q->where('sed_codigo', $sed_id);
+            });
         }
 
         // ordenar de formar descendiente
