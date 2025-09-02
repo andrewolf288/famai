@@ -115,6 +115,7 @@ class ProductoProveedorController extends Controller
         $cotizaciones = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion'])
             ->whereHas('detalleCotizacion', function ($query) use ($producto) {
                 $query->where('pro_id', $producto);
+                $query->where('coc_estado', 'RPR');
             })
             ->orderBy('coc_feccreacion', 'desc')
             ->limit(10)

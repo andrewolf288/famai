@@ -228,8 +228,8 @@ $(document).ready(async () => {
                 const reqUoi = []
                 detalle.forEach(item => {
                     if (item.orden_interna_parte.orden_interna.mrq_codigo !== 'RPR' && pro_codigo == null) sePuedeCotizar = false
-                    if (!reqUoi.includes(item.orden_interna_parte.orden_interna.oic_id)) {
-                        reqUoi.push(item.orden_interna_parte.orden_interna.oic_id)
+                    if (!reqUoi.includes(item.odm_id)) {
+                        reqUoi.push(item.odm_id)
                     }
                 })
                 content += `
@@ -257,7 +257,7 @@ $(document).ready(async () => {
                         </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico position-relative" data-historico="${pro_id}" ${pro_id ? '' : 'disabled' } data-req-uoi="${reqUoi.length}">
+                        <button class="btn btn-sm ${pro_id ? 'btn-primary' : 'btn-secondary'} btn-historico position-relative" data-historico="${pro_id}" ${pro_id ? '' : 'disabled' } data-req-uoi="${reqUoi}">
                             Ver histórico
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 ${proveedores_count}
@@ -601,6 +601,7 @@ $(document).ready(async () => {
                 const { proveedor, moneda, coc_fechavalidez, coc_numero, coc_fechacotizacion, coc_id, detalle_cotizacion } = cotizacion
                 const esFechaValida = coc_fechavalidez ? moment(coc_fechavalidez).isSameOrAfter(moment()) : false
                 console.log(esFechaValida)
+                console.log(detalle_cotizacion[0].cod_preciounitario)
                 contentCotizacion += `
                     <tr>
                         <td>${parseDateSimple(coc_fechacotizacion)}</td>
@@ -610,7 +611,7 @@ $(document).ready(async () => {
                         <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_cantidad).toFixed(4) || 'N/A'}</td>
                         <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_preciounitario).toFixed(4) || 'N/A'}</td>
                         <td class="text-center">${moneda ? moneda.mon_codigo : ''}</td>
-                        <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_total).toFixed(4) || 'N/A'}</td>
+                        <td class="text-center">${parseFloat(detalle_cotizacion[0].cod_total ?? 0).toFixed(4) || 'N/A'}</td>
                         <td class="text-center">${coc_fechavalidez ? parseDateSimple(coc_fechavalidez) : 'N/A'}
                         </td>
                         <td class="text-center">
