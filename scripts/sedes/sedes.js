@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const sedeActual = document.getElementById('sede-actual')
       const inputAlmacen = document.getElementById('almacen-actual')
+      const inputSede = document.getElementById('sed-actual')
       const { data } = await client.get('/sede-actual-trabajador')
 
       if (!data || !data.sed_nombre) {
@@ -42,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sedeActual.textContent = data.sed_nombre
         inputAlmacen.value = data.alm_codigo
+        inputSede.value = data.sed_codigo
       }
+
     } catch (error) {
       console.log(error)
     }

@@ -1,4 +1,4 @@
-$(document).ready(() => {
+$(document).ready(async () => {
     // variables para el manejo de datatable
     let dataTable;
     const dataContainer = $('#data-container')
@@ -87,7 +87,7 @@ $(document).ready(() => {
                 // obtenemos los datos
                 const { producto, orden_interna_parte, cotizaciones_count, ordenes_compra_count } = material
                 const { orden_interna } = orden_interna_parte
-                const { odt_numero, oic_tipo } = orden_interna
+                const { odt_numero, oic_tipo, oic_otsap } = orden_interna
 
                 const rowItem = document.createElement('tr')
                 rowItem.dataset.detalle = material.odm_id
@@ -96,6 +96,7 @@ $(document).ready(() => {
                         ${oic_tipo}
                     </td>
                     <td>${odt_numero || 'N/A'}</td>
+                    <td>${oic_otsap || 'N/A'}</td>
                     <td>${parseDate(material.odm_feccreacion)}</td>
                     <td>${material.odm_estado || 'N/A'}</td>
                     <td>${orden_interna.oic_estado || 'N/A'}</td>
@@ -103,7 +104,7 @@ $(document).ready(() => {
                         ${material.odm_tipo == 1 ? 'R' : 'A'}
                     </td>
                     <td>${producto?.pro_codigo || 'N/A'}</td>
-                    <td>${material.odm_descripcion}</td>
+                    <td style="max-width: 500px; white-space: wrap;">${material.odm_descripcion}</td>
                     <td>${material.odm_observacion || 'N/A'}</td>
                     <td class="text-center">${material.odm_cantidad}</td>
                     <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
@@ -118,7 +119,7 @@ $(document).ready(() => {
                         </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-primary position-relative btn-cotizado" data-detalle="${material.odm_id}">
+                        <button class="btn btn-primary position-relative btn-cotizado text-black" data-detalle="${material.odm_id}" style="${!+cotizaciones_count > 0 ? 'background-color: #FC6868 !important' : 'background-color: #BDFFB0 !important'}">
                             Cotizaciones
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 ${cotizaciones_count}
@@ -126,7 +127,7 @@ $(document).ready(() => {
                         </button>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-primary position-relative btn-ordenado" data-detalle="${material.odm_id}">
+                        <button class="btn btn-primary position-relative btn-ordenado text-black" data-detalle="${material.odm_id}" style="${!+ordenes_compra_count > 0 ? 'background-color: #FC6868 !important' : 'background-color: #BDFFB0 !important'}">
                             Ordenes de compra
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 ${ordenes_compra_count}
@@ -146,7 +147,23 @@ $(document).ready(() => {
     }
 
     // ------------ INCIIALIZAMOS EL DATATABLE ------------
+    await traerInformacionAlmacenes()
+    
     initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`)
+
+    // traer informacion de almacenes
+    async function traerInformacionAlmacenes() {
+        const { data } = await client.get('/sedes')
+        const $sedes = $("#sed_id")
+        data.forEach(sede => {
+            const option = $('<option>').val(sede["sed_codigo"]).text(sede["sed_nombre"])
+            $sedes.append(option)
+        })
+
+        if (document.getElementById('sed-actual').value) {
+            $sedes.val(document.getElementById('sed-actual').value)
+        }
+    }
 
     $('#btn-buscar').on('click', () => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
