@@ -112,7 +112,9 @@ class ProductoProveedorController extends Controller
     {
         $producto = $request->input('producto', null);
 
-        $cotizaciones = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion'])
+        $cotizaciones = Cotizacion::with(['proveedor', 'moneda', 'detalleCotizacion' => function ($query) use ($producto) {
+                $query->where('pro_id', $producto);
+            }])
             ->whereHas('detalleCotizacion', function ($query) use ($producto) {
                 $query->where('pro_id', $producto);
                 $query->where('coc_estado', 'RPR');
