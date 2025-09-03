@@ -8,9 +8,94 @@ use App\Proveedor;
 use App\Trabajador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\ProductoProveedor;
+use App\OrdenInternaMateriales;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CotizacionDetalleController extends Controller
 {
+    public function crearCotizacionProductoProveedor(Request $request, $id)
+    {
+        $user = auth()->user();
+        $prp_id = $id;
+        $reqUoi = $request->reqUoi;
+        $reqUoi = explode(',', $reqUoi);
+        $reqUoi = array_map('intval', $reqUoi);
+        $trabajador = Trabajador::with('sede', 'usuario')->where('usu_codigo', $user->usu_codigo)->first();
+        if (!$trabajador) {
+            return response()->json(['error' => 'No se encontro el trabajador.'], 404);
+        }
+
+
+        $lastCotizacion = Cotizacion::orderBy('coc_id', 'desc')->first();
+        if (!$lastCotizacion) {
+            $numero = 1;
+        } else {
+            $numero = intval($lastCotizacion->coc_numero) + 1;
+        }
+        
+        $productoProveedor = ProductoProveedor::with(['producto', 'proveedor'])->where('prp_id', $prp_id)->first();
+        $ordenesInternasMateriales = OrdenInternaMateriales::whereIn('odm_id', $reqUoi)->get();
+
+        // saber si se debe sumar o no el IGV
+        try {
+            $sql = "EXEC dbo.obtenerTipoIGV @parDocNum = ?, @parItemCode = ?";
+            $igv = DB::select($sql, [$productoProveedor->prp_numeroordencompra, $productoProveedor->prp_codigo]);
+            $igv = $igv[0]->VatPrcnt;
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Ocurrio un error al obtener el tipo de IGV.'], 500);
+        }
+
+        // Crear una nueva cabecera de cotizacion
+        $cabezeraCotizacion = Cotizacion::create([
+            'coc_numero' => str_pad($numero, 7, '0', STR_PAD_LEFT),
+            'sed_codigo' => $trabajador->sed_codigo,
+            'prv_id' => $productoProveedor->prv_id,
+            'coc_fechacotizacion' => now(),
+            'mon_codigo' => $productoProveedor->prp_moneda,
+            'tra_solicitante' => $trabajador->tra_id,
+            'coc_estado' => 'RPR',
+            'coc_usucreacion' => $trabajador->usu_codigo,
+            'coc_fecmodificacion' => null
+        ]);
+
+        $total = 0;
+
+        // Crear los detalles
+        $orden = 1;
+
+        foreach ($reqUoi as $req) {
+            $ordenInternaMateriales = $ordenesInternasMateriales->where('odm_id', $req)->first();
+            $cotizacionDetalle = CotizacionDetalle::create([
+                'pro_id' => $productoProveedor->pro_id,
+                'coc_id' => $cabezeraCotizacion->coc_id,
+                'cod_orden' => $orden,
+                'cod_descripcion' => $productoProveedor->producto->pro_descripcion,
+                'cod_cantidad' => $ordenInternaMateriales->odm_cantidadpendiente,
+                'cod_preciounitario' => $productoProveedor->prp_preciounitario,
+                'cod_total' => $productoProveedor->prp_preciounitario * $ordenInternaMateriales->odm_cantidadpendiente,
+                'cod_activo' => 1,
+                'cod_usucreacion' => $trabajador->usu_codigo,
+                'cod_fecmodificacion' => null,
+                'odm_id' => $req,
+                'cod_cantidadcotizada' => $ordenInternaMateriales->odm_cantidadpendiente,
+                'cod_descuento' => 0,
+                'cod_cotizar' => 1,
+                'cod_impuesto' => floatval($igv) == 0 ? 'exo' : 'igv',
+                'cod_precioconigv' => $productoProveedor->prp_preciounitario + ($productoProveedor->prp_preciounitario * $igv / 100)
+            ]);
+
+            $total += $cotizacionDetalle->cod_total;
+            $orden++;
+        }
+
+        $cabezeraCotizacion->update([
+            'coc_total' => $total
+        ]);
+
+        return response()->json(['success' => 'Cotizacion creada correctamente.', 'cotizacion' => $cabezeraCotizacion], 200);
+    }
 
     public function copiarCotizacionDetalle(Request $request, $id)
     {

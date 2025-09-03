@@ -558,7 +558,7 @@ $(document).ready(async () => {
             let content = ''
             let contentCotizacion = ''
             data.forEach(item => {
-                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra, prp_moneda, cotizacion, pro_id } = item
+                const { proveedor, producto, prp_fechaultimacompra, prp_preciounitario, prp_nroordencompra, prp_moneda, cotizacion, pro_id, prp_id } = item
                 $("#spanNombreProducto").text(producto.pro_descripcion)
                 let fechaCotizacion = 'N/A'
                 let numeroCotizacion = 'N/A'
@@ -587,7 +587,7 @@ $(document).ready(async () => {
                             ${fechaCotizacion}
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${pro_id}" data-fecha="${esFechaValida}" data-req-uoi="${reqUoi}" ${!coc_id ? 'disabled' : ''}>
+                            <button class="btn btn-success px-2 py-1 btn-copiar-cotizacion" data-cotizacion="${coc_id}" data-producto="${pro_id}" data-fecha="${esFechaValida}" data-req-uoi="${reqUoi}" data-prp-id="${prp_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="24" height="24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
                                 </svg>
@@ -636,11 +636,13 @@ $(document).ready(async () => {
         }
     })
 
-    $(document).on('click', '.btn-copiar-cotizacion', async function () {
+    $(document).off('click', '.btn-copiar-cotizacion').on('click', '.btn-copiar-cotizacion', async function () {
         const producto = $(this).data('producto');
         const cotizacionId = $(this).data('cotizacion');
         const esFechaValida = $(this).data('fecha');
         const reqUoi = $(this).data('req-uoi');
+        const prp_id = $(this).data('prp-id');
+
         try {
             const result = await new Promise(resolve => {
                 bootbox.confirm({
@@ -656,10 +658,31 @@ $(document).ready(async () => {
 
             if (!result) return;
 
-            const { data } = await client.post(`/cotizacion-detalle/copiar/${cotizacionId}`, {
-                pro_id: producto,
-                reqUoi: reqUoi
-            });
+            if (cotizacionId) {
+                await client.post(`/cotizacion-detalle/copiar/${cotizacionId}`, {
+                    pro_id: producto,
+                    reqUoi: reqUoi
+                });
+            } else {
+                const continuar = await new Promise(resolve => {
+                        bootbox.confirm({
+                        title: '<span class="text-warning">Advertencia</span>',
+                        message: `Se creara una cotizacion basada en los datos de la Orden de compra, por lo q los datos de la cotizacion podrian no estar completos, ¿Desea continuar?`,
+                        backdrop: true,
+                        className: 'bootbox-alert-modal',
+                        callback: async function (result) {
+                            resolve(result);
+                        }
+                    });
+                });
+
+                if (!continuar) return;
+
+                await client.post(`/cotizacion-detalle/cotizacion-producto-proveedor/${prp_id}`, {
+                    pro_id: producto,
+                    reqUoi: reqUoi
+                });
+            }
 
             bootbox.alert({
                 title: '<span class="text-success">Cotización</span>',
@@ -669,16 +692,13 @@ $(document).ready(async () => {
                 className: 'bootbox-alert-modal'
             })
 
-            const filteredURL = obtenerFiltrosActuales()
-            initDataTable(filteredURL)
-
             const modalProductosProveedor = bootstrap.Modal.getInstance(document.getElementById('productosProveedorModal'))
             modalProductosProveedor.hide()
         } catch (error) {
             console.log(error);
             bootbox.alert({
                 title: '<span class="text-danger">Error</span>',
-                message: 'Ocurrio un error al generar la cotización',
+                message: error.response.data.error ? error.response.data.error : 'Hubo un error en la creación de solicitud de cotización',
                 centerVertical: true,
                 backdrop: true,
                 className: 'bootbox-alert-modal'
@@ -783,6 +803,9 @@ $(document).ready(async () => {
             // cerramos el modal de cotizaciones
             const loadModalCotizaciones = bootstrap.Modal.getInstance(document.getElementById('cotizadoModal'))
             loadModalCotizaciones.hide()
+
+            const filteredURL = obtenerFiltrosActuales()
+            initDataTable(filteredURL)
         } catch (error) {
             console.log(error)
             alert("Ocurrio un error al seleccionar la cotización")
@@ -2752,12 +2775,6 @@ $(document).ready(async () => {
     // Gestionamos el cierre del modal
     $('#cotizacionesModal').on('hide.bs.modal', function (e) {
         clearDataCotizacion()
-        const filteredURL = obtenerFiltrosActuales()
-        initDataTable(filteredURL)
-    })
-
-    // Gestionamos el cierre del modal de seleccion de cotizaciones
-    $('#cotizadoModal').on('hide.bs.modal', function (e) {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })

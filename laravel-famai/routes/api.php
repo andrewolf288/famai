@@ -411,6 +411,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('cotizacion-detalle-findByProducto', [CotizacionDetalleController::class, 'findCotizacionByProducto']);
     Route::put('cotizacion-detalle/seleccionar/{id}', [CotizacionDetalleController::class, 'seleccionarCotizacionDetalle']);
     Route::post('cotizacion-detalle/copiar/{id}', [CotizacionDetalleController::class, 'copiarCotizacionDetalle']);
+    Route::post('cotizacion-detalle/cotizacion-producto-proveedor/{id}', [CotizacionDetalleController::class, 'crearCotizacionProductoProveedor']);
 });
 
 // rutas de detalle de archivo de cotizacion
