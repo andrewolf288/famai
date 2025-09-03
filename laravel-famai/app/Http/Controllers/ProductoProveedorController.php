@@ -119,6 +119,7 @@ class ProductoProveedorController extends Controller
                 $query->where('pro_id', $producto);
                 $query->where('coc_estado', 'RPR');
             })
+            ->where('coc_estado', 'RPR') // Filtro directo en la cotización
             ->orderBy('coc_feccreacion', 'desc')
             ->limit(10)
             ->get();
