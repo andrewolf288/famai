@@ -142,8 +142,8 @@ class CotizacionDetalleController extends Controller
         $nuevaCotizacion->coc_usucreacion = $user->usu_codigo;
         $nuevaCotizacion->coc_fecmodificacion = null;
         $nuevaCotizacion->coc_usumodificacion = null;
-        $nuevaCotizacion->save();
         $nuevaCotizacion->sed_codigo = $user->sed_codigo;
+        $nuevaCotizacion->save();
 
         foreach ($reqUoi as $req) {
             foreach ($detalles as $detalle) {
