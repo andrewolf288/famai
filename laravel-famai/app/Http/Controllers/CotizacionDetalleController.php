@@ -43,10 +43,10 @@ class CotizacionDetalleController extends Controller
             // saber si se debe sumar o no el IGV
             try {
                 $sql = "EXEC dbo.obtenerTipoIGV @parDocNum = ?, @parItemCode = ?";
-                $igv = DB::select($sql, [$productoProveedor->prp_numeroordencompra, $productoProveedor->prp_codigo]);
+                Log::info('dbo.obtenerTipoIGV: ' . $productoProveedor->prp_nroordencompra . ' - ' . $productoProveedor->producto->pro_codigo);
+                $igv = DB::select($sql, [$productoProveedor->prp_nroordencompra, $productoProveedor->producto->pro_codigo]);
                 $igv = $igv[0]->VatPrcnt;
             } catch (\Exception $e) {
-                Log::error('dbo.obtenerTipoIGV: ' . $productoProveedor->prp_numeroordencompra . ' - ' . $productoProveedor->prp_codigo);
                 Log::error('Error al obtener el tipo de IGV: ' . $e->getMessage());
                 throw new \Exception('Ocurrio un error al obtener el tipo de IGV: ' . $e->getMessage());
             }
