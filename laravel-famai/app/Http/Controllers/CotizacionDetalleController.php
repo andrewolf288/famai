@@ -139,6 +139,9 @@ class CotizacionDetalleController extends Controller
         $nuevaCotizacion = $cotizacionOriginal->replicate();
         $nuevaCotizacion->coc_numero = $nuevoNumero;
         $nuevaCotizacion->coc_fechacotizacion = now();
+        $nuevaCotizacion->coc_usucreacion = $user->usu_codigo;
+        $nuevaCotizacion->coc_fecmodificacion = null;
+        $nuevaCotizacion->coc_usumodificacion = null;
         $nuevaCotizacion->save();
         $nuevaCotizacion->sed_codigo = $user->sed_codigo;
 
