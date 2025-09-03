@@ -113,7 +113,7 @@ class CotizacionDetalleController extends Controller
         $reqUoi = explode(',', $reqUoi);
         $reqUoi = array_map('intval', $reqUoi);
         
-        $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+        $trabajador = Trabajador::with('sede', 'usuario')->where('usu_codigo', $user->usu_codigo)->first();
 
 
 
@@ -124,9 +124,9 @@ class CotizacionDetalleController extends Controller
         $cotizacionOriginal = Cotizacion::where('coc_id', $id)->firstOrFail();
         $detalles = CotizacionDetalle::where('coc_id', $id)
             ->where('pro_id', $request->pro_id)
-            ->get();
+            ->first();
 
-        if ($detalles->isEmpty()) {
+        if (!$detalles) {
             return response()->json(['error' => 'No existen detalles para ese producto en la cotización.'], 404);
         }
 
@@ -139,23 +139,21 @@ class CotizacionDetalleController extends Controller
         $nuevaCotizacion = $cotizacionOriginal->replicate();
         $nuevaCotizacion->coc_numero = $nuevoNumero;
         $nuevaCotizacion->coc_fechacotizacion = now();
-        $nuevaCotizacion->coc_usucreacion = $user->usu_codigo;
+        $nuevaCotizacion->coc_usucreacion = $trabajador->usu_codigo;
         $nuevaCotizacion->coc_fecmodificacion = null;
         $nuevaCotizacion->coc_usumodificacion = null;
-        $nuevaCotizacion->sed_codigo = $user->sed_codigo;
+        $nuevaCotizacion->sed_codigo = $trabajador->sed_codigo;
         $nuevaCotizacion->save();
 
         foreach ($reqUoi as $req) {
-            foreach ($detalles as $detalle) {
-                $nuevoDetalle = $detalle->replicate();
-                $nuevoDetalle->coc_id = $nuevaCotizacion->coc_id;
-                $nuevoDetalle->cod_feccreacion = now();
-                $nuevoDetalle->cod_usucreacion = $user->usu_codigo;
-                $nuevoDetalle->cod_fecmodificacion = null;
-                $nuevoDetalle->cod_usumodificacion = null;
-                $nuevoDetalle->odm_id = $req;
-                $nuevoDetalle->save();
-            }
+            $nuevoDetalle = $detalles->replicate();
+            $nuevoDetalle->coc_id = $nuevaCotizacion->coc_id;
+            $nuevoDetalle->cod_feccreacion = now();
+            $nuevoDetalle->cod_usucreacion = $trabajador->usu_codigo;
+            $nuevoDetalle->cod_fecmodificacion = null;
+            $nuevoDetalle->cod_usumodificacion = null;
+            $nuevoDetalle->odm_id = $req;
+            $nuevoDetalle->save();
         }
 
         $nuevaCotizacion->load(['detalleCotizacion' => function ($query) use ($request) {
