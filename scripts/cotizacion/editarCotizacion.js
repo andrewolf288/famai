@@ -100,7 +100,7 @@ $(document).ready(() => {
 
         // debemos recorrer el detalle
         data.detalle_cotizacion.forEach(detalle => {
-            const { cod_id, cod_cantidad, cod_descripcion, cod_orden, cod_preciounitario, cod_total, pro_id } = detalle
+            const { cod_id, cod_cantidad, cod_descripcion, cod_orden, cod_preciounitario, cod_total, pro_id, cod_descuento } = detalle
             const producto_id = pro_id ? pro_id : obtenerIdUnico()
             const rowItem = document.createElement('tr')
             if (!pro_id) {
@@ -111,9 +111,13 @@ $(document).ready(() => {
             rowItem.classList.add('table-primary')
             // inicializamos su dataset
             rowItem.dataset.id = cod_id
+            
+            const precioBase = cod_descuento > 0 ? cod_preciounitario / (1 - cod_descuento / 100) : cod_preciounitario
+            
             // construimos la información a mostrar
             rowItem.innerHTML = `
                 <input class="producto-id" value="${producto_id}" type="hidden"/>
+                <input class="precio-base" value="${precioBase}" type="hidden"/>
                 <td class="orden">${cod_orden}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value='${cod_descripcion}' readonly/>
@@ -122,7 +126,10 @@ $(document).ready(() => {
                     <input type="number" class="form-control cantidad-input" value='${cod_cantidad}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control precio-input" value='${cod_preciounitario}' readonly/>
+                    <input type="number" class="form-control precio-input" value='${precioBase}' readonly/>
+                </td>
+                <td>
+                    <input type="number" class="form-control descuento-input" value='${cod_descuento}'/>
                 </td>
                 <td>
                     <input type="number" class="form-control total-input" value='${cod_total}' readonly/>
@@ -153,24 +160,32 @@ $(document).ready(() => {
             const botonEditar = rowItem.querySelector('.btn-cotizacion-editar')
             const botonEliminar = rowItem.querySelector('.btn-cotizacion-eliminar')
             const botonGuardar = rowItem.querySelector('.btn-cotizacion-guardar')
+            const descuentoDetalle = rowItem.querySelector('.descuento-input')
 
-            cantidadDetalle.addEventListener('input', function () {
-                const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+            // Función para calcular el total basado en el precio base y descuento
+            function calcularTotal() {
+                const cantidad = parseFloat(cantidadDetalle.value) || 0
+                const precioBase = parseFloat(precioDetalle.value) || 0
+                const descuento = parseFloat(descuentoDetalle.value) || 0
+                
+                // Calculamos el precio con descuento aplicado
+                const precioConDescuento = precioBase * (1 - descuento / 100)
+                
+                // El total es cantidad * precio con descuento
+                const total = cantidad * precioConDescuento
+                
                 if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2);
+                    rowItem.querySelector('.total-input').value = total.toFixed(2)
                 } else {
-                    rowItem.querySelector('.total-input').value = '';
+                    rowItem.querySelector('.total-input').value = ''
                 }
-            })
+            }
 
-            precioDetalle.addEventListener('input', function () {
-                const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-                if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2);
-                } else {
-                    rowItem.querySelector('.total-input').value = '';
-                }
-            });
+            cantidadDetalle.addEventListener('input', calcularTotal)
+
+            precioDetalle.addEventListener('input', calcularTotal)
+
+            descuentoDetalle.addEventListener('input', calcularTotal)
 
             // escuchadores de acciones
             botonEditar.addEventListener('click', function () { editarDetalleCotizacion(rowItem) })
@@ -235,14 +250,15 @@ $(document).ready(() => {
     // funcion para guardar detalle de cotizacion
     async function guardarDetalleCotizacion(rowItem) {
         const cantidadDetalle = $(rowItem).find('.cantidad-input')
-        const precioDetalle = $(rowItem).find('.precio-input')
+        const precioInput = $(rowItem).find('.precio-input')
+        const descuentoDetalle = $(rowItem).find('.descuento-input')
 
         let handleError = ''
-        if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val()) || !esValorNumericoValidoYMayorQueCero(precioDetalle.val())) {
+        if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val()) || !esValorNumericoValidoYMayorQueCero(precioInput.val())) {
             if (!esValorNumericoValidoYMayorQueCero(cantidadDetalle.val())) {
                 handleError += '- La cantidad debe ser un valor numérico mayor a 0\n'
             }
-            if (!esValorNumericoValidoYMayorQueCero(precioDetalle.val())) {
+            if (!esValorNumericoValidoYMayorQueCero(precioInput.val())) {
                 handleError += '- El precio debe ser un valor numérico mayor a 0\n'
             }
         }
@@ -256,21 +272,23 @@ $(document).ready(() => {
         if ($(rowItem).hasClass('row-editable')) {
             const totalDetalle = $(rowItem).find('.total-input')
             const descripcionDetalle = $(rowItem).find('.descripcion-input')
+            const precioInput = $(rowItem).find('.precio-input')
             const idDetalleCotizacion = $(rowItem).data('id')
             // debemos actualizar el tr
             try {
                 const formatData = {
                     cod_descripcion: descripcionDetalle.val(),
                     cod_cantidad: cantidadDetalle.val(),
-                    cod_preciounitario: precioDetalle.val(),
-                    cod_total: totalDetalle.val()
+                    cod_preciounitario: precioInput.val() - (precioInput.val() * descuentoDetalle.val() / 100),
+                    cod_total: totalDetalle.val(),
+                    cod_descuento: descuentoDetalle.val(),
                 }
                 const {data} = await client.put(`/cotizacion-detalle/${idDetalleCotizacion}`, formatData)
             } catch(error) {
                 // si ocurrio un error, dejamos la data como estaba antes
                 const detalleAnterior = dataCotizacion.detalle_cotizacion.find(detalle => detalle.coc_id === idDetalleCotizacion)
                 cantidadDetalle.val(detalleAnterior.coc_cantidad)
-                precioDetalle.val(detalleAnterior.cod_preciounitario)
+                precioInput.val(detalleAnterior.cod_preciounitario)
                 totalDetalle.val(detalleAnterior.cod_total)
                 descripcionDetalle.val(detalleAnterior.cod_descripcion)
                 // mostramos alerta de error
@@ -294,6 +312,39 @@ $(document).ready(() => {
         $(rowItem).find('.precio-input').prop('readonly', false)
         $(rowItem).find('.btn-cotizacion-editar').css('display', 'none')
         $(rowItem).find('.btn-cotizacion-guardar').css('display', '')
+
+        // Agregar event listeners para recalcular el total cuando se editen los campos
+        const cantidadInput = $(rowItem).find('.cantidad-input')
+        const precioInput = $(rowItem).find('.precio-input')
+        const descuentoInput = $(rowItem).find('.descuento-input')
+        const totalInput = $(rowItem).find('.total-input')
+
+        // Función para recalcular el total
+        function recalcularTotal() {
+            const cantidad = parseFloat(cantidadInput.val()) || 0
+            const precio = parseFloat(precioInput.val()) || 0
+            const descuento = parseFloat(descuentoInput.val()) || 0
+            
+            // Calculamos el precio con descuento aplicado
+            const precioConDescuento = precio * (1 - descuento / 100)
+            
+            // El total es cantidad * precio con descuento
+            const total = cantidad * precioConDescuento
+            
+            if (!isNaN(total)) {
+                totalInput.val(total.toFixed(2))
+            } else {
+                totalInput.val('')
+            }
+        }
+
+        // Agregar event listeners
+        cantidadInput.off('input').on('input', recalcularTotal)
+        precioInput.off('input').on('input', recalcularTotal)
+        descuentoInput.off('input').on('input', recalcularTotal)
+
+        // Calcular total inicial
+        recalcularTotal()
     }
 
     // funcion para calcular resumen de cotizacion
@@ -446,8 +497,7 @@ $(document).ready(() => {
     }
 
     function ingresarProductoSinCodigo() {
-        const pro_codigo = ""
-        const pro_id = obtenerIdUnico()
+        const pro_codigo = null
         const pro_descripcion = $.trim($('#productosInput').val())
 
         if (pro_descripcion.length < 3) {
@@ -457,7 +507,7 @@ $(document).ready(() => {
             const rowItem = document.createElement('tr')
             rowItem.classList.add('sin-asociar');
             rowItem.innerHTML = `
-                <input class="producto-id" value="${pro_id}" type="hidden"/>
+                <input class="producto-id" value="${""}" type="hidden"/>
                 <td>${pro_codigo}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input" value='${pro_descripcion}'/>
@@ -469,29 +519,42 @@ $(document).ready(() => {
                     <input type="number" class="form-control precio-input" value=''/>
                 </td>
                 <td>
-                    <input type="number" class="form-control total-input" value='' readonly/>
+                    <input type="number" class="form-control descuento-input" value='0.00'/>
                 </td>
-             `
+                <td>
+                    <input type="number" class="form-control total-input-modal" value='' readonly style="width: 100px;"/>
+                </td>
+            `
             const cantidad = rowItem.querySelector('.cantidad-input')
             const precio = rowItem.querySelector('.precio-input')
+            const descuento = rowItem.querySelector('.descuento-input')
 
-            cantidad.addEventListener('input', function () {
-                const total = parseFloat(cantidad.value) * parseFloat(precio.value);
+            // Función para calcular el total basado en el precio y descuento
+            function calcularTotal() {
+                const cantidadVal = parseFloat(cantidad.value) || 0
+                const precioVal = parseFloat(precio.value) || 0
+                const descuentoVal = parseFloat(descuento.value) || 0
+                
+                // Calculamos el precio con descuento aplicado
+                const precioConDescuento = precioVal * (1 - descuentoVal / 100)
+                
+                // El total es cantidad * precio con descuento
+                const total = cantidadVal * precioConDescuento
+                
                 if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2);
+                    rowItem.querySelector('.total-input-modal').value = total.toFixed(2)
                 } else {
-                    rowItem.querySelector('.total-input').value = '';
+                    rowItem.querySelector('.total-input-modal').value = ''
                 }
-            })
+            }
 
-            precio.addEventListener('input', function () {
-                const total = parseFloat(cantidad.value) * parseFloat(precio.value);
-                if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2);
-                } else {
-                    rowItem.querySelector('.total-input').value = '';
-                }
-            });
+            cantidad.addEventListener('input', calcularTotal)
+            precio.addEventListener('input', calcularTotal)
+            descuento.addEventListener('input', calcularTotal)
+            
+            // Calculamos el total inicial
+            calcularTotal()
+            
             $('#tbl-cotizacion-productos tbody').html(rowItem)
         }
     }
@@ -517,30 +580,44 @@ $(document).ready(() => {
             <input type="number" class="form-control precio-input" value=''/>
         </td>
         <td>
-            <input type="number" class="form-control total-input" value='' readonly/>
+            <input type="number" class="form-control descuento-input" value='0.00'/>
+        </td>
+        <td>
+            <input type="number" class="form-control total-input-modal" value='' readonly style="width: 100px;"/>
         </td>
         `
 
         const cantidad = rowItem.querySelector('.cantidad-input')
         const precio = rowItem.querySelector('.precio-input')
+        const descuento = rowItem.querySelector('.descuento-input')
 
-        cantidad.addEventListener('input', function () {
-            const total = parseFloat(cantidad.value) * parseFloat(precio.value);
+        // Función para calcular el total basado en el precio y descuento
+        function calcularTotal() {
+            const cantidadVal = parseFloat(cantidad.value) || 0
+            const precioVal = parseFloat(precio.value) || 0
+            const descuentoVal = parseFloat(descuento.value) || 0
+            
+            // Calculamos el precio con descuento aplicado
+            const precioConDescuento = precioVal * (1 - descuentoVal / 100)
+            
+            // El total es cantidad * precio con descuento
+            const total = cantidadVal * precioConDescuento
+            
             if (!isNaN(total)) {
-                rowItem.querySelector('.total-input').value = total.toFixed(2);
+                console.log(total)
+                rowItem.querySelector('.total-input-modal').value = total.toFixed(2)
             } else {
-                rowItem.querySelector('.total-input').value = '';
+                console.log('no es un numero')
+                rowItem.querySelector('.total-input-modal').value = ''
             }
-        })
+        }
 
-        precio.addEventListener('input', function () {
-            const total = parseFloat(cantidad.value) * parseFloat(precio.value);
-            if (!isNaN(total)) {
-                rowItem.querySelector('.total-input').value = total.toFixed(2);
-            } else {
-                rowItem.querySelector('.total-input').value = '';
-            }
-        });
+        cantidad.addEventListener('input', calcularTotal)
+        precio.addEventListener('input', calcularTotal)
+        descuento.addEventListener('input', calcularTotal)
+
+        // Calculamos el total inicial
+        calcularTotal()
 
         $('#tbl-cotizacion-productos tbody').html(rowItem)
     }
@@ -557,7 +634,16 @@ $(document).ready(() => {
             const descripcion = fila.find('.descripcion-input').val().trim()
             const cantidad = fila.find('.cantidad-input').val()
             const precio = fila.find('.precio-input').val()
-            const total = fila.find('.total-input').val()
+            const descuento = fila.find('.descuento-input').val()
+            const total = fila.find('.total-input-modal').val()
+
+            console.log('Valores del modal:', {
+                descripcion,
+                cantidad,
+                precio,
+                descuento,
+                total
+            })
 
             if (!esValorNumericoValidoYMayorQueCero(cantidad) || !esValorNumericoValidoYMayorQueCero(precio) || descripcion.length < 3) {
                 if (descripcion.length < 3) {
@@ -571,6 +657,11 @@ $(document).ready(() => {
                 if (!esValorNumericoValidoYMayorQueCero(precio)) {
                     handleError += '- El precio debe ser un valor numérico mayor a 0\n'
                 }
+            }
+
+            // Validar que el descuento sea un número válido (puede ser 0)
+            if (isNaN(parseFloat(descuento))) {
+                handleError += '- El descuento debe ser un valor numérico válido\n'
             }
 
             if (handleError.length > 0) {
@@ -588,6 +679,7 @@ $(document).ready(() => {
                     cod_descripcion: descripcion,
                     cod_cantidad: cantidad,
                     cod_precio: precio,
+                    cod_descuento: descuento,
                     cod_total: total,
                     cod_asociar: asociar
                 }
@@ -609,6 +701,9 @@ $(document).ready(() => {
                 </td>
                 <td>
                     <input type="number" class="form-control precio-input" value='${rowData.cod_precio}' readonly/>
+                </td>
+                <td>
+                    <input type="number" class="form-control descuento-input" value='${rowData.cod_descuento}'/>
                 </td>
                 <td>
                     <input type="number" class="form-control total-input" value='${rowData.cod_total}' readonly/>
@@ -637,27 +732,33 @@ $(document).ready(() => {
 
                 const cantidadDetalle = rowItem.querySelector('.cantidad-input')
                 const precioDetalle = rowItem.querySelector('.precio-input')
+                const descuentoDetalle = rowItem.querySelector('.descuento-input')
                 const botonEditar = rowItem.querySelector('.btn-cotizacion-editar')
                 const botonEliminar = rowItem.querySelector('.btn-cotizacion-eliminar')
                 const botonGuardar = rowItem.querySelector('.btn-cotizacion-guardar')
 
-                cantidadDetalle.addEventListener('input', function () {
-                    const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
+                // Función para calcular el total basado en el precio y descuento
+                function calcularTotal() {
+                    const cantidad = parseFloat(cantidadDetalle.value) || 0
+                    const precio = parseFloat(precioDetalle.value) || 0
+                    const descuento = parseFloat(descuentoDetalle.value) || 0
+                    
+                    // Calculamos el precio con descuento aplicado
+                    const precioConDescuento = precio * (1 - descuento / 100)
+                    
+                    // El total es cantidad * precio con descuento
+                    const total = cantidad * precioConDescuento
+                    
                     if (!isNaN(total)) {
-                        rowItem.querySelector('.total-input').value = total.toFixed(2);
+                        rowItem.querySelector('.total-input').value = total.toFixed(2)
                     } else {
-                        rowItem.querySelector('.total-input').value = '';
+                        rowItem.querySelector('.total-input').value = ''
                     }
-                })
+                }
 
-                precioDetalle.addEventListener('input', function () {
-                    const total = parseFloat(cantidadDetalle.value) * parseFloat(precioDetalle.value);
-                    if (!isNaN(total)) {
-                        rowItem.querySelector('.total-input').value = total.toFixed(2);
-                    } else {
-                        rowItem.querySelector('.total-input').value = '';
-                    }
-                });
+                cantidadDetalle.addEventListener('input', calcularTotal)
+                precioDetalle.addEventListener('input', calcularTotal)
+                descuentoDetalle.addEventListener('input', calcularTotal)
 
                 // escuchadores de acciones
                 botonEditar.addEventListener('click', function () { editarDetalleCotizacion(rowItem) })
@@ -715,11 +816,12 @@ $(document).ready(() => {
         detalle_productos.each(function (index, row) {
             const item = {
                 cod_orden: $(row).find('.orden').text(),
-                pro_id: $(row).hasClass('sin-asociar') ? null : $(row).find('.producto-id').val(),
+                pro_id: $(row).find('.producto-id').val() ? $(row).find('.producto-id').val() : null,
                 cod_descripcion: $(row).find('.descripcion-input').val(),
                 cod_cantidad: $(row).find('.cantidad-input').val(),
-                cod_preciounitario: $(row).find('.precio-input').val(),
+                cod_preciounitario: $(row).find('.precio-input').val() - ($(row).find('.precio-input').val() * $(row).find('.descuento-input').val() / 100),
                 cod_total: $(row).find('.total-input').val(),
+                cod_descuento: $(row).find('.descuento-input').val(),
             }
             formatDetalleProductos.push(item)
         })

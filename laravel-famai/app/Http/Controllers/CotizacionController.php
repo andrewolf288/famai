@@ -705,7 +705,7 @@ class CotizacionController extends Controller
                 // Crear material para cada producto
                 $odm = OrdenInternaMateriales::create([
                     'opd_id' => $detalleParte->opd_id,
-                    'pro_id' => $detalle['pro_id'],
+                    'pro_id' => $detalle['pro_id'] ? $detalle['pro_id'] : null,
                     'odm_item' => $itemIndex++,
                     'odm_descripcion' => $detalle['cod_descripcion'],
                     'odm_cantidad' => $detalle['cod_cantidad'],
@@ -720,7 +720,7 @@ class CotizacionController extends Controller
 
                 // Crear detalle de cotización con el odm_id asignado
                 $cotizacionDetalleData = [
-                    'pro_id' => $detalle['pro_id'],
+                    'pro_id' => $detalle['pro_id'] ? $detalle['pro_id'] : null,
                     'coc_id' => $cotizacion->coc_id,
                     'cod_orden' => $detalle['cod_orden'],
                     'cod_descripcion' => $detalle['cod_descripcion'],
@@ -731,7 +731,8 @@ class CotizacionController extends Controller
                     'cod_activo' => 1,
                     'cod_usucreacion' => $user->usu_codigo,
                     'cod_fecmodificacion' => null,
-                    'cod_estado' => 'SML'
+                    'cod_estado' => 'SML',
+                    'cod_descuento' => $detalle['cod_descuento'],
                 ];
 
                 CotizacionDetalle::create($cotizacionDetalleData);

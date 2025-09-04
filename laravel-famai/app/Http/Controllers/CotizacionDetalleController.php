@@ -253,6 +253,7 @@ class CotizacionDetalleController extends Controller
             'cod_cantidad' => 'required',
             'cod_preciounitario' => 'required',
             'cod_total' => 'required',
+            'cod_descuento' => 'required',
         ])->validate();
 
         $cotizacion->update([
@@ -260,6 +261,7 @@ class CotizacionDetalleController extends Controller
             'cod_cantidad' => $request->input('cod_cantidad'),
             'cod_preciounitario' => $request->input('cod_preciounitario'),
             'cod_total' => $request->input('cod_total'),
+            'cod_descuento' => $request->input('cod_descuento'),
             'cod_usumodificacion' => $user->usu_codigo,
         ]);
 
