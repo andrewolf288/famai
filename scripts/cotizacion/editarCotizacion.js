@@ -129,7 +129,7 @@ $(document).ready(() => {
                     <input type="number" class="form-control precio-input" value='${precioBase}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control descuento-input" value='${cod_descuento}'/>
+                    <input type="number" class="form-control descuento-input" value='${cod_descuento}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control total-input" value='${cod_total}' readonly/>
@@ -175,7 +175,7 @@ $(document).ready(() => {
                 const total = cantidad * precioConDescuento
                 
                 if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input').value = total.toFixed(2)
+                    rowItem.querySelector('.total-input').value = total.toFixed(4)
                 } else {
                     rowItem.querySelector('.total-input').value = ''
                 }
@@ -301,6 +301,7 @@ $(document).ready(() => {
         $(rowItem).find('.descripcion-input').prop('readonly', true)
         $(rowItem).find('.cantidad-input').prop('readonly', true)
         $(rowItem).find('.precio-input').prop('readonly', true)
+        $(rowItem).find('.descuento-input').prop('readonly', true)
         $(rowItem).find('.btn-cotizacion-guardar').css('display', 'none')
         $(rowItem).find('.btn-cotizacion-editar').css('display', '')
     }
@@ -310,6 +311,7 @@ $(document).ready(() => {
         $(rowItem).find('.descripcion-input').prop('readonly', false)
         $(rowItem).find('.cantidad-input').prop('readonly', false)
         $(rowItem).find('.precio-input').prop('readonly', false)
+        $(rowItem).find('.descuento-input').prop('readonly', false)
         $(rowItem).find('.btn-cotizacion-editar').css('display', 'none')
         $(rowItem).find('.btn-cotizacion-guardar').css('display', '')
 
@@ -332,7 +334,7 @@ $(document).ready(() => {
             const total = cantidad * precioConDescuento
             
             if (!isNaN(total)) {
-                totalInput.val(total.toFixed(2))
+                totalInput.val(total.toFixed(4))
             } else {
                 totalInput.val('')
             }
@@ -357,7 +359,7 @@ $(document).ready(() => {
             totalCotizacionAcumulado += total
         })
 
-        totalCotizacion.text((totalCotizacionAcumulado).toFixed(2))
+        totalCotizacion.text((totalCotizacionAcumulado).toFixed(4))
     }
 
     async function initInformacion() {
@@ -542,7 +544,7 @@ $(document).ready(() => {
                 const total = cantidadVal * precioConDescuento
                 
                 if (!isNaN(total)) {
-                    rowItem.querySelector('.total-input-modal').value = total.toFixed(2)
+                    rowItem.querySelector('.total-input-modal').value = total.toFixed(4)
                 } else {
                     rowItem.querySelector('.total-input-modal').value = ''
                 }
@@ -605,7 +607,7 @@ $(document).ready(() => {
             
             if (!isNaN(total)) {
                 console.log(total)
-                rowItem.querySelector('.total-input-modal').value = total.toFixed(2)
+                rowItem.querySelector('.total-input-modal').value = total.toFixed(4)
             } else {
                 console.log('no es un numero')
                 rowItem.querySelector('.total-input-modal').value = ''
@@ -703,7 +705,7 @@ $(document).ready(() => {
                     <input type="number" class="form-control precio-input" value='${rowData.cod_precio}' readonly/>
                 </td>
                 <td>
-                    <input type="number" class="form-control descuento-input" value='${rowData.cod_descuento}'/>
+                    <input type="number" class="form-control descuento-input" value='${rowData.cod_descuento}' readonly/>
                 </td>
                 <td>
                     <input type="number" class="form-control total-input" value='${rowData.cod_total}' readonly/>
@@ -750,7 +752,7 @@ $(document).ready(() => {
                     const total = cantidad * precioConDescuento
                     
                     if (!isNaN(total)) {
-                        rowItem.querySelector('.total-input').value = total.toFixed(2)
+                        rowItem.querySelector('.total-input').value = total.toFixed(4)
                     } else {
                         rowItem.querySelector('.total-input').value = ''
                     }
