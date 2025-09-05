@@ -1272,14 +1272,17 @@ $(document).ready(async () => {
         const odm_id = $(this).data('odm-id')
         const botonAjustar = $(this)
         try {
-            const continuar = new Promise((resolve, reject) => {
-                bootbox.confirm('¿Está seguro de ajustar el material?', {
-                    title: 'Ajustar Material',
-                    className: 'bootbox-confirm-modal',
-                    size: 'extra-large',
-                    buttons: {},
-                }, function (result) {
-                    resolve(result)
+            const continuar = await new Promise((resolve) => {
+                bootbox.confirm({
+                    message: '¿Está seguro de ajustar el material?',
+                    title: '<i class="fa fa-exclamation-triangle text-warning"></i> <span class="text-warning">Ajustar Material</span>',
+                    className: 'bootbox-alert-modal',
+                    size: 'small',
+                    backdrop: true,
+                    centerVertical: true,
+                    callback: function (result) {
+                        resolve(result)
+                    }
                 })
             })
 
@@ -1296,13 +1299,19 @@ $(document).ready(async () => {
                 className: 'bootbox-success-modal bootbox-alert-modal',
                 centerVertical: true,
                 backdrop: true,
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                        className: 'btn-success'
+                    }
+                }
             })
 
             initDataTable(obtenerFiltrosActuales())
         } catch (error) {
             bootbox.dialog({
                 title: '<i class="fa fa-times-circle text-danger"></i> <span class="text-danger">Error</span>',
-                message: error.response.data.error ? error.response.data.error : 'Hubo un error al ajustar el material',
+                message: error.response?.data?.error ? error.response.data.error : 'Hubo un error al ajustar el material',
                 backdrop: true,
                 centerVertical: true,
                 className: 'bootbox-alert-modal',
