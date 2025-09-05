@@ -382,6 +382,11 @@ $(document).ready(async () => {
                 <td>${odm_usucreacion}</td>
                 <td>${odm_fecmodificacion ? parseDate(odm_fecmodificacion) : 'N/A'}</td>
                 <td>${odm_usumodificacion ? odm_usumodificacion : 'N/A'}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-primary btn-ajustar" data-odm-id="${odm_id}">
+                        Ajustar
+                    </button>
+                </td>
             `
             $("#tbl-despliegue-materiales-body").append(rowItem)
 
@@ -1260,6 +1265,57 @@ $(document).ready(async () => {
         } else {
             $('#fechaDesde').prop('disabled', true)
             $('#fechaHasta').prop('disabled', true)
+        }
+    })
+
+    $(document).on('click', '.btn-ajustar', async function () {
+        const odm_id = $(this).data('odm-id')
+        const botonAjustar = $(this)
+        try {
+            const continuar = new Promise((resolve, reject) => {
+                bootbox.confirm('¿Está seguro de ajustar el material?', {
+                    title: 'Ajustar Material',
+                    className: 'bootbox-confirm-modal',
+                    size: 'extra-large',
+                    buttons: {},
+                }, function (result) {
+                    resolve(result)
+                })
+            })
+
+            if (!continuar) { return }
+
+            botonAjustar.prop('disabled', true)
+            botonAjustar.html('<i class="fa fa-spinner fa-spin"></i> Ajustando...')
+
+            const { data } = await client.get(`/detalleMaterialesOrdenInterna/ajustar-material/${odm_id}`)
+            console.log('se ejecuto el boton ajustar', data)
+            bootbox.dialog({
+                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Ajuste de Material</span>',
+                message: 'Material ajustado correctamente',
+                className: 'bootbox-success-modal bootbox-alert-modal',
+                centerVertical: true,
+                backdrop: true,
+            })
+
+            initDataTable(obtenerFiltrosActuales())
+        } catch (error) {
+            bootbox.dialog({
+                title: '<i class="fa fa-times-circle text-danger"></i> <span class="text-danger">Error</span>',
+                message: error.response.data.error ? error.response.data.error : 'Hubo un error al ajustar el material',
+                backdrop: true,
+                centerVertical: true,
+                className: 'bootbox-alert-modal',
+                buttons: {
+                    confirm: {
+                        label: 'Aceptar',
+                        className: 'btn-danger'
+                    }
+                }
+            })
+        } finally {
+            botonAjustar.prop('disabled', false)
+            botonAjustar.html('Ajustar')
         }
     })
 

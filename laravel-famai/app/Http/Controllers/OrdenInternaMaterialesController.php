@@ -29,6 +29,26 @@ use Illuminate\Support\Facades\Log;
 class OrdenInternaMaterialesController extends Controller
 {
 
+    public function ajustarMaterial($id)
+    {
+        try {
+            $user = auth()->user();
+            $detalleMaterial = OrdenInternaMateriales::find($id);
+            
+            $cantidadPendienteOriginal = $detalleMaterial->odm_cantidadpendiente;
+            
+            $detalleMaterial->odm_observacion = "Ajuste de cantidad (" . $cantidadPendienteOriginal . ") por " . $user->usu_nombre . " el " . Carbon::now()->format('d/m/Y H:i:s');
+            $detalleMaterial->odm_usumodificacion = $user->usu_codigo;
+            $detalleMaterial->odm_cantidadordenada = $cantidadPendienteOriginal + $detalleMaterial->odm_cantidadordenada;
+            $detalleMaterial->odm_cantidadpendiente = 0;
+            $detalleMaterial->odm_fecmodificacion = Carbon::now();
+            $detalleMaterial->save();
+            return response()->json($detalleMaterial);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function asignarResponsableEnBloque(Request $request, $idResponsable)
     {
         $user = auth()->user();
