@@ -852,6 +852,9 @@ class OrdenInternaMaterialesController extends Controller
 
         // multifilters
         $multifilter = $request->input('multifilter', null);
+        
+        // filtro de estado de orden interna
+        $oic_estado = $request->input('oic_estado', null);
 
         $query = OrdenInternaMateriales::with(
             [
@@ -863,11 +866,21 @@ class OrdenInternaMaterialesController extends Controller
             ->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sede) {
                 $q->where('sed_codigo', $sede);
             })
-            ->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+            ->whereNotIn('odm_tipo', [3, 4, 5]);
+
+        // filtro por estado de orden interna
+        if ($oic_estado !== null) {
+            $estados = explode(',', $oic_estado);
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($estados) {
+                $q->whereIn('oic_estado', $estados);
+            });
+        } else {
+            // Por defecto, si no se especifica estado, usar ENVIADO y EVALUADO
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) {
                 $q->where('oic_estado', 'ENVIADO')
                     ->orWhere('oic_estado', 'EVALUADO');
-            })
-            ->whereNotIn('odm_tipo', [3, 4, 5]);
+            });
+        }
 
         // filtro por orden de trabajo
         if ($ordenTrabajo !== null) {

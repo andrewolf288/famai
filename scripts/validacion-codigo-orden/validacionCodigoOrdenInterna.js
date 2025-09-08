@@ -13,9 +13,10 @@ $(document).ready(async () => {
     // referencias de filtros
     const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
-    const filterButton = $('#filter-button')
-    const filterFechas = $('#filter-dates')
-    const filterMultiselect = $('#filtermultiselect-button')
+    const filterMultiselect = $('#filterMultipleSelector')
+    const filterEstado = $('#filterMultipleSelectorEstado')
+    const sedesFilter = $('#sedesFilter')
+    const btnFiltrar = $('#btn-filtrar')
 
     // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
@@ -126,6 +127,7 @@ $(document).ready(async () => {
                     <td class="text-center">
                         <button class="btn btn-primary asignar-codigo" data-detalle="${material.odm_id}">Validar Código</button>
                     </td>
+                    <td class="text-center">${orden_interna_parte.orden_interna.oic_estado}</td>
                 `
                 $('#data-container-body').append(rowItem)
             })
@@ -137,54 +139,54 @@ $(document).ready(async () => {
         }
     }
 
-    const getValueSede = () => {
-        const sedeValue = $('#sedesFilter').val()
-        if (sedeValue.length !== 0) {
-            return `&sed_codigo=${sedeValue}`
-        }
-        return ""
-    }
-
     function obtenerFiltrosActuales(urlAPI = apiURL) {
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
-        let filteredURL = urlAPI
+        const fecha_desde = transformarFecha($('#fechaDesde').val())
+        const fecha_hasta = transformarFecha($('#fechaHasta').val())
+        const filters = filterMultiselect.val() || []
+        const estados = filterEstado.val() || []
+        const sedeValue = sedesFilter.val()
+        
+        let filteredURL = urlAPI + '?'
+        let params = []
 
-        // si existen filtros de combobox, estos no dependen de filtros de fechas ni filtros multiples
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}${getValueSede()}`
-        } else {
-            const filters = $('select[multiple]').val()
-            const fecha_desde = transformarFecha($('#fechaDesde').val())
-            const fecha_hasta = transformarFecha($('#fechaHasta').val())
-
-            filteredURL += `?fecha_desde=${fecha_desde}&fecha_hasta=${fecha_hasta}${getValueSede()}`
-
-            if (filters.length !== 0) {
-                filteredURL += `&multifilter=${filters.join('OR')}`
-            }
+        // Filtro de fechas (siempre se envían)
+        if (fecha_desde && fecha_hasta) {
+            params.push(`fecha_desde=${fecha_desde}`)
+            params.push(`fecha_hasta=${fecha_hasta}`)
         }
 
+        // Filtro de búsqueda específica
+        if (filterField.length !== 0 && filterValue.length !== 0) {
+            params.push(`${filterField}=${encodeURIComponent(filterValue)}`)
+        }
+
+        // Filtros múltiples de validación
+        if (filters.length > 0) {
+            params.push(`multifilter=${filters.join('OR')}`)
+        }
+
+        // Filtros de estado
+        if (estados.length > 0) {
+            params.push(`oic_estado=${estados.join(',')}`)
+        }
+
+        // Sede
+        if (sedeValue && sedeValue.length > 0) {
+            params.push(`sed_codigo=${sedeValue}`)
+        }
+
+        filteredURL += params.join('&')
         return filteredURL
     }
 
-    $("#sedesFilter").on('change', () => {
+    sedesFilter.on('change', () => {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })
 
-    filterFechas.on('click', () => {
-        const filteredURL = obtenerFiltrosActuales()
-        initDataTable(filteredURL)
-    })
-
-    // filtro multi select
-    filterMultiselect.on('click', async () => {
-        const filteredURL = obtenerFiltrosActuales()
-        initDataTable(filteredURL)
-    })
-
-    filterButton.on('click', () => {
+    btnFiltrar.on('click', () => {
         const filteredURL = obtenerFiltrosActuales()
         initDataTable(filteredURL)
     })

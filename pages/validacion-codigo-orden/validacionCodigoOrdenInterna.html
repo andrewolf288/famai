@@ -1,48 +1,52 @@
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+<!-- Header con título y botones de acción -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
     <h2 class="mb-3 fs-4">Validación Códigos</h2>
-    <button class="btn btn-success ms-2" id="btn-export-data-almacen">Excel Almacen</button>
+    <div class="d-flex gap-2">
+        <button class="btn btn-success" id="btn-export-data-almacen">
+            Excel Almacén
+        </button>
+        <button class="btn btn-success" id="btn-validar-materiales">
+            Validar
+        </button>
+    </div>
 </div>
 
-<div class="row mb-3">
-    <!-- Filtros de fechas -->
-    <div class="col-12 col-md-3 mb-3 mb-md-0">
-        <div class="d-flex flex-column flex-md-row align-items-end">
-            <div class="me-3">
+<!-- Panel de filtros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-filter me-2"></i>
+            Filtros
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Filtros de fechas -->
+            <div class="col-12 col-md-3">
                 <label for="fechaDesde" class="form-label">Fecha Desde</label>
                 <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
             </div>
-            <div>
+            <div class="col-12 col-md-3">
                 <label for="fechaHasta" class="form-label">Fecha Hasta</label>
                 <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
             </div>
-            <button id="filter-dates" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
-                    viewBox="0 0 16 16">
-                    <path
-                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                </svg>
-            </button>
-        </div>
-    </div>
 
-    <!-- Filtros a la izquierda -->
-    <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-        <div class="d-flex flex-column flex-md-row">
-            <select id="filter-selector" class="form-select w-100 w-md-auto">
-                <option value="">Seleccione un filtro</option>
-                <option value="odt_numero">Orden trabajo</option>
-            </select>
+            <!-- Filtro de búsqueda específica -->
+            <div class="col-12 col-md-3">
+                <label for="filter-selector" class="form-label">Tipo de Búsqueda</label>
+                <select id="filter-selector" class="form-select">
+                    <option value="">Seleccione un filtro</option>
+                    <option value="odt_numero">Orden de Trabajo</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label for="filter-input" class="form-label">Término de Búsqueda</label>
+                <input type="text" id="filter-input" class="form-control" placeholder="Ingrese el término a buscar...">
+            </div>
 
-            <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
-                placeholder="Buscar...">
-            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
-        </div>
-    </div>
-
-    <!-- Filtro multiselect -->
-    <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-        <div class="d-flex flex-column flex-md-row mt-3 w-100">
-            <div class="col-10">
+            <!-- Filtros de validación -->
+            <div class="col-12 col-md-4">
+                <label for="filterMultipleSelector" class="form-label">Estado de Validación</label>
                 <select id="filterMultipleSelector" class="form-select" multiple>
                     <option value="verificados">Verificados</option>
                     <option value="no_verificados" selected>No verificados</option>
@@ -50,19 +54,42 @@
                     <option value="productos_con_codigo">Productos con código</option>
                 </select>
             </div>
-            <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filtermultiselect-button">Filtrar</button>
-        </div>
-    </div>
-</div>
 
-<div class="d-flex flex-column flex-md-row justify-content-center align-items-center">
-    <div class="w-auto me-4">
-        <button class="btn btn-success me-2" id="btn-validar-materiales">Validar</button>
-    </div>
-    <div class="w-25 me-4">
-        <select name="sedes" id="sedesFilter" class="form-select">
-            <option value="">Selecciona una sede</option>
-        </select>
+            <!-- Filtros de estado de orden -->
+            <div class="col-12 col-md-4">
+                <label for="filterMultipleSelectorEstado" class="form-label">Estado de Orden Interna</label>
+                <select id="filterMultipleSelectorEstado" class="form-select" multiple>
+                    <option value="REABIERTO">REABIERTO</option>
+                    <option value="DESPACHADO">DESPACHADO</option>
+                    <option value="ENVIADO" selected>ENVIADO</option>
+                    <option value="EVALUADO" selected>EVALUADO</option>
+                    <option value="INGRESO">INGRESO</option>
+                    <option value="DEVOLUCION">DEVOLUCION</option>
+                    <option value="ANULADO">ANULADO</option>
+                    <option value="EN ESPERA">EN ESPERA</option>
+                    <option value="TERMINADO">TERMINADO</option>
+                    <option value="PROCESO">PROCESO</option>
+                </select>
+            </div>
+
+            <!-- Filtro de sede -->
+            <div class="col-12 col-md-4">
+                <label for="sedesFilter" class="form-label">Sede</label>
+                <select name="sedes" id="sedesFilter" class="form-select">
+                    <option value="">Todas las sedes</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Botones de acción de filtros -->
+        <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-center">
+                <button class="btn btn-primary px-4" id="btn-filtrar">
+                    <i class="fas fa-search me-2"></i>
+                    Filtrar
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -81,6 +108,7 @@
         <th>Und.</th>
         <th class="text-center">Cantidad</th>
         <th class="text-center">Validar</th>
+        <th class="text-center">Estado</th>
     </thead>
     <tbody id="data-container-body">
     </tbody>
