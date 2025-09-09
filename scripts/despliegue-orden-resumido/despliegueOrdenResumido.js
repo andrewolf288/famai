@@ -1383,14 +1383,12 @@ $(document).ready(async () => {
 
             $('#tbl-cotizaciones-materiales tbody').empty();
             let content = '';
-            let filasProcesadas = 0;
             
             detalleCotizacion.forEach((detalle, index) => {
-                const proveedor = data.find(p => p.pro_id === detalle.pro_id);
+                const proveedor = data.find(p => p.pro_id == detalle.pro_id);
                 const rowHtml = renderRowCotizacion(detalle, index, proveedor);
                 if (rowHtml) {
                     content += rowHtml;
-                    filasProcesadas++;
                 }
             });
 
