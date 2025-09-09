@@ -228,6 +228,9 @@ class OrdenCompraController extends Controller
         $user = auth()->user();
         $sed_codigo = "10";
         // iniciamos una transaccion
+
+        // Guardar el LOG de la data que se recibio
+        Log::info('Data recibida para crear orden de compra: ' . json_encode($request->all()));
         try {
             DB::beginTransaction();
             $proveedorRequest = $request->input('proveedor');
