@@ -29,6 +29,318 @@ use Illuminate\Support\Facades\Log;
 class OrdenInternaMaterialesController extends Controller
 {
 
+    public function obtenerPorIds(Request $request)
+    {
+        $request->validate([
+            'odm_ids' => 'required|array',
+        ]);
+
+        // Convert all IDs to integers to ensure proper type comparison
+        $odmIds = array_map('intval', $request->odm_ids);
+
+        // Use the same structure as indexResumido
+        $data = OrdenInternaMateriales::select([
+            'odm_id',
+            'opd_id',
+            'pro_id',
+            'tra_responsable',
+            'odm_descripcion',
+            'odm_cantidadpendiente',
+            'odm_cantidad',
+            'odm_solped',
+            'odm_fecconsultareservacion',
+            'odm_estado',
+            'odm_feccreacion',
+            'odm_usucreacion',
+            'odm_fecmodificacion',
+            'odm_usumodificacion',
+            'odm_observacion'
+        ])->with([
+            'responsable' => function($q) {
+                $q->select('tra_id', 'tra_nombre');
+            },
+            'producto' => function($q) {
+                $q->select('pro_id', 'pro_codigo', 'pro_descripcion', 'uni_codigo')
+                  ->with([
+                      'unidad' => function($q3) {
+                          $q3->select('uni_codigo');
+                      }
+                  ]);
+            },
+            'ordenInternaParte' => function($q) {
+                $q->select('opd_id', 'oic_id')
+                  ->with([
+                      'ordenInterna' => function($q2) {
+                          $q2->select('oic_id', 'odt_numero', 'oic_estado', 'oic_tipo', 'sed_codigo')
+                            ->with([
+                                'almacen' => function($q3) {
+                                    $q3->select('alm_id', 'alm_codigo', 'sed_codigo');
+                                }
+                            ]);
+                      }
+                  ]);
+            },
+            'detalleAdjuntos' => function($q) {
+                $q->select('oma_id', 'odm_id');
+            }
+        ])->whereIn('odm_id', $odmIds)->get();
+
+        // Get additional counts like in indexResumido
+        $cotizaciones_counts = CotizacionDetalle::select('odm_id', DB::raw('COUNT(DISTINCT coc_id) as count'))
+            ->whereIn('odm_id', $odmIds)
+            ->groupBy('odm_id')
+            ->pluck('count', 'odm_id')->toArray();
+
+        $ordenes_compra_counts = OrdenCompraDetalle::select('odm_id', DB::raw('COUNT(DISTINCT occ_id) as count'))
+            ->whereIn('odm_id', $odmIds)
+            ->groupBy('odm_id')
+            ->pluck('count', 'odm_id')->toArray();
+
+        $cotizaciones_seleccionadas = CotizacionDetalle::with([
+                'cotizacion' => function($q) {
+                    $q->select('coc_id', 'prv_id', 'mon_codigo')
+                      ->with([
+                          'proveedor' => function($q2) {
+                              $q2->select('prv_id', 'prv_nombre');
+                          },
+                          'moneda' => function($q2) {
+                              $q2->select('mon_codigo', 'mon_simbolo');
+                          }
+                      ]);
+                }
+            ])
+            ->select('cod_id', 'odm_id', 'coc_id', 'cod_estado', 'cod_preciounitario')
+            ->whereIn('odm_id', $odmIds)
+            ->where(function ($query) {
+                $query->where('cod_estado', "SAT")
+                    ->orWhere('cod_estado', "SML");
+            })
+            ->get()
+            ->keyBy('odm_id');
+
+        // Group data like in indexResumido
+        $agrupados = $data
+            ->whereNotNull('pro_id')
+            ->groupBy('pro_id')
+            ->map(function ($grupo, $pro_id) use ($cotizaciones_counts, $ordenes_compra_counts, $cotizaciones_seleccionadas) {
+                $producto = $grupo->first()->producto;
+                if (!$producto) { return null; }
+
+                $identificadores_materiales = $grupo->pluck('odm_id')->toArray();
+                
+                $cotizaciones_count = array_sum(array_intersect_key($cotizaciones_counts, array_flip($identificadores_materiales)));
+                $ordenes_compra_count = array_sum(array_intersect_key($ordenes_compra_counts, array_flip($identificadores_materiales)));
+                
+                $cotizacion_seleccionada = null;
+                foreach ($identificadores_materiales as $odm_id) {
+                    if (isset($cotizaciones_seleccionadas[$odm_id])) {
+                        $cotizacion_seleccionada = $cotizaciones_seleccionadas[$odm_id];
+                        break;
+                    }
+                }
+
+                return [
+                    'pro_id' => $pro_id,
+                    'pro_codigo' => $producto->pro_codigo,
+                    'pro_descripcion' => $producto->pro_descripcion,
+                    'uni_codigo' => $producto->unidad ? $producto->unidad->uni_codigo : null,
+                    'cantidad' => $grupo->sum('odm_cantidadpendiente'),
+                    'stock' => 0.00,
+                    'cotizaciones_count' => $cotizaciones_count,
+                    'ordenes_compra_count' => $ordenes_compra_count,
+                    'cotizacion_seleccionada' => $cotizacion_seleccionada,
+                    'detalle' => $grupo->values(),
+                    'tiene_adjuntos' => $grupo->some(function ($item) {
+                        return $item->detalleAdjuntos->isNotEmpty();
+                    }),
+                    'proveedores_count' => 5,
+                ];
+            })
+            ->filter()
+            ->values();
+
+        $sinAgrupar = $data
+            ->whereNull('pro_id')
+            ->map(function ($item) use ($cotizaciones_counts, $ordenes_compra_counts, $cotizaciones_seleccionadas) {
+                $odm_id = $item->odm_id;
+                $cotizaciones_count = $cotizaciones_counts[$odm_id] ?? 0;
+                $ordenes_compra_count = $ordenes_compra_counts[$odm_id] ?? 0;
+                $cotizacion_seleccionada = $cotizaciones_seleccionadas[$odm_id] ?? null;
+
+                return [
+                    'pro_id' => null,
+                    'pro_codigo' => null,
+                    'pro_descripcion' => $item->odm_descripcion,
+                    'uni_codigo' => null,
+                    'cantidad' => $item->odm_cantidadpendiente,
+                    'cantidad_requerida' => $item->odm_cantidad,
+                    'stock' => 0.00,
+                    'cotizaciones_count' => $cotizaciones_count,
+                    'ordenes_compra_count' => $ordenes_compra_count,
+                    'cotizacion_seleccionada' => $cotizacion_seleccionada,
+                    'detalle' => [$item],
+                    'tiene_adjuntos' => $item->detalleAdjuntos->isNotEmpty() ? true : false
+                ];
+            })
+            ->values();
+
+        $resultado = $agrupados->concat($sinAgrupar);
+
+        return response()->json($resultado);
+    }
+
+    public function asignarCodigosProducto(Request $request)
+    {
+        $user = auth()->user();
+        $rawIds = $request['odm_ids'];
+        $allIds = [];
+        
+        foreach ($rawIds as $idString) {
+            if (strpos($idString, ',') !== false) {
+                $splitIds = explode(',', $idString);
+                foreach ($splitIds as $id) {
+                    $allIds[] = trim($id);
+                }
+            } else {
+                $allIds[] = $idString;
+            }
+        }
+        
+        $odmIds = array_map('intval', array_filter($allIds));
+
+        Log::info('asignarCodigosProducto - Iniciando proceso', [
+            'odm_ids_originales' => $request['odm_ids'],
+            'odm_ids_convertidos' => $odmIds,
+            'pro_codigo' => $request['pro_codigo'],
+            'total_ids' => count($odmIds)
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pro_id = null;
+            $pro_descripcion = null;
+            // buscamos el material en la base de datos
+            $findMaterial = Producto::where('pro_codigo', $request['pro_codigo'])->first();
+            // en caso no se encuentre, se crea el registro
+            if (!$findMaterial) {
+                // hacemos una busqueda de los datos en la base de datos secundaria
+                $productoSecondary = DB::connection('sqlsrv_secondary')
+                    ->table('OITM as T0')
+                    ->select([
+                        'T0.ItemCode as pro_codigo',
+                        'T0.ItemName as pro_descripcion',
+                        'T0.BuyUnitMsr as uni_codigo',
+                    ])
+                    ->where('T0.ItemCode', $request['pro_codigo'])
+                    ->first();
+
+                if ($productoSecondary) {
+                    // debemos hacer validaciones de la unidad
+                    $uni_codigo = 'SIN';
+                    $uni_codigo_secondary = trim($productoSecondary->uni_codigo);
+                    if (!empty($uni_codigo)) {
+                        $unidadFound = Unidad::where('uni_codigo', $uni_codigo_secondary)->first();
+                        if ($unidadFound) {
+                            $uni_codigo = $unidadFound->uni_codigo;
+                        } else {
+                            $unidadCreated = Unidad::create([
+                                'uni_codigo' => $uni_codigo_secondary,
+                                'uni_descripcion' => $uni_codigo_secondary,
+                                'uni_activo' => 1,
+                                'uni_usucreacion' => $user->usu_codigo,
+                                'uni_fecmodificacion' => null
+                            ]);
+                            $uni_codigo = $unidadCreated->uni_codigo;
+                        }
+                    }
+                    // creamos el producto con los valores correspondientes
+                    $productoCreado = Producto::create([
+                        'pro_codigo' => $productoSecondary->pro_codigo,
+                        'pro_descripcion' => $productoSecondary->pro_descripcion,
+                        'uni_codigo' => $uni_codigo,
+                        'pgi_codigo' => 'SIN',
+                        'pfa_codigo' => 'SIN',
+                        'psf_codigo' => 'SIN',
+                        'pma_codigo' => 'SIN',
+                        'pro_usucreacion' => $user->usu_codigo,
+                        'pro_fecmodificacion' => null
+                    ]);
+                    // se establece el ID correspondiente
+                    $pro_id = $productoCreado->pro_id;
+                    $pro_descripcion = $productoCreado->pro_descripcion;
+                } else {
+                    throw new Exception('Material no encontrado en la base de datos secundaria');
+                }
+            } else {
+                try {
+                    $sql = "EXEC dbo.actualizarProductoSAP @pro_codigo = ?";
+                    DB::statement($sql, [$request['pro_codigo']]);
+                } catch (\Throwable $th) {}
+                // en el caso que se encuentre el producto en base de datos dbfamai
+                $pro_id = $findMaterial->pro_id;
+                $pro_descripcion = $findMaterial->pro_descripcion;
+            }
+
+            // buscamos el material en la base de datos
+            Log::info('Buscando materiales con IDs:', $odmIds);
+            
+            $ordenInternaMateriales = OrdenInternaMateriales::with('producto', 'ordenInternaParte.ordenInterna')
+                ->whereIn('odm_id', $odmIds)
+                ->get();
+
+            Log::info('Materiales encontrados:', [
+                'total_encontrados' => $ordenInternaMateriales->count(),
+                'ids_encontrados' => $ordenInternaMateriales->pluck('odm_id')->toArray(),
+                'ids_buscados' => $odmIds,
+                'ids_no_encontrados' => array_diff($odmIds, $ordenInternaMateriales->pluck('odm_id')->toArray())
+            ]);
+
+            if ($ordenInternaMateriales->isEmpty()) {
+                throw new Exception('Material no encontrado');
+            }
+
+            $updatedCount = 0;
+            $ordenInternaMateriales->each(function ($ordenMaterial) use ($user, $pro_id, $pro_descripcion, &$updatedCount) {
+                $data = [
+                    'pro_id' => $pro_id,
+                    'odm_estado' => 'REQ',
+                    'odm_descripcion' => $pro_descripcion,
+                    'odm_usumodificacion' => $user->usu_codigo,
+                    'odm_fecmodificacion' => Carbon::now()
+                ];
+
+                if ($ordenMaterial->ordenInternaParte && 
+                    $ordenMaterial->ordenInternaParte->ordenInterna && 
+                    $ordenMaterial->ordenInternaParte->ordenInterna->oic_tipo !== 'OI') {
+                    $data['odm_fecconsultareservacion'] = Carbon::now();
+                }
+
+                Log::info('Actualizando material ODM ID: ' . $ordenMaterial->odm_id, [
+                    'data' => $data,
+                    'original_pro_id' => $ordenMaterial->pro_id,
+                    'original_estado' => $ordenMaterial->odm_estado
+                ]);
+
+                $result = $ordenMaterial->update($data);
+                if ($result) {
+                    $updatedCount++;
+                    Log::info('Material actualizado exitosamente: ' . $ordenMaterial->odm_id);
+                } else {
+                    Log::error('Error al actualizar material: ' . $ordenMaterial->odm_id);
+                }
+            });
+
+            Log::info('Total de materiales actualizados: ' . $updatedCount . ' de ' . $ordenInternaMateriales->count());
+
+            DB::commit();
+            return response()->json("Material actualizado exitosamente", 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function ajustarMaterial($id)
     {
         try {

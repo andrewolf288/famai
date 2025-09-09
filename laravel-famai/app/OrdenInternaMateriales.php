@@ -70,6 +70,12 @@ class OrdenInternaMateriales extends Model
         return $this->belongsTo(User::class, 'odm_usucreacion');
     }
 
+    // usuario modificador
+    public function usuarioModificador()
+    {
+        return $this->belongsTo(User::class, 'odm_usumodificacion');
+    }
+
     // detalle de adjuntos
     public function detalleAdjuntos()
     {

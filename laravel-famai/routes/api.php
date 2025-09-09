@@ -207,6 +207,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('detalleMaterialesOrdenInterna-resumido', [OrdenInternaMaterialesController::class, 'indexResumido']);
     Route::get('detalleMaterialOrdenInterna/{id}', [OrdenInternaMaterialesController::class, 'show']);
     Route::put('ordeninternamateriales/{id}', [OrdenInternaMaterialesController::class, 'update']);
+    Route::post('ordeninternamateriales/obtener-por-ids', [OrdenInternaMaterialesController::class, 'obtenerPorIds']);
     Route::put('ordeninternamateriales/tipo/{id}', [OrdenInternaMaterialesController::class, 'updateTipoMaterial']);
     Route::put('ordeninternamateriales/responsable/{id}', [OrdenInternaMaterialesController::class, 'updateResponsableMaterial']);
     Route::post('ordeninternamateriales/responsable-masivo', [OrdenInternaMaterialesController::class, 'updateResponsableMaterialMasivo']);
@@ -221,6 +222,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordeninternamateriales/ordencompra', [OrdenInternaMaterialesController::class, 'findOrdenCompraByMaterial']);
     Route::get('detalleMaterialesOrdenInterna/validacion', [OrdenInternaMaterialesController::class, 'indexValidacionCodigo']);
     Route::post('ordeninternamateriales/validar-codigo', [OrdenInternaMaterialesController::class, 'asignarCodigoProducto']);
+    Route::post('ordeninternamateriales/validar-codigos', [OrdenInternaMaterialesController::class, 'asignarCodigosProducto']);
     Route::post('detalleMaterialesOrdenInterna/materiales-cotizar', [OrdenInternaMaterialesController::class, 'informacionMaterialesCotizar']);
     Route::post('detalleMaterialesOrdenInterna/findByNumeroOrdenTrabajo', [OrdenInternaMaterialesController::class, 'findByNumeroOrdenTrabajo']);
     Route::post('detalleMaterialesOrdenInterna/verificar-materiales', [OrdenInternaMaterialesController::class, 'validarMaterialesMasivo']);
