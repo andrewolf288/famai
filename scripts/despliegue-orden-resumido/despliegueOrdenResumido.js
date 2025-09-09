@@ -1557,7 +1557,7 @@ $(document).ready(async () => {
         try {
             const queryEncoded = encodeURIComponent(query)
             // TODO: cambiar a productosByQuery2 para testear, en produccion usar productosByQuery
-            const { data } = await client.get(`/productosByQuery2?query=${queryEncoded}`)
+            const { data } = await client.get(`/productosByQuery?query=${queryEncoded}`)
             // Limpiamos la lista
 
             limpiarListaValidacionCodigo()
@@ -1569,7 +1569,7 @@ $(document).ready(async () => {
                 listItem.className = 'list-group-item list-group-item-action material-item'
                 listItem.style.cursor = 'pointer'
                 listItem.textContent = `${material.pro_codigo} - ${material.pro_descripcion} - Stock: ${material.alp_stock || '0.000000'} - Fec. Ult. Ingreso: ${material["UltimaFechaIngreso"] ? parseDateSimple(material["UltimaFechaIngreso"]) : 'No Aplica'}`
-                listItem.dataset.id = material.pro_codigo
+                listItem.dataset.id = material.pro_id
                 listItem.dataset.procodigo = material.pro_codigo
                 listItem.dataset.prodescripcion = material.pro_descripcion
                 listItem.dataset.alpstock = material.alp_stock
