@@ -558,8 +558,8 @@ $(document).ready(async () => {
     $('#btn-export-data').click(async function () {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
-        const filterField = filterSelector.val().trim()
-        const filterValue = filterInput.val().trim()
+        const filterField = $('#filter-selector').val().trim()
+        const filterValue = $('#filter-input').val().trim()
 
         let filteredURL = `/ordeninternamateriales/export-excel`
 
@@ -589,8 +589,8 @@ $(document).ready(async () => {
     $('#btn-export-data-presupuesto').click(async function () {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
-        const filterField = filterSelector.val().trim()
-        const filterValue = filterInput.val().trim()
+        const filterField = $('#filter-selector').val().trim()
+        const filterValue = $('#filter-input').val().trim()
 
         let filteredURL = `/ordeninternamateriales/export-excel-presupuesto`
 
