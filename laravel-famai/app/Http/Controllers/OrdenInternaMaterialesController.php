@@ -420,7 +420,7 @@ class OrdenInternaMaterialesController extends Controller
         
         if ($odt_numero !== null) {
             $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero) {
-                $q->where('odt_numero', $odt_numero);
+                $q->where('odt_numero', 'LIKE', '%' . $odt_numero . '%');
             });
         }
 
@@ -432,7 +432,7 @@ class OrdenInternaMaterialesController extends Controller
 
         if ($oic_otsap !== null) {
             $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($oic_otsap) {
-                $q->where('oic_otsap', $oic_otsap);
+                $q->where('oic_otsap', 'LIKE', '%' . $oic_otsap . '%');
             });
         }
 
@@ -1627,9 +1627,8 @@ class OrdenInternaMaterialesController extends Controller
     public function exportExcelPresupuesto(Request $request)
     {
         try {
-            $ordenTrabajo = $request->input('odt_numero', null);
-            $fecha_desde = $request->input('fecha_desde', null);
-            $fecha_hasta = $request->input('fecha_hasta', null);
+            $ots = $request->input('ots', null);
+            $ots = explode(',', $ots);
 
             $query = OrdenInternaMateriales::with(
                 [
@@ -1639,22 +1638,16 @@ class OrdenInternaMaterialesController extends Controller
             )->whereNotIn('odm_tipo', [3, 4, 5]);
 
             // filtro de orden de trabajo
-            if ($ordenTrabajo !== null) {
-                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
-                    $q->where('odt_numero', $ordenTrabajo);
+            if ($ots !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ots) {
+                    $q->whereIn('oic_otsap', $ots);
                 });
-            }
-
-            // filtro de fecha
-            if ($fecha_desde !== null && $fecha_hasta !== null) {
-                $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
             }
 
             $query->join('tblordenesinternasdetpartes_opd', 'tblordenesinternasdetpartes_opd.opd_id', '=', 'tblordenesinternasdetmateriales_odm.opd_id')
                 ->join('tblordenesinternascab_oic', 'tblordenesinternascab_oic.oic_id', '=', 'tblordenesinternasdetpartes_opd.oic_id')
                 ->orderBy('tblordenesinternascab_oic.odt_numero', 'asc')
                 ->orderBy('odm_feccreacion', 'desc');
-
 
             // Obtener los resultados de la primera base de datos
             $ordenesMateriales = $query->get();
@@ -1668,74 +1661,9 @@ class OrdenInternaMaterialesController extends Controller
                 ];
             });
 
-            // $productoConInformacionCompras = $ordenesMateriales->map(function ($material) {
-            //     $codigoProducto = $material->producto ? $material->producto->pro_codigo : null;
-            //     // si es un producto diferente de null
-            //     if ($codigoProducto !== null) {
-            //         $compraInfo = DB::connection('sqlsrv_secondary')
-            //             ->table('OITM as T0')
-            //             ->join('OITW as T1', 'T0.ItemCode', '=', 'T1.ItemCode')
-            //             ->select([
-            //                 'T1.AvgPrice',
-            //                 DB::raw('MAX(T1.OnOrder) as stock'),
-            //                 DB::raw(
-            //                     "(CASE 
-            //                     WHEN (
-            //                         SELECT MAX(OPDN.DocDate) 
-            //                         FROM OPDN 
-            //                         JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-            //                         WHERE PDN1.ItemCode = T0.ItemCode
-            //                     ) IS NULL 
-            //                     THEN (
-            //                         SELECT MAX(OIGN.DocDate) 
-            //                         FROM OIGN 
-            //                         JOIN IGN1 ON OIGN.DocEntry = IGN1.DocEntry 
-            //                         WHERE IGN1.ItemCode = T0.ItemCode
-            //                     )
-            //                     ELSE (
-            //                         SELECT MAX(OPDN.DocDate) 
-            //                         FROM OPDN 
-            //                         JOIN PDN1 ON OPDN.DocEntry = PDN1.DocEntry 
-            //                         WHERE PDN1.ItemCode = T0.ItemCode
-            //                     )
-            //                     END) as UltimaFechaIngreso"
-            //                 )
-            //             ])
-            //             ->where('T0.ItemCode', '=', $codigoProducto)
-            //             ->where('T1.WhsCode', '=', '01_AQPAG')
-            //             ->where('T0.validFor', '=', 'Y')
-            //             ->groupBy(
-            //                 'T0.ItemCode',
-            //                 'T0.ItemName',
-            //                 'T1.WhsCode',
-            //                 'T0.CntUnitMsr',
-            //                 'T1.AvgPrice',
-            //                 'T0.validFor',
-            //                 'T0.InvntItem',
-            //                 'T0.frozenFor',
-            //                 'T1.ItemCode '
-            //             )
-            //             ->first();
-
-            //         return [
-            //             'material' => $material,
-            //             'ultimoPrecioCompras' => $compraInfo->AvgPrice ?? null,
-            //             'ultimaFechaCompras' => $compraInfo->UltimaFechaIngreso ?? null,
-            //             'stock' => $compraInfo->stock ?? null
-            //         ];
-            //     } else {
-            //         return [
-            //             'material' => $material,
-            //             'ultimoPrecioCompras' => null,
-            //             'ultimaFechaCompras' => null,
-            //             'stock' => null
-            //         ];
-            //     }
-            // });
-
-            $headers = ['OT', 'Fec. Det OI', '', 'Tipo', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Stock', 'Cantidad', 'Und.', 'Reservado', 'Ordenado', 'Atendido'];
-            $columnWidths = [15, 19, 18, 5, 10, 50, 40, 10, 15, 10, 10, 7, 10, 10, 10];
-            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'text', 'numero', 'numero', 'texto', 'numero', 'numero', 'numero'];
+            $headers = ['OT', 'Fec. Det OI', '', 'Tipo', 'Cod Producto', 'Producto', 'Obs Producto', 'Ult. Precio de compra', 'Ult. Fecha de compra', 'Cantidad', 'Und.'];
+            $columnWidths = [15, 19, 18, 5, 10, 50, 40, 10, 15, 10, 7];
+            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'text', 'numero', 'texto'];
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -1833,13 +1761,8 @@ class OrdenInternaMaterialesController extends Controller
                 $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_observacion));
                 $sheet->setCellValue("H{$row}", UtilHelper::getValueFormatExcel($rowData['ultimoPrecioCompras']));
                 $sheet->setCellValue("I{$row}", UtilHelper::getValueFormatExcel($rowData['ultimaFechaCompras']));
-                $sheet->setCellValue("J{$row}", UtilHelper::getValueFormatExcel($rowData['stock']));
-                $sheet->setCellValue("K{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_cantidad));
-                $sheet->setCellValue("L{$row}", UtilHelper::getValueFormatExcel($rowData['material']->producto && $rowData['material']->producto->unidad ? $rowData['material']->producto->unidad->uni_codigo : null));
-                $sheet->setCellValue("M{$row}", 0.00);
-                $sheet->setCellValue("N{$row}", 0.00);
-                $sheet->setCellValue("O{$row}", 0.00);
-
+                $sheet->setCellValue("J{$row}", UtilHelper::getValueFormatExcel($rowData['material']->odm_cantidad));
+                $sheet->setCellValue("K{$row}", UtilHelper::getValueFormatExcel($rowData['material']->producto && $rowData['material']->producto->unidad ? $rowData['material']->producto->unidad->uni_codigo : null));
                 // Avanzamos la fila
                 $row++;
             }
@@ -1871,47 +1794,66 @@ class OrdenInternaMaterialesController extends Controller
     public function exportExcel(Request $request)
     {
         try {
-            $ordenTrabajo = $request->input('odt_numero', null);
-            $almID = 1;
+            $user = auth()->user();
+
+            $trabajador = Trabajador::where('usu_codigo', $user->usu_codigo)->first();
+
             $fecha_desde = $request->input('fecha_desde', null);
             $fecha_hasta = $request->input('fecha_hasta', null);
+            $oic_otsap = $request->input('oic_otsap', null);
+            $odt_numero = $request->input('odt_numero', null);
+            $sed_id = $request->input('sed_id', null);
+            $odm_descripcion = $request->input('odm_descripcion', null);
 
+            // se necesita agregar informacion de procedimiento almacenado
             $query = OrdenInternaMateriales::with(
                 [
+                    'responsable',
                     'producto.unidad',
-                    'producto.stock' => function ($q) use ($almID) {
-                        if ($almID !== null) {
-                            $q->where('alm_id', $almID)
-                                ->select('pro_id', 'alm_id', 'alp_stock');
-                        } else {
-                            $q->selectRaw('null as alp_stock');
-                        }
-                    },
                     'ordenInternaParte.ordenInterna'
                 ]
-            )->where('odm_tipo', "!=", 3)
-                ->where("odm_tipo", "!=", 4)
-                ->where("odm_tipo", "!=", 5);
+            )
+                ->withCount('cotizaciones')
+                ->withCount('ordenesCompra')
+                ->whereNotIn('odm_tipo', [3, 4, 5])
+                ->whereNotNull('odm_estado');
 
-            // filtro de orden de trabajo
-            if ($ordenTrabajo !== null) {
-                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($ordenTrabajo) {
-                    $q->where('odt_numero', $ordenTrabajo);
+            
+            if ($odt_numero !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero) {
+                    $q->where('odt_numero', 'LIKE', '%' . $odt_numero . '%');
                 });
             }
 
-            // filtro de fecha
             if ($fecha_desde !== null && $fecha_hasta !== null) {
-                $query->whereBetween('odm_feccreacion', [$fecha_desde, $fecha_hasta]);
+                $query->whereDate('odm_feccreacion', '>=', $fecha_desde)
+                    ->whereDate('odm_feccreacion', '<=', $fecha_hasta);
+            }
+
+
+            if ($oic_otsap !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($oic_otsap) {
+                    $q->where('oic_otsap', 'LIKE', '%' . $oic_otsap . '%');
+                });
+            }
+
+            if ($odm_descripcion !== null) {
+                $query->where('odm_descripcion', 'LIKE', '%' . $odm_descripcion . '%');
+            }
+
+            if ($sed_id !== null) {
+                $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($sed_id) {
+                    $q->where('sed_codigo', $sed_id);
+                });
             }
 
             // ordenar de formar descendiente
             $query->orderBy('odm_feccreacion', 'desc');
 
             $data = $query->get();
-            $headers = ['OT', 'Fec. Det OI', 'Tipo', 'Cod Producto', 'Producto', 'Obs Producto', 'Cantidad', 'Und.', 'Stock Alm', 'Reservado', 'Ordenado', 'Atendido'];
-            $columnWidths = [15, 19, 5, 10, 50, 40, 10, 7, 10, 10, 10, 10];
-            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'texto', 'numero', 'numero', 'numero', 'numero'];
+            $headers = ['OT', 'Fec. Det OI', 'Tipo', 'Cod Producto', 'Producto', 'Obs Producto', 'Cantidad', 'Und.'];
+            $columnWidths = [15, 19, 5, 10, 50, 40, 10, 7];
+            $tipoDato = ['texto', 'texto', 'texto', 'texto', 'texto', 'texto', 'numero', 'texto'];
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
@@ -1957,10 +1899,6 @@ class OrdenInternaMaterialesController extends Controller
                 $sheet->setCellValue("F{$row}", UtilHelper::getValueFormatExcel($rowData->odm_observacion));
                 $sheet->setCellValue("G{$row}", UtilHelper::getValueFormatExcel($rowData->odm_cantidad));
                 $sheet->setCellValue("H{$row}", UtilHelper::getValueFormatExcel($rowData->producto && $rowData->producto->unidad ? $rowData->producto->unidad->uni_codigo : null));
-                $sheet->setCellValue("I{$row}", UtilHelper::getValueFormatExcel($rowData->producto && $rowData->producto->stock ? $rowData->producto->stock->alp_stock : null, 0.00));
-                $sheet->setCellValue("J{$row}", 0.00);
-                $sheet->setCellValue("K{$row}", 0.00);
-                $sheet->setCellValue("L{$row}", 0.00);
                 $row++;
             }
 

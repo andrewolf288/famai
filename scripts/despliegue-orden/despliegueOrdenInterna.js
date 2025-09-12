@@ -149,8 +149,6 @@ $(document).ready(async () => {
     // ------------ INCIIALIZAMOS EL DATATABLE ------------
     await traerInformacionAlmacenes()
     
-    initDataTable(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`)
-
     // traer informacion de almacenes
     async function traerInformacionAlmacenes() {
         const { data } = await client.get('/sedes')
@@ -560,13 +558,16 @@ $(document).ready(async () => {
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         const filterField = $('#filter-selector').val().trim()
         const filterValue = $('#filter-input').val().trim()
+        const sed_id = $("#sed_id").val().trim()
 
-        let filteredURL = `/ordeninternamateriales/export-excel`
+        let filteredURL = `/ordeninternamateriales/export-excel?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
 
         if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
-        } else {
-            filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
+            filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
+        }
+
+        if (sed_id.length !== 0) {
+            filteredURL += `&sed_id=${sed_id}`
         }
 
         try {
@@ -587,18 +588,43 @@ $(document).ready(async () => {
 
     // exportamos excel presupuesto
     $('#btn-export-data-presupuesto').click(async function () {
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        const filterField = $('#filter-selector').val().trim()
-        const filterValue = $('#filter-input').val().trim()
+        const otsElegidas = await new Promise((resolve) => {
+            const elegirOtsExcel = new bootstrap.Modal(document.getElementById('elegir-ots-excel'))
+            const $otsExcel = $('#ots-excel')
+            $otsExcel.val('')
+            
+            $('#elegir-ots-excel').off('click', '#btn-generar-ots-excel')
+            $otsExcel.off('input')
+            $('#elegir-ots-excel').off('hidden.bs.modal')
+
+            $('#elegir-ots-excel').on('click', '#btn-generar-ots-excel', function () {
+                const ots = $otsExcel.val().trim()
+                resolve(ots)
+                elegirOtsExcel.hide()
+            })
+
+            $otsExcel.on('input', function () {
+                if ($otsExcel.val().trim().length > 0) {
+                    $('#btn-generar-ots-excel').prop('disabled', false)
+                } else {
+                    $('#btn-generar-ots-excel').prop('disabled', true)
+                }
+            })
+
+            $('#elegir-ots-excel').on('hidden.bs.modal', function () {
+                resolve("")
+                elegirOtsExcel.hide()
+            })
+
+            elegirOtsExcel.show()
+
+        })
+
+        if (otsElegidas.length == 0) { return }
 
         let filteredURL = `/ordeninternamateriales/export-excel-presupuesto`
-
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
-        } else {
-            filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        }
+        
+        filteredURL += `?ots=${otsElegidas}`
 
         try {
             const response = await client.get(filteredURL, {
