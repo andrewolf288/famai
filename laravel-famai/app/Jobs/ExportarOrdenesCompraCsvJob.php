@@ -146,7 +146,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "U_FAM_FECINOC",
             "ItemDetails",
             "U_EXF_DOCNUMOT",
-            'WarehouseCode'
+            'WarehouseCode',
+            'UnitPrice',
             // "GrossTotal"
             // "TaxTotal"
         ]);
@@ -165,7 +166,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             "U_FAM_FECINOC",
             "Text",
             "U_EXF_DOCNUMOT",
-            'WhsCode'
+            'WhsCode',
+            'PriceBefDi'
             // "GTotal"
             // "VatSum"
         ]);
@@ -226,7 +228,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
                     UtilHelper::cleanForCSV($detalle->ocd_observacion),
                     $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap,
-                    $almacen
+                    $almacen,
+                    $detalle->ocd_preciounitario, // PRECIO SIN DESCUENTO
                 ]);
 
                 $contadorDetalle++;
