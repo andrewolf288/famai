@@ -26,7 +26,19 @@ $(document).ready(() => {
         responsive: true,
         paging: false,
         searching: false,
-        info: false
+        info: false,
+        columnDefs: [
+            {
+                className: 'all',
+                targets: [0,1,6,7]
+            },
+        ],
+        columnDefs: [
+            {
+                className: 'none',
+                targets: [2,3,4,5,8,9,10,11]
+            },
+        ],
     }
 
     // Inicializacion de data table
