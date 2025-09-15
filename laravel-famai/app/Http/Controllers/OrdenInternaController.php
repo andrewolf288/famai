@@ -58,7 +58,7 @@ class OrdenInternaController extends Controller
             ->where('sed_codigo', $sed_codigo);
 
         if ($odtNumero !== null) {
-            $query->where('odt_numero', $odtNumero);
+            $query->where('odt_numero', 'like', '%' . $odtNumero . '%');
         }
 
         if ($oicEstado !== null) {
