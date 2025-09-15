@@ -97,7 +97,7 @@ $(document).ready(() => {
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        initPagination(filteredURL, initDataTable, dataTableOptions)
+        initPagination(filteredURL, initDataTable, dataTableOptions, 100)
     })
 
     filterButton.on('click', () => {
@@ -119,11 +119,11 @@ $(document).ready(() => {
             filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
             console.log(filteredURL)
         }
-        initPagination(filteredURL, initDataTable, dataTableOptions)
+        initPagination(filteredURL, initDataTable, dataTableOptions, 100)
     })
 
     // inicializamos la paginacion con datatable
-    initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
+    initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions, 100)
 
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
     $('#data-container').on('click', '.btn-orden-interna-editar', function () {
@@ -159,7 +159,7 @@ $(document).ready(() => {
         if (confirm('¿Desea eliminar esta orden interna?')) {
             try {
                 await client.delete(`/ordeninterna/${id}`)
-                initPagination(`${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions)
+                initPagination(`${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 100)
             } catch (error) {
                 const { response } = error
                 if (response.status === 400) {
@@ -207,7 +207,7 @@ $(document).ready(() => {
 
             // traemos la data
             const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
-            initPagination(URL, initDataTable, dataTableOptions)
+            initPagination(URL, initDataTable, dataTableOptions, 100)
         } catch (error) {
             alert('Error al cambiar el estado')
         }
