@@ -44,6 +44,10 @@ $(document).ready(async function () {
                 const totalNoPedir = item.materiales.filter((element) => element.odm_tipo == 4).length
                 const totalRecuperado = item.materiales.filter((element) => element.odm_tipo == 5).length
 
+                // Verificar si hay materiales con historial
+                const tieneHistorialMateriales = item.materiales.some(material => material.cantidad_historial_materiales_count > 0)
+                const claseAnimacionBtn = tieneHistorialMateriales ? 'has-materials-history' : ''
+
                 const row = `
                 <tr>
                     <td>${item.parte.oip_descripcion}</td>
@@ -59,7 +63,7 @@ $(document).ready(async function () {
                         <p class="text-center" id="cantidad-procesos-${item.opd_id}">${totalDetalleProcesos}</p>
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-eliminar btn-productos" data-element="${item.parte.oip_descripcion}" data-id-parte="${item.oip_id}" data-id-detalle-parte="${item.opd_id}">
+                        <button class="btn btn-sm btn-eliminar btn-productos ${claseAnimacionBtn}" data-element="${item.parte.oip_descripcion}" data-id-parte="${item.oip_id}" data-id-detalle-parte="${item.opd_id}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hammer" viewBox="0 0 16 16">
                                 <path d="M9.972 2.508a.5.5 0 0 0-.16-.556l-.178-.129a5 5 0 0 0-2.076-.783C6.215.862 4.504 1.229 2.84 3.133H1.786a.5.5 0 0 0-.354.147L.146 4.567a.5.5 0 0 0 0 .706l2.571 2.579a.5.5 0 0 0 .708 0l1.286-1.29a.5.5 0 0 0 .146-.353V5.57l8.387 8.873A.5.5 0 0 0 14 14.5l1.5-1.5a.5.5 0 0 0 .017-.689l-9.129-8.63c.747-.456 1.772-.839 3.112-.839a.5.5 0 0 0 .472-.334"/>
                             </svg>
@@ -171,8 +175,10 @@ $(document).ready(async function () {
         const findElement = buscarDetalleParte(id_detalle_parte)
         const { materiales } = findElement
         materiales.forEach(element => {
+            const claseAnimacionRow = element.cantidad_historial_materiales_count > 0 ? 'has-materials-history-row' : ''
+
             const row = `
-            <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary">
+            <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary ${claseAnimacionRow}">
                 <td>${element.producto?.pro_codigo ?? '-'}</td>
                 <td>
                     <input type="text" class="form-control descripcion-input ${element.producto ? '' : 'editable-input'}" value='${element.odm_descripcion?.replace(/'/g, "&#39;")}' readonly/>
