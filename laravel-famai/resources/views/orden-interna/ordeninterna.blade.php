@@ -205,6 +205,9 @@
             </tr>
         </thead>
         <tbody>
+            @php
+                $categoriaIndex = 0;
+            @endphp
             @foreach ($datosPartes as $parte)
                 @php
                     $countMateriales = count($parte['detalle_materiales']);
@@ -238,6 +241,8 @@
                     if ($parte['oip_descripcion'] == 'EQUIPO') {
                         $nombreParte = 'EQP';
                     }
+                    
+                    $backgroundColorCategoria = ($categoriaIndex % 2 == 0) ? '#d9d9d9' : '#ffffff';
                 @endphp
 
                 @if ($countMateriales != 0 || $countProcesos != 0)
@@ -261,55 +266,58 @@
                         @endphp
                         <tr>
                             @if ($i == 0)
-                                <td rowspan="{{ $maximoCount }}" style="text-align: center;">
+                                <td rowspan="{{ $maximoCount }}" style="text-align: center; background-color: {{ $backgroundColorCategoria }};">
                                     {{ $nombreParte }}
                                 </td>
                             @endif
                             {{-- PROCESOS --}}
                             @if ($i < $countProcesos)
                                 <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center;">{{ $parte['detalle_procesos'][$i]['opp_codigo'] }}</td>
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}">
+                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_procesos'][$i]['opp_codigo'] }}</td>
+                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="background-color: {{ $backgroundColorCategoria }};">
                                     {{ $parte['detalle_procesos'][$i]['odp_descripcion'] }}</td>
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="text-align: center;">
+                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="text-align: center; background-color: {{ $backgroundColorCategoria }};">
                                     <input type="checkbox" {{ $parte['detalle_procesos'][$i]['odp_ccalidad'] == 1 ? 'checked="checked"' : '' }} />
                                 </td>
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}">
+                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="background-color: {{ $backgroundColorCategoria }};">
                                     {!! nl2br(e($parte['detalle_procesos'][$i]['odp_observacion'])) !!}</td>
                                     {{-- {{ $parte['detalle_procesos'][$i]['odp_observacion'] }}</td> --}}
                             @elseif ($i == 0 && $countProcesos == 0)
-                                <td rowspan="{{ $maximoCount }}"></td>
-                                <td rowspan="{{ $maximoCount }}"></td>
-                                <td rowspan="{{ $maximoCount }}"></td>
-                                <td rowspan="{{ $maximoCount }}"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
                             @endif
 
                             {{-- MATERIALES --}}
                             @if ($i < $countMateriales)
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center;">{{ $parte['detalle_materiales'][$i]['pro_codigo'] }}
+                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_materiales'][$i]['pro_codigo'] }}
                                 </td>
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="font-weight: {{ $fontWeight }};">
+                                    style="font-weight: {{ $fontWeight }}; background-color: {{ $backgroundColorCategoria }};">
                                     {{ $parte['detalle_materiales'][$i]['odm_descripcion'] }}</td>
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center;">{{ $parte['detalle_materiales'][$i]['uni_codigo'] }}
+                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_materiales'][$i]['uni_codigo'] }}
                                 </td>
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center;">{{ $parte['detalle_materiales'][$i]['odm_cantidad'] }}
+                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_materiales'][$i]['odm_cantidad'] }}
                                 </td>
                                 <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
                                     style="background-color: {{ $colorObservacion }}; font-weight: {{ $fontWeight }};">
                                     {!! nl2br(e($parte['detalle_materiales'][$i]['odm_observacion'])) !!} </td>
                                     {{-- {{ $parte['detalle_materiales'][$i]['odm_observacion'] }}</td> --}}
                             @elseif ($i == 0 && $countMateriales == 0)
-                                <td rowspan="{{ $maximoCount }}"></td>
-                                <td rowspan="{{ $maximoCount }}"></td>
-                                <td rowspan="{{ $maximoCount }}"></td>
-                                <td rowspan="{{ $maximoCount }}"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
+                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
                             @endif
                         </tr>
                     @endfor
+                    @php
+                        $categoriaIndex++;
+                    @endphp
                 @endif
             @endforeach
         </tbody>
