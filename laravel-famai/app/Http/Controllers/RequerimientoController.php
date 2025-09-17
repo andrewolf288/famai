@@ -72,6 +72,9 @@ class RequerimientoController extends Controller
             // contar registros de materiales
             $countMateriales = OrdenInternaMateriales::where('opd_id', $requerimiento->partes[0]->opd_id)->count();
 
+            // Sincronizar productos 
+            DB::statement('EXEC [dbo].[SincronizarProductosSAP]');
+
             foreach ($request->detalle_requerimiento as $detalle) {
 
                 // Obtener pro_id
