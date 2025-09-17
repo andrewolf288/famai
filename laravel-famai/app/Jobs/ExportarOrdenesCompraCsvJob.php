@@ -89,7 +89,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'DocType',
             'Series',
             'DocDate',
-            'DocDueDate',
             'CardCode',
             'DocTotal',
             'DocCurrency',
@@ -111,7 +110,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'DocType',
             'Series',
             'DocDate',
-            'DocDueDate',
             'CardCode',
             'DocTotal',
             'DocCur',
@@ -187,7 +185,6 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 $tipo_documento, // DocType (standard for purchase order)
                 $serie,
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
-                UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDueDate
                 $orden->proveedor->prv_codigo, // CardCode
                 $orden->occ_total, // DocTotal (Total)
                 $orden->mon_codigo, // DocCur (Moneda)
