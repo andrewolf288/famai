@@ -1034,22 +1034,22 @@ $(document).ready(async () => {
                         <input type="number" class="form-control cantidad-pedida-detalle hide-number-arrows" value="${detalle.cantidad.toFixed(2)}" />
                     </td>
                     <td class="text-center d-none label-valor-unitario hide-number-arrows">
-                        <input type="number" class="form-control valor-unitario" style="width: 90px" value="${(0).toFixed(2)}"/>
+                        <input type="number" class="form-control valor-unitario" style="width: 100px" value="${(0).toFixed(2)}"/>
                     </td>
                     <td class="text-center d-none label-precio-unitario-detalle">
-                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00" style="width: 90px"/>
+                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00" style="width: 100px"/>
                     </td>
                     <td class="text-center d-none label-descuento">
-                        <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 90px"/>
+                        <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 100px"/>
                     </td>
                     <td class="text-center d-none label-impuesto">
-                        <select class="form-select impuesto-detalle" style="width: 90px;">
+                        <select class="form-select impuesto-detalle" style="width: 100px;">
                             <option value="igv" selected>IGV</option>
                             <option value="exo">EXO</option>
                         </select>
                     </td>
                     <td class="text-center d-none label-valor-unitario-total">
-                        <input type="number" readonly class="form-control valor-unitario-total hide-number-arrows" style="width: 90px" value="${(0).toFixed(4)}"/>
+                        <input type="number" readonly class="form-control valor-unitario-total hide-number-arrows" style="width: 100px" value="${(0).toFixed(4)}"/>
                     </td>
                     <td class="text-center">
                         <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
@@ -1100,25 +1100,25 @@ $(document).ready(async () => {
                     <td class="text-center">${detalle.producto?.uni_codigo || 'N/A'}</td>
                     <td class="text-center cantidad-requerida-detalle">${detalle.odm_cantidad}</td>
                     <td class="text-center">
-                        <input type="number" class="form-control cantidad-pedida-detalle hide-number-arrows" style="width: 90px" value="${detalle.odm_cantidad}"  />
+                        <input type="number" class="form-control cantidad-pedida-detalle hide-number-arrows" style="width: 100px" value="${detalle.odm_cantidad}"  />
                     </td>
                     <td class="text-center d-none label-valor-unitario hide-number-arrows">
-                        <input type="number" class="form-control valor-unitario hide-number-arrows" style="width: 90px" value="${(0).toFixed(2)}"/>
+                        <input type="number" class="form-control valor-unitario hide-number-arrows" style="width: 100px" value="${(0).toFixed(2)}"/>
                     </td>
                     <td class="text-center d-none label-precio-unitario-detalle">
-                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00" style="width: 90px"/>
+                        <input type="number" class="form-control precio-unitario-detalle hide-number-arrows" value="0.00" style="width: 100px"/>
                     </td>
                     <td class="text-center d-none label-descuento">
-                        <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 90px"/>
+                        <input type="number" class="form-control descuento hide-number-arrows" value="${descuento}" style="width: 100px"/>
                     </td>
                     <td class="text-center d-none label-impuesto">
-                        <select class="form-select impuesto-detalle" style="width: 90px;">
+                        <select class="form-select impuesto-detalle" style="width: 100px;">
                             <option value="igv" selected>IGV</option>
                             <option value="exo">EXO</option>
                         </select>
                     </td>
                     <td class="text-center d-none label-valor-unitario-total">
-                        <input type="number" readonly class="form-control valor-unitario-total hide-number-arrows" style="width: 90px" value="${(0).toFixed(4)}"/>
+                        <input type="number" readonly class="form-control valor-unitario-total hide-number-arrows" style="width: 100px" value="${(0).toFixed(4)}"/>
                     </td>
                     <td class="text-center">
                         <input type="text" class="form-control fecha-entrega-detalle" style="width: 130px;" value="${detalle.odm_fechaentrega || ''}"/>
@@ -2279,6 +2279,8 @@ $(document).ready(async () => {
             $(".label-valor-unitario").removeClass('d-none')
             $(".label-impuesto").removeClass('d-none')
             $("#div-totales-cotizacion").removeClass('d-none')
+
+            $('#checkboxUltimoPrecioCotizacion').prop('checked', false)
         } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
@@ -2290,6 +2292,60 @@ $(document).ready(async () => {
             $(".label-impuesto").addClass('d-none')
             $("#div-totales-cotizacion").addClass('d-none')
         }
+    })
+
+    // Copiar "Últ. Precio" -> "Valor Unit. (Sin IGV)"
+    function copyUltimoPrecioToValorUnit() {
+        const isChecked = $('#checkboxUltimoPrecioCotizacion').is(':checked')
+
+        const $table = $('#tbl-cotizaciones-materiales')
+        if ($table.length === 0) return
+
+        // Obtener índices de columnas por cabecera
+        const $ths = $table.find('thead th')
+        const idxValorUnit = $ths.filter('.label-valor-unitario').first().index()
+        // Hay dos cabeceras con .label-ultimo-precio (fecha y precio). Usamos la última (precio)
+        const idxUltimoPrecio = $ths.filter('.label-ultimo-precio').last().index()
+
+        if (idxUltimoPrecio < 0) return
+
+        // Recorrer filas y copiar valores
+        $table.find('tbody tr').each(function () {
+            const $tr = $(this)
+            const $tds = $tr.children('td')
+            const $tdUltimoPrecio = $tds.eq(idxUltimoPrecio)
+            if ($tdUltimoPrecio.length === 0) return
+
+            // Extraer número desde el texto/celda
+            const rawText = $tdUltimoPrecio.text().trim()
+            let numText = rawText.replace(/[^0-9,.-]/g, '')
+            if (numText.indexOf(',') > -1 && numText.indexOf('.') === -1) {
+                numText = numText.replace(/,/g, '.')
+            } else if (numText.indexOf(',') > -1 && numText.indexOf('.') > -1) {
+                numText = numText.replace(/,/g, '')
+            }
+
+            let value = parseFloat(numText)
+            if (!isChecked) {
+                value = 0
+            }
+            if (isNaN(value)) return
+
+            // Escribir en el input de valor unitario (clase .valor-unitario) si existe; de lo contrario usar índice
+            let $inputValorUnit = $tr.find('.valor-unitario')
+            if ($inputValorUnit.length === 0 && idxValorUnit >= 0) {
+                const $tdValor = $tds.eq(idxValorUnit)
+                $inputValorUnit = $tdValor.find('input')
+            }
+
+            if ($inputValorUnit && $inputValorUnit.length > 0) {
+                $inputValorUnit.val(value.toFixed(4)).trigger('input').trigger('change')
+            }
+        })
+    }
+
+    $(document).on('change', '#checkboxUltimoPrecioCotizacion', function () {
+        copyUltimoPrecioToValorUnit()
     })
 
     $('#proveedoresInput').on('input', debounce(async function () {
