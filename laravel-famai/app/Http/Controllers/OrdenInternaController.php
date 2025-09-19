@@ -52,6 +52,8 @@ class OrdenInternaController extends Controller
 
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+        $years = $request->input('years', []);
+        $months = $request->input('months', []);
 
         $query = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen'])
             ->where('oic_tipo', 'OI')
@@ -69,11 +71,18 @@ class OrdenInternaController extends Controller
             $query->whereBetween('oic_fecha', [$fecha_desde, $fecha_hasta]);
         }
 
+        if (is_array($years) && count($years) > 0) {
+            $query->whereIn(DB::raw('YEAR(oic_fecha)'), $years);
+        }
+
+        if (is_array($months) && count($months) > 0) {
+            $query->whereIn(DB::raw('MONTH(oic_fecha)'), $months);
+        }
+
         $query->orderBy('oic_fecha', 'desc');
 
         $ordenesInternas = $query->paginate($pageSize, ['*'], 'page', $page);
 
-        // Agregar el total de materiales
         $ordenesInternas->getCollection()->transform(function ($ordenInterna) {
             $ordenInterna->total_materiales = $ordenInterna->totalMateriales();
             return $ordenInterna;

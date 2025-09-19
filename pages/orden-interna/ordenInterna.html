@@ -6,39 +6,38 @@
     </a>
   </div>
 </div>
-<div class="row mb-3">
-  <!-- Filtros de fechas -->
-  <div class="col-12 col-md-3 mb-3 mb-md-0">
+<div class="row mb-3 d-flex justify-content-between">
+  <div class="col-12 col-md-6 mb-3 mb-md-0">
     <div class="d-flex flex-column flex-md-row align-items-end">
-      <div class="me-3">
-        <label for="fechaDesde" class="form-label">Fecha Desde</label>
-        <input type="text" id="fechaDesde" class="form-control" placeholder="Seleccione una fecha">
+      <div class="me-3 d-flex align-items-center">
+        <label class="form-check-label text-center" for="include-period" style="width: 100px;">Incluir año/mes</label>
+        <input class="form-check-input" type="checkbox" id="include-period" checked>
       </div>
-      <div>
-        <label for="fechaHasta" class="form-label">Fecha Hasta</label>
-        <input type="text" id="fechaHasta" class="form-control" placeholder="Seleccione una fecha">
+      <div class="me-3 w-50">
+        <label for="year-selector" class="form-label mb-1">Años</label>
+        <select id="year-selector" class="form-select w-100" multiple></select>
       </div>
-      <button id="filter-dates" class="btn btn-primary ms-md-2 mt-2 mt-md-0">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
-          viewBox="0 0 16 16">
-          <path
-            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- Filtros a la izquierda -->
-  <div class="col-12 col-md-5 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-end">
-    <div class="d-flex flex-column flex-md-row">
-      <select id="filter-selector" class="form-select w-100 w-md-auto">
-        <option value="">Seleccione un filtro</option>
-        <option value="odt_numero" selected>Orden trabajo</option>
-        <option value="oic_estado">Estado</option>
-      </select>
-
-      <input type="text" id="filter-input" class="form-control w-100 w-md-auto mt-2 mt-md-0 ms-md-2"
-        placeholder="Buscar...">
+      <div class="me-3 w-50">
+        <label for="month-selector" class="form-label mb-1">Meses</label>
+        <select id="month-selector" class="form-select w-100" multiple>
+          <option value="1">Enero</option>
+          <option value="2">Febrero</option>
+          <option value="3">Marzo</option>
+          <option value="4">Abril</option>
+          <option value="5">Mayo</option>
+          <option value="6">Junio</option>
+          <option value="7">Julio</option>
+          <option value="8">Agosto</option>
+          <option value="9">Septiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="me-3 w-50">
+        <label for="filter-input" class="form-label mb-1 me-md-2">Nro de OT</label>
+        <input type="text" id="filter-input" class="form-control w-100" placeholder="">
+      </div>
 
       <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
     </div>

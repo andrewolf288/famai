@@ -6,19 +6,32 @@ $(document).ready(() => {
     const apiURL = '/ordenesinternas'
 
     // referencias de filtros
-    const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
     const filterButton = $('#filter-button')
-    const filterFechas = $('#filter-dates')
+    const yearSelector = $('#year-selector')
+    const monthSelector = $('#month-selector')
+    const includePeriod = $('#include-period')
 
-    // -------- MANEJO DE FECHA ----------
-    $("#fechaDesde").datepicker({
-        dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", new Date());
+    // -------- INICIALIZACION MULTISELECTS --------
+    for (let y = 2020; y <= new Date().getFullYear() + 1; y++) {
+        const selected = y === new Date().getFullYear() ? 'selected' : ''
+        yearSelector.append(`<option value="${y}" ${selected}>${y}</option>`)
+    }
+    // Seleccionar el mes actual en meses
+    const currentMonth = new Date().getMonth() + 1 // 1-12
+    monthSelector.find(`option[value="${currentMonth}"]`).prop('selected', true)
 
-    $("#fechaHasta").datepicker({
-        dateFormat: 'dd/mm/yy',
-    }).datepicker("setDate", new Date());
+    // Gestion de multiselect
+    yearSelector.multiselect({
+        texts: { placeholder: 'Año' },
+        selectAll: "Seleccionar todos",
+        unselectAll: "Deseleccionar todos",
+    })
+    monthSelector.multiselect({
+        texts: { placeholder: 'Mes' },
+        selectAll: "Seleccionar todos",
+        unselectAll: "Deseleccionar todos",
+    })
 
     // Opciones de DataTable
     const dataTableOptions = {
@@ -38,7 +51,12 @@ $(document).ready(() => {
                 className: 'none',
                 targets: [2,3,4,5,8,9,10,11]
             },
+            {
+                targets: 8,
+                render: DataTable.render.datetime('DD/MM/YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm:ss')
+            }
         ],
+        order: [[8, 'desc']],
     }
 
     // Inicializacion de data table
@@ -67,7 +85,7 @@ $(document).ready(() => {
                             </button>
                             <button class="btn btn-sm ${habilitadoEditar ? 'btn-warning' : 'btn-secondary'} btn-orden-interna-editar me-2" data-orden-interna="${ordenInterna.oic_id}" ${habilitadoEditar ? '' : 'disabled'}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
-                                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                                    <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.5-.5V9h-.5a.5.5 0 0 1-.5-.5V8h-.5a.5.5 0 0 1-.5-.5V7h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
                                 </svg>
                             </button>
                             <button class="btn btn-sm btn-danger btn-orden-interna-pdf me-2" data-orden-interna="${ordenInterna.oic_id}">
@@ -93,37 +111,27 @@ $(document).ready(() => {
         $('#data-container-body').html(content)
     }
 
-    filterFechas.on('click', () => {
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        let filteredURL = `${apiURL}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-        initPagination(filteredURL, initDataTable, dataTableOptions, 100)
-    })
+    function buildFilteredURL() {
+        const params = new URLSearchParams()
+        const filterValue = filterInput.val().trim()
+        if (filterValue.length !== 0) params.append('odt_numero', filterValue)
+        if (includePeriod.is(':checked')) {
+            const years = yearSelector.val() || []
+            const months = monthSelector.val() || []
+            years.forEach(y => params.append('years[]', y))
+            months.forEach(m => params.append('months[]', m))
+        }
+        const qs = params.toString()
+        return qs.length ? `${apiURL}?${qs}` : apiURL
+    }
 
     filterButton.on('click', () => {
-        // seleccionamos el valor del selector
-        const filterField = filterSelector.val().trim()
-        // seleccionamos el valor del criterio de busqueda
-        const filterValue = filterInput.val().trim()
-
-        let filteredURL = apiURL
-
-        // primero aplicamos el filtro de fechas
-        const fechaDesde = transformarFecha($('#fechaDesde').val())
-        const fechaHasta = transformarFecha($('#fechaHasta').val())
-        // filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
-
-        // debemos adjuntar el filtro de busqueda por criterio
-        if (filterField.length !== 0 && filterValue.length !== 0) {
-            // filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
-            filteredURL += `?${filterField}=${encodeURIComponent(filterValue)}`
-            console.log(filteredURL)
-        }
+        const filteredURL = buildFilteredURL()
         initPagination(filteredURL, initDataTable, dataTableOptions, 100)
     })
 
-    // inicializamos la paginacion con datatable
-    initPagination(`${apiURL}?fecha_desde=${moment().format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions, 100)
+    // inicializamos la paginacion con los filtros por defecto (año y mes actual)
+    initPagination(buildFilteredURL(), initDataTable, dataTableOptions, 100)
 
     // ----------- FUNCIONES PARA GESTIONAR ACCIONES DE BOTONES -------------
     $('#data-container').on('click', '.btn-orden-interna-editar', function () {
@@ -159,7 +167,7 @@ $(document).ready(() => {
         if (confirm('¿Desea eliminar esta orden interna?')) {
             try {
                 await client.delete(`/ordeninterna/${id}`)
-                initPagination(`${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`, initDataTable, dataTableOptions, 100)
+                initPagination(buildFilteredURL(), initDataTable, dataTableOptions, 100)
             } catch (error) {
                 const { response } = error
                 if (response.status === 400) {
@@ -205,13 +213,39 @@ $(document).ready(() => {
             const modalChangeEstado = bootstrap.Modal.getInstance(document.getElementById('changeEstadoOI'))
             modalChangeEstado.hide()
 
-            // traemos la data
-            const URL = `${apiURL}?fecha_desde=${transformarFecha($('#fechaDesde').val())}&fecha_hasta=${transformarFecha($('#fechaHasta').val())}`
-            initPagination(URL, initDataTable, dataTableOptions, 100)
+            // recargar data con los filtros actuales
+            initPagination(buildFilteredURL(), initDataTable, dataTableOptions, 100)
         } catch (error) {
             alert('Error al cambiar el estado')
         }
     })
+
+    $('#limpiar-btn').on('click', function () {
+        $('#filter-input').val('')
+        
+        const currentMonth = (new Date().getMonth() + 1).toString()
+        const currentYear = new Date().getFullYear().toString()
+        
+        $('#year-selector').multiselect('destroy')
+        $('#month-selector').multiselect('destroy')
+        
+        $('#year-selector').empty() 
+        
+        for (let y = 2020; y <= new Date().getFullYear() + 1; y++) {
+            const selected = y.toString() === currentYear ? 'selected' : ''
+            $('#year-selector').append(`<option value="${y}" ${selected}>${y}</option>`)
+        }
+        
+        $('#month-selector option').prop('selected', false) 
+        $(`#month-selector option[value="${currentMonth}"]`).prop('selected', true) 
+        
+        $('#year-selector').multiselect()
+        $('#month-selector').multiselect()
+        
+        initPagination(buildFilteredURL(), initDataTable, dataTableOptions, 100)
+    })
+    
+    
 
     function showModalPreview(pdfUrl) {
         document.getElementById('pdf-frame').src = pdfUrl;
