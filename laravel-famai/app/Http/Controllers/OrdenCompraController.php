@@ -273,7 +273,7 @@ class OrdenCompraController extends Controller
                     'prv_id' => 'nullable|exists:tblproveedores_prv,prv_id',
                     'prv_nombre' => 'required|string',
                     'prv_nrodocumento' => 'required|string',
-                    'prv_correo' => 'nullable|email',
+                    'prv_correo' => 'nullable',
                     'prv_direccion' => 'nullable|string',
                     'prv_contacto' => 'nullable|string',
                     'prv_whatsapp' => 'nullable|string',
