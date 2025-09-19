@@ -2688,24 +2688,34 @@ $(document).ready(async () => {
             if (index !== undefined) {
                 const detalleIndex = detalleCotizacion[index]
                 if (detalleIndex.odm_id === undefined) {
+                    let remaining = parseFloat(cantidadPedida || 0);
+                
                     detalleIndex.detalle.forEach(detalle => {
-                        detalleMateriales.push({
-                            cod_orden: cod_orden,
-                            odm_id: detalle.odm_id,
-                            pro_id: detalleIndex.pro_id,
-                            uni_codigo: detalle.producto.uni_codigo,
-                            cod_descripcion: detalle.producto.pro_descripcion,
-                            cod_observacion: observacion,
-                            cod_cantidad: proveedor_unico ? cantidadPedida : detalle.odm_cantidad,
-                            cod_preciounitario: precioUnitario,
-                            cod_total: parseFloat((proveedor_unico ? cantidadPedida : detalle.odm_cantidad) * precioUnitario).toFixed(4),
-                            cod_cantidadcotizada: cantidadPedida,
-                            cod_fecentregaoc: fechaEntrega,
-                            cod_descuento: descuentoDetalle,
-                            cod_impuesto: tipoImpuesto,
-                            cod_precioconigv: precioConIgv
-                        })
-                    })
+                        const cantidadRequerida = parseFloat(detalle.odm_cantidad || 0);
+                
+                        const cantidadAsignada = Math.min(remaining, cantidadRequerida);
+                
+                        if (cantidadAsignada > 0) {
+                            detalleMateriales.push({
+                                cod_orden: cod_orden,
+                                odm_id: detalle.odm_id,
+                                pro_id: detalleIndex.pro_id,
+                                uni_codigo: detalle.producto.uni_codigo,
+                                cod_descripcion: detalle.producto.pro_descripcion,
+                                cod_observacion: observacion,
+                                cod_cantidad: cantidadAsignada,
+                                cod_preciounitario: precioUnitario,
+                                cod_total: parseFloat(cantidadAsignada * precioUnitario).toFixed(4),
+                                cod_cantidadcotizada: cantidadAsignada,
+                                cod_fecentregaoc: fechaEntrega,
+                                cod_descuento: descuentoDetalle,
+                                cod_impuesto: tipoImpuesto,
+                                cod_precioconigv: precioConIgv
+                            });
+                
+                            remaining -= cantidadAsignada;
+                        }
+                    });
                 } else {
                     detalleMateriales.push({
                         cod_orden: cod_orden,
@@ -2714,15 +2724,15 @@ $(document).ready(async () => {
                         uni_codigo: detalleIndex.pro_id ? detalleIndex.producto.uni_codigo : '',
                         cod_descripcion: detalleIndex.odm_descripcion,
                         cod_observacion: observacion,
-                        cod_cantidad: proveedor_unico ? cantidadPedida : detalleIndex.odm_cantidad,
+                        cod_cantidad: proveedor_unico ? Math.min(parseFloat(cantidadPedida || 0), parseFloat(detalleIndex.odm_cantidad || 0)) : detalleIndex.odm_cantidad,
                         cod_preciounitario: precioUnitario,
-                        cod_total: parseFloat((proveedor_unico ? cantidadPedida : detalleIndex.odm_cantidad) * precioUnitario).toFixed(4),
-                        cod_cantidadcotizada: cantidadPedida,
+                        cod_total: parseFloat((proveedor_unico ? Math.min(parseFloat(cantidadPedida || 0), parseFloat(detalleIndex.odm_cantidad || 0)) : detalleIndex.odm_cantidad) * precioUnitario).toFixed(4),
+                        cod_cantidadcotizada: (proveedor_unico ? Math.min(parseFloat(cantidadPedida || 0), parseFloat(detalleIndex.odm_cantidad || 0)) : detalleIndex.odm_cantidad),
                         cod_fecentregaoc: fechaEntrega,
                         cod_descuento: descuentoDetalle,
                         cod_impuesto: tipoImpuesto,
                         cod_precioconigv: precioConIgv
-                    })
+                    });
                 }
             } else {
                 detalleMaterialesStock.push({
@@ -2735,6 +2745,7 @@ $(document).ready(async () => {
                     cod_cantidad: $(this).find('.cantidad-pedida-detalle').val(),
                     cod_preciounitario: precioUnitario,
                     cod_total: parseFloat($(this).find('.cantidad-pedida-detalle').val() * precioUnitario).toFixed(4),
+                    cod_cantidadcotizada: parseFloat($(this).find('.cantidad-pedida-detalle').val() || 0),
                     cod_fecentregaoc: fechaEntrega,
                     cod_descuento: descuentoDetalle,
                     cod_impuesto: tipoImpuesto,
