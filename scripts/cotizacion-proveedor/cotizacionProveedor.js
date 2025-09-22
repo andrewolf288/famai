@@ -168,7 +168,7 @@ $(document).ready(function () {
                     </td >
                     <td class="text-center">
                         <div class="d-flex align-items-center justify-content-center">
-                            <span class="moneda me-1"></span><span class="total-input">${cod_total.toFixed(2)}</span>
+                            <span class="moneda me-1"></span><span class="total-input">${cod_total.toFixed(4)}</span>
                         </div>
                     </td>
                     `
@@ -184,7 +184,7 @@ $(document).ready(function () {
                             const total = precio * (1 - descuento / 100) * parseFloat(cantidadDetalle.value)
 
                             if (!isNaN(total)) {
-                                rowItem.querySelector('.total-input').textContent = total.toFixed(2);
+                                rowItem.querySelector('.total-input').textContent = total.toFixed(4);
                             } else {
                                 rowItem.querySelector('.total-input').textContent = '';
                             }
@@ -197,7 +197,7 @@ $(document).ready(function () {
                             const total = precio * (1 - descuento / 100) * parseFloat(cantidadDetalle.value)
 
                             if (!isNaN(total)) {
-                                rowItem.querySelector('.total-input').textContent = total.toFixed(2);
+                                rowItem.querySelector('.total-input').textContent = total.toFixed(4);
                             } else {
                                 rowItem.querySelector('.total-input').textContent = '';
                             }
@@ -210,7 +210,7 @@ $(document).ready(function () {
                             const total = precio * (1 - descuento / 100) * parseFloat(cantidadDetalle.value)
 
                             if (!isNaN(total)) {
-                                rowItem.querySelector('.total-input').textContent = total.toFixed(2)
+                                rowItem.querySelector('.total-input').textContent = total.toFixed(4)
                             } else {
                                 rowItem.querySelector('.total-input').textContent = '';
                             }
@@ -272,7 +272,7 @@ $(document).ready(function () {
             const total = parseFloat($(row).find('.total-input').text() || 0)
             totalCotizacionAcumulado += total
         })
-        totalCotizacion.text((totalCotizacionAcumulado).toFixed(2))
+        totalCotizacion.text((totalCotizacionAcumulado).toFixed(4))
     }
 
     // escape HTML
