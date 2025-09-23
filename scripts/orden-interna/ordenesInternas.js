@@ -11,6 +11,7 @@ $(document).ready(() => {
     const yearSelector = $('#year-selector')
     const monthSelector = $('#month-selector')
     const includePeriod = $('#include-period')
+    const filtroEstado = $('#filtro-estado')
 
     // -------- INICIALIZACION MULTISELECTS --------
     for (let y = 2020; y <= new Date().getFullYear() + 1; y++) {
@@ -33,23 +34,30 @@ $(document).ready(() => {
         unselectAll: "Deseleccionar todos",
     })
 
+    filtroEstado.multiselect({
+        texts: { placeholder: 'Estado' },
+        selectAll: "Seleccionar todos",
+        unselectAll: "Deseleccionar todos",
+    })
+
     // Opciones de DataTable
     const dataTableOptions = {
         destroy: true,
         responsive: true,
         paging: false,
-        searching: false,
+        searching: true,
+        dom: 'lrtip',
         info: false,
         columnDefs: [
             {
                 className: 'all',
-                targets: [0,1,6,7]
+                targets: [0,1,2,3,8,9]
             },
         ],
         columnDefs: [
             {
                 className: 'none',
-                targets: [2,3,4,5,8,9,10,11]
+                targets: [4,5,6,7,10,11,12,13]
             },
             {
                 targets: 8,
@@ -57,6 +65,64 @@ $(document).ready(() => {
             }
         ],
         order: [[8, 'desc']],
+        initComplete: function() {
+            const table = this.api();
+            $('#filtro-nro-ot').val('');
+            $('#filtro-cliente').val('');
+            $('#filtro-informacion-equipo').val('');
+            $('#filtro-componente').val('');
+            $('#filtro-estado').multiselect('reset');
+
+            $('#filtro-nro-ot').off('keyup change clear').on('keyup change clear', function() {
+                const val = $.fn.dataTable.util.escapeRegex(this.value);
+                table
+                  .column(0)
+                  .search(val, false, true)
+                  .draw();
+            });
+
+            $('#filtro-cliente').off('keyup change clear').on('keyup change clear', function() {
+                const val = $.fn.dataTable.util.escapeRegex(this.value);
+                table
+                  .column(1)
+                  .search(val, false, true)
+                  .draw();
+            });
+
+            $('#filtro-informacion-equipo').off('keyup change clear').on('keyup change clear', function() {
+                const val = $.fn.dataTable.util.escapeRegex(this.value);
+                table
+                  .column(2)
+                  .search(val, false, true)
+                  .draw();
+            });
+
+            $('#filtro-componente').off('keyup change clear').on('keyup change clear', function() {
+                const val = $.fn.dataTable.util.escapeRegex(this.value);
+                table
+                  .column(3)
+                  .search(val, false, true)
+                  .draw();
+            });
+
+            $('#filtro-estado').off('keyup change clear').on('keyup change clear', function() {
+                const arrayEstados = filtroEstado.val() || [];
+    
+                if (arrayEstados.length === 0) {
+                    table.column(8).search('', true, false).draw();
+                    return;
+                }
+
+                const regex = arrayEstados
+                  .map(s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'))
+                  .join('|');
+
+                table
+                  .column(8)
+                  .search(regex, true, false)
+                  .draw();
+            });
+        }
     }
 
     // Inicializacion de data table
@@ -68,6 +134,8 @@ $(document).ready(() => {
                 <tr>
                     <td>${ordenInterna?.odt_numero ?? 'N/A'}</td>
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'N/A'}</td>
+                    <td>${ordenInterna.oic_equipo_descripcion ?? 'N/A'}</td>
+                    <td>${ordenInterna.oic_componente ?? 'N/A'}</td>
                     <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'N/A'}</td>
                     <td>${ordenInterna.oic_fechaaprobacion !== null ? parseDateSimple(ordenInterna.oic_fechaaprobacion) : 'N/A'}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'N/A'}</td>
@@ -221,32 +289,23 @@ $(document).ready(() => {
     })
 
     $('#limpiar-btn').on('click', function () {
-        $('#filter-input').val('')
+        $('#filter-input').val('');
         
-        const currentMonth = (new Date().getMonth() + 1).toString()
-        const currentYear = new Date().getFullYear().toString()
+        const currentMonth = (new Date().getMonth() + 1).toString();
+        const currentYear  = new Date().getFullYear().toString();
         
-        $('#year-selector').multiselect('destroy')
-        $('#month-selector').multiselect('destroy')
+        $('#year-selector').multiselect('reset');
+        $('#month-selector').multiselect('reset');
         
-        $('#year-selector').empty() 
+        $(`#year-selector option[value="${currentYear}"]`).prop('selected', true);
+        $(`#month-selector option[value="${currentMonth}"]`).prop('selected', true);
         
-        for (let y = 2020; y <= new Date().getFullYear() + 1; y++) {
-            const selected = y.toString() === currentYear ? 'selected' : ''
-            $('#year-selector').append(`<option value="${y}" ${selected}>${y}</option>`)
-        }
+        $('#year-selector').multiselect('reload');
+        $('#month-selector').multiselect('reload');
         
-        $('#month-selector option').prop('selected', false) 
-        $(`#month-selector option[value="${currentMonth}"]`).prop('selected', true) 
-        
-        $('#year-selector').multiselect()
-        $('#month-selector').multiselect()
-        
-        initPagination(buildFilteredURL(), initDataTable, dataTableOptions, 100)
-    })
+        initPagination(buildFilteredURL(), initDataTable, dataTableOptions, 100);
+    });
     
-    
-
     function showModalPreview(pdfUrl) {
         document.getElementById('pdf-frame').src = pdfUrl;
         const modal = new bootstrap.Modal(document.getElementById("previewPDFModal"));

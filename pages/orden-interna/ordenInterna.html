@@ -40,6 +40,7 @@
       </div>
 
       <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="filter-button">Filtrar</button>
+      <button class="btn btn-primary w-25 mt-2 mt-md-0 ms-md-2" id="limpiar-btn">Limpiar</button>
     </div>
   </div>
 
@@ -51,18 +52,39 @@
 
 <table id="data-container" class="table table-striped nowrap" style="width:100%">
   <thead>
-    <th>Nro. OT</th>
-    <th>Cliente</th>
-    <th>Fecha de OI</th>
-    <th>Fecha aprobación</th>
-    <th>Área</th>
-    <th>Materiales</th>
-    <th>Estado OI</th>
-    <th>Acciones</th>
-    <th>Fec. Creación</th>
-    <th>Usu. Creador</th>
-    <th>Fec. Actualización</th>
-    <th>Usu. Actualizador</th>
+    <th style="border-bottom: none;">Nro. OT</th>
+    <th style="border-bottom: none;">Cliente</th>
+    <th style="border-bottom: none;">Informacion de equipo</th>
+    <th style="border-bottom: none;">Componente</th>
+    <th style="border-bottom: none;">Fecha de OI</th>
+    <th style="border-bottom: none;">Fecha aprobación</th>
+    <th style="border-bottom: none;">Área</th>
+    <th style="border-bottom: none;">Materiales</th>
+    <th style="border-bottom: none;">Estado OI</th>
+    <th style="border-bottom: none;">Acciones</th>
+    <th style="border-bottom: none;">Fec. Creación</th>
+    <th style="border-bottom: none;">Usu. Creador</th>
+    <th style="border-bottom: none;">Fec. Actualización</th>
+    <th style="border-bottom: none;">Usu. Actualizador</th>
+  </thead>
+  <thead >
+    <th><input type="text" id="filtro-nro-ot" class="form-control w-100" autocomplete="off"></th>
+    <th><input type="text" id="filtro-cliente" class="form-control w-100" autocomplete="off"></th>
+    <th><input type="text" id="filtro-informacion-equipo" class="form-control w-100" autocomplete="off"></th>
+    <th><input type="text" id="filtro-componente" class="form-control w-100" autocomplete="off"></th>
+    <th style="max-width: 130px !important;"><select name="filtro-estado" id="filtro-estado" class="form-select w-100" multiple>
+      <option value="REABIERTO">REABIERTO</option>
+      <option value="DESPACHADO">DESPACHADO</option>
+      <option value="ENVIADO">ENVIADO</option>
+      <option value="EVALUADO">EVALUADO</option>
+      <option value="INGRESO">INGRESO</option>
+      <option value="DEVOLUCION">DEVOLUCION</option>
+      <option value="ANULADO">ANULADO</option>
+      <option value="EN ESPERA">EN ESPERA</option>
+      <option value="TERMINADO">TERMINADO</option>
+      <option value="PROCESO">PROCESO</option>
+    </select></th>
+    <th></th>
   </thead>
   <tbody id="data-container-body">
   </tbody>
