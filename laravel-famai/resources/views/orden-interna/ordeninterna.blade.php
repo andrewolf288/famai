@@ -188,7 +188,6 @@
     <table class="table-container-detalle" style="margin-top: 10px;">
         <thead>
             <tr>
-                <td rowspan="2" width="3%"></td>
                 <td colspan="4">ACTIVIDADES A REALIZAR</td>
                 <td colspan="4">PEDIDO DE MATERIALES</td>
             </tr>
@@ -246,6 +245,13 @@
                 @endphp
 
                 @if ($countMateriales != 0 || $countProcesos != 0)
+
+                <tr style="background-color: {{ $backgroundColorCategoria }}; font-weight: bold;">
+                <td colspan="9" style="text-align: left;">
+                    {{ $nombreParte }} - {{ $parte['oip_descripcion'] }}
+                </td>
+            </tr>
+
                     @for ($i = 0; $i < $maximoCount; $i++)
                         @php
                             $colorObservacion = '#ffffff';
@@ -265,11 +271,6 @@
                             }
                         @endphp
                         <tr>
-                            @if ($i == 0)
-                                <td rowspan="{{ $maximoCount }}" style="text-align: center; background-color: {{ $backgroundColorCategoria }};">
-                                    {{ $nombreParte }}
-                                </td>
-                            @endif
                             {{-- PROCESOS --}}
                             @if ($i < $countProcesos)
                                 <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}"
