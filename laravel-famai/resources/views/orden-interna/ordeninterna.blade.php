@@ -72,7 +72,11 @@
             font-size: 8pt;
         }
 
-        .table-container-detalle td {
+        .table-container-detalle thead td {
+            border: 0.5mm solid #888888;
+        }
+
+        .border-full {
             border: 0.5mm solid #888888;
         }
 
@@ -87,6 +91,46 @@
             font-size: 7.5pt;
             border-top: 0.5mm solid #888888;
         }
+
+        .table-container-detalle, .table-container-detalle tbody {
+            page-break-inside: auto;
+        }
+        .table-container-detalle tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        .table-container-detalle td {
+            page-break-inside: avoid;
+        }
+
+        .borde-td {
+            border: none;
+            border-left: 0.5mm solid #888888;
+            border-right: 0.5mm solid #888888;
+        }
+
+        .borde-primer-registros {
+            border: none;
+            border-left: 0.5mm solid #888888;
+            border-right: 0.5mm solid #888888;
+            border-top: 0.5mm solid #888888;
+        }
+
+        .borde-ultimo-registros {
+            border: none;
+            border-left: 0.5mm solid #888888;
+            border-right: 0.5mm solid #888888;
+            border-bottom: 0.5mm solid #888888;
+        }
+
+        .borde-primer-ultimo {
+            border: none;
+            border-left: 0.5mm solid #888888;
+            border-right: 0.5mm solid #888888;
+            border-top: 0.5mm solid #888888;
+            border-bottom: 0.5mm solid #888888;
+        }
+
     </style>
 </head>
 
@@ -186,143 +230,121 @@
 
     {{-- TABLE DE DETALLE DE ORDEN INTERNA --}}
     <table class="table-container-detalle" style="margin-top: 10px;">
-        <thead>
-            <tr>
-                <td colspan="4">ACTIVIDADES A REALIZAR</td>
-                <td colspan="4">PEDIDO DE MATERIALES</td>
-            </tr>
-            <tr>
-                <td width="3%">COD.</td>
-                <td width="13%">DESCRIPCIÓN</td>
-                <td width="2%">CC</td>
-                <td width="20%">OBSERVACIONES</td>
-                <td width="6%">COD.</td>
-                <td width="21%">DESCRIPCIÓN</td>
-                <td width="4%">UNI</td>
-                <td width="4%">CANT</td>
-                <td>OBSERVACIÓN</td>
-            </tr>
-        </thead>
-        <tbody>
+    <thead>
+        <tr>
+            <td colspan="4">ACTIVIDADES A REALIZAR</td>
+            <td colspan="4">PEDIDO DE MATERIALES</td>
+        </tr>
+        <tr>
+            <td width="3%">COD.</td>
+            <td width="13%">DESCRIPCIÓN</td>
+            <td width="2%">CC</td>
+            <td width="20%">OBSERVACIONES</td>
+            <td width="6%">COD.</td>
+            <td width="21%">DESCRIPCIÓN</td>
+            <td width="4%">UNI</td>
+            <td width="4%">CANT</td>
+            <td>OBSERVACIÓN</td>
+        </tr>
+    </thead>
+    <tbody id="detalleOrdenInterna">
+        @php $categoriaIndex = 0; @endphp
+
+        @foreach ($datosPartes as $parte)
             @php
-                $categoriaIndex = 0;
+                $procesos = $parte['detalle_procesos'];
+                $materiales = $parte['detalle_materiales'];
+                $countP = count($procesos);
+                $countM = count($materiales);
+                $maxRows = max($countP, $countM);
+                $map = [
+                  'INICIO'=>'INI','CILINDRO'=>'CIL','VASTAGO'=>'VST',
+                  'TAPA'=>'TPA','EMBOLO'=>'EMB','TAPA POSTERIOR'=>'TPP',
+                  'FINAL'=>'FIN','OTROS'=>'OTR','EQUIPO'=>'EQP'
+                ];
+                $codigoParte = $map[$parte['oip_descripcion']] ?? '';
+                $bg = ($categoriaIndex % 2 == 0) ? '#d9d9d9' : '#ffffff';
             @endphp
-            @foreach ($datosPartes as $parte)
-                @php
-                    $countMateriales = count($parte['detalle_materiales']);
-                    $countProcesos = count($parte['detalle_procesos']);
-                    $maximoCount = max($countMateriales, $countProcesos);
-                    $nombreParte = '';
-                    if ($parte['oip_descripcion'] == 'INICIO') {
-                        $nombreParte = 'INI';
-                    }
-                    if ($parte['oip_descripcion'] == 'CILINDRO') {
-                        $nombreParte = 'CIL';
-                    }
-                    if ($parte['oip_descripcion'] == 'VASTAGO') {
-                        $nombreParte = 'VST';
-                    }
-                    if ($parte['oip_descripcion'] == 'TAPA') {
-                        $nombreParte = 'TPA';
-                    }
-                    if ($parte['oip_descripcion'] == 'EMBOLO') {
-                        $nombreParte = 'EMB';
-                    }
-                    if ($parte['oip_descripcion'] == 'TAPA POSTERIOR') {
-                        $nombreParte = 'TPP';
-                    }
-                    if ($parte['oip_descripcion'] == 'FINAL') {
-                        $nombreParte = 'FIN';
-                    }
-                    if ($parte['oip_descripcion'] == 'OTROS') {
-                        $nombreParte = 'OTR';
-                    }
-                    if ($parte['oip_descripcion'] == 'EQUIPO') {
-                        $nombreParte = 'EQP';
-                    }
-                    
-                    $backgroundColorCategoria = ($categoriaIndex % 2 == 0) ? '#d9d9d9' : '#ffffff';
-                @endphp
 
-                @if ($countMateriales != 0 || $countProcesos != 0)
+            @if ($countP || $countM)
+                {{-- Título de sección --}}
+                <tr style="background-color: {{ $bg }}; font-weight: bold;">
+                    <td colspan="9" style="text-align: left; border-top: 0.5mm solid #888888;">
+                        {{ $codigoParte }} - {{ $parte['oip_descripcion'] }}
+                    </td>
+                </tr>
 
-                <tr style="background-color: {{ $backgroundColorCategoria }}; font-weight: bold;">
-                <td colspan="9" style="text-align: left;">
-                    {{ $nombreParte }} - {{ $parte['oip_descripcion'] }}
+                @for ($i = 0; $i < $maxRows; $i++)
+    @php
+        $hasP = $i < $countP;
+        $hasM = $i < $countM;
+        $proc = $hasP ? $procesos[$i] : null;
+        $mat  = $hasM ? $materiales[$i] : null;
+        $obsColor = '#ffffff';
+        $fw = 'normal';
+        $codigoAnterior = '';
+        if ($i > 0 && isset($procesos[$i - 1]) && isset($procesos[$i - 1]['opp_codigo'])) {
+            $codigoAnterior = $procesos[$i - 1]['opp_codigo'];
+        }
+        $ultimoRegistro = $i == $maxRows - 1;
+        
+        if ($hasM) {
+            if ($mat['odm_tipo']==3) $obsColor='#8FD0F3';
+            if ($mat['odm_tipo']==4) $obsColor='#EF646B';
+            if ($mat['odm_tipo']==5) $obsColor='#74AE7E';
+            if ($mat['odm_tipo']==2) $fw='bold';
+        }
+        
+    @endphp
+    
+    @if ($hasP || $hasM)
+        <tr>
+            {{-- Procesos --}}
+            @if ($hasP)
+                <td class="borde-primer-registros" style="background: {{ $bg }};">{{ $proc['opp_codigo'] }}</td>
+                <td class="borde-primer-registros" style="background: {{ $bg }};">{{ $proc['odp_descripcion'] }}</td>
+                <td class="borde-primer-registros" style="background: {{ $bg }}; text-align:center;">
+                    <input type="checkbox" {{ $proc['odp_ccalidad']==1?'checked':'' }} />
                 </td>
-            </tr>
+                <td class="borde-primer-registros" style="background: {{ $bg }};">{!! nl2br(e($proc['odp_observacion'])) !!}</td>
+            @else
+                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+            @endif
 
-                    @for ($i = 0; $i < $maximoCount; $i++)
-                        @php
-                            $colorObservacion = '#ffffff';
-                            $fontWeight = 'normal';
+            {{-- Materiales --}}
+            @if ($hasM)
+                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['pro_codigo'] }}</td>
+                <td class="border-full" style="background: {{ $bg }}; font-weight: {{ $fw }};">
+                    {{ $mat['odm_descripcion'] }}
+                </td>
+                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['uni_codigo'] }}</td>
+                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['odm_cantidad'] }}</td>
+                <td class="border-full" style="background: {{ $obsColor }}; font-weight: {{ $fw }};">
+                    {!! nl2br(e($mat['odm_observacion'])) !!}
+                </td>
+            @else
+                <td style="background: {{ $bg }};" style="border: none"></td>
+                <td style="background: {{ $bg }};" style="border: none"></td>
+                <td style="background: {{ $bg }};" style="border: none"></td>
+                <td style="background: {{ $bg }};" style="border: none"></td>
+                <td style="background: {{ $bg }};" style="border: none"></td>
+            @endif
+        </tr>
+    @endif
+@endfor
 
-                            if ($i < $countMateriales && $parte['detalle_materiales'][$i]['odm_tipo'] == 3) {
-                                $colorObservacion = '#8FD0F3';
-                            }
-                            if ($i < $countMateriales && $parte['detalle_materiales'][$i]['odm_tipo'] == 4) {
-                                $colorObservacion = '#EF646B';
-                            }
-                            if ($i < $countMateriales && $parte['detalle_materiales'][$i]['odm_tipo'] == 5) {
-                                $colorObservacion = '#74AE7E';
-                            }
-                            if ($i < $countMateriales && $parte['detalle_materiales'][$i]['odm_tipo'] == 2) {
-                                $fontWeight = 'bold';
-                            }
-                        @endphp
-                        <tr>
-                            {{-- PROCESOS --}}
-                            @if ($i < $countProcesos)
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_procesos'][$i]['opp_codigo'] }}</td>
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="background-color: {{ $backgroundColorCategoria }};">
-                                    {{ $parte['detalle_procesos'][$i]['odp_descripcion'] }}</td>
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="text-align: center; background-color: {{ $backgroundColorCategoria }};">
-                                    <input type="checkbox" {{ $parte['detalle_procesos'][$i]['odp_ccalidad'] == 1 ? 'checked="checked"' : '' }} />
-                                </td>
-                                <td rowspan="{{ $i == $countProcesos - 1 ? $maximoCount - $i : 1 }}" style="background-color: {{ $backgroundColorCategoria }};">
-                                    {!! nl2br(e($parte['detalle_procesos'][$i]['odp_observacion'])) !!}</td>
-                                    {{-- {{ $parte['detalle_procesos'][$i]['odp_observacion'] }}</td> --}}
-                            @elseif ($i == 0 && $countProcesos == 0)
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                            @endif
 
-                            {{-- MATERIALES --}}
-                            @if ($i < $countMateriales)
-                                <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_materiales'][$i]['pro_codigo'] }}
-                                </td>
-                                <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="font-weight: {{ $fontWeight }}; background-color: {{ $backgroundColorCategoria }};">
-                                    {{ $parte['detalle_materiales'][$i]['odm_descripcion'] }}</td>
-                                <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_materiales'][$i]['uni_codigo'] }}
-                                </td>
-                                <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="text-align: center; background-color: {{ $backgroundColorCategoria }};">{{ $parte['detalle_materiales'][$i]['odm_cantidad'] }}
-                                </td>
-                                <td rowspan="{{ $i == $countMateriales - 1 ? $maximoCount - $i : 1 }}"
-                                    style="background-color: {{ $colorObservacion }}; font-weight: {{ $fontWeight }};">
-                                    {!! nl2br(e($parte['detalle_materiales'][$i]['odm_observacion'])) !!} </td>
-                                    {{-- {{ $parte['detalle_materiales'][$i]['odm_observacion'] }}</td> --}}
-                            @elseif ($i == 0 && $countMateriales == 0)
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                                <td rowspan="{{ $maximoCount }}" style="background-color: {{ $backgroundColorCategoria }};"></td>
-                            @endif
-                        </tr>
-                    @endfor
-                    @php
-                        $categoriaIndex++;
-                    @endphp
-                @endif
-            @endforeach
-        </tbody>
-    </table>
+
+                @php $categoriaIndex++; @endphp
+            @endif
+        @endforeach
+    </tbody>
+</table>
+
+
 </body>
 
 </html>

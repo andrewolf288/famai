@@ -813,8 +813,10 @@ class OrdenInternaController extends Controller
             'margin_top' => 1,
             //'margin_footer' => 15,
             //'margin_bottom' => 15,
-            'margin_bottom' => 35,
-            'margin_footer' => 1
+            'margin_bottom' => 1,
+            'margin_footer' => 1,
+            'setAutoBottomMargin' => 'stretch',
+            'keep_table_proportions' => true,
         ]);
 
         $footer = '
