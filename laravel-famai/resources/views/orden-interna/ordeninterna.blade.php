@@ -140,7 +140,7 @@
         <tbody>
             <tr>
                 <td width="15%" style="text-align: center;">
-                    <!-- <img src="{{ asset('famai/logo-blanco-famai.jpg') }}" alt="Logo FAMAI" width="130px" height="auto"> -->
+                    <img src="{{ asset('famai/logo-blanco-famai.jpg') }}" alt="Logo FAMAI" width="130px" height="auto">
                 </td>
                 <td width="75%" style="font-weight: bold; text-align: center;font-size: 14pt;">
                     ORDEN INTERNA
@@ -295,7 +295,7 @@
                             if ($mat['odm_tipo']==2) $fw='bold';
                         }
 
-                        $bordeProceso = $countP > $i ? 'borde-primer-registros' : 'borde-primer-ultimo';
+                        $bordeProceso = $countP == $i ? 'borde-primer-registros' : 'borde-primer-ultimo';
                         
                     @endphp
                     
