@@ -326,11 +326,11 @@
                     {!! nl2br(e($mat['odm_observacion'])) !!}
                 </td>
             @else
-                <td style="background: {{ $bg }};" style="border: none"></td>
-                <td style="background: {{ $bg }};" style="border: none"></td>
-                <td style="background: {{ $bg }};" style="border: none"></td>
-                <td style="background: {{ $bg }};" style="border: none"></td>
-                <td style="background: {{ $bg }};" style="border: none"></td>
+                <td style="background: {{ $bg }};" class="border-full"></td>
+                <td style="background: {{ $bg }};" class="border-full"></td>
+                <td style="background: {{ $bg }};" class="border-full"></td>
+                <td style="background: {{ $bg }};" class="border-full"></td>
+                <td style="background: {{ $bg }};" class="border-full"></td>
             @endif
         </tr>
     @endif
