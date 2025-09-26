@@ -140,7 +140,7 @@
         <tbody>
             <tr>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('famai/logo-blanco-famai.jpg') }}" alt="Logo FAMAI" width="130px" height="auto">
+                    <!-- <img src="{{ asset('famai/logo-blanco-famai.jpg') }}" alt="Logo FAMAI" width="130px" height="auto"> -->
                 </td>
                 <td width="75%" style="font-weight: bold; text-align: center;font-size: 14pt;">
                     ORDEN INTERNA
@@ -269,74 +269,74 @@
             @if ($countP || $countM)
                 {{-- Título de sección --}}
                 <tr style="background-color: {{ $bg }}; font-weight: bold;">
-                    <td colspan="9" style="text-align: left; border-top: 0.5mm solid #888888;">
+                    <td colspan="9" style="text-align: left; border-top: 0.5mm solid #888888; border-bottom: 0.5mm solid #888888;">
                         {{ $codigoParte }} - {{ $parte['oip_descripcion'] }}
                     </td>
                 </tr>
 
                 @for ($i = 0; $i < $maxRows; $i++)
-    @php
-        $hasP = $i < $countP;
-        $hasM = $i < $countM;
-        $proc = $hasP ? $procesos[$i] : null;
-        $mat  = $hasM ? $materiales[$i] : null;
-        $obsColor = '#ffffff';
-        $fw = 'normal';
-        $codigoAnterior = '';
-        if ($i > 0 && isset($procesos[$i - 1]) && isset($procesos[$i - 1]['opp_codigo'])) {
-            $codigoAnterior = $procesos[$i - 1]['opp_codigo'];
-        }
-        $ultimoRegistro = $i == $maxRows - 1;
-        
-        if ($hasM) {
-            if ($mat['odm_tipo']==3) $obsColor='#8FD0F3';
-            if ($mat['odm_tipo']==4) $obsColor='#EF646B';
-            if ($mat['odm_tipo']==5) $obsColor='#74AE7E';
-            if ($mat['odm_tipo']==2) $fw='bold';
-        }
-        
-    @endphp
-    
-    @if ($hasP || $hasM)
-        <tr>
-            {{-- Procesos --}}
-            @if ($hasP)
-                <td class="borde-primer-registros" style="background: {{ $bg }};">{{ $proc['opp_codigo'] }}</td>
-                <td class="borde-primer-registros" style="background: {{ $bg }};">{{ $proc['odp_descripcion'] }}</td>
-                <td class="borde-primer-registros" style="background: {{ $bg }}; text-align:center;">
-                    <input type="checkbox" {{ $proc['odp_ccalidad']==1?'checked':'' }} />
-                </td>
-                <td class="borde-primer-registros" style="background: {{ $bg }};">{!! nl2br(e($proc['odp_observacion'])) !!}</td>
-            @else
-                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
-                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
-                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
-                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
-            @endif
+                    @php
+                        $hasP = $i < $countP;
+                        $hasM = $i < $countM;
+                        $proc = $hasP ? $procesos[$i] : null;
+                        $mat  = $hasM ? $materiales[$i] : null;
+                        $obsColor = '#ffffff';
+                        $fw = 'normal';
+                        $codigoAnterior = '';
+                        if ($i > 0 && isset($procesos[$i - 1]) && isset($procesos[$i - 1]['opp_codigo'])) {
+                            $codigoAnterior = $procesos[$i - 1]['opp_codigo'];
+                        }
+                        $ultimoRegistro = $i == ($maxRows - 1);
+                        
+                        if ($hasM) {
+                            if ($mat['odm_tipo']==3) $obsColor='#8FD0F3';
+                            if ($mat['odm_tipo']==4) $obsColor='#EF646B';
+                            if ($mat['odm_tipo']==5) $obsColor='#74AE7E';
+                            if ($mat['odm_tipo']==2) $fw='bold';
+                        }
 
-            {{-- Materiales --}}
-            @if ($hasM)
-                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['pro_codigo'] }}</td>
-                <td class="border-full" style="background: {{ $bg }}; font-weight: {{ $fw }};">
-                    {{ $mat['odm_descripcion'] }}
-                </td>
-                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['uni_codigo'] }}</td>
-                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['odm_cantidad'] }}</td>
-                <td class="border-full" style="background: {{ $obsColor }}; font-weight: {{ $fw }};">
-                    {!! nl2br(e($mat['odm_observacion'])) !!}
-                </td>
-            @else
-                <td style="background: {{ $bg }};" class="border-full"></td>
-                <td style="background: {{ $bg }};" class="border-full"></td>
-                <td style="background: {{ $bg }};" class="border-full"></td>
-                <td style="background: {{ $bg }};" class="border-full"></td>
-                <td style="background: {{ $bg }};" class="border-full"></td>
-            @endif
-        </tr>
-    @endif
-@endfor
+                        $bordeProceso = $countP > $i ? 'borde-primer-registros' : 'borde-primer-ultimo';
+                        
+                    @endphp
+                    
+                    @if ($hasP || $hasM)
+                        <tr>
+                            {{-- Procesos --}}
+                            @if ($hasP)
+                                <td class="{{ $bordeProceso }}" style="background: {{ $bg }};">{{ $proc['opp_codigo'] }}</td>
+                                <td class="{{ $bordeProceso }}" style="background: {{ $bg }};">{{ $proc['odp_descripcion'] }}</td>
+                                <td class="{{ $bordeProceso }}" style="background: {{ $bg }}; text-align:center;">
+                                    <input type="checkbox" {{ $proc['odp_ccalidad']==1?'checked':'' }} />
+                                </td>
+                                <td class="{{ $bordeProceso }}" style="background: {{ $bg }};">{!! nl2br(e($proc['odp_observacion'])) !!}</td>
+                            @else
+                                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                                <td style="background: {{ $bg }};" class="{{ $ultimoRegistro ? 'borde-ultimo-registros' : 'borde-td' }}"></td>
+                            @endif
 
-
+                            {{-- Materiales --}}
+                            @if ($hasM)
+                                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['pro_codigo'] }}</td>
+                                <td class="border-full" style="background: {{ $bg }}; font-weight: {{ $fw }};">
+                                    {{ $mat['odm_descripcion'] }}
+                                </td>
+                                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['uni_codigo'] }}</td>
+                                <td class="border-full" style="background: {{ $bg }}; text-align:center;">{{ $mat['odm_cantidad'] }}</td>
+                                <td class="border-full" style="background: {{ $obsColor }}; font-weight: {{ $fw }};">
+                                    {!! nl2br(e($mat['odm_observacion'])) !!}
+                                </td>
+                            @else
+                                <td style="background: {{ $bg }};" class="border-full"></td>
+                                <td style="background: {{ $bg }};" class="border-full"></td>
+                                <td style="background: {{ $bg }};" class="border-full"></td>
+                                <td style="background: {{ $bg }};" class="border-full"></td>
+                                <td style="background: {{ $bg }};" class="border-full"></td>
+                            @endif
+                        </tr>
+                    @endif
+                @endfor
 
                 @php $categoriaIndex++; @endphp
             @endif
