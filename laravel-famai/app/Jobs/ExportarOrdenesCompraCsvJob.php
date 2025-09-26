@@ -224,7 +224,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     // '', // VatSum (por calcular o llenar según lógica)
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
                     UtilHelper::cleanForCSV($detalle->ocd_observacion),
-                    $detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap,
+                    (trim($detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap)) ? intval(trim($detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap)) : null,
                     $almacen,
                     $detalle->ocd_preciounitario, // PRECIO SIN DESCUENTO
                 ]);
