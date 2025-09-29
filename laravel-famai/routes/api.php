@@ -269,6 +269,7 @@ Route::group(['middleware' => ['auth.jwt']], function () {
 Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('/generarReporteOrdenTrabajo', [OrdenInternaController::class, 'exportOrdenInternaPDF']);
     Route::post('/previsualizarReporteOrdenTrabajo', [OrdenInternaController::class, 'previsualizarOrdenInternaPDF']);
+    Route::get('/exportarOrdenInternaExcel', [OrdenInternaController::class, 'exportOrdenInternaExcel']);
 });
 
 // rutas padron SUNAT

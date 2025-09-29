@@ -26,6 +26,11 @@ use DateTime;
 use App\HistoriaOrdenesInternasMat;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class OrdenInternaController extends Controller
 {
@@ -859,5 +864,157 @@ class OrdenInternaController extends Controller
                 'Content-Disposition' => 'attachment; filename="reporte.pdf"'
             ]
         );
+    }
+
+    // --------- EXPORTAR EXCEL  ---------
+    public function exportOrdenInternaExcel(Request $request)
+    {
+        try {
+            $reporte = new Reporte();
+            $idOIC = $request->input('oic_id');
+            $datosCabecera = $reporte->metobtenerCabecera($idOIC);
+            $calculoFechaEntregaLogistica = DateHelper::calcularFechaLimiteLogistica($datosCabecera[0]['oic_fechaaprobacion'], $datosCabecera[0]['oic_fechaentregaestimada']);
+            $datosCabecera[0]['oic_fechaentregaproduccion'] = $calculoFechaEntregaLogistica;
+
+            $datosPartes = $reporte->metobtenerPartes($idOIC);
+            foreach ($datosPartes as &$parte) {
+                $procesos = $reporte->metobtenerProcesos($idOIC, $parte['oip_id']);
+                $materiales = $reporte->metobtenerMateriales($idOIC, $parte['oip_id']);
+                $parte['detalle_procesos'] = $procesos;
+                $parte['detalle_materiales'] = $materiales;
+            }
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Título principal
+            $sheet->setCellValue('A1', 'ORDEN INTERNA');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+            // Información de cabecera básica
+            $sheet->setCellValue('A3', 'Cliente');
+            $sheet->setCellValue('B3', $datosCabecera[0]['nombre_del_cliente'] ?? '');
+            $sheet->setCellValue('D3', 'OT');
+            $sheet->setCellValue('E3', $datosCabecera[0]['odt_numero'] ?? '');
+
+            $sheet->setCellValue('A4', 'Equipo');
+            $sheet->setCellValue('B4', $datosCabecera[0]['descripcion_equipo'] ?? '');
+            $sheet->setCellValue('D4', 'Componente');
+            $sheet->setCellValue('E4', $datosCabecera[0]['oic_componente'] ?? '');
+
+            // Encabezados completos (Procesos + Materiales) como en Blade
+            $headers = ['COD.', 'DESCRIPCIÓN', 'CC', 'OBSERVACIONES', 'COD.', 'DESCRIPCIÓN', 'UNI', 'CANT', 'OBSERVACIÓN'];
+            $columnWidths = [8, 50, 6, 40, 10, 60, 8, 10, 60];
+
+            $row = 6;
+            $categoriaIndex = 0;
+
+            $map = [
+                'INICIO' => 'INI', 'CILINDRO' => 'CIL', 'VASTAGO' => 'VST',
+                'TAPA' => 'TPA', 'EMBOLO' => 'EMB', 'TAPA POSTERIOR' => 'TPP',
+                'FINAL' => 'FIN', 'OTROS' => 'OTR', 'EQUIPO' => 'EQP'
+            ];
+
+            foreach ($datosPartes as $parte) {
+                $materiales = $parte['detalle_materiales'];
+                $countM = count($materiales);
+                $countP = count($parte['detalle_procesos']);
+                if (!$countM && !$countP) {
+                    continue;
+                }
+
+                $codigoParte = $map[$parte['oip_descripcion']] ?? '';
+
+                // Fila de título de sección
+                $sectionRow = $row;
+                $sheet->setCellValue("A{$sectionRow}", ($codigoParte ? $codigoParte . ' - ' : '') . $parte['oip_descripcion']);
+                $sheet->mergeCells("A{$sectionRow}:I{$sectionRow}");
+                $sheet->getStyle("A{$sectionRow}")->getFont()->setBold(true);
+                // Color alternado por categoría
+                $bg = ($categoriaIndex % 2 == 0) ? 'D9D9D9' : 'FFFFFF';
+                $sheet->getStyle("A{$sectionRow}:I{$sectionRow}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
+                // Borde para fila de sección
+                $sheet->getStyle("A{$sectionRow}:I{$sectionRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $row++;
+
+                // Encabezados A..I
+                $headerRow = $row;
+                foreach ($headers as $i => $header) {
+                    $col = Coordinate::stringFromColumnIndex($i + 1);
+                    $sheet->setCellValue("{$col}{$headerRow}", $header);
+                    $sheet->getStyle("{$col}{$headerRow}")->getFont()->setBold(true);
+                    $sheet->getColumnDimension($col)->setWidth($columnWidths[$i]);
+                    $sheet->getStyle("{$col}{$headerRow}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7CDD6');
+                }
+                $sheet->getStyle("A{$headerRow}:I{$headerRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $row++;
+
+                $countP = count($parte['detalle_procesos']);
+                $countM = count($materiales);
+                $maxRows = max($countP, $countM);
+                for ($i = 0; $i < $maxRows; $i++) {
+                    $hasP = $i < $countP;
+                    $hasM = $i < $countM;
+
+                    // PROCESOS
+                    if ($hasP) {
+                        $proc = $parte['detalle_procesos'][$i];
+                        $rowspanP = ($i == $countP - 1) ? ($maxRows - $i) : 1;
+                        $sheet->setCellValue("A{$row}", $proc['opp_codigo'] ?? '');
+                        $sheet->setCellValue("B{$row}", $proc['odp_descripcion'] ?? '');
+                        $sheet->setCellValue("C{$row}", (isset($proc['odp_ccalidad']) && (int)$proc['odp_ccalidad'] === 1) ? 'X' : '');
+                        $sheet->setCellValue("D{$row}", str_replace(["\r\n","\n"], "\n", $proc['odp_observacion'] ?? ''));
+                        $sheet->getStyle("D{$row}")->getAlignment()->setWrapText(true);
+                        if ($rowspanP > 1) {
+                            $endRow = $row + $rowspanP - 1;
+                            foreach (['A','B','C','D'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
+                        }
+                    } elseif ($i == 0 && $countP == 0) {
+                        $endRow = $row + $maxRows - 1;
+                        foreach (['A','B','C','D'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
+                    }
+
+                    // MATERIALES
+                    if ($hasM) {
+                        $mat = $materiales[$i];
+                        $rowspanM = ($i == $countM - 1) ? ($maxRows - $i) : 1;
+                        $sheet->setCellValue("E{$row}", $mat['pro_codigo'] ?? '');
+                        $sheet->setCellValue("F{$row}", $mat['odm_descripcion'] ?? '');
+                        $sheet->setCellValue("G{$row}", $mat['uni_codigo'] ?? '');
+                        $sheet->setCellValue("H{$row}", $mat['odm_cantidad'] ?? '');
+                        $sheet->setCellValue("I{$row}", str_replace(["\r\n","\n"], "\n", $mat['odm_observacion'] ?? ''));
+                        $sheet->getStyle("I{$row}")->getAlignment()->setWrapText(true);
+                        $tipo = $mat['odm_tipo'] ?? null;
+                        
+                        if ($tipo == 2) { $sheet->getStyle("F{$row}:I{$row}")->getFont()->setBold(true); }
+                        if ($rowspanM > 1) {
+                            $endRow = $row + $rowspanM - 1;
+                            foreach (['E','F','G','H','I'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
+                        }
+                    } elseif ($i == 0 && $countM == 0) {
+                        $endRow = $row + $maxRows - 1;
+                        foreach (['E','F','G','H','I'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
+                    }
+
+                    // Fondo y borde de la fila
+                    $sheet->getStyle("A{$row}:I{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
+                    $sheet->getStyle("A{$row}:I{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    $row++;
+                }
+
+                $categoriaIndex++;
+                $row++;
+            }
+
+            $filename = 'orden_interna_' . ($datosCabecera[0]['odt_numero'] ?? 'reporte') . '.xlsx';
+            return response()->streamDownload(function () use ($spreadsheet) {
+                $writer = new Xlsx($spreadsheet);
+                $writer->save('php://output');
+            }, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

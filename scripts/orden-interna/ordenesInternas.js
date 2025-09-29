@@ -162,6 +162,18 @@ $(document).ready(() => {
                                     <path fill-rule="evenodd" d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2zM4.165 13.668c.09.18.23.343.438.419.207.075.412.04.58-.03.318-.13.635-.436.926-.786.333-.401.683-.927 1.021-1.51a11.7 11.7 0 0 1 1.997-.406c.3.383.61.713.91.95.28.22.603.403.934.417a.86.86 0 0 0 .51-.138c.155-.101.27-.247.354-.416.09-.181.145-.37.138-.563a.84.84 0 0 0-.2-.518c-.226-.27-.596-.4-.96-.465a5.8 5.8 0 0 0-1.335-.05 11 11 0 0 1-.98-1.686c.25-.66.437-1.284.52-1.794.036-.218.055-.426.048-.614a1.24 1.24 0 0 0-.127-.538.7.7 0 0 0-.477-.365c-.202-.043-.41 0-.601.077-.377.15-.576.47-.651.823-.073.34-.04.736.046 1.136.088.406.238.848.43 1.295a20 20 0 0 1-1.062 2.227 7.7 7.7 0 0 0-1.482.645c-.37.22-.699.48-.897.787-.21.326-.275.714-.08 1.103"/>
                                 </svg>
                             </button>
+
+                            <button class="btn btn-sm btn-primary btn-orden-interna-jpg me-2" data-orden-interna="${ordenInterna.oic_id}">
+                                <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve" fill="currentColor" height="16" width="16"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill="currentColor" d="M60,0H4C1.789,0,0,1.789,0,4v56c0,2.211,1.789,4,4,4h56c2.211,0,4-1.789,4-4V4C64,1.789,62.211,0,60,0z M8,8h48v32.688l-9.113-9.113c-1.562-1.559-4.094-1.559-5.656,0L16.805,56H8V8z"></path> <circle fill="currentColor" cx="24" cy="24" r="8"></circle> </g> </g></svg>
+                            </button>
+
+                            <button class="btn btn-sm btn-success btn-orden-interna-excel me-2" data-orden-interna="${ordenInterna.oic_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-excel-fill" viewBox="0 0 16 16">
+                                  <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 0.293A1 1 0 0 0 9.293 0zM9.5 1.5v2A1.5 1.5 0 0 0 11 5h2v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                  <path d="M5.884 6.68a.5.5 0 0 1 .536.127l1.58 1.707 1.58-1.707a.5.5 0 1 1 .736.68L8.932 9l1.384 1.64a.5.5 0 1 1-.736.68L8 9.707l-1.58 1.613a.5.5 0 1 1-.736-.68L7.068 9 5.684 7.488a.5.5 0 0 1 .2-.807z"/>
+                                </svg>
+                            </button>
+
                             <button class="btn btn-sm btn-outline-danger btn-orden-interna-eliminar" data-orden-interna="${ordenInterna.oic_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                     <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
@@ -227,6 +239,78 @@ $(document).ready(() => {
             showModalPreview(pdfUrl)
         } catch (error) {
             alert('Error al generar el reporte')
+        }
+    })
+
+    $('#data-container').on('click', '.btn-orden-interna-excel', async function () {
+        const id = $(this).data('orden-interna')
+        try {
+            const response = await client.get(`/exportarOrdenInternaExcel?oic_id=${id}`, {
+                headers: { 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+                responseType: 'blob'
+            })
+
+            const xlsBlob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+            const url = URL.createObjectURL(xlsBlob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `orden_interna_${id}.xlsx`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+        } catch (error) {
+            alert('Error al exportar Excel de la orden interna')
+            console.error(error)
+        }
+    })
+
+    $('#data-container').on('click', '.btn-orden-interna-jpg', async function () {
+        const id = $(this).data('orden-interna')
+        try {
+            const response = await client.get(`/generarReporteOrdenTrabajo?oic_id=${id}`, {
+                headers: { 'Accept': 'application/pdf' },
+                responseType: 'blob'
+            })
+
+            const pdfBlob = response.data
+            const arrayBuffer = await pdfBlob.arrayBuffer()
+
+            if (window['pdfjsLib']) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js'
+            } else {
+                alert('No se pudo cargar PDF.js')
+                return
+            }
+
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer })
+            const pdf = await loadingTask.promise
+
+            const scale = 2.5
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum)
+                const viewport = page.getViewport({ scale })
+
+                const canvas = document.createElement('canvas')
+                const ctx = canvas.getContext('2d')
+                canvas.width = viewport.width
+                canvas.height = viewport.height
+
+                await page.render({ canvasContext: ctx, viewport }).promise
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+                const a = document.createElement('a')
+                a.href = dataUrl
+                a.download = `orden_interna_${id}_p${pageNum}.jpg`
+                document.body.appendChild(a)
+                a.click()
+                a.remove()
+
+                await new Promise(res => setTimeout(res, 200))
+            }
+        } catch (error) {
+            alert('Error al generar la imagen JPG del reporte')
+            console.error(error)
         }
     })
 
