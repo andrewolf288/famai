@@ -937,6 +937,17 @@ class OrdenInternaController extends Controller
                 $sheet->getStyle("A{$sectionRow}:I{$sectionRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $row++;
 
+                // Fila de grupos: ACTIVIDADES A REALIZAR | PEDIDO DE MATERIALES
+                $groupRow = $row;
+                $sheet->setCellValue("A{$groupRow}", 'ACTIVIDADES A REALIZAR');
+                $sheet->mergeCells("A{$groupRow}:D{$groupRow}");
+                $sheet->setCellValue("E{$groupRow}", 'PEDIDO DE MATERIALES');
+                $sheet->mergeCells("E{$groupRow}:I{$groupRow}");
+                $sheet->getStyle("A{$groupRow}:I{$groupRow}")->getFont()->setBold(true);
+                $sheet->getStyle("A{$groupRow}:I{$groupRow}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C7CDD6');
+                $sheet->getStyle("A{$groupRow}:I{$groupRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $row++;
+
                 // Encabezados A..I
                 $headerRow = $row;
                 foreach ($headers as $i => $header) {
