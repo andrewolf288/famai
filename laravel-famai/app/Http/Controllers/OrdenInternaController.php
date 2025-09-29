@@ -956,28 +956,31 @@ class OrdenInternaController extends Controller
                     $hasP = $i < $countP;
                     $hasM = $i < $countM;
 
-                    // PROCESOS
+                    // PROCESOS (A-D) sin merges, simulando unión solo con bordes
                     if ($hasP) {
                         $proc = $parte['detalle_procesos'][$i];
-                        $rowspanP = ($i == $countP - 1) ? ($maxRows - $i) : 1;
                         $sheet->setCellValue("A{$row}", $proc['opp_codigo'] ?? '');
                         $sheet->setCellValue("B{$row}", $proc['odp_descripcion'] ?? '');
                         $sheet->setCellValue("C{$row}", (isset($proc['odp_ccalidad']) && (int)$proc['odp_ccalidad'] === 1) ? 'X' : '');
                         $sheet->setCellValue("D{$row}", str_replace(["\r\n","\n"], "\n", $proc['odp_observacion'] ?? ''));
                         $sheet->getStyle("D{$row}")->getAlignment()->setWrapText(true);
-                        if ($rowspanP > 1) {
-                            $endRow = $row + $rowspanP - 1;
-                            foreach (['A','B','C','D'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
+                        // Bordes completos en A-D cuando hay actividad
+                        $sheet->getStyle("A{$row}:D{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                    } else {
+                        $sheet->getStyle("A{$row}:D{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                        // Continuación (sin nueva actividad): mantener izquierda/derecha, quitar borde superior, y quitar borde inferior de la fila previa
+                        $sheet->getStyle("A{$row}:D{$row}")->getBorders()->getLeft()->setBorderStyle(Border::BORDER_THIN);
+                        $sheet->getStyle("A{$row}:D{$row}")->getBorders()->getRight()->setBorderStyle(Border::BORDER_THIN);
+                        $sheet->getStyle("A{$row}:D{$row}")->getBorders()->getTop()->setBorderStyle(Border::BORDER_NONE);
+                        $prev = $row - 1;
+                        if ($prev >= 1) {
+                            $sheet->getStyle("A{$prev}:D{$prev}")->getBorders()->getBottom()->setBorderStyle(Border::BORDER_NONE);
                         }
-                    } elseif ($i == 0 && $countP == 0) {
-                        $endRow = $row + $maxRows - 1;
-                        foreach (['A','B','C','D'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
                     }
 
-                    // MATERIALES
+                    // MATERIALES (E-I) siempre con bordes completos
                     if ($hasM) {
                         $mat = $materiales[$i];
-                        $rowspanM = ($i == $countM - 1) ? ($maxRows - $i) : 1;
                         $sheet->setCellValue("E{$row}", $mat['pro_codigo'] ?? '');
                         $sheet->setCellValue("F{$row}", $mat['odm_descripcion'] ?? '');
                         $sheet->setCellValue("G{$row}", $mat['uni_codigo'] ?? '');
@@ -985,20 +988,13 @@ class OrdenInternaController extends Controller
                         $sheet->setCellValue("I{$row}", str_replace(["\r\n","\n"], "\n", $mat['odm_observacion'] ?? ''));
                         $sheet->getStyle("I{$row}")->getAlignment()->setWrapText(true);
                         $tipo = $mat['odm_tipo'] ?? null;
-                        
                         if ($tipo == 2) { $sheet->getStyle("F{$row}:I{$row}")->getFont()->setBold(true); }
-                        if ($rowspanM > 1) {
-                            $endRow = $row + $rowspanM - 1;
-                            foreach (['E','F','G','H','I'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
-                        }
-                    } elseif ($i == 0 && $countM == 0) {
-                        $endRow = $row + $maxRows - 1;
-                        foreach (['E','F','G','H','I'] as $c) { $sheet->mergeCells("{$c}{$row}:{$c}{$endRow}"); }
                     }
+                    // Bordes para columnas E-I, haya o no material, para mantener la grilla
+                    $sheet->getStyle("E{$row}:I{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-                    // Fondo y borde de la fila
+                    // Fondo de la fila
                     $sheet->getStyle("A{$row}:I{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bg);
-                    $sheet->getStyle("A{$row}:I{$row}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                     $row++;
                 }
 
