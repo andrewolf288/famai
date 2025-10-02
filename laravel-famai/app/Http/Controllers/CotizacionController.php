@@ -550,7 +550,7 @@ class CotizacionController extends Controller
                     'cod_cotizar' => $proveedor_unico ? 1 : 0,
                     'cod_impuesto' => $detalle['cod_impuesto'],
                     'cod_precioconigv' => $detalle['cod_precioconigv'],
-                    'cod_preciounitariopuro' => $detalle['cod_preciounitariopuro']
+                    'cod_preciounitariopuro' => $detalle['cod_preciounitariopuro'] ?? null
                 ]);
 
                 $detalleMaterial->odm_estado = 'COT';
@@ -1196,7 +1196,7 @@ class CotizacionController extends Controller
                         'cod_cotizar' => 1,
                         'cod_descuento' => $detalle['cod_descuento'],
                         'cod_precioconigv' => $tieneIgvIncluido ? $precioUnitarioSinDescuento : $precioUnitarioSinDescuento * 1.18,
-                        'cod_preciounitariopuro' => $detalle['cod_preciounitariopuro'],
+                        'cod_preciounitariopuro' => $detalle['cod_preciounitariopuro'] ?? null,
                     ]);
 
                     $cantidadCotizadaTotal -= $cantidadCotizadaDetalle;
