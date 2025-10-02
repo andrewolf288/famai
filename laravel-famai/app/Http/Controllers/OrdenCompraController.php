@@ -164,7 +164,7 @@ class OrdenCompraController extends Controller
                         'pro_id' => $detalle->pro_id,
                         'pro_codigo' => $detalle->producto->pro_codigo,
                         'ocd_descripcion' => $detalle->ocd_descripcion,
-                        'ocd_observacion' => $detalle->detalleMaterial->odm_observacion,
+                        'ocd_observacion' => $detalle->detalleMaterial->odm_observacion ?? null,
                         'ocd_preciounitario' => number_format($detalle->ocd_preciounitario, 2, '.', ''),
                         'ocd_cantidad' => $detalle->ocd_cantidad,
                         'ocd_total' => number_format($detalle->ocd_total, 2, '.', ''),
@@ -199,7 +199,7 @@ class OrdenCompraController extends Controller
                         'pro_id' => $group->first()->pro_id,
                         'pro_codigo' => $group->first()->producto->pro_codigo,
                         'ocd_descripcion' => $group->first()->ocd_descripcion,
-                        'ocd_observacion' => $group->first()->detalleMaterial->odm_observacion,
+                        'ocd_observacion' => $group->first()->detalleMaterial->odm_observacion ?? null,
                         'ocd_preciounitario' => number_format($group->first()->ocd_preciounitario, 2, '.', ''),
                         'uni_codigo' => $group->first()->producto ? $group->first()->producto->uni_codigo : '',
                         'ocd_cantidad' => $group->sum('ocd_cantidad'),
@@ -375,7 +375,7 @@ class OrdenCompraController extends Controller
 
             foreach ($validatedData['detalle_productos'] as $detalle) {
                 $ordencompraDetalle = OrdenCompraDetalle::create([
-                    'odm_id' => $detalle['odm_id'],
+                    'odm_id' => $detalle['odm_id'] ?? null,
                     'occ_id' => $ordencompra->occ_id,
                     'ocd_orden' => $detalle['ocd_orden'],
                     'pro_id' => $detalle['pro_id'],

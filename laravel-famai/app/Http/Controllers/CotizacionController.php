@@ -558,6 +558,52 @@ class CotizacionController extends Controller
                 $total_cotizacion += $detalle['cod_total'];
             }
 
+            // Agregar item de flete solo cuando es proveedor único y el request lo indica
+            if ($proveedor_unico && isset($data['incluye_flete']) && $data['incluye_flete'] === true && isset($data['flete'])) {
+                $flete = $data['flete'];
+                $codigoFlete = $flete['codigo'] ?? null;
+                $descripcionFlete = $flete['descripcion'] ?? '';
+                $precioUnitario = isset($flete['precio_unitario']) ? floatval($flete['precio_unitario']) : 0.0; // sin IGV
+                $precioConIgv = isset($flete['precio_con_igv']) ? floatval($flete['precio_con_igv']) : null;
+                $impuesto = $flete['impuesto'] ?? 'igv';
+
+                if ($codigoFlete && $precioUnitario > 0) {
+                    $productoFlete = Producto::where('pro_codigo', $codigoFlete)->first();
+                    if (!$productoFlete) {
+                        throw new Exception("No se encontró el producto de flete con código {$codigoFlete}");
+                    }
+
+                    // Orden correlativo (continuación del mayor cod_orden del detalle enviado)
+                    $ordenFlete = (count($detalleMateriales) > 0)
+                        ? (max(array_map(function ($d) { return intval($d['cod_orden'] ?? 0); }, $detalleMateriales)) + 1)
+                        : 1;
+
+                    CotizacionDetalle::create([
+                        'coc_id' => $cotizacion->coc_id,
+                        'cod_orden' => $ordenFlete,
+                        'odm_id' => null,
+                        'pro_id' => $productoFlete->pro_id,
+                        'cod_descripcion' => $descripcionFlete !== '' ? $descripcionFlete : $productoFlete->pro_descripcion,
+                        'cod_observacion' => null,
+                        'cod_cantidad' => 1,
+                        'cod_parastock' => 0,
+                        'cod_preciounitario' => $precioUnitario,
+                        'cod_total' => round($precioUnitario * 1, 4),
+                        'cod_activo' => 1,
+                        'cod_usucreacion' => $user->usu_codigo,
+                        'cod_fecmodificacion' => null,
+                        'cod_cantidadcotizada' => 1,
+                        'cod_fecentregaoc' => null,
+                        'cod_descuento' => 0,
+                        'cod_cotizar' => 1,
+                        'cod_impuesto' => $impuesto,
+                        'cod_precioconigv' => $precioConIgv
+                    ]);
+
+                    $total_cotizacion += round($precioUnitario, 4);
+                }
+            }
+
             // actualizamos total de cotizacion
             $cotizacion->coc_total = round(floatval($total_cotizacion), 4);
             $cotizacion->save();
@@ -930,11 +976,11 @@ class CotizacionController extends Controller
 
         // Filtrar agrupados y no agrupados
         $agrupado = $cotizacionDetalle->filter(function ($detalle) {
-            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+            return $detalle->odm_id !== null || $detalle->odm_id == null || $detalle->cod_parastock == 1;
         });
 
         $marcas = $cotizacionDetalle->filter(function ($detalle) {
-            return $detalle->odm_id === null && $detalle->cod_parastock == 0;
+            return ($detalle->odm_id === null || $detalle->odm_id === null )&& $detalle->cod_parastock == 0;
         });
 
         $agrupado_detalle = $agrupado
@@ -1357,20 +1403,24 @@ class CotizacionController extends Controller
     {
         $solicitantes = $request->input('solicitantes', null);
 
-        $detalleCotizaciones = CotizacionDetalle::whereHas('detalleMaterial', function ($query) {
-            $query->where('odm_estado', 'COT');
+        $detalleCotizaciones = CotizacionDetalle::with(['detalleMaterial', 'cotizacion.proveedor', 'cotizacion.moneda'])
+        ->where(function($query) {
+            $query->whereNull('odm_id')
+                  ->orWhereHas('detalleMaterial', function ($q) {
+                      $q->where('odm_estado', 'COT');
+                  });
         })
-            ->whereHas('cotizacion', function ($query) use ($solicitantes) {
-                if ($solicitantes) {
-                    if (!is_array($solicitantes)) {
-                        $solicitantes = [$solicitantes];
-                    }
-                    $query->whereIn('tra_solicitante', $solicitantes);
+        ->whereHas('cotizacion', function ($query) use ($solicitantes) {
+            if ($solicitantes) {
+                if (!is_array($solicitantes)) {
+                    $solicitantes = [$solicitantes];
                 }
-            })
-            ->whereNotNull('cod_estado')
-            ->whereNotNull('pro_id')
-            ->get();
+                $query->whereIn('tra_solicitante', $solicitantes);
+            }
+        })
+        ->whereNotNull('cod_estado')
+        ->whereNotNull('pro_id')
+        ->get();
 
         // debemos agrupar por proveedor
         $proveedores = $detalleCotizaciones
@@ -1478,9 +1528,11 @@ class CotizacionController extends Controller
             
             $detalles = $detallesAgrupados->map(function ($grupoDetalles, $pro_id) {
                 $primerDetalle = $grupoDetalles->first();
+
+                $producto = $primerDetalle->producto;
                 
                 return [
-                    "producto" => $primerDetalle->detalleMaterial->producto,
+                    "producto" => $producto,
                     "detalles" => $grupoDetalles->values(),
                     "cantidad_requerida" => $grupoDetalles->sum('detalleMaterial.odm_cantidadpendiente'),
                     "precio_unitario" => $primerDetalle->cod_preciounitario,

@@ -152,12 +152,12 @@ $(document).ready(async () => {
                 contentDetalle += `
                 <tr>
                     <td class="text-center">${counterIndex + 1}</td>
-                    <td class="text-center">${detalle.detalle_material?.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
-                    <td>${detalle.detalle_material.odm_feccreacion ? parseDateSimple(detalle.detalle_material.odm_feccreacion) : 'N/A'}</td>
+                    <td class="text-center">${detalle?.detalle_material?.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                    <td>${detalle?.detalle_material?.odm_feccreacion ? parseDateSimple(detalle?.detalle_material?.odm_feccreacion) : 'N/A'}</td>
                     <td>${producto.pro_descripcion}</td>
-                    <td>${detalle.detalle_material?.odm_observacion || 'N/A'}</td>
+                    <td>${detalle?.detalle_material?.odm_observacion || 'N/A'}</td>
                     <td class="text-center">${producto.uni_codigo}</td>
-                    <td class="text-center">${detalle.detalle_material?.odm_cantidadpendiente || 0.00}</td>
+                    <td class="text-center">${detalle?.detalle_material?.odm_cantidadpendiente || 0.00}</td>
                 </tr>
                 `
                 counterIndex++
@@ -417,12 +417,15 @@ $(document).ready(async () => {
                 const { detalle_material } = detalleMaterial
                 const precio_real = precio_unitario / (1 - detalleMaterial.cod_descuento / 100)
                 const precio_unitario_igv = precio_real * (detalleMaterial.cotizacion.coc_conigv == 1 ? (1 / 1.18) : 1)
+
                 const formatDetalle = {
+                    producto: detalleMaterial.producto,
+                    odm_cantidadpendiente: 1,
                     ...detalle_material,
                     ocd_porcentajedescuento: detalleMaterial.cod_descuento,
-                    ocd_cantidad: detalle_material["odm_cantidadpendiente"],
+                    ocd_cantidad: detalle_material?.odm_cantidadpendiente || 1,
                     ocd_preciounitario: parseFloat(precio_unitario_igv).toFixed(4),
-                    ocd_total: (parseFloat(detalle_material["odm_cantidadpendiente"]) * parseFloat(precio_unitario_igv).toFixed(4)) * (1 - detalleMaterial.cod_descuento / 100),
+                    ocd_total: (parseFloat(detalle_material?.odm_cantidadpendiente || 1) * parseFloat(precio_unitario_igv).toFixed(4)) * (1 - detalleMaterial.cod_descuento / 100),
                     ocd_fechaentrega: detalleMaterial["cod_fecentregaoc"],
                     coc_formapago: detalleMaterial.cotizacion.coc_formapago
                 }
@@ -451,7 +454,7 @@ $(document).ready(async () => {
                     acumulador[key] = {
                         pro_id: item.pro_id,
                         codigo: item.producto?.pro_codigo || null,
-                        descripcion: item.odm_descripcion,
+                        descripcion: item.odm_descripcion || item.producto?.pro_descripcion,
                         unidad: item.producto?.uni_codigo || null,
                         cantidad_requerida: 0,
                         cantidad_pedida: 0,
@@ -521,22 +524,20 @@ $(document).ready(async () => {
         // recorremos el detalle material para completar la información
         detallesOrdenCompra.forEach((material, index) => {
             const { odm_id, producto, orden_interna_parte, odm_descripcion, odm_observacion, odm_cantidadpendiente, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_fechaentrega, ocd_porcentajedescuento, imp_codigo, coc_formapago } = material
-            const { orden_interna } = orden_interna_parte
-            const { odt_numero } = orden_interna
 
             const rowItem = document.createElement('tr')
             rowItem.dataset.detalle = odm_id
             rowItem.dataset.producto = producto?.pro_id
             rowItem.innerHTML = `
                 <td class="text-center">${index + 1}</td>
-                <td>${odt_numero || 'N/A'}</td>
+                <td>${orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
                 <td class="text-center align-middle">
                     <input type="number" class="form-control porcentaje-descuento-input" value="${ocd_porcentajedescuento}"/>
                 </td>
                 <td class="text-center">
                     <input type="text" class="form-control fecha-entrega-input"/>
                 </td>
-                <td>${producto?.pro_codigo || ''}${producto?.pro_codigo ? ' - ' : ''}${odm_descripcion || 'N/A'}</td>
+                <td>${producto?.pro_codigo || ''}${producto?.pro_codigo ? ' - ' : ''}${odm_descripcion || producto?.pro_descripcion || 'N/A'}</td>
                 <td class="text-center align-middle">${producto?.uni_codigo || 'N/A'}</td>
                 <td class="text-center align-middle">${odm_cantidadpendiente}</td>
                 <td class="text-center align-middle">
@@ -1045,8 +1046,8 @@ $(document).ready(async () => {
             const formatDetalleItem = {
                 ocd_orden: ocd_orden++, // orden
                 odm_id: detalle.odm_id, // detalle material
-                pro_id: detalle.pro_id, // producto
-                ocd_descripcion: detalle.odm_descripcion, // descripcion
+                pro_id: detalle.pro_id || detalle.producto.pro_id, // producto
+                ocd_descripcion: detalle.odm_descripcion || detalle.producto.pro_descripcion, // descripcion
                 ocd_cantidad: cantidad_real, // cantidad
                 odm_cantidadpendiente: detalle.odm_cantidadpendiente,
                 ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario

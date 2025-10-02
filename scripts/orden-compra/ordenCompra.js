@@ -133,13 +133,11 @@ $(document).ready(() => {
             data.forEach(detalle => {
                 const { orden_compra, producto } = detalle
                 const { moneda } = orden_compra
-                const { detalle_material } = detalle
-                const { orden_interna_parte } = detalle_material
 
                 $('#tbl-ordencompra-detalle tbody').append(`
                     <tr>
                         <td>${detalle.ocd_orden}</td>
-                        <td>${orden_interna_parte.orden_interna?.odt_numero || 'N/A'}</td>
+                        <td>${detalle.orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
                         <td>${producto.pro_codigo}</td>
                         <td>${detalle.ocd_descripcion}</td>
                         <td class="text-center">${producto ? producto.uni_codigo : 'N/A'}</td>

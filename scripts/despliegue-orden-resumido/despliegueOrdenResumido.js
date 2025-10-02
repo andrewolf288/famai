@@ -1874,6 +1874,12 @@ $(document).ready(async () => {
         $('#tipo-proveedor').val('')
         $('#tbl-cotizaciones-proveedores tbody').empty()
         $('#tbl-cotizaciones-materiales tbody').empty()
+        $('#div-flete').addClass('d-none')
+        $('#incluyeFleteCotizacionInput').prop('checked', false)
+        $('#precioUnitarioFleteCotizacionInput').val('')
+        $('#codigoFleteCotizacionInput').val('MA409253')
+        $('#descripcionFleteCotizacionInput').val('EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+        $('.div-flete').addClass('d-none')
 
         // Setear valor de forma de pago y moneda de data
         try {
@@ -2281,6 +2287,7 @@ $(document).ready(async () => {
             $("#div-totales-cotizacion").removeClass('d-none')
 
             $('#checkboxUltimoPrecioCotizacion').prop('checked', false)
+            $("#div-flete-cotizacion").removeClass('d-none')
         } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')
@@ -2291,6 +2298,67 @@ $(document).ready(async () => {
             $(".label-valor-unitario").addClass('d-none')
             $(".label-impuesto").addClass('d-none')
             $("#div-totales-cotizacion").addClass('d-none')
+            $("#div-flete-cotizacion").addClass('d-none')
+        }
+    })
+
+    $('#incluyeFleteCotizacionInput').on('change', function () {
+        const checked = $(this).is(':checked')
+        $('#precioUnitarioFleteCotizacionInput').val('')
+        $('#codigoFleteCotizacionInput').val('MA409253')
+        $('#descripcionFleteCotizacionInput').val('EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+        if (checked) {
+            $('.div-flete').removeClass('d-none')
+        } else {
+            $('.div-flete').addClass('d-none')
+        }
+    })
+
+    $('#btnEditarFleteCotizacion').on('click', async function () {
+        const modo = $(this).data('modo')
+        if (modo === 'editar') {
+            $(this).data('modo', 'guardar')
+            $(this).removeClass("btn-warning")
+            $(this).addClass("btn-success")
+            $(this).html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
+                            <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"></path>
+                            <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"></path>
+                        </svg>`)
+            $('#codigoFleteCotizacionInput').prop('readonly', false)
+        } else {
+            const continuar = await new Promise(resolve => {
+                    bootbox.confirm({
+                    title: '<span class="text-warning">Advertencia</span>',
+                    message: `¿Esta seguro que desea cambiar el codigo asociado al flete?`,
+                    backdrop: true,
+                    className: 'bootbox-alert-modal',
+                    callback: async function (result) {
+                        resolve(result);
+                    }
+                });
+            });
+
+            if (!continuar) {
+                $('#codigoFleteCotizacionInput').val('MA409253')
+                $('#descripcionFleteCotizacionInput').val('EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+            } else {
+                const datosFlete = await client.get(`/productoByCodigo`, {
+                    params: {
+                        pro_codigo: $('#codigoFleteCotizacionInput').val()
+                    }
+                })
+    
+                $('#codigoFleteCotizacionInput').val(datosFlete.data.pro_codigo)
+                $('#descripcionFleteCotizacionInput').val(datosFlete.data.pro_descripcion)
+            }
+
+            $(this).data('modo', 'editar')
+            $(this).addClass("btn-warning")
+            $(this).removeClass("btn-success")
+            $(this).html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"></path>
+                        </svg>`)
+            $('#codigoFleteCotizacionInput').prop('readonly', true)
         }
     })
 
@@ -2762,6 +2830,44 @@ $(document).ready(async () => {
             detalle_materiales_stock: detalleMaterialesStock,
             proveedor_unico: proveedor_unico,
             cotizacion: cotizacion
+        }
+
+
+        // incluir flete como item adicional solo cuando es proveedor único y el check está activo
+        if (proveedor_unico && $('#incluyeFleteCotizacionInput').is(':checked')) {
+            const codigoFlete = $('#codigoFleteCotizacionInput').val()?.trim();
+            const descripcionFlete = $('#descripcionFleteCotizacionInput').val()?.trim();
+            const precioUnitarioFleteStr = $('#precioUnitarioFleteCotizacionInput').val();
+            const impuestoFlete = $('#selectImpuestoCotizacion').val() || 'igv';
+
+            const precioUnitarioConIgv = parseFloat(precioUnitarioFleteStr || '0');
+
+            if (precioUnitarioConIgv <= 0) {
+                bootbox.alert({
+                    title: '<span style="color:#dc3545;font-weight:bold;">Error</span>',
+                    message: 'El precio unitario del flete debe ser mayor a 0',
+                    centerVertical: true,
+                    backdrop: true,
+                    className: 'bootbox-alert-modal'
+                })
+                return;
+            }
+
+            if (codigoFlete && !isNaN(precioUnitarioConIgv) && precioUnitarioConIgv > 0) {
+                // calcular precio sin IGV si aplica
+                const precioUnitarioSinIgv = impuestoFlete === 'igv'
+                    ? +(precioUnitarioConIgv / 1.18).toFixed(4)
+                    : precioUnitarioConIgv;
+
+                formatData.incluye_flete = true;
+                formatData.flete = {
+                    codigo: codigoFlete,
+                    descripcion: descripcionFlete || '',
+                    precio_unitario: precioUnitarioSinIgv,
+                    precio_con_igv: +precioUnitarioConIgv.toFixed(4),
+                    impuesto: impuestoFlete
+                };
+            }
         }
 
         // Recolectar información de productos excedentes

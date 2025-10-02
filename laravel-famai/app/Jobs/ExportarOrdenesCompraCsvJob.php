@@ -201,13 +201,23 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 $orden->occ_referencia
             ]);
             
-            $ordenescompradetalle = OrdenCompraDetalle::with('producto', 'detalleMaterial.ordenInternaParte.ordenInterna')
-                ->where('occ_id', $orden->occ_id)
-                ->get();
+            $ordenescompradetalle = OrdenCompraDetalle::with([
+                'producto',
+                'detalleMaterial.ordenInternaParte.ordenInterna'
+            ])
+            ->where('occ_id', $orden->occ_id)
+            ->get();
 
             $contadorDetalle = 0;
 
             foreach ($ordenescompradetalle as $detalle) {
+                $oicOtsap = null;
+                if ($detalle->detalleMaterial) {
+                    $oicOtsapTrim = trim($detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap);
+                    $oicOtsap = $oicOtsapTrim ? intval($oicOtsapTrim) : null;
+                }
+
+
                 $csvDetalle->insertOne([
                     $contador, // DocNum
                     $contadorDetalle, // LineNum
@@ -224,7 +234,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     // '', // VatSum (por calcular o llenar según lógica)
                     UtilHelper::formatDateExportSAP($detalle->ocd_fechaentrega), // U_FAM_FECINOC (campo obligatorio)
                     UtilHelper::cleanForCSV($detalle->ocd_observacion),
-                    (trim($detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap)) ? intval(trim($detalle->detalleMaterial->ordenInternaParte->ordenInterna->oic_otsap)) : null,
+                    $oicOtsap,
                     $almacen,
                     $detalle->ocd_preciounitario, // PRECIO SIN DESCUENTO
                 ]);

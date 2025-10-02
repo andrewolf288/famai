@@ -195,11 +195,11 @@ class CotizacionDetalleController extends Controller
 
         // Filtrar agrupados y no agrupados
         $agrupado = $detalleCotizacion->filter(function ($detalle) {
-            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+            return $detalle->odm_id == null || $detalle->cod_orden !== null || $detalle->cod_parastock == 1;
         });
 
         $materiales = $detalleCotizacion->filter(function ($detalle) {
-            return $detalle->odm_id !== null || $detalle->cod_parastock == 1;
+            return $detalle->odm_id == null || $detalle->cod_orden !== null || $detalle->cod_parastock == 1;
         });
 
         $agrupadoDetalle = $agrupado
