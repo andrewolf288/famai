@@ -345,7 +345,8 @@ $(document).ready(function () {
                     cod_preciounitario: $(this).find('.precio-input').val() * (1 - $(this).find('.descuento-input').val() / 100),
                     cod_total: $(this).find('.total-input').text(),
                     cod_cotizar: 1,
-                    cod_descuento: $(this).find('.descuento-input').val()
+                    cod_descuento: $(this).find('.descuento-input').val(),
+                    cod_preciounitariopuro: $(this).find('.precio-input').val()
                 }
                 detalleCotizacionValidos.push(formatDetalle)
             }

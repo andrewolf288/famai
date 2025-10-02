@@ -2743,6 +2743,7 @@ $(document).ready(async () => {
                 ? parseFloat($(this).find('.valor-unitario').val().trim()).toFixed(4) * (1 - descuentoDetalle / 100)
                 : 0.00
             if (isNaN(precioUnitario)) precioUnitario = 0.00
+            const precioUnitarioPuro = parseFloat($(this).find('.valor-unitario').val().trim()).toFixed(4)
             const cantidadPedida = $(this).find('.cantidad-pedida-detalle').val()
             const tipoImpuesto = $(this).find('.impuesto-detalle').val()
             const precioConIgv = $(this).find(".precio-unitario-detalle").val()
@@ -2778,7 +2779,8 @@ $(document).ready(async () => {
                                 cod_fecentregaoc: fechaEntrega,
                                 cod_descuento: descuentoDetalle,
                                 cod_impuesto: tipoImpuesto,
-                                cod_precioconigv: precioConIgv
+                                cod_precioconigv: precioConIgv,
+                                cod_preciounitariopuro: precioUnitarioPuro
                             });
                 
                             remaining -= cantidadAsignada;
@@ -2799,7 +2801,8 @@ $(document).ready(async () => {
                         cod_fecentregaoc: fechaEntrega,
                         cod_descuento: descuentoDetalle,
                         cod_impuesto: tipoImpuesto,
-                        cod_precioconigv: precioConIgv
+                        cod_precioconigv: precioConIgv,
+                        cod_preciounitariopuro: precioUnitarioPuro
                     });
                 }
             } else {
@@ -2817,7 +2820,8 @@ $(document).ready(async () => {
                     cod_fecentregaoc: fechaEntrega,
                     cod_descuento: descuentoDetalle,
                     cod_impuesto: tipoImpuesto,
-                    cod_precioconigv: precioConIgv
+                    cod_precioconigv: precioConIgv,
+                    cod_preciounitariopuro: precioUnitarioPuro
                 })
             }
             cod_orden++

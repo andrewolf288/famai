@@ -180,10 +180,10 @@ $(document).ready(async () => {
   const initInformacionCotizacion = (cotizacion) => {
       $("#monedaOrdenCompraInput").val(cotizacion.mon_codigo || '')
       $("#referenciaOrdenCompraInput").val(cotizacion.coc_cotizacionproveedor || '')
-      if (cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento) {
+      if (cotizacion.detalle_cotizacion[0]?.detalle_material?.orden_interna_parte?.orden_interna?.motivo_requerimiento?.mrq_descripcion) {
           $("#notaOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].detalle_material.orden_interna_parte.orden_interna.motivo_requerimiento.mrq_descripcion)
       }
-      if (cotizacion.detalle_cotizacion[0].cod_impuesto) {
+      if (cotizacion.detalle_cotizacion[0]?.cod_impuesto) {
           $("#impuestoOrdenCompraInput").val(cotizacion.detalle_cotizacion[0].cod_impuesto.toUpperCase())
       }
   }
@@ -424,7 +424,7 @@ $(document).ready(async () => {
           detalles.forEach((detalleMaterial) => {
               const precio_unitario = detalleMaterial.cod_preciounitario
               const { detalle_material } = detalleMaterial
-              const precio_real = precio_unitario / (1 - detalleMaterial.cod_descuento / 100)
+              const precio_real = detalleMaterial.cod_preciounitariopuro || precio_unitario / (1 - detalleMaterial.cod_descuento / 100)
               const precio_unitario_igv = precio_real * (detalleMaterial.cotizacion.coc_conigv == 1 ? (1 / 1.18) : 1)
               const formatDetalle = {
                   ...detalle_material,
