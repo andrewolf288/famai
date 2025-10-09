@@ -228,7 +228,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                     $orden->mon_codigo, // Currency
                     $detalle->ocd_porcentajedescuento,
                     $detalle->imp_codigo, // TaxCode
-                    $detalle->ocd_total, // LineTotal
+                    null, // LineTotal
                     $detalle->ocd_porcentajeimpuesto, // VatPrcnt
                     // $detalle->ocd_total, // GrossTotal
                     // '', // VatSum (por calcular o llenar según lógica)
