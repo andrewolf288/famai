@@ -51,13 +51,13 @@ $(document).ready(() => {
         columnDefs: [
             {
                 className: 'all',
-                targets: [0,1,2,3,8,9]
+                targets: [0,1,2,3,8,9,4,5]
             },
         ],
         columnDefs: [
             {
                 className: 'none',
-                targets: [4,5,6,7,10,11,12,13]
+                targets: [6,7,10,11,12,13]
             },
             {
                 targets: 8,
@@ -74,7 +74,7 @@ $(document).ready(() => {
             $('#filtro-estado').multiselect('reset');
 
             $('#filtro-nro-ot').off('keyup change clear').on('keyup change clear', function() {
-                const val = $.fn.dataTable.util.escapeRegex(this.value);
+                const val = this.value;
                 table
                   .column(0)
                   .search(val, false, true)
@@ -82,26 +82,26 @@ $(document).ready(() => {
             });
 
             $('#filtro-cliente').off('keyup change clear').on('keyup change clear', function() {
-                const val = $.fn.dataTable.util.escapeRegex(this.value);
-                table
-                  .column(1)
-                  .search(val, false, true)
-                  .draw();
-            });
-
-            $('#filtro-informacion-equipo').off('keyup change clear').on('keyup change clear', function() {
-                const val = $.fn.dataTable.util.escapeRegex(this.value);
+                const val = this.value;
                 table
                   .column(2)
                   .search(val, false, true)
                   .draw();
             });
 
-            $('#filtro-componente').off('keyup change clear').on('keyup change clear', function() {
-                const val = $.fn.dataTable.util.escapeRegex(this.value);
+            $('#filtro-informacion-equipo').off('keyup change clear').on('keyup change clear', function() {
+                const val = this.value;
                 table
                   .column(3)
-                  .search(val, false, true)
+                  .search(val, false, false)
+                  .draw();
+            });
+
+            $('#filtro-componente').off('keyup change clear').on('keyup change clear', function() {
+                const val = this.value;
+                table
+                  .column(4)
+                  .search(val, false, false)
                   .draw();
             });
 
@@ -133,10 +133,10 @@ $(document).ready(() => {
             content += `
                 <tr>
                     <td>${ordenInterna?.odt_numero ?? 'N/A'}</td>
+                    <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'N/A'}</td>
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'N/A'}</td>
                     <td>${ordenInterna.oic_equipo_descripcion ?? 'N/A'}</td>
                     <td>${ordenInterna.oic_componente ?? 'N/A'}</td>
-                    <td>${ordenInterna.oic_fecha !== null ? parseDateSimple(ordenInterna.oic_fecha) : 'N/A'}</td>
                     <td>${ordenInterna.oic_fechaaprobacion !== null ? parseDateSimple(ordenInterna.oic_fechaaprobacion) : 'N/A'}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'N/A'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
