@@ -23,7 +23,7 @@
                             <label for="areaSelect" class="form-label">Área:</label>
                         </div>
                         <div class="col-9 col-md-10">
-                            <select id="areaSelect" class="form-select">
+                            <select id="areaSelect" class="form-select" disabled readonly>
                                 <option value="">Seleccione un área</option>
                             </select>
                         </div>
@@ -36,7 +36,7 @@
                             <label for="responsableOrigen" class="form-label">Responsable:</label>
                         </div>
                         <div class="col-9 col-md-10">
-                            <select id="responsableOrigen" class="form-select">
+                            <select id="responsableOrigen" class="form-select" disabled readonly>
                                 <option value="" selected>Seleccione un encargado</option>
                             </select>
                         </div>
@@ -50,7 +50,7 @@
                         </div>
                         <div class="col-9 col-md-10">
                             <div class="input-group">
-                                <input type="text" id="otInput" class="form-control" placeholder="Buscar OT" autocomplete="off">
+                                <input type="text" id="otInput" class="form-control" placeholder="Buscar OT" autocomplete="off" disabled readonly>
                                 <button id="searchButton" class="btn btn-outline-danger">
                                 <svg id="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"></path>
@@ -73,7 +73,7 @@
                             <label for="fechaEntregaPicker" class="form-label">Fecha Entrega:</label>
                         </div>
                         <div class="col-8 col-md-9">
-                            <input type="text" id="fechaEntregaPicker" class="form-control">
+                            <input type="text" id="fechaEntregaPicker" class="form-control" disabled readonly>
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                             <label for="motivoRequerimientoSelect" class="form-label">Motivo:</label>
                         </div>
                         <div class="col-9 col-md-10">
-                            <select id="motivoRequerimientoSelect" class="form-select">
+                            <select id="motivoRequerimientoSelect" class="form-select" disabled readonly>
                                 <option value="">Seleccione un motivo</option>
                             </select>
                         </div>
@@ -97,7 +97,7 @@
                             <label for="equipoInput" class="form-label">Obs:</label>
                         </div>
                         <div class="col-9 col-md-11">
-                            <textarea id="equipoInput" class="form-control nota-input" autocomplete="off"
+                            <textarea id="equipoInput" class="form-control nota-input" autocomplete="off" disabled readonly
                                 rows="1"></textarea>
                         </div>
                     </div>
@@ -145,6 +145,8 @@
                                 <th class="col-1">Cantidad</th>
                                 <th class="col-1">Und.</th>
                                 <th class="col-4">Observación</th>
+                                <th class="col-4">Usu. Modificación</th>
+                                <th class="col-4">Fec. Modificación</th>
                                 <th class="col-1">Acciones</th>
                             </tr>
                         </thead>

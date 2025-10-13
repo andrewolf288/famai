@@ -98,6 +98,8 @@ $(document).ready(async () => {
       const partes = requerimiento.partes;
       partes.forEach((parte) => {
         parte.materiales.forEach((material) => {
+          const hasOrdenesCompra = material.ordenes_compra.length > 0;
+
           const row = `
                         <tr>
                             <td >${material["producto"]?.["pro_codigo"] ?? "N/A"}</td>
@@ -122,6 +124,15 @@ $(document).ready(async () => {
                             </td>
 
                             <td>
+                                ${material["odm_usumodificacion"] ? material["odm_usumodificacion"] : material["odm_usucreacion"]}
+                            </td>
+
+                            <td>
+                                ${material["odm_fecmodificacion"] ? parseDate(material["odm_fecmodificacion"]) : parseDate(material["odm_feccreacion"])}
+                            </td>
+
+                            <td>
+                                ${!hasOrdenesCompra ? `
                                 <div class="d-flex justify-content-around">
                                     <button class="btn btn-sm btn-warning btn-detalle-producto-editar me-2" data-producto="${
                                       material["producto"]?.["pro_id"]
@@ -145,6 +156,7 @@ $(document).ready(async () => {
                                         </svg>
                                     </button>
                                 </div>
+                                ` : ` <span class="text-danger">El material se encuentra en una OC</span>`}
                             </td>
                         </tr>
                     `;
@@ -250,6 +262,14 @@ $(document).ready(async () => {
                       /'/g,
                       "&#39;"
                     )}' readonly/>
+                </td>
+
+                <td style="background-color:rgb(248, 229, 165);">
+                    
+                </td>
+
+                <td style="background-color:rgb(248, 229, 165);">
+                    
                 </td>
 
                 <td style="background-color:rgb(248, 229, 165);">
@@ -375,7 +395,7 @@ $(document).ready(async () => {
         const continuar = await new Promise((resolve) => {
           bootbox.confirm({
             title: "Eliminar producto",
-            message: "¿Estás seguro de querer eliminar este material?",
+            message: "¿Está seguro de que desea eliminar este material? Se eliminarán también, en las cotizaciones, los detalles que incluyan este material.",
             callback: function (result) {
               resolve(result);
             },

@@ -29,11 +29,8 @@ class RequerimientoController extends Controller
             $user = auth()->user();
             $material = OrdenInternaMateriales::findOrFail($id);
 
-            // No se puede actualizar el material a menos cantidad de lo ya cotizado
-            $cantidadCotizada = $material->cotizaciones->sum('cod_cantidad');
-            Log::info($cantidadCotizada);
-            if ($request->odm_cantidad < $cantidadCotizada) {
-                throw new Exception('No se puede actualizar el material, la cantidad a actualizar es menor a la cantidad cotizada');
+            if (request()->odm_cantidad < 0) {
+                throw new Exception('La cantidad no puede ser menor a 0');
             }
 
             $material->update([
@@ -73,7 +70,14 @@ class RequerimientoController extends Controller
             $countMateriales = OrdenInternaMateriales::where('opd_id', $requerimiento->partes[0]->opd_id)->count();
 
             // Sincronizar productos 
-            DB::statement('EXEC [dbo].[SincronizarProductosSAP]');
+            try {
+                DB::statement('EXEC [dbo].[SincronizarProductosSAP]');
+            } catch (Exception $e) {
+                Log::error('Error al sincronizar productos', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
 
             foreach ($request->detalle_requerimiento as $detalle) {
 
@@ -129,11 +133,14 @@ class RequerimientoController extends Controller
             // buscar cotizaciones u ordenes de compra
             $cotizaciones = $material->cotizaciones;
             $ordenesCompra = $material->ordenesCompra;
-            if ($cotizaciones->count() > 0) {
-                throw new Exception('No se puede eliminar el material, tiene cotizaciones asociadas');
-            }
+            
             if ($ordenesCompra->count() > 0) {  
                 throw new Exception('No se puede eliminar el material, tiene ordenes de compra asociadas');
+            }
+
+            // eliminar el detalle en cotizaciones
+            foreach ($cotizaciones as $cotizacion) {
+                $cotizacion->delete();
             }
 
             // eliminar los adjuntos
@@ -156,6 +163,7 @@ class RequerimientoController extends Controller
             'trabajadorOrigen', 
             'motivoRequerimiento',
             'partes.materiales.producto',
+            'partes.materiales.ordenesCompra'
         ])->findOrFail($id);
         return response()->json([
             'message' => 'Se muestra el requerimiento',
