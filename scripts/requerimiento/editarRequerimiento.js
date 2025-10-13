@@ -156,7 +156,7 @@ $(document).ready(async () => {
                                         </svg>
                                     </button>
                                 </div>
-                                ` : ` <span class="text-danger">El material se encuentra en una OC</span>`}
+                                ` : ` <span class="text-danger">Se encuentra en una OC</span>`}
                             </td>
                         </tr>
                     `;
