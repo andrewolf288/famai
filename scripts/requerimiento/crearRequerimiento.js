@@ -185,6 +185,7 @@ $(document).ready(function () {
     function ingresarProductoSinCodigo() {
         const pro_codigo = ""
         const pro_id = obtenerIdUnico()
+        const fila_id = obtenerIdUnico()
         const pro_descripcion = $.trim($('#productosInput').val())
 
         if (pro_descripcion.length < 3) {
@@ -195,6 +196,7 @@ $(document).ready(function () {
             const data = {
                 pro_id,
                 pro_codigo,
+                fila_id,
                 odm_descripcion: pro_descripcion,
                 odm_cantidad: 1.00,
                 odm_observacion: "",
@@ -204,7 +206,7 @@ $(document).ready(function () {
             }
 
             const row = `
-             <tr data-producto="${data["pro_id"]}">
+             <tr data-producto="${data["pro_id"]}" data-fila="${data["fila_id"]}">
                  <td>${data["pro_codigo"]}</td>
                  <td>
                      <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"].replace(/'/g, "&#39;")}' />
@@ -218,12 +220,12 @@ $(document).ready(function () {
                  </td>
                  <td>
                      <div class="d-flex justify-content-around">
-                         <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}">
+                         <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}" data-fila="${data["fila_id"]}">
                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                  <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                              </svg>
                          </button>
-                         <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data["pro_id"]}">
+                         <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data["pro_id"]}" data-fila="${data["fila_id"]}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
                                 <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
                             </svg>
@@ -270,9 +272,12 @@ $(document).ready(function () {
         limpiarLista()
         $('#productosInput').val('')
 
+        const fila_id = obtenerIdUnico() 
+
         const data = {
             pro_id,
             pro_codigo,
+            fila_id,
             odm_descripcion: pro_descripcion,
             odm_cantidad: 1.00,
             uni_codigo,
@@ -283,7 +288,7 @@ $(document).ready(function () {
         }
 
         const row = `
-        <tr data-producto="${data["pro_id"]}">
+        <tr data-producto="${data["pro_id"]}" data-fila="${data["fila_id"]}">
             <td>${data["pro_codigo"]}</td>
             <td>
                 <input type="text" class="form-control descripcion-input" value='${data["odm_descripcion"].replace(/'/g, "&#39;")}' />
@@ -297,12 +302,12 @@ $(document).ready(function () {
             </td>
             <td>
                 <div class="d-flex justify-content-around">
-                    <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}">
+                    <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data["pro_id"]}" data-fila="${data["fila_id"]}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                             <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                         </svg>
                     </button>
-                    <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data["pro_id"]}">
+                    <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data["pro_id"]}" data-fila="${data["fila_id"]}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
                             <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
                         </svg>
@@ -313,10 +318,11 @@ $(document).ready(function () {
 
         $('#tbl-requerimientos tbody').append(row)
         detalle_requerimiento.push(data)
+        console.log(detalle_requerimiento)
     }
 
     $('#tbl-requerimientos').on('change', '.cantidad-input, .observacion-input, .descripcion-input', function () {
-        const id_producto = $(this).closest('tr').data('producto')
+        const fila_id = $(this).closest('tr').data('fila')
         const $row = $(this).closest('tr')
 
         const $descripcionInput = $row.find('.descripcion-input')
@@ -327,7 +333,7 @@ $(document).ready(function () {
         const valueCantidad = $cantidadInput.val()
         const valueObservacion = $observacionInput.val()
 
-        const findElementProducto = detalle_requerimiento.find(element => element.pro_id == id_producto)
+        const findElementProducto = detalle_requerimiento.find(element => element.fila_id == fila_id)
         findElementProducto["odm_descripcion"] = valueDescripcion
         findElementProducto["odm_cantidad"] = valueCantidad
         findElementProducto["odm_observacion"] = valueObservacion
@@ -336,25 +342,25 @@ $(document).ready(function () {
 
     // funcion de eliminacion de detalle de producto
     $('#tbl-requerimientos').on('click', '.btn-detalle-producto-eliminar', function () {
-        const id_producto = $(this).data('producto')
+        const fila_id = $(this).data('fila')
         const $row = $(this).closest('tr')
 
         // removemos el DOM
         $row.remove()
 
-        const findIndexElementProceso = detalle_requerimiento.findIndex(element => element.pro_id == id_producto)
+        const findIndexElementProceso = detalle_requerimiento.findIndex(element => element.fila_id == fila_id)
         detalle_requerimiento.splice(findIndexElementProceso, 1)
     })
 
     // -------- GESTION DE ARCHIVOS ADJUNTOS ---------
     $('#tbl-requerimientos').on('click', '.btn-detalle-producto-adjuntos', function () {
         console.log("netro aqui")
-        const id_producto = $(this).data('producto')
+        const fila_id = $(this).data('fila')
         // const $row = $(this).closest('tr')
         $("#tabla-archivos-adjuntos").empty()
-        $("#id-detalle-material").val(id_producto)
+        $("#id-detalle-material").val(fila_id)
 
-        const findDetalle = detalle_requerimiento.find(element => element.pro_id == id_producto)
+        const findDetalle = detalle_requerimiento.find(element => element.fila_id == fila_id)
         const { detalle_adjuntos } = findDetalle
 
         detalle_adjuntos.forEach((element, index) => {
@@ -383,9 +389,9 @@ $(document).ready(function () {
     $('#btn-agregar-archivo').click(async function () {
         const fileInput = $('#fileUpload')[0]
         const descriptionInput = $('#fileDescription')
-        const id_producto = $("#id-detalle-material").val()
+        const fila_id = $("#id-detalle-material").val()
 
-        const findDetalle = detalle_requerimiento.find(element => element.pro_id == id_producto)
+        const findDetalle = detalle_requerimiento.find(element => element.fila_id == fila_id)
         const { detalle_adjuntos } = findDetalle
 
         // Verificar que se haya seleccionado un archivo y que haya una descripción
@@ -430,9 +436,9 @@ $(document).ready(function () {
         const row = $(this).closest('tr')
         const index = row.data('index')
 
-        const id_producto = $("#id-detalle-material").val()
+        const fila_id = $("#id-detalle-material").val()
 
-        const findDetalle = detalle_requerimiento.find(element => element.pro_id == id_producto)
+        const findDetalle = detalle_requerimiento.find(element => element.fila_id == fila_id)
         const { detalle_adjuntos } = findDetalle
 
         detalle_adjuntos.splice(index, 1)
@@ -661,6 +667,7 @@ $(document).ready(function () {
                 const item = {
                     pro_id: null,
                     pro_codigo: '',
+                    fila_id: obtenerIdUnico(), 
                     odm_descripcion: '',
                     odm_cantidad: 1,
                     uni_codigo: '',
@@ -723,7 +730,7 @@ $(document).ready(function () {
 
                 // Agregar a la tabla y al array de detalle
                 const row = `
-                <tr data-producto="${item.pro_id}">
+                <tr data-producto="${item.pro_id}" data-fila="${item.fila_id}">
                     <td>${item.pro_codigo}</td>
                     <td>
                         <input type="text" class="form-control descripcion-input" value='${item.odm_descripcion.replace(/'/g, "&#39;")}' />
@@ -737,12 +744,12 @@ $(document).ready(function () {
                     </td>
                     <td>
                         <div class="d-flex justify-content-around">
-                            <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${item.pro_id}">
+                            <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${item.pro_id}" data-fila="${item.fila_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                     <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                                 </svg>
                             </button>
-                            <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${item.pro_id}">
+                            <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${item.pro_id}" data-fila="${item.fila_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
                                     <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
                                 </svg>
