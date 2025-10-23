@@ -494,6 +494,8 @@ class OrdenInternaMaterialesController extends Controller
         $multifilter = $request->input('multifilter', null);
         // responsables
         $responsables = $request->input('responsables', null);
+        // tipo de material
+        $tipo = $request->input('tipo', null);
 
         if ($almacen_request !== null) {
             $almacen_codigo = $almacen_request;
@@ -573,6 +575,36 @@ class OrdenInternaMaterialesController extends Controller
         $query->whereNotIn('odm_tipo', [3, 4, 5]);
         $query->whereNotNull('odm_estado');
         $query->where('odm_estado', '!=', 'ODC');
+
+        // filtro de tipo de material (adicionales)
+        if ($tipo === 'adicionales') {
+            $query->where('odm_tipo', 2);
+        }
+
+        // filtro de tipo de material (stock)
+        if ($tipo === 'stock') {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('mrq_codigo', 'STK');
+            });
+        }
+
+        if ($tipo === 'mensual') {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('mrq_codigo', 'MEN');
+            });
+        }
+
+        if ($tipo === 'parada') {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('mrq_codigo', 'PAR');
+            });
+        }
+
+        if ($tipo === 'compraventa') {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('mrq_codigo', 'CYV');
+            });
+        }
 
         // filtro de orden de trabajo
         // local.ERROR: Array to string conversion {"userId":"ADMIN   "

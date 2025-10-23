@@ -13,6 +13,11 @@ $(document).ready(async () => {
     // URL ENDPOINT
     const apiURL = '/detalleMaterialesOrdenInterna-resumido'
 
+    // Obtener parámetro 'tipo' de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tipoParam = urlParams.get('tipo');
+    let autoRefreshInterval = null;
+
     // referencias de filtros
     const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
@@ -312,6 +317,30 @@ $(document).ready(async () => {
 
     await initInformacionMaestros()
     // initDataTable(obtenerFiltrosActuales())
+
+    if (!!tipoParam) {
+     const filteredURL = obtenerFiltrosActuales()
+     initDataTable(filteredURL)
+
+     autoRefreshInterval = setInterval(() => {
+        const filteredURL = obtenerFiltrosActuales()
+        initDataTable(filteredURL)
+    }, 300000) // 5 minutos
+    }
+
+    if (tipoParam === 'adicionales') {
+        $('#titulo-pagina').text('Logística requerimientos - Adicionales')
+    } else if (tipoParam === 'stock') {
+        $('#titulo-pagina').text('Logística requerimientos - Stock')
+    } else if (tipoParam === 'mensual') {
+        $('#titulo-pagina').text('Logística requerimientos - Mensual')
+    } else if (tipoParam === 'parada') {
+        $('#titulo-pagina').text('Logística requerimientos - Parada')
+    } else if (tipoParam === 'compraventa') {
+        $('#titulo-pagina').text('Logística requerimientos - Compra y Venta')
+    } else {
+        $('#titulo-pagina').text('Logística requerimientos')
+    }
 
     filterButton.on('click', () => {
         const filteredURL = obtenerFiltrosActuales()
@@ -3230,6 +3259,11 @@ $(document).ready(async () => {
         let filteredURL = urlAPI
         let params = []
 
+        // Agregar parámetro tipo si existe
+        if (tipoParam) {
+            params.push(`tipo=${tipoParam}`)
+        }
+
         // Agregar filtro de fechas (siempre se aplican)
         if (fecha_desde && fecha_hasta) {
             params.push(`fecha_desde=${fecha_desde}`)
@@ -3440,6 +3474,13 @@ $(document).ready(async () => {
         } else {
             // Deseleccionar todas las cotizaciones
             $('#tbl-materiales-oc-body .cotizacion-radio').prop('checked', false).trigger('change');
+        }
+    })
+
+    // Limpiar el intervalo cuando se cierra la página
+    $(window).on('beforeunload', function() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
         }
     })
 })
