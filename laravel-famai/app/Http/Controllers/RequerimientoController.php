@@ -98,6 +98,9 @@ class RequerimientoController extends Controller
                     $pro_id = $productoCreado->pro_id;
                 }
 
+                // REQUERIMIENTOS SIN NECESIDAD DE VALIDAR
+                $noValidar = ['STK', 'MEN', 'PAR', 'CYV'];
+
                 OrdenInternaMateriales::create([
                     'opd_id' => $requerimiento->partes[0]->opd_id,
                     'pro_id' => $pro_id,
@@ -110,8 +113,8 @@ class RequerimientoController extends Controller
                     'odm_usucreacion' => $user->usu_codigo,
                     'odm_fecmodificacion' => null,
                     'tra_responsable' => $request->tra_idorigen,
-                    'odm_estado' => $request->mrq_codigo === 'STK' ? 'REQ' : null,
-                    'odm_fecconsultareservacion' => $request->mrq_codigo === 'STK' ? Carbon::now() : null
+                    'odm_estado' => in_array($request->mrq_codigo, $noValidar) ? 'REQ' : null,
+                    'odm_fecconsultareservacion' => in_array($request->mrq_codigo, $noValidar) ? Carbon::now() : null
                 ]);
 
                 $countMateriales++;
@@ -473,6 +476,9 @@ class RequerimientoController extends Controller
                     }
                 }
 
+                // REQUERIMIENTOS SIN NECESIDAD DE VALIDAR
+                $noValidar = ['STK', 'MEN', 'PAR', 'CYV'];
+                
                 // creamos el detalle de material
                 $ordenInternaDetalleMaterial = OrdenInternaMateriales::create([
                     'opd_id' => $detalleParte->opd_id,
@@ -488,8 +494,8 @@ class RequerimientoController extends Controller
                     'tra_responsable' => $tra_id,
                     'odm_fecasignacionresponsable' => $tra_id ? Carbon::now() : null,
                     // Condiciones especiales si es requerimientos de stock
-                    'odm_estado' => $data['mrq_codigo'] === 'STK' ? 'REQ' : null,
-                    'odm_fecconsultareservacion' => $data['mrq_codigo'] === 'STK' ? Carbon::now() : null
+                    'odm_estado' => in_array($data['mrq_codigo'], $noValidar) ? 'REQ' : null,
+                    'odm_fecconsultareservacion' => in_array($data['mrq_codigo'], $noValidar) ? Carbon::now() : null
                 ]);
 
                 // detalle de descripciones
