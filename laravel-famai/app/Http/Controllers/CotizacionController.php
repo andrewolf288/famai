@@ -1094,12 +1094,19 @@ class CotizacionController extends Controller
     // funcion para editar cotizacion para proveedor
     public function updateCotizacionProveedor(Request $request, $id)
     {
+        // Log de la data que viene del frontend
+        Log::info('Data recibida en updateCotizacionProveedor', [
+            'coc_id' => $id,
+            'request_data' => $request->all()
+        ]);
+
         try {
             DB::beginTransaction();
 
             $proveedorRequest = $request->input('proveedor');
+            
             // validacion de cotizacion
-            $validatedData = validator($request->all(), [
+            $validatorCotizacion = validator($request->all(), [
                 'coc_cotizacionproveedor' => 'required|string',
                 'coc_correocontacto' => 'nullable|email',
                 'coc_fechavalidez' => 'required|date',
@@ -1110,10 +1117,22 @@ class CotizacionController extends Controller
                 'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
                 'coc_formapago' => 'required|string',
                 'detalle_cotizacion' => 'required|array|min:1',
-            ])->validate();
+            ]);
+
+            if ($validatorCotizacion->fails()) {
+                Log::error('Error de validación en cotización', [
+                    'errores' => $validatorCotizacion->errors()->toArray()
+                ]);
+                return response()->json([
+                    'error' => 'Error de validación en los datos de la cotización',
+                    'errores' => $validatorCotizacion->errors()
+                ], 422);
+            }
+
+            $validatedData = $validatorCotizacion->validated();
 
             // validacion de proveedor
-            $validatedDataProveedor = validator($proveedorRequest, [
+            $validatorProveedor = validator($proveedorRequest, [
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
                 'prv_correo' => 'nullable|email',
                 'prv_direccion' => 'nullable|string',
@@ -1121,7 +1140,19 @@ class CotizacionController extends Controller
                 'prv_telefono' => 'nullable|string',
                 'prv_whatsapp' => 'nullable|string',
                 'cuentas_bancarias' => 'required|array|min:1',
-            ])->validate();
+            ]);
+
+            if ($validatorProveedor->fails()) {
+                Log::error('Error de validación en proveedor', [
+                    'errores' => $validatorProveedor->errors()->toArray()
+                ]);
+                return response()->json([
+                    'error' => 'Error de validación en los datos del proveedor',
+                    'errores' => $validatorProveedor->errors()
+                ], 422);
+            }
+
+            $validatedDataProveedor = $validatorProveedor->validated();
 
             // actualizamos informacion de proveedor
             $proveedor = Proveedor::findOrFail($validatedDataProveedor['prv_id']);
@@ -1215,8 +1246,18 @@ class CotizacionController extends Controller
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Error al actualizar la cotizacion: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
+            Log::error('Error al actualizar la cotizacion', [
+                'coc_id' => $id,
+                'error_message' => $e->getMessage(),
+                'error_line' => $e->getLine(),
+                'error_file' => $e->getFile(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'error' => $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => basename($e->getFile())
+            ], 500);
         }
     }
 
