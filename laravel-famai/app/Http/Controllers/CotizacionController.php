@@ -1113,7 +1113,7 @@ class CotizacionController extends Controller
                 'coc_lugarentrega' => 'nullable|string',
                 'coc_conigv' => 'required|boolean',
                 'coc_notas' => 'nullable|string',
-                'coc_total' => 'required|numeric|min:1',
+                'coc_total' => 'required',
                 'mon_codigo' => 'required|string|exists:tblmonedas_mon,mon_codigo',
                 'coc_formapago' => 'required|string',
                 'detalle_cotizacion' => 'required|array|min:1',
