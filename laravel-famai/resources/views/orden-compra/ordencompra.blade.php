@@ -147,6 +147,11 @@
             text-align: right !important;
         }
 
+        .col-descuento {
+            width: 7%;
+            text-align: right !important;
+        }
+
         .col-total {
             width: 10.20%;
             text-align: right !important;
@@ -335,6 +340,7 @@
                 <th class="col-cantidad">CANTID</th>
                 <th class="col-und">UND</th>
                 <th class="col-precio">PRECIO s/IGV</th>
+                <th class="col-descuento">DESC %</th>
                 <th class="col-total">TOTAL s/IGV</th>
             </tr>
         </thead>
@@ -345,10 +351,11 @@
                     <td class="col-codigo">{{ $detalle['pro_codigo'] ? $detalle['pro_codigo'] : '' }}</td>
                     <td class="col-descripcion">{{ $detalle['ocd_descripcion'] }} {!! nl2br(e($detalle['ocd_observacion'])) !!}</td>
                     <td class="col-observacion">{{ $detalle['ocd_observacionOC'] }}</td>
-                    <td class="col-cantidad">{{ $detalle['ocd_cantidad'] }}</td>
+                    <td class="col-cantidad">{{ number_format($detalle['ocd_cantidad'], 2, '.', ',') }}</td>
                     <td class="col-und">{{ $detalle['uni_codigo'] ? $detalle['uni_codigo'] : '' }}</td>
-                    <td class="col-precio">{{ $detalle['ocd_preciounitario'] }}</td>
-                    <td class="col-total">{{ $detalle['ocd_total'] }}</td>
+                    <td class="col-precio">{{ number_format($detalle['ocd_preciounitario'], 2, '.', ',') }}</td>
+                    <td class="col-descuento">{{ $detalle['ocd_porcentajedescuento'] ? number_format($detalle['ocd_porcentajedescuento'], 2, '.', ',') : '0.00' }}</td>
+                    <td class="col-total">{{ number_format($detalle['ocd_total'], 2, '.', ',') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -384,7 +391,7 @@
                     </tr>
                     <tr>
                         <td style="font-size: 12px;height: 50px;font-weight: bold;border: 1px solid #000000;vertical-align: top;padding-left: 1px;"
-                            colspan="2">NOTAS: {{ $ordencompra['occ_notas'] ? $ordencompra['occ_notas'] : '' }}</td>
+                            colspan="2">NOTAS: {!! nl2br(e($ordencompra['occ_notas'] ?? '')) !!}</td>
                     </tr>
                     <tr>
                         <td style="font-size: 9px;height: 50px;border: 1px solid #000000;padding-left: 1px;"
@@ -407,12 +414,12 @@
                                 <tr>
                                     <td style="text-align: left; padding: 0;">SUBTOT
                                         {{ $ordencompra['moneda']['mon_simbolo'] }}</td>
-                                    <td style="text-align: right; padding: 0;">{{ number_format($ordencompra['occ_subtotal'], 2, '.', '') }}</td>
+                                    <td style="text-align: right; padding: 0;">{{ number_format($ordencompra['occ_subtotal'], 2, '.', ',') }}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align: left; padding: 0;">I.G.V.
                                         {{ $ordencompra['occ_porcentajeimpuesto'] }}%</td>
-                                    <td style="text-align: right; padding: 0;">{{ number_format($ordencompra['occ_impuesto'], 2, '.', '') }}</td>
+                                    <td style="text-align: right; padding: 0;">{{ number_format($ordencompra['occ_impuesto'], 2, '.', ',') }}</td>
                                 </tr>
                             </table>
                         </td>
@@ -421,7 +428,7 @@
                         <td
                             style="height: 20px;border: 1px solid #000000;font-size: 12px;font-weight: bold;padding: 0px 1px 0px 1px;">
                             <span style="float: left;">TOTAL {{ $ordencompra['moneda']['mon_simbolo'] }}</span>
-                            <span style="float: right;">{{ number_format($ordencompra['occ_total'], 2, '.', '') }}</span>
+                            <span style="float: right;">{{ number_format($ordencompra['occ_total'], 2, '.', ',') }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -438,13 +445,13 @@
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Adelanto:</td>
                                     <td style="text-align: right; padding: 0;">
-                                        {{ $ordencompra['occ_adelanto'] ? number_format($ordencompra['occ_adelanto'], 2, '.', '') : '' }}</td>
+                                        {{ $ordencompra['occ_adelanto'] ? number_format($ordencompra['occ_adelanto'], 2, '.', ',') : '' }}</td>
                                 </tr>
                                 <br>
                                 <tr>
                                     <td style="text-align: left; padding: 0;">Saldo:</td>
                                     <td style="text-align: right; padding: 0;">
-                                        {{ $ordencompra['occ_saldo'] ? number_format($ordencompra['occ_saldo'], 2, '.', '') : '' }}</td>
+                                        {{ $ordencompra['occ_saldo'] ? number_format($ordencompra['occ_saldo'], 2, '.', ',') : '' }}</td>
                                 </tr>
                             </table>
                         </td>
