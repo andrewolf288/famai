@@ -537,8 +537,33 @@ $(document).ready(function () {
                 }
             }
         } catch (error) {
-            console.log(error)
-            alert('Hubo un error en el envio de la cotizacion. Intentelo más tarde.')
+            let errorMessage = 'Hubo un error en el envio de la cotizacion.\n\n';
+            
+            if (error.response) {
+                errorMessage += `Status: ${error.response.status}\n\n`;
+                
+                // Si el error.response.data es un Blob, convertirlo a texto
+                if (error.response.data instanceof Blob) {
+                    error.response.data.text().then(text => {
+                        try {
+                            const jsonError = JSON.parse(text);
+                            alert(errorMessage + 'Error del servidor:\n' + JSON.stringify(jsonError, null, 2));
+                        } catch (e) {
+                            alert(errorMessage + 'Error del servidor:\n' + text);
+                        }
+                    });
+                } else {
+                    errorMessage += 'Error del servidor:\n' + JSON.stringify(error.response.data, null, 2);
+                    alert(errorMessage);
+                }
+            } else if (error.request) {
+                errorMessage += 'No se recibió respuesta del servidor.\n';
+                errorMessage += 'Detalles: ' + error.message;
+                alert(errorMessage);
+            } else {
+                errorMessage += 'Error: ' + error.message;
+                alert(errorMessage);
+            }
         }
     })
 });

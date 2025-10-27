@@ -1215,6 +1215,7 @@ class CotizacionController extends Controller
             return $pdf->download('cotizacion.pdf');
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Error al actualizar la cotizacion: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
