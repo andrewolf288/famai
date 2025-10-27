@@ -703,7 +703,17 @@ $(document).ready(async () => {
 
     // --------- CREACION DE ORDEN DE COMPRA ----------
     $("#guardar-orden-compra").on('click', function () {
-        crearOrdenCompra()
+        // Deshabilitar botón al iniciar el proceso
+        const $btnGuardar = $(this)
+        $btnGuardar.prop('disabled', true)
+        const textoOriginal = $btnGuardar.html()
+        $btnGuardar.html('<i class="fa fa-spinner fa-spin"></i> Procesando...')
+        
+        crearOrdenCompra().catch(() => {
+            // Rehabilitar botón si hay error en el proceso
+            $btnGuardar.prop('disabled', false)
+            $btnGuardar.html(textoOriginal)
+        })
     })
 
     async function crearOrdenCompra() {
@@ -772,7 +782,7 @@ $(document).ready(async () => {
         // manejar alerta de error
         if (handleError.length > 0) {
             alert(handleError)
-            return
+            throw new Error('Validación fallida')
         }
 
         // validamos la información de cuentas bancarias
@@ -784,7 +794,7 @@ $(document).ready(async () => {
         if (cuentas_bancarias.length === 0) {
             const errorValidacionCuentasBancarias = 'No se pudo verificar correctamente la información de ninguna cuenta bancaria. Se presentan los siguientes errores:\n' + handle_errors_cuentas_bancarias.join('\n')
             alert(errorValidacionCuentasBancarias)
-            return
+            throw new Error('Validación de cuentas bancarias fallida')
         }
 
         // formamos la información de detalle de la orden de compra
@@ -801,7 +811,7 @@ $(document).ready(async () => {
                 message: errorsDetalle.join('\n'),
                 className: 'bootbox-alert-modal'
             })
-            return
+            throw new Error('Validación de detalles fallida')
         }
 
         let oic_otsap;
@@ -882,21 +892,29 @@ $(document).ready(async () => {
             })
         }
 
-        if (oic_otsap == null && formatDetalleExedentes.length > 0) return
+        if (oic_otsap == null && formatDetalleExedentes.length > 0) {
+            throw new Error('Proceso cancelado por el usuario')
+        }
 
         // verificamos la forma de impresión
-        const confirmar = await new Promise((resolve) => {
+        const confirmar = await new Promise((resolve, reject) => {
             const modal = new bootstrap.Modal(document.getElementById('imprimirModal'), {
                 backdrop: 'static',
                 keyboard: false
             })
-            modal.show()
-
+            
             $("#btn-imprimir").off('click').on('click', function () {
                 resolve($("#formato-impresion").val())
                 modal.hide()
             })
 
+            // Agregar manejador para cancelar
+            $("#btn-cancelar-impresion").off('click').on('click', function () {
+                modal.hide()
+                reject(new Error('Impresión cancelada por el usuario'))
+            })
+
+            modal.show()
         })
 
         // formamos la informacion de la orden de compra
@@ -944,9 +962,16 @@ $(document).ready(async () => {
             })
         })
 
-        if (!continuar) return
+        if (!continuar) {
+            throw new Error('Proceso cancelado por el usuario')
+        }
 
-        // return
+        // Deshabilitar botón y mostrar estado de carga
+        const $btnGuardar = $("#guardar-orden-compra")
+        $btnGuardar.prop('disabled', true)
+        const textoOriginal = $btnGuardar.html()
+        $btnGuardar.html('<i class="fa fa-spinner fa-spin"></i> Guardando...')
+
         try {
             const response = await client.post('ordenescompra', formatData, {
                 headers: {
@@ -987,6 +1012,10 @@ $(document).ready(async () => {
             }
 
             alert("Hubo un error al crear la orden de compra: " + mensajeError)
+            
+            // Rehabilitar botón solo en caso de error
+            $btnGuardar.prop('disabled', false)
+            $btnGuardar.html(textoOriginal)
         }
     }
 
@@ -997,6 +1026,11 @@ $(document).ready(async () => {
     }
 
     function openDialogCrearOrdenCompra() {
+        // Habilitar botón al abrir el modal
+        const $btnGuardar = $("#guardar-orden-compra")
+        $btnGuardar.prop('disabled', false)
+        $btnGuardar.html('Guardar')
+        
         const modal = new bootstrap.Modal(document.getElementById('crearOrdenCompraModal'))
         modal.show()
     }

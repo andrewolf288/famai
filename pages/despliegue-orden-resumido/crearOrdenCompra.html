@@ -404,7 +404,7 @@
               </div>
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancelar-impresion">Cancelar</button>
               <button type="button" class="btn btn-primary" id="btn-imprimir">Continuar</button>
           </div>
       </div>
@@ -426,6 +426,40 @@
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" id="cancelar-sin-ot" data-bs-dismiss="modal">Cancelar</button>
               <button type="button" class="btn btn-primary" id="continuar-sin-ot">Continuar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- MODAL SELECCIONAR FLETE -->
+<div class="modal fade" id="seleccionarFleteModal" tabindex="-1" aria-labelledby="seleccionarFleteModalLabel" aria-hidden="true" style="backdrop-filter: blur(5px); background-color: rgba(0, 0, 0, 0.5);">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Seleccionar Flete</h5>
+          </div>
+          <div class="modal-body">
+              <div class="row">
+                  <div class="col-md-12">
+                      <p class="fw-bold text-primary">Se encontraron los siguientes fletes en la cotización. Debe seleccionar uno para agregarlo a la orden de compra:</p>
+                      <table class="table table-striped">
+                          <thead>
+                              <tr>
+                                  <th class="text-center">Seleccionar</th>
+                                  <th>Descripción</th>
+                                  <th class="text-center">Cantidad</th>
+                                  <th class="text-center">Precio Unitario</th>
+                                  <th class="text-center">Total</th>
+                              </tr>
+                          </thead>
+                          <tbody id="tablaFletesBody">
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="agregar-flete">Continuar con flete seleccionado</button>
           </div>
       </div>
   </div>

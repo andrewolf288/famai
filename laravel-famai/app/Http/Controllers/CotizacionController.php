@@ -598,7 +598,9 @@ class CotizacionController extends Controller
                         'cod_descuento' => 0,
                         'cod_cotizar' => 1,
                         'cod_impuesto' => $impuesto,
-                        'cod_precioconigv' => $precioConIgv
+                        'cod_precioconigv' => $precioConIgv,
+                        'cod_esflete' => 1,
+                        'cod_preciounitariopuro' => $precioUnitario,
                     ]);
 
                     $total_cotizacion += round($precioUnitario, 4);
@@ -1502,6 +1504,9 @@ class CotizacionController extends Controller
                 ->whereIn('cod_id', $detalles)
                 ->get();
 
+            // Obtener todos los coc_id únicos de los detalles enviados
+            $cotizacionesIds = $detallesCotizaciones->pluck('coc_id')->unique()->values();
+
             $cotizacion = null;
             if (count($detallesCotizaciones) > 0) {
                 $coc_id = $detallesCotizaciones[0]->coc_id;
@@ -1541,10 +1546,37 @@ class CotizacionController extends Controller
                 ];
             })->values();
 
+            // Obtener fletes de TODAS las cotizaciones relacionadas a los detalles enviados
+            $fletes = [];
+            if ($cotizacionesIds->isNotEmpty()) {
+                $fletes = CotizacionDetalle::with(['producto'])
+                    ->whereIn('coc_id', $cotizacionesIds)
+                    ->where('cod_esflete', 1)
+                    ->where('cod_activo', 1)
+                    ->get()
+                    ->map(function ($flete) {
+                        return [
+                            'cod_id' => $flete->cod_id,
+                            'cod_orden' => $flete->cod_orden,
+                            'cod_descripcion' => $flete->cod_descripcion,
+                            'cod_cantidad' => $flete->cod_cantidad,
+                            'cod_preciounitario' => $flete->cod_preciounitario,
+                            'cod_total' => $flete->cod_total,
+                            'cod_descuento' => $flete->cod_descuento,
+                            'cod_impuesto' => $flete->cod_impuesto,
+                            'cod_precioconigv' => $flete->cod_precioconigv,
+                            'cod_preciounitariopuro' => $flete->cod_preciounitariopuro,
+                            'pro_id' => $flete->pro_id,
+                            'producto' => $flete->producto
+                        ];
+                    });
+            }
+
             $formatData = array(
                 "proveedor" => $proveedor,
                 "detalles" => $detalles,
-                "cotizacion" => $cotizacion
+                "cotizacion" => $cotizacion,
+                "fletes" => $fletes
             );
             DB::commit();
             return response()->json($formatData);

@@ -2873,9 +2873,9 @@ $(document).ready(async () => {
             const precioUnitarioFleteStr = $('#precioUnitarioFleteCotizacionInput').val();
             const impuestoFlete = $('#selectImpuestoCotizacion').val() || 'igv';
 
-            const precioUnitarioConIgv = parseFloat(precioUnitarioFleteStr || '0');
+            const precioUnitarioSinIgv = parseFloat(precioUnitarioFleteStr || '0');
 
-            if (precioUnitarioConIgv <= 0) {
+            if (precioUnitarioSinIgv <= 0) {
                 bootbox.alert({
                     title: '<span style="color:#dc3545;font-weight:bold;">Error</span>',
                     message: 'El precio unitario del flete debe ser mayor a 0',
@@ -2886,11 +2886,11 @@ $(document).ready(async () => {
                 return;
             }
 
-            if (codigoFlete && !isNaN(precioUnitarioConIgv) && precioUnitarioConIgv > 0) {
-                // calcular precio sin IGV si aplica
-                const precioUnitarioSinIgv = impuestoFlete === 'igv'
-                    ? +(precioUnitarioConIgv / 1.18).toFixed(4)
-                    : precioUnitarioConIgv;
+            if (codigoFlete && !isNaN(precioUnitarioSinIgv) && precioUnitarioSinIgv > 0) {
+                // calcular precio con IGV si aplica
+                const precioUnitarioConIgv = impuestoFlete === 'igv'
+                    ? +(precioUnitarioSinIgv * 1.18).toFixed(4)
+                    : precioUnitarioSinIgv;
 
                 formatData.incluye_flete = true;
                 formatData.flete = {
@@ -3243,6 +3243,7 @@ $(document).ready(async () => {
         $(".label-valor-unitario").addClass('d-none')
         // los valores de precios unitarios reseteamos a 0
         $(".precio-unitario-detalle").val(0)
+        $("#div-flete-cotizacion").addClass('d-none')
     }
 
     // obtener filtros para la busqueda
