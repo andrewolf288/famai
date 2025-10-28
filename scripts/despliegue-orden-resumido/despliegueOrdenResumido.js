@@ -2316,7 +2316,7 @@ $(document).ready(async () => {
             $("#div-totales-cotizacion").removeClass('d-none')
 
             $('#checkboxUltimoPrecioCotizacion').prop('checked', false)
-            // $("#div-flete-cotizacion").removeClass('d-none')
+            $("#div-flete-cotizacion").removeClass('d-none')
         } else {
             $("#div-cotizacion").addClass('d-none')
             $(".label-precio-unitario").addClass('d-none')

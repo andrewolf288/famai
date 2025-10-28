@@ -1544,6 +1544,7 @@ class CotizacionController extends Controller
             // buscamos las cotizaciones detalle correspondientes con todas las relaciones necesarias
             $detallesCotizaciones = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
                 ->whereIn('cod_id', $detalles)
+                ->where('cod_esflete', 0)
                 ->get();
 
             // Obtener todos los coc_id únicos de los detalles enviados

@@ -2,6 +2,8 @@ $(document).ready(async () => {
     let dataInformacion = []
     let detallesOrdenCompra = []
     let impuestos = []
+    let fletesDisponibles = []
+    let fleteSeleccionado = null
     const cuentaConSeparadoresRegex = /^.*$/
     const filterSolicitante = $('#filtrar-solicitante')
     const apiUrl = 'cotizacion-proveedores'
@@ -406,6 +408,12 @@ $(document).ready(async () => {
         initInformacionOrdenCompra(data.detalles)
         // abrimos el modal
         openDialogCrearOrdenCompra()
+
+        // procesar fletes si existen
+        if (data.fletes && data.fletes.length > 0) {
+            const fleteElegido = await mostrarModalFletes(data.fletes)
+            agregarFleteADetalles(fleteElegido)
+        }
     })
 
     const initInformacionOrdenCompra = (detalles) => {
@@ -523,36 +531,39 @@ $(document).ready(async () => {
         $("#disgregadoDetalleOrdenCompraBody").empty()
         // recorremos el detalle material para completar la información
         detallesOrdenCompra.forEach((material, index) => {
-            const { odm_id, producto, orden_interna_parte, odm_descripcion, odm_observacion, odm_cantidadpendiente, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_fechaentrega, ocd_porcentajedescuento, imp_codigo, coc_formapago } = material
+            const { odm_id, producto, orden_interna_parte, odm_descripcion, odm_observacion, odm_cantidadpendiente, ocd_cantidad, ocd_preciounitario, ocd_total, ocd_fechaentrega, ocd_porcentajedescuento, imp_codigo, coc_formapago, es_flete } = material
+            
+            // Manejo especial para fletes
+            const odt_numero = es_flete ? 'FLETE' : (orden_interna_parte?.orden_interna?.odt_numero || 'N/A')
 
             const rowItem = document.createElement('tr')
             rowItem.dataset.detalle = odm_id
             rowItem.dataset.producto = producto?.pro_id
             rowItem.innerHTML = `
                 <td class="text-center">${index + 1}</td>
-                <td>${orden_interna_parte?.orden_interna?.odt_numero || 'N/A'}</td>
+                <td>${odt_numero}</td>
                 <td class="text-center align-middle">
-                    <input type="number" class="form-control porcentaje-descuento-input" value="${ocd_porcentajedescuento}"/>
+                    <input type="number" class="form-control porcentaje-descuento-input" value="${parseFloat(ocd_porcentajedescuento || 0)}"/>
                 </td>
                 <td class="text-center">
                     <input type="text" class="form-control fecha-entrega-input"/>
                 </td>
                 <td>${producto?.pro_codigo || ''}${producto?.pro_codigo ? ' - ' : ''}${odm_descripcion || producto?.pro_descripcion || 'N/A'}</td>
                 <td class="text-center align-middle">${producto?.uni_codigo || 'N/A'}</td>
-                <td class="text-center align-middle">${odm_cantidadpendiente}</td>
+                <td class="text-center align-middle">${parseFloat(odm_cantidadpendiente || 0).toFixed(2)}</td>
                 <td class="text-center align-middle">
-                    <input type="number" class="form-control cantidad-pedido-input" value="${ocd_cantidad}" />
+                    <input type="number" class="form-control cantidad-pedido-input" value="${parseFloat(ocd_cantidad || 0)}" />
                 </td>
                 <td class="text-center align-middle">
                     <div class="d-flex align-items-center justify-content-center">
                         <span class="moneda me-1"></span>
-                        <input type="number" class="form-control precio-unitario-input" value="${ocd_preciounitario}" />
+                        <input type="number" class="form-control precio-unitario-input" value="${parseFloat(ocd_preciounitario || 0)}" />
                     </div>
                 </td>
                 <td class="text-center align-middle total-input">
                     <div class="d-flex align-items-center justify-content-center">
                         <span class="moneda me-1"></span>
-                        ${ocd_total.toFixed(4)}
+                        ${parseFloat(ocd_total || 0).toFixed(4)}
                     </div>
                 </td>
                 <td>${odm_observacion || 'N/A'}</td>
@@ -577,13 +588,15 @@ $(document).ready(async () => {
                 $('#fechaEntregaOrdenCompraPicker').val(fechaEntregaDetalle)
             }
 
-            $("#formaDePagoOrdenCompraInput option").each(function () {
-                if (!coc_formapago) return
-                let formapago = coc_formapago.includes('-') ? coc_formapago.split('-')[0] : coc_formapago
-                if (this.innerText.toLowerCase() === (formapago.toLowerCase())) {
-                    $("#formaDePagoOrdenCompraInput").val(this.value)
-                }
-            })
+            if (!es_flete) {
+                $("#formaDePagoOrdenCompraInput option").each(function () {
+                    if (!coc_formapago) return
+                    let formapago = coc_formapago.includes('-') ? coc_formapago.split('-')[0] : coc_formapago
+                    if (this.innerText.toLowerCase() === (formapago.toLowerCase())) {
+                        $("#formaDePagoOrdenCompraInput").val(this.value)
+                    }
+                })
+            }
 
             $("#disgregadoDetalleOrdenCompraBody").append(rowItem)
         })
@@ -1075,13 +1088,26 @@ $(document).ready(async () => {
             const row = $(`#disgregadoDetalleOrdenCompraBody tr[data-detalle="${odm_id}"]`)
             const fecha_entrega = row.find('.fecha-entrega-input').val()
             const observacion = row.find('.observacion-input').val()
-            const cantidad_real = Math.min(obtenerValorNumerico(detalle.ocd_cantidad), obtenerValorNumerico(detalle.odm_cantidadpendiente))
-            const cantidad_exedente = obtenerValorNumerico(detalle.ocd_cantidad) - obtenerValorNumerico(detalle.odm_cantidadpendiente)
+            
+            // Verificar si es un flete
+            const es_flete = detalle.es_flete || false
+            
+            let cantidad_real, cantidad_exedente
+            if (es_flete) {
+                // Para fletes, usar la cantidad directamente
+                cantidad_real = obtenerValorNumerico(detalle.ocd_cantidad)
+                cantidad_exedente = 0
+            } else {
+                // Para items normales, calcular como antes
+                cantidad_real = Math.min(obtenerValorNumerico(detalle.ocd_cantidad), obtenerValorNumerico(detalle.odm_cantidadpendiente))
+                cantidad_exedente = obtenerValorNumerico(detalle.ocd_cantidad) - obtenerValorNumerico(detalle.odm_cantidadpendiente)
+            }
+            
             const formatDetalleItem = {
                 ocd_orden: ocd_orden++, // orden
-                odm_id: detalle.odm_id, // detalle material
-                pro_id: detalle.pro_id || detalle.producto.pro_id, // producto
-                ocd_descripcion: detalle.odm_descripcion || detalle.producto.pro_descripcion, // descripcion
+                odm_id: es_flete ? null : detalle.odm_id, // detalle material (null para fletes)
+                pro_id: detalle.pro_id || detalle.producto?.pro_id, // producto
+                ocd_descripcion: detalle.odm_descripcion || detalle.producto?.pro_descripcion, // descripcion
                 ocd_cantidad: cantidad_real, // cantidad
                 odm_cantidadpendiente: detalle.odm_cantidadpendiente,
                 ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario
@@ -1090,15 +1116,16 @@ $(document).ready(async () => {
                 ocd_fechaentrega: transformarFecha(fecha_entrega), // fecha de entrega
                 ocd_observacion: observacion, // observacion
                 imp_codigo: impuesto, // impuesto
-                ocd_porcentajeimpuesto: porcentaje_impuesto // porcentaje impuesto
+                ocd_porcentajeimpuesto: porcentaje_impuesto, // porcentaje impuesto
+                es_flete: es_flete // Indicador de flete
             }
 
-            if (cantidad_exedente > 0) {
+            if (cantidad_exedente > 0 && !es_flete) {
                 const formatDetalleExedente = {
                     ocd_orden: ocd_orden++, // orden
                     odm_id: detalle.odm_id, // detalle material
-                    pro_id: detalle.pro_id, // producto
-                    ocd_descripcion: detalle.odm_descripcion, // descripcion
+                    pro_id: detalle.pro_id || detalle.producto?.pro_id, // producto
+                    ocd_descripcion: detalle.odm_descripcion || detalle.producto?.pro_descripcion, // descripcion
                     ocd_cantidad: cantidad_exedente, // cantidad
                     odm_cantidadpendiente: detalle.odm_cantidadpendiente,
                     ocd_preciounitario: detalle.ocd_preciounitario, // precio unitario
@@ -1149,6 +1176,91 @@ $(document).ready(async () => {
         })
 
         return handleError;
+    }
+
+    // funcion para mostrar el modal de seleccion de fletes
+    const mostrarModalFletes = async (fletes) => {
+        return new Promise((resolve) => {
+            if (fletes.length === 0) {
+                resolve(null)
+                return
+            }
+
+            // Si solo hay 1 flete, retornarlo automáticamente sin mostrar modal
+            if (fletes.length === 1) {
+                resolve(fletes[0])
+                return
+            }
+
+            fletesDisponibles = fletes
+            const modal = new bootstrap.Modal(document.getElementById('seleccionarFleteModal'), {
+                backdrop: 'static',
+                keyboard: false
+            })
+
+            // limpiar la tabla de fletes
+            $('#tablaFletesBody').empty()
+
+            // agregar los fletes a la tabla
+            fletes.forEach((flete, index) => {
+                const row = `
+                    <tr class="flete-row" data-index="${index}" style="cursor: pointer;">
+                        <td class="text-center">
+                            <input type="radio" name="fleteSeleccionado" value="${index}" ${index === 0 ? 'checked' : ''}>
+                        </td>
+                        <td>${flete.cod_descripcion}</td>
+                        <td class="text-center">${parseFloat(flete.cod_cantidad || 0).toFixed(2)}</td>
+                        <td class="text-center">${parseFloat(flete.cod_preciounitario || 0).toFixed(4)}</td>
+                        <td class="text-center">${parseFloat(flete.cod_total || 0).toFixed(4)}</td>
+                    </tr>
+                `
+                $('#tablaFletesBody').append(row)
+            })
+            
+            // Hacer que toda la fila sea clickeable
+            $('#tablaFletesBody').on('click', '.flete-row', function() {
+                const index = $(this).data('index')
+                $(this).find('input[type="radio"]').prop('checked', true)
+            })
+
+            $('#agregar-flete').off('click').on('click', function() {
+                const indexSeleccionado = $('input[name="fleteSeleccionado"]:checked').val()
+                if (indexSeleccionado !== undefined) {
+                    fleteSeleccionado = fletesDisponibles[indexSeleccionado]
+                    modal.hide()
+                    resolve(fleteSeleccionado)
+                }
+            })
+
+            modal.show()
+        })
+    }
+
+    // funcion para agregar flete a los detalles de orden de compra
+    const agregarFleteADetalles = (flete) => {
+        if (!flete) return
+
+        // crear un objeto similar a los detalles de orden de compra
+        const fleteDetalle = {
+            odm_id: `FLETE_${Date.now()}`, // ID único temporal para el flete
+            producto: flete.producto,
+            pro_id: flete.pro_id,
+            orden_interna_parte: null,
+            odm_descripcion: flete.cod_descripcion,
+            odm_observacion: 'N/A',
+            odm_cantidadpendiente: parseFloat(flete.cod_cantidad || 0),
+            ocd_cantidad: parseFloat(flete.cod_cantidad || 0),
+            ocd_preciounitario: parseFloat(flete.cod_preciounitariopuro || 0),
+            ocd_total: parseFloat(flete.cod_total || 0),
+            ocd_fechaentrega: moment().format('YYYY-MM-DD'),
+            ocd_porcentajedescuento: parseFloat(flete.cod_descuento || 0),
+            imp_codigo: flete.cod_impuesto,
+            coc_formapago: null,
+            es_flete: true // marcador para identificar que es un flete
+        }
+
+        detallesOrdenCompra.push(fleteDetalle)
+        renderizarVista()
     }
 
     function validarCuentasBancarias(entidadBancariaSolesInput, cuentaBancariaSolesInput, idCuentaBancariaSolesInput,
