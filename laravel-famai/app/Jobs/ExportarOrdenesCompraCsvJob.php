@@ -186,7 +186,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
                 $serie,
                 UtilHelper::formatDateExportSAP($orden->occ_fecha), // DocDate
                 $orden->proveedor->prv_codigo, // CardCode
-                $orden->occ_total, // DocTotal (Total)
+                null, // DocTotal (Total)
                 $orden->mon_codigo, // DocCur (Moneda)
                 $orden->occ_tipocambio ?? 1, // DocRate
                 UtilHelper::cleanForCSV($orden->occ_notas), // Comments (Comentarios)
