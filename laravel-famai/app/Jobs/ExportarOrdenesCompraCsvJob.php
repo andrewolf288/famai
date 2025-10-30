@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\File;
 use App\OrdenCompra;
 use App\OrdenCompraDetalle;
 use League\Csv\Writer;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class ExportarOrdenesCompraCsvJob implements ShouldQueue
 {
@@ -73,6 +75,8 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         // if (File::exists($pathcsvDetalleTemp)) {
         //     File::delete($pathcsvDetalleTemp);
         // }
+
+        DB::statement('EXEC dbo.ActualizarNumerosSAPOrdenCompra');
 
         // debemos buscar aquellas ordenes de compra que no se han importado aún
         $ordenescompra = OrdenCompra::with('proveedor', 'moneda', 'trabajador', 'sede.almacenPrincipal')
@@ -171,6 +175,7 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
         ]);
 
         $contador = 1;
+        $datos_exportados = [];
         // generamos el csv de cabecera
         foreach ($ordenescompra as $key => $orden) {
             $sed_codigo = $orden->sed_codigo;
@@ -178,6 +183,9 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             $serie = UtilHelper::getSerieValue($series, $sed_codigo, $occ_tipo);
             $tipo_documento = 'I';
             $almacen = $orden->sede->almacenPrincipal->alm_codigo;
+            
+            // solo gurdar su occ_numero
+            $datos_exportados[] = ['occ_numero' => $orden->occ_numero];
             
             $csvCabecera->insertOne([
                 $contador, // DocNum
@@ -250,5 +258,15 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             'occ_importacion' => 1,
             'occ_estado' => 'SAP'
         ]);
+
+        // Log de generación de CSV solo si hubo datos exportados
+        $totalGenerados = $contador - 1; // contador inició en 1
+        if ($totalGenerados > 0) {
+            Log::info('Exportación OC → CSV generado con datos', [
+                'total_ordenes' => $totalGenerados,
+                'datos_exportados' => $datos_exportados,
+                'fecha y hora' => now()->toDateTimeString(),
+            ]);
+        }
     }
 }
