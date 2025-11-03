@@ -977,13 +977,13 @@ class CotizacionController extends Controller
             ->where('coc_id', $cotizacion->coc_id)
             ->get();
 
-        // Filtrar agrupados y no agrupados
+        // Filtrar agrupados y no agrupados (excluir flete)
         $agrupado = $cotizacionDetalle->filter(function ($detalle) {
-            return $detalle->odm_id !== null || $detalle->odm_id == null || $detalle->cod_parastock == 1;
+            return ($detalle->odm_id !== null || $detalle->odm_id == null || $detalle->cod_parastock == 1) && $detalle->cod_esflete != 1;
         });
 
         $marcas = $cotizacionDetalle->filter(function ($detalle) {
-            return ($detalle->odm_id === null || $detalle->odm_id === null )&& $detalle->cod_parastock == 0;
+            return ($detalle->odm_id === null || $detalle->odm_id === null) && $detalle->cod_parastock == 0 && $detalle->cod_esflete != 1;
         });
 
         $agrupado_detalle = $agrupado
@@ -1010,12 +1010,29 @@ class CotizacionController extends Controller
         $detalle_marcas = $marcas
             ->values();
 
+        // Buscar información de flete si existe
+        $fleteDetalle = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
+            ->where('cod_esflete', 1)
+            ->with('producto')
+            ->first();
+
+        $fleteInfo = null;
+        if ($fleteDetalle) {
+            $fleteInfo = [
+                'cod_id' => $fleteDetalle->cod_id,
+                'codigo' => $fleteDetalle->producto ? $fleteDetalle->producto->pro_codigo : null,
+                'descripcion' => $fleteDetalle->cod_descripcion,
+                'precio_unitario' => floatval($fleteDetalle->cod_preciounitario),
+            ];
+        }
+
         return response()->json([
             "cotizacion" => $cotizacion,
             "monedas" => $monedas,
             "bancos" => $bancos,
             "agrupado_detalle" => $agrupado_detalle,
-            "detalle_marcas" => $detalle_marcas
+            "detalle_marcas" => $detalle_marcas,
+            "flete" => $fleteInfo
         ]);
     }
 
@@ -1233,6 +1250,98 @@ class CotizacionController extends Controller
                     ]);
 
                     $cantidadCotizadaTotal -= $cantidadCotizadaDetalle;
+                }
+            }
+
+            // Manejar flete si viene en el request
+            // Buscar si ya existe un flete para esta cotización
+            $fleteExistente = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
+                ->where('cod_esflete', 1)
+                ->first();
+
+            // Obtener el usuario de uno de los detalles existentes para usar el mismo usuario
+            $usuarioCodigo = null;
+            if (count($detalleCotizacion) > 0) {
+                $primerDetalleResumido = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
+                    ->where('cod_orden', $detalleCotizacion[0]['cod_orden'])
+                    ->first();
+                if ($primerDetalleResumido) {
+                    $usuarioCodigo = $primerDetalleResumido->cod_usumodificacion ?? $primerDetalleResumido->cod_usucreacion;
+                }
+            }
+            // Si no se encontró usuario en los detalles, usar el de la cotización
+            if (!$usuarioCodigo) {
+                $usuarioCodigo = $cotizacion->coc_usumodificacion ?? $cotizacion->coc_usucreacion;
+            }
+
+            $incluyeFlete = $request->input('incluye_flete');
+            $fleteData = $request->input('flete');
+            
+            if ($incluyeFlete === true && $fleteData !== null) {
+                $flete = $fleteData;
+                $codigoFlete = $flete['codigo'] ?? null;
+                $descripcionFlete = $flete['descripcion'] ?? '';
+                $precioUnitario = isset($flete['precio_unitario']) ? floatval($flete['precio_unitario']) : 0.0; // sin IGV
+                $precioConIgv = isset($flete['precio_con_igv']) ? floatval($flete['precio_con_igv']) : null;
+                $impuesto = $flete['impuesto'] ?? 'igv';
+
+                if ($codigoFlete && $precioUnitario > 0) {
+                    $productoFlete = Producto::where('pro_codigo', $codigoFlete)->first();
+                    if (!$productoFlete) {
+                        throw new Exception("No se encontró el producto de flete con código {$codigoFlete}");
+                    }
+
+                    if ($fleteExistente) {
+                        // Si ya existe un flete, actualizarlo
+                        $fleteExistente->update([
+                            'pro_id' => $productoFlete->pro_id,
+                            'cod_descripcion' => $descripcionFlete !== '' ? $descripcionFlete : $productoFlete->pro_descripcion,
+                            'cod_preciounitario' => $precioUnitario,
+                            'cod_total' => round($precioUnitario * 1, 4),
+                            'cod_usumodificacion' => $usuarioCodigo,
+                            'cod_impuesto' => $impuesto,
+                            'cod_precioconigv' => $precioConIgv,
+                            'cod_preciounitariopuro' => $precioUnitario,
+                        ]);
+                    } else {
+                        // Si no existe, crear uno nuevo
+                        // Obtener el mayor cod_orden de los detalles existentes
+                        $mayorOrden = CotizacionDetalle::where('coc_id', $cotizacion->coc_id)
+                            ->max('cod_orden');
+                        $ordenFlete = ($mayorOrden ?? 0) + 1;
+
+                        CotizacionDetalle::create([
+                            'coc_id' => $cotizacion->coc_id,
+                            'cod_orden' => $ordenFlete,
+                            'odm_id' => null,
+                            'pro_id' => $productoFlete->pro_id,
+                            'cod_descripcion' => $descripcionFlete !== '' ? $descripcionFlete : $productoFlete->pro_descripcion,
+                            'cod_observacion' => null,
+                            'cod_cantidad' => 1,
+                            'cod_parastock' => 0,
+                            'cod_preciounitario' => $precioUnitario,
+                            'cod_total' => round($precioUnitario * 1, 4),
+                            'cod_activo' => 1,
+                            'cod_usucreacion' => $usuarioCodigo,
+                            'cod_fecmodificacion' => null,
+                            'cod_cantidadcotizada' => 1,
+                            'cod_fecentregaoc' => null,
+                            'cod_descuento' => 0,
+                            'cod_cotizar' => 1,
+                            'cod_impuesto' => $impuesto,
+                            'cod_precioconigv' => $precioConIgv,
+                            'cod_esflete' => 1,
+                            'cod_preciounitariopuro' => $precioUnitario,
+                        ]);
+                    }
+
+                    // El total ya viene calculado en el request desde el frontend (incluye el flete)
+                    // No es necesario actualizarlo aquí
+                }
+            } else {
+                // Si no se incluye flete pero existe uno, eliminarlo
+                if ($fleteExistente) {
+                    $fleteExistente->delete();
                 }
             }
 

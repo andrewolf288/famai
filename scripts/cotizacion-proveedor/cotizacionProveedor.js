@@ -19,7 +19,7 @@ $(document).ready(function () {
     async function traerInformacionCotizacion() {
         try {
             const { data } = await axios.get(`${config.BACK_URL}/cotizacion-proveedor/${coc_id}`)
-            const { cotizacion, agrupado_detalle, monedas, bancos } = data
+            const { cotizacion, agrupado_detalle, monedas, bancos, flete } = data
             const { proveedor, coc_estado, coc_total, coc_cotizacionproveedor, coc_notas, coc_correocontacto, coc_fechavalidez, mon_codigo, coc_formapago, coc_lugarentrega } = cotizacion
             const { cuentas_bancarias, prv_id, tdo_codigo, prv_nrodocumento, prv_nombre, prv_contacto, prv_telefono, prv_whatsapp, prv_direccion, prv_correo } = proveedor
 
@@ -116,6 +116,11 @@ $(document).ready(function () {
                 $("#lugarEntregaCotizacionInput").attr('disabled', true)
                 // nota de cotizacion
                 $("#notasCotizacionInput").attr('disabled', true)
+                // flete
+                $("#div-flete-cotizacion-proveedor").addClass('d-none')
+            } else {
+                // Mostrar div de flete solo cuando el estado es SOL
+                $("#div-flete-cotizacion-proveedor").removeClass('d-none')
             }
 
             // el detalle agrupado se debe recorrer
@@ -221,6 +226,15 @@ $(document).ready(function () {
                     $('#productosCotizacionTable tbody').append(rowItem)
                 })
 
+            // Cargar información de flete si existe
+            if (flete && coc_estado === 'SOL') {
+                $('#incluyeFleteCotizacionProveedorInput').prop('checked', true)
+                $('#codigoFleteCotizacionProveedorInput').val(flete.codigo || 'MA409253')
+                $('#descripcionFleteCotizacionProveedorInput').val(flete.descripcion || 'EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+                $('#precioUnitarioFleteCotizacionProveedorInput').val(flete.precio_unitario || '')
+                $('.div-flete-proveedor').removeClass('d-none')
+            }
+
             // debemos controlar el boton de guardado
             if (coc_estado === 'SOL') {
                 $("#btn-guardar-cotizacion-proveedor").attr("disabled", false)
@@ -262,6 +276,70 @@ $(document).ready(function () {
         $(".flagIGV").text($(this).is(':checked') ? 'c/IGV' : 's/IGV')
     })
 
+    // ---------- GESTION DE FLETE ------------
+    $('#incluyeFleteCotizacionProveedorInput').on('change', function () {
+        const checked = $(this).is(':checked')
+        $('#precioUnitarioFleteCotizacionProveedorInput').val('')
+        $('#codigoFleteCotizacionProveedorInput').val('MA409253')
+        $('#descripcionFleteCotizacionProveedorInput').val('EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+        if (checked) {
+            $('.div-flete-proveedor').removeClass('d-none')
+        } else {
+            $('.div-flete-proveedor').addClass('d-none')
+        }
+        calcularResumenCotizacion()
+    })
+
+    $('#btnEditarFleteCotizacionProveedor').on('click', async function () {
+        const modo = $(this).data('modo')
+        if (modo === 'editar') {
+            $(this).data('modo', 'guardar')
+            $(this).removeClass("btn-warning")
+            $(this).addClass("btn-success")
+            $(this).html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy-fill" viewBox="0 0 16 16">
+                            <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z"></path>
+                            <path d="M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z"></path>
+                        </svg>`)
+            $('#codigoFleteCotizacionProveedorInput').prop('readonly', false)
+        } else {
+            const continuar = await new Promise(resolve => {
+                confirm(`¿Está seguro que desea cambiar el código asociado al flete?`) ? resolve(true) : resolve(false)
+            })
+
+            if (!continuar) {
+                $('#codigoFleteCotizacionProveedorInput').val('MA409253')
+                $('#descripcionFleteCotizacionProveedorInput').val('EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+            } else {
+                try {
+                    const { data } = await axios.get(`${config.BACK_URL}/productoByCodigoPublico`, {
+                        params: {
+                            pro_codigo: $('#codigoFleteCotizacionProveedorInput').val()
+                        }
+                    })
+                    $('#codigoFleteCotizacionProveedorInput').val(data.pro_codigo)
+                    $('#descripcionFleteCotizacionProveedorInput').val(data.pro_descripcion)
+                } catch (error) {
+                    alert('Error al buscar el producto. Por favor, verifique el código.')
+                    $('#codigoFleteCotizacionProveedorInput').val('MA409253')
+                    $('#descripcionFleteCotizacionProveedorInput').val('EMBALAJES - FLETE - CERTIFICADO - CORTES - EXPORT')
+                }
+            }
+
+            $(this).data('modo', 'editar')
+            $(this).addClass("btn-warning")
+            $(this).removeClass("btn-success")
+            $(this).html(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"></path>
+                        </svg>`)
+            $('#codigoFleteCotizacionProveedorInput').prop('readonly', true)
+        }
+    })
+
+    // Recalcular totales cuando cambia el precio del flete
+    $('#precioUnitarioFleteCotizacionProveedorInput').on('input', function () {
+        calcularResumenCotizacion()
+    })
+
     // ----------- GESTION DE DETALLES DE COTIZACION ..........
     // funcion para calcular resumen de cotizacion
     function calcularResumenCotizacion() {
@@ -272,6 +350,13 @@ $(document).ready(function () {
             const total = parseFloat($(row).find('.total-input').text() || 0)
             totalCotizacionAcumulado += total
         })
+        
+        // Agregar flete si está marcado
+        if ($('#incluyeFleteCotizacionProveedorInput').is(':checked')) {
+            const precioFlete = parseFloat($('#precioUnitarioFleteCotizacionProveedorInput').val() || 0)
+            totalCotizacionAcumulado += precioFlete
+        }
+        
         totalCotizacion.text((totalCotizacionAcumulado).toFixed(4))
     }
 
@@ -507,6 +592,36 @@ $(document).ready(function () {
                             prv_direccion: direccionProveedorInput,
                             prv_correo: correoContactoCotizacionInput,
                             cuentas_bancarias: cuentasBancarias
+                        }
+                    }
+
+                    // Incluir flete si está marcado
+                    if ($('#incluyeFleteCotizacionProveedorInput').is(':checked')) {
+                        const codigoFlete = $('#codigoFleteCotizacionProveedorInput').val()?.trim()
+                        const descripcionFlete = $('#descripcionFleteCotizacionProveedorInput').val()?.trim()
+                        const precioUnitarioFleteStr = $('#precioUnitarioFleteCotizacionProveedorInput').val()
+                        const precioUnitarioSinIgv = parseFloat(precioUnitarioFleteStr || '0')
+                        const tieneIgvIncluido = $("#incluyeIGVCotizacion").is(':checked')
+                        
+                        if (precioUnitarioSinIgv <= 0) {
+                            alert('El precio unitario del flete debe ser mayor a 0')
+                            return
+                        }
+
+                        if (codigoFlete && !isNaN(precioUnitarioSinIgv) && precioUnitarioSinIgv > 0) {
+                            // Calcular precio con IGV si aplica
+                            const precioUnitarioConIgv = tieneIgvIncluido
+                                ? precioUnitarioSinIgv
+                                : precioUnitarioSinIgv * 1.18
+
+                            formatData.incluye_flete = true
+                            formatData.flete = {
+                                codigo: codigoFlete,
+                                descripcion: descripcionFlete || '',
+                                precio_unitario: precioUnitarioSinIgv,
+                                precio_con_igv: parseFloat(precioUnitarioConIgv.toFixed(4)),
+                                impuesto: 'igv'
+                            }
                         }
                     }
                     console.log(formatData)

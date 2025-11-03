@@ -263,6 +263,7 @@ class CotizacionDetalleController extends Controller
             'cod_total' => $request->input('cod_total'),
             'cod_descuento' => $request->input('cod_descuento'),
             'cod_usumodificacion' => $user->usu_codigo,
+            'cod_preciounitariopuro' => $request->input('cod_preciounitariopuro'),
         ]);
 
         return response()->json($cotizacion, 200);

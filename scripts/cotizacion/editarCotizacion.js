@@ -282,6 +282,7 @@ $(document).ready(() => {
                     cod_preciounitario: precioInput.val() - (precioInput.val() * descuentoDetalle.val() / 100),
                     cod_total: totalDetalle.val(),
                     cod_descuento: descuentoDetalle.val(),
+                    cod_preciounitariopuro: precioInput.val(),
                 }
                 const {data} = await client.put(`/cotizacion-detalle/${idDetalleCotizacion}`, formatData)
             } catch(error) {
