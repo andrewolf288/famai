@@ -192,6 +192,36 @@
           </div>
       </div>
   </div>
+  <!-- Archivos adjuntos -->
+  <div class="row mt-3">
+      <div class="col">
+          <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="card-title">Archivos adjuntos</h5>
+                  <button type="button" class="btn btn-primary btn-sm" id="btn-agregar-adjunto-orden-compra">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                      </svg>
+                      Agregar archivo
+                  </button>
+              </div>
+              <div class="card-body">
+                  <table class="table table-striped table-hover">
+                      <thead>
+                          <tr>
+                              <th class="col-1">Item</th>
+                              <th class="col-9">Descripción</th>
+                              <th class="col-2 text-center">Acciones</th>
+                          </tr>
+                      </thead>
+                      <tbody id="tabla-archivos-adjuntos-orden-compra">
+                          <!-- Aquí se agregarán las filas de archivos adjuntos dinámicamente -->
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+  </div>
   <!-- Agrupado Detalle Materiales -->
   <div class="row mt-3">
       <div class="col">
@@ -463,6 +493,61 @@
           </div>
       </div>
   </div>
+</div>
+
+<!-- MODAL PARA ADJUNTOS ORDEN DE COMPRA -->
+<div class="modal fade" id="adjuntosOrdenCompraModal" tabindex="-1" aria-labelledby="adjuntosOrdenCompraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="adjuntosOrdenCompraModalLabel">Archivos adjuntos de orden de compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- ingreso de archivo con su descripcion -->
+                <div class="row mb-3 d-flex align-items-center">
+                    <!-- Subir archivo -->
+                    <div class="col-md-4">
+                        <label for="fileUploadOrdenCompra" class="form-label">Subir archivo</label>
+                        <input class="form-control" type="file" id="fileUploadOrdenCompra">
+                    </div>
+
+                    <!-- Descripción del archivo -->
+                    <div class="col-md-7">
+                        <label for="fileDescriptionOrdenCompra" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="fileDescriptionOrdenCompra" rows="1"></textarea>
+                    </div>
+
+                    <!-- Botón Agregar archivo -->
+                    <div class="col-md-1 d-flex justify-content-center mt-4">
+                        <button type="button" class="btn btn-success" id="btn-agregar-archivo-orden-compra">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- tabla para mostrar archivos adjuntos -->
+                <div>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="col-2">Item</th>
+                                <th class="col-8">Descripción</th>
+                                <th class="col-2 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-archivos-adjuntos-modal-orden-compra">
+                            <!-- Aquí se agregarán las filas de archivos adjuntos dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- LOADER -->

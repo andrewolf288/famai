@@ -4,6 +4,7 @@ $(document).ready(async () => {
     let impuestos = []
     let fletesDisponibles = []
     let fleteSeleccionado = null
+    let archivosAdjuntosOrdenCompra = []
     const cuentaConSeparadoresRegex = /^.*$/
     const filterSolicitante = $('#filtrar-solicitante')
     const apiUrl = 'cotizacion-proveedores'
@@ -714,6 +715,126 @@ $(document).ready(async () => {
         renderizarResumenOrdenCompra()
     })
 
+    // -------- GESTION DE ARCHIVOS ADJUNTOS ORDEN DE COMPRA ---------
+    // Abrir modal de adjuntos
+    $('#btn-agregar-adjunto-orden-compra').on('click', function () {
+        // Limpiar el modal
+        $('#fileUploadOrdenCompra').val('')
+        $('#fileDescriptionOrdenCompra').val('')
+        renderizarTablaAdjuntosModal()
+        
+        // Mostrar el modal
+        const modalAdjuntos = new bootstrap.Modal(document.getElementById('adjuntosOrdenCompraModal'), {
+            backdrop: 'static',
+            keyboard: false
+        })
+        modalAdjuntos.show()
+    })
+
+    // Función para renderizar la tabla de adjuntos en el modal
+    function renderizarTablaAdjuntosModal() {
+        $('#tabla-archivos-adjuntos-modal-orden-compra').empty()
+        
+        archivosAdjuntosOrdenCompra.forEach((archivo, index) => {
+            const row = `
+                <tr data-index="${index}">
+                    <td>${index + 1}</td>
+                    <td class="descripcion-file">${archivo.oca_descripcion}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm btn-eliminar-archivo-orden-compra">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            `
+            $('#tabla-archivos-adjuntos-modal-orden-compra').append(row)
+        })
+        
+        // Renderizar también en la tabla principal
+        renderizarTablaAdjuntosPrincipal()
+    }
+
+    // Función para renderizar la tabla de adjuntos principal
+    function renderizarTablaAdjuntosPrincipal() {
+        $('#tabla-archivos-adjuntos-orden-compra').empty()
+        
+        if (archivosAdjuntosOrdenCompra.length === 0) {
+            const row = `
+                <tr>
+                    <td colspan="3" class="text-center text-muted">No hay archivos adjuntos</td>
+                </tr>
+            `
+            $('#tabla-archivos-adjuntos-orden-compra').append(row)
+            return
+        }
+        
+        archivosAdjuntosOrdenCompra.forEach((archivo, index) => {
+            const row = `
+                <tr data-index="${index}">
+                    <td>${index + 1}</td>
+                    <td>${archivo.oca_descripcion}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm btn-eliminar-archivo-orden-compra-principal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            `
+            $('#tabla-archivos-adjuntos-orden-compra').append(row)
+        })
+    }
+
+    // Agregar archivo desde el modal
+    $('#btn-agregar-archivo-orden-compra').on('click', function () {
+        const fileInput = $('#fileUploadOrdenCompra')[0]
+        const descriptionInput = $('#fileDescriptionOrdenCompra')
+        
+        // Verificar que se haya seleccionado un archivo y que haya una descripción
+        if (fileInput.files.length > 0 && descriptionInput.val().trim() !== "") {
+            const file = fileInput.files[0]
+            const description = descriptionInput.val().trim()
+            
+            const formatData = {
+                oca_descripcion: description,
+                oca_file: file,
+            }
+            
+            // Agregar al array
+            archivosAdjuntosOrdenCompra.push(formatData)
+            
+            // Limpiar los campos después de agregar el archivo
+            fileInput.value = ''
+            descriptionInput.val('')
+            
+            // Renderizar las tablas
+            renderizarTablaAdjuntosModal()
+        } else {
+            alert('Por favor, seleccione un archivo y agregue una descripción.')
+        }
+    })
+
+    // Eliminar archivo desde el modal
+    $('#tabla-archivos-adjuntos-modal-orden-compra').on('click', '.btn-eliminar-archivo-orden-compra', function () {
+        const row = $(this).closest('tr')
+        const index = row.data('index')
+        
+        archivosAdjuntosOrdenCompra.splice(index, 1)
+        renderizarTablaAdjuntosModal()
+    })
+
+    // Eliminar archivo desde la tabla principal
+    $('#tabla-archivos-adjuntos-orden-compra').on('click', '.btn-eliminar-archivo-orden-compra-principal', function () {
+        const row = $(this).closest('tr')
+        const index = row.data('index')
+        
+        archivosAdjuntosOrdenCompra.splice(index, 1)
+        renderizarTablaAdjuntosPrincipal()
+    })
+
     // --------- CREACION DE ORDEN DE COMPRA ----------
     $("#guardar-orden-compra").on('click', function () {
         // Deshabilitar botón al iniciar el proceso
@@ -790,6 +911,9 @@ $(document).ready(async () => {
         }
         if (tipoOrdenCompraInput.length === 0) {
             handleError += "- Debe seleccionar un tipo de orden de compra\n"
+        }
+        if (archivosAdjuntosOrdenCompra.length < 3) {
+            handleError += "- Debe adjuntar al menos 3 archivos\n"
         }
 
         // manejar alerta de error
@@ -986,7 +1110,17 @@ $(document).ready(async () => {
         $btnGuardar.html('<i class="fa fa-spinner fa-spin"></i> Guardando...')
 
         try {
-            const response = await client.post('ordenescompra', formatData, {
+            // Crear FormData para enviar archivos
+            const formData = new FormData()
+            formData.append('data', JSON.stringify(formatData))
+            
+            // Agregar archivos adjuntos al FormData
+            archivosAdjuntosOrdenCompra.forEach((archivo, index) => {
+                formData.append(`archivos[${index}]`, archivo.oca_file)
+                formData.append(`descripciones[${index}]`, archivo.oca_descripcion)
+            })
+            
+            const response = await client.post('ordenescompra', formData, {
                 headers: {
                     'Accept': 'application/pdf'
                 },
@@ -1039,10 +1173,20 @@ $(document).ready(async () => {
     }
 
     function openDialogCrearOrdenCompra() {
+        // Reiniciar archivos adjuntos
+        archivosAdjuntosOrdenCompra = []
+        
+        // Limpiar campos del modal de adjuntos si están abiertos
+        $('#fileUploadOrdenCompra').val('')
+        $('#fileDescriptionOrdenCompra').val('')
+        
         // Habilitar botón al abrir el modal
         const $btnGuardar = $("#guardar-orden-compra")
         $btnGuardar.prop('disabled', false)
         $btnGuardar.html('Guardar')
+        
+        // Inicializar tabla de adjuntos
+        renderizarTablaAdjuntosPrincipal()
         
         const modal = new bootstrap.Modal(document.getElementById('crearOrdenCompraModal'))
         modal.show()

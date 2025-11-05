@@ -81,6 +81,12 @@ $(document).ready(() => {
                                     <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
                                 </svg>
                             </button>
+
+                            <button class="btn btn-sm btn-outline-info btn-adjuntos-orden-compra text-center d-flex align-items-center justify-content-center" data-ordencompra="${ordenCompra.occ_id}" title="Ver archivos adjuntos">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                            </button>
                         </div>
                     </td>
                     <td>${ordenCompra.occ_feccreacion === null ? 'No aplica' : parseDate(ordenCompra.occ_feccreacion)}</td>
@@ -223,6 +229,144 @@ $(document).ready(() => {
     $('#data-container').on('click', '.btn-ver-orden-compra', function () {
         const id = $(this).data('ordencompra')
         router.navigate(`/orden-compra/ver/${id}`)
+    })
+
+    // Ver archivos adjuntos de orden de compra
+    $('#data-container').on('click', '.btn-adjuntos-orden-compra', async function () {
+        const occ_id = $(this).data('ordencompra')
+        
+        // Mostrar loading
+        $('#loading-adjuntos').show()
+        $('#tabla-adjuntos-orden-compra').hide()
+        $('#sin-adjuntos').hide()
+        
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById("adjuntosOrdenCompraModal"))
+        modal.show()
+        
+        try {
+            const { data } = await client.get(`/ordenescompra/${occ_id}/adjuntos`)
+            
+            $('#loading-adjuntos').hide()
+            
+            if (data && data.length > 0) {
+                $('#tabla-adjuntos-orden-compra').show()
+                $('#tabla-adjuntos-orden-compra-body').empty()
+                
+                data.forEach((adjunto, index) => {
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${adjunto.oca_descripcion || 'Sin descripción'}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-primary btn-descargar-adjunto" data-url="${adjunto.oca_url}" data-nombre="${adjunto.oca_descripcion || 'archivo'}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5h2a.5.5 0 0 1 0 1h-2A1.5 1.5 0 0 1 0 11V4a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 5 4v1a.5.5 0 0 1-1 0V4a.5.5 0 0 0-.5-.5h-2A.5.5 0 0 0 1 4v7a.5.5 0 0 0 .5.5h2a.5.5 0 0 1 0 1h-2z"/>
+                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                    </svg>
+                                    Descargar
+                                </button>
+                            </td>
+                        </tr>
+                    `
+                    $('#tabla-adjuntos-orden-compra-body').append(row)
+                })
+            } else {
+                $('#sin-adjuntos').show()
+            }
+        } catch (error) {
+            console.error('Error al cargar adjuntos:', error)
+            $('#loading-adjuntos').hide()
+            $('#sin-adjuntos').show()
+            $('#sin-adjuntos').html('<p class="text-danger">Error al cargar los archivos adjuntos.</p>')
+        }
+    })
+
+    // Descargar archivo adjunto
+    $('#tabla-adjuntos-orden-compra-body').on('click', '.btn-descargar-adjunto', async function () {
+        const url = $(this).data('url')
+        const descripcion = $(this).data('nombre') // Este es el campo oca_descripcion
+        
+        try {
+            const response = await client.get(`/ordenescompra/adjuntos/descargar?url=${encodeURIComponent(url)}`, {
+                responseType: 'blob'
+            })
+            
+            // Verificar si la respuesta es un error JSON verificando el Content-Type
+            const contentType = response.headers['content-type'] || ''
+            if (contentType.includes('application/json')) {
+                // Es un error JSON, leerlo y mostrar el mensaje
+                const text = await response.data.text()
+                try {
+                    const errorData = JSON.parse(text)
+                    alert('Error: ' + (errorData.error || 'Error al descargar el archivo'))
+                    return
+                } catch (e) {
+                    alert('Error al descargar el archivo')
+                    return
+                }
+            }
+            
+            // Obtener la extensión del archivo desde la URL
+            let extension = ''
+            if (url) {
+                const urlParts = url.split('/')
+                const lastPart = urlParts[urlParts.length - 1]
+                if (lastPart && lastPart.includes('.')) {
+                    const extensionMatch = lastPart.match(/\.([^.]+)$/)
+                    if (extensionMatch) {
+                        extension = extensionMatch[1]
+                    }
+                }
+            }
+            
+            // Usar la descripción como nombre del archivo, agregando la extensión si existe
+            let filename = descripcion || 'archivo'
+            if (extension && !filename.endsWith('.' + extension)) {
+                filename = filename + '.' + extension
+            }
+            
+            // Limpiar el nombre del archivo de caracteres inválidos
+            filename = filename.replace(/[<>:"/\\|?*]/g, '_')
+            
+            // Obtener el tipo MIME correcto de la respuesta
+            const mimeType = contentType || response.data.type || 'application/octet-stream'
+            
+            // Crear el blob con el tipo MIME correcto
+            const blob = new Blob([response.data], { type: mimeType })
+            const downloadUrl = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = downloadUrl
+            link.download = filename
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(downloadUrl)
+        } catch (error) {
+            console.error('Error al descargar archivo:', error)
+            
+            // Intentar leer el error si viene como blob
+            if (error.response && error.response.data) {
+                try {
+                    const errorBlob = error.response.data
+                    if (errorBlob instanceof Blob) {
+                        const errorText = await errorBlob.text()
+                        try {
+                            const errorData = JSON.parse(errorText)
+                            alert('Error: ' + (errorData.error || 'Error al descargar el archivo'))
+                        } catch (e) {
+                            alert('Error al descargar el archivo')
+                        }
+                    } else {
+                        alert('Error al descargar el archivo: ' + (error.message || 'Error desconocido'))
+                    }
+                } catch (e) {
+                    alert('Error al descargar el archivo')
+                }
+            } else {
+                alert('Error al descargar el archivo: ' + (error.message || 'Error desconocido'))
+            }
+        }
     })
 
     function showModalPreview(pdfUrl) {

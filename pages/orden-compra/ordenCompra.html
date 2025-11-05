@@ -168,3 +168,39 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL ARCHIVOS ADJUNTOS ORDEN DE COMPRA -->
+<div class="modal fade" id="adjuntosOrdenCompraModal" tabindex="-1" aria-labelledby="adjuntosOrdenCompraModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adjuntosOrdenCompraModalLabel">Archivos Adjuntos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="loading-adjuntos" class="text-center py-3">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+        <table class="table table-striped table-hover" id="tabla-adjuntos-orden-compra" style="display: none;">
+          <thead>
+            <tr>
+              <th class="col-1">Item</th>
+              <th class="col-7">Descripción</th>
+              <th class="col-4 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-adjuntos-orden-compra-body">
+          </tbody>
+        </table>
+        <div id="sin-adjuntos" class="text-center text-muted py-3" style="display: none;">
+          <p>No hay archivos adjuntos para esta orden de compra.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

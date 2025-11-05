@@ -440,6 +440,8 @@ Route::group(['middleware' => ['auth.jwt']], function () {
     Route::get('ordencompra-pendientes-ingresar', [OrdenCompraController::class, 'ordenesCompraPorEmitirNotaIngreso']);
     Route::get('ordencompra-pendientes-entregar/{id}', [OrdenCompraController::class, 'ordenCompraDetallesPendientesById']);
     Route::post('ordencompra/anular/{id}', [OrdenCompraController::class, 'anular']);
+    Route::get('ordenescompra/{id}/adjuntos', [OrdenCompraController::class, 'getAdjuntos']);
+    Route::get('ordenescompra/adjuntos/descargar', [OrdenCompraController::class, 'descargarAdjunto']);
 });
 
 // rutas de ordendes de compra detalle

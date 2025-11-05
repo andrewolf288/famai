@@ -92,4 +92,9 @@ class OrdenCompra extends Model
     {
         return $this->belongsTo(Trabajador::class, 'tra_elaborado', 'tra_id');
     }
+
+    public function adjuntos()
+    {
+        return $this->hasMany(OrdenCompraAdjuntos::class, 'occ_id', 'occ_id');
+    }
 }

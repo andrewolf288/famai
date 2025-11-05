@@ -25,6 +25,8 @@ use App\OrdenInterna;
 use App\Parte;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaPartes;
+use App\OrdenCompraAdjuntos;
+use Illuminate\Support\Facades\Storage;
 
 class OrdenCompraController extends Controller
 {
@@ -231,11 +233,48 @@ class OrdenCompraController extends Controller
         $sed_codigo = "10";
         // iniciamos una transaccion
 
+        $data = $request->input('data');
+        if ($data) {
+            $dataArray = json_decode($data, true);
+            if ($dataArray) {
+                $request->merge($dataArray);
+            }
+        }
+
         // Guardar el LOG de la data que se recibio
         Log::info('Data recibida para crear orden de compra: ' . json_encode($request->all()));
         try {
             DB::beginTransaction();
             $proveedorRequest = $request->input('proveedor');
+            
+            $archivos = [];
+            $descripciones = [];
+            
+            
+            $index = 0;
+            while ($request->hasFile("archivos.$index")) {
+                $file = $request->file("archivos.$index");
+                if ($file && $file->isValid()) {
+                    $archivos[] = $file;
+                }
+                $index++;
+            }
+            
+            // Recopilar descripciones
+            $descripcionesInput = $request->input('descripciones', []);
+            if (is_array($descripcionesInput)) {
+                $descripciones = array_values($descripcionesInput);
+            } else {
+                $descripciones = [$descripcionesInput];
+            }
+            
+            if (count($archivos) < 3) {
+                throw new Exception('Debe adjuntar al menos 3 archivos para la orden de compra');
+            }
+            
+            if (count($archivos) !== count($descripciones)) {
+                throw new Exception('El número de archivos y descripciones no coincide');
+            }
             
             // Validación de la orden de compra
             try {
@@ -291,8 +330,16 @@ class OrdenCompraController extends Controller
             }
 
             // primero validamos que no exista un registro con el mismo numero de documento de proveedor
-            $proveedor = Proveedor::where('prv_nrodocumento', $validatedDataProveedor['prv_nrodocumento'])->first();
-            if (!$proveedor) {
+            $proveedores = Proveedor::where('prv_nrodocumento', $validatedDataProveedor['prv_nrodocumento'])->get();
+
+                return response()->json([
+                    'mensaje' => 'Se encontraron multiples proveedores con el mismo numero de documento',
+                    'errores' => [
+                        'prv_nrodocumento' => ['Existen multiples proveedores registrados con el mismo numero de documento (' . $validatedDataProveedor['prv_nrodocumento'] . ')']
+                    ]
+                ], 422);
+
+            if ($proveedores->count() === 0) {
                 $proveedor = Proveedor::create([
                     'prv_nombre' => $validatedDataProveedor['prv_nombre'],
                     'prv_nrodocumento' => $validatedDataProveedor['prv_nrodocumento'],
@@ -302,6 +349,7 @@ class OrdenCompraController extends Controller
                     'prv_whatsapp' => $validatedDataProveedor['prv_whatsapp'],
                 ]);
             } else {
+                $proveedor = $proveedores->first();
                 $proveedor->update([
                     'prv_correo' => $validatedDataProveedor['prv_correo'],
                     'prv_direccion' => $validatedDataProveedor['prv_direccion'],
@@ -496,6 +544,23 @@ class OrdenCompraController extends Controller
                     ]);
                 }
 
+            }
+
+            // Guardar archivos adjuntos
+            foreach ($archivos as $index => $file) {
+                $extension = $file->getClientOriginalExtension();
+                $fileName = uniqid() . '.' . $extension;
+                $path = $file->storeAs('orden-compra-adjuntos', $fileName, 'public');
+                
+                $descripcion = isset($descripciones[$index]) ? $descripciones[$index] : 'Sin descripción';
+                
+                OrdenCompraAdjuntos::create([
+                    'occ_id' => $ordencompra->occ_id,
+                    'oca_descripcion' => $descripcion,
+                    'oca_url' => $path,
+                    'oca_usucreacion' => $user->usu_codigo,
+                    'oca_fecmodificacion' => null
+                ]);
             }
 
             DB::commit();
@@ -844,5 +909,68 @@ class OrdenCompraController extends Controller
         );
 
         return response()->json($data);
+    }
+
+    // Obtener archivos adjuntos de una orden de compra
+    public function getAdjuntos($id)
+    {
+        try {
+            $adjuntos = OrdenCompraAdjuntos::where('occ_id', $id)->get();
+            return response()->json($adjuntos);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // Descargar archivo adjunto
+    public function descargarAdjunto(Request $request)
+    {
+        try {
+            $url = $request->input('url');
+            
+            if (!$url) {
+                return response()->json(['error' => 'URL del archivo no proporcionada'], 400);
+            }
+            
+            $urlDecoded = urldecode($url);
+            
+            if (!Storage::disk('public')->exists($urlDecoded)) {
+                return response()->json(['error' => 'Archivo no encontrado'], 404);
+            }
+            
+            $path = storage_path('app/public/' . $urlDecoded);
+            
+            if (!file_exists($path)) {
+                return response()->json(['error' => 'Archivo no encontrado en el servidor'], 404);
+            }
+            
+            $filename = basename($urlDecoded);
+            $mimeType = mime_content_type($path);
+            
+            // Si no se puede determinar el tipo MIME, intentar por extensión
+            if (!$mimeType || $mimeType === 'application/octet-stream') {
+                $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+                $mimeTypes = [
+                    'pdf' => 'application/pdf',
+                    'zip' => 'application/zip',
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'png' => 'image/png',
+                    'gif' => 'image/gif',
+                    'doc' => 'application/msword',
+                    'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'xls' => 'application/vnd.ms-excel',
+                    'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'txt' => 'text/plain',
+                ];
+                $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+            }
+            
+            return response()->download($path, $filename, [
+                'Content-Type' => $mimeType,
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
