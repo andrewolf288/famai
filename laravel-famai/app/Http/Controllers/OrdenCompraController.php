@@ -329,14 +329,14 @@ class OrdenCompraController extends Controller
             // primero validamos que no exista un registro con el mismo numero de documento de proveedor
             $proveedores = Proveedor::where('prv_nrodocumento', $validatedDataProveedor['prv_nrodocumento'])->get();
 
-            if ($proveedores->count() > 1) {
-                return response()->json([
-                    'mensaje' => 'Se encontraron multiples proveedores con el mismo numero de documento',
-                    'errores' => [
-                        'prv_nrodocumento' => ['Existen multiples proveedores registrados con el mismo numero de documento (' . $validatedDataProveedor['prv_nrodocumento'] . ')']
-                    ]
-                ], 422);
-            }
+            // if ($proveedores->count() > 1) {
+            //     return response()->json([
+            //         'mensaje' => 'Se encontraron multiples proveedores con el mismo numero de documento',
+            //         'errores' => [
+            //             'prv_nrodocumento' => ['Existen multiples proveedores registrados con el mismo numero de documento (' . $validatedDataProveedor['prv_nrodocumento'] . ')']
+            //         ]
+            //     ], 422);
+            // }
 
             if ($proveedores->count() === 0) {
                 $proveedor = Proveedor::create([
