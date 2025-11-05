@@ -736,9 +736,6 @@ $(document).ready(async () => {
       if (tipoOrdenCompraInput.length === 0) {
           handleError += "- Debe seleccionar un tipo de orden de compra\n"
       }
-      if (archivosAdjuntosOrdenCompra.length < 3) {
-          handleError += "- Debe adjuntar al menos 3 archivos\n"
-      }
 
       // manejar alerta de error
       if (handleError.length > 0) {
@@ -986,7 +983,7 @@ $(document).ready(async () => {
             
             // Rehabilitar botón solo en caso de error
             $btnGuardar.prop('disabled', false)
-            $btnGuardar.html(textoOriginal)
+            $btnGuardar.html("Guardar")
         }
   }
 
