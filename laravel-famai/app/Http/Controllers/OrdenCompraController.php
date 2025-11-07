@@ -569,6 +569,12 @@ class OrdenCompraController extends Controller
             return $pdf->download('ordencompra.pdf');
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Error en la creación de la orden de compra', [
+                'user' => $user->usu_codigo,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $request->all()
+            ]);
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
