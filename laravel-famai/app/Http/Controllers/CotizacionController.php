@@ -716,7 +716,7 @@ class CotizacionController extends Controller
                     
                     // Buscar el último requerimiento para generar el número
                     $lastRequerimientoCabecera = OrdenInterna::where('sed_codigo', $sed_codigo)
-                        ->where('oic_tipo', 'COT')
+                        ->where('oic_tipo', 'REQ')
                         ->orderBy('oic_id', 'desc')
                         ->first();
                     $numero = !$lastRequerimientoCabecera ? 1 : intval(substr($lastRequerimientoCabecera->odt_numero, 3)) + 1;
