@@ -89,7 +89,7 @@ $(document).ready(() => {
                             </button>
                         </div>
                     </td>
-                    <td>${ordenCompra.occ_feccreacion === null ? 'No aplica' : parseDate(ordenCompra.occ_feccreacion)}</td>
+                    <td data-order="${ordenCompra.occ_feccreacion ? moment(ordenCompra.occ_feccreacion).valueOf() : 0}">${ordenCompra.occ_feccreacion === null ? 'No aplica' : parseDate(ordenCompra.occ_feccreacion)}</td>
                     <td>${ordenCompra.occ_usucreacion === null ? 'No aplica' : ordenCompra.occ_usucreacion}</td>
                     <td>${ordenCompra.occ_fecmodificacion === null ? 'No aplica' : parseDate(ordenCompra.occ_fecmodificacion)}</td>
                     <td>${ordenCompra.occ_usumodificacion === null ? 'No aplica' : ordenCompra.occ_usumodificacion}</td>

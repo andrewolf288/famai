@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\DateHelper;
+use App\OrdenCompra;
+use App\OrdenCompraDetalle;
 use App\OrdenInterna;
 use App\OrdenInternaMateriales;
 use App\OrdenInternaMaterialesAdjuntos;
@@ -223,6 +225,42 @@ class RequerimientoController extends Controller
         }
     }
 
+    public function sincronizarAnulados()
+    {
+        $user = auth()->user();
+
+        try {
+            DB::beginTransaction();
+            
+            $ordenesAnuladas = DB::select('EXEC dbo.getOrdenesAnuladas');
+            
+            foreach ($ordenesAnuladas as $orden) {
+                $ordencompra = OrdenCompra::find($orden->occ_id);
+                
+                if ($ordencompra) {
+                    $ordencompra->update([
+                        'occ_estado' => 'ANU',
+                        'occ_usumodificacion' => $user->usu_codigo,
+                        'occ_fecmodificacion' => Carbon::now(),
+                        'occ_total' => 0.00,
+                        'occ_subtotal' => 0.00,
+                        'occ_impuesto' => 0.00
+                    ]);
+                    
+                    // eliminamos los detalles de la orden de compra
+                    OrdenCompraDetalle::where('occ_id', $orden->occ_id)->delete();
+                }
+            }
+            
+            DB::commit();
+            return ['message' => 'Órdenes de compra sincronizadas y anuladas correctamente', 'total' => count($ordenesAnuladas)];
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error al sincronizar Ordenes Anuladas en requerimientos', ['error' => $e->getMessage()]);
+            return ['error' => $e->getMessage()];
+        }
+    }
+
     // funcion para traer toda la informaicion de requerimientos
     public function index(Request $request)
     {
@@ -232,6 +270,8 @@ class RequerimientoController extends Controller
 
         $fecha_desde = $request->input('fecha_desde', null);
         $fecha_hasta = $request->input('fecha_hasta', null);
+
+        $this->sincronizarAnulados();
 
         $query = OrdenInterna::with([
             'area', 

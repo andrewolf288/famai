@@ -61,6 +61,7 @@ class OrdenCompraController extends Controller
             return ['message' => 'Órdenes de compra sincronizadas y anuladas correctamente', 'total' => count($ordenesAnuladas)];
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error('Error al sincronizar anulados de ordenes de compra', ['error' => $e->getMessage()]);
             return ['error' => $e->getMessage()];
         }
     }
@@ -119,17 +120,22 @@ class OrdenCompraController extends Controller
         $fechaHasta = $request->input('fecha_hasta');
         $occ_numero = $request->input('occ_numero');
         $occ_nrosap = $request->input('occ_nrosap');
+        $occ_usucreacion = $request->input('occ_usucreacion');
 
         $query = OrdenCompra::with(['proveedor', 'moneda', 'autorizador', 'elaborador'])
             ->where('sed_codigo', $sed_codigo);
 
-        $query->orderBy('occ_fecha', 'desc');
         $query->where('occ_fecha', '>=', $fechaDesde);
         $query->where('occ_fecha', '<=', $fechaHasta);
         $query->where('occ_numero', 'like', '%' . $occ_numero . '%');
         if ($occ_nrosap) {
             $query->where('occ_nrosap', 'like', '%' . $occ_nrosap . '%');
         }
+        if ($occ_usucreacion) {
+            $query->where('occ_usucreacion', 'like', '%' . $occ_usucreacion . '%');
+        }
+        
+        $query->orderBy('occ_feccreacion', 'desc');
         $cotizaciones = $query->paginate($pageSize, ['*'], 'page', $page);
         return response()->json([
             'message' => 'Se listan las ordenes de compra',
