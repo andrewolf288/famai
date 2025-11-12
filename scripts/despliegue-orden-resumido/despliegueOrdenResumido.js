@@ -3250,6 +3250,7 @@ $(document).ready(async () => {
     function obtenerFiltrosActuales(urlAPI = apiURL) {
         const filterField = filterSelector.val().trim()
         const filterValue = filterInput.val().trim()
+        const incluirExcluir = $('#filter-incluir-excluir').val() || 'incluir'
         const solped = $('#inputSOLPED').val().trim()
         const filters = $('#filterMultipleSelector').val()
         const fecha_desde = transformarFecha($('#fechaDesde').val())
@@ -3279,6 +3280,7 @@ $(document).ready(async () => {
         // Agregar filtro de búsqueda por campo específico
         if (filterField.length !== 0 && filterValue.length !== 0) {
             params.push(`${filterField}=${encodeURIComponent(filterValue)}`)
+            params.push(`incluir_excluir=${incluirExcluir}`)
         }
 
         // Agregar filtro de SOLPED

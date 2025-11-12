@@ -496,6 +496,8 @@ class OrdenInternaMaterialesController extends Controller
         $responsables = $request->input('responsables', null);
         // tipo de material
         $tipo = $request->input('tipo', null);
+        // incluir/excluir
+        $incluir_excluir = $request->input('incluir_excluir', 'incluir');
 
         if ($almacen_request !== null) {
             $almacen_codigo = $almacen_request;
@@ -612,14 +614,22 @@ class OrdenInternaMaterialesController extends Controller
 
 
         if ($odt_numero !== null && count($odt_numero) > 0) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero) {
-                $q->whereIn('odt_numero', $odt_numero);
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($odt_numero, $incluir_excluir) {
+                if ($incluir_excluir === 'excluir') {
+                    $q->whereNotIn('odt_numero', $odt_numero);
+                } else {
+                    $q->whereIn('odt_numero', $odt_numero);
+                }
             });
         }
 
         if ($oic_otsap !== null && count($oic_otsap) > 0) {
-            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($oic_otsap) {
-                $q->whereIn('oic_otsap', $oic_otsap);
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) use ($oic_otsap, $incluir_excluir) {
+                if ($incluir_excluir === 'excluir') {
+                    $q->whereNotIn('oic_otsap', $oic_otsap);
+                } else {
+                    $q->whereIn('oic_otsap', $oic_otsap);
+                }
             });
         }
 
