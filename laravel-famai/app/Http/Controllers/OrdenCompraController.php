@@ -804,6 +804,22 @@ class OrdenCompraController extends Controller
             $occ_id = $request->input('occ_id');
             $imprimir_disgregado = $request->input('imprimir_disgregado');
 
+            // Obtener la orden de compra para verificar condiciones
+            $ordenCompra = OrdenCompra::find($occ_id);
+            
+            // Verificar si es la primera vez que se descarga y ya tiene occ_nrosap
+            if ($ordenCompra && 
+                $ordenCompra->occ_nrosap !== null && 
+                $ordenCompra->occ_nrosap !== '' &&
+                ($ordenCompra->occ_descargado == 0 || $ordenCompra->occ_descargado === null || $ordenCompra->occ_descargado === false)) {
+                
+                // Actualizar los campos de descarga (solo la primera vez)
+                $ordenCompra->occ_descargado = 1;
+                $ordenCompra->occ_fechadescargado = now();
+                $ordenCompra->occ_usuariodescargado = $user->usu_codigo;
+                $ordenCompra->save();
+            }
+
             $pdf = $this->generarPDF($occ_id, $imprimir_disgregado, $user);
             return $pdf->download('ordencompra.pdf');
         } catch (Exception $e) {

@@ -41,7 +41,10 @@ class OrdenCompra extends Model
         'occ_usumodificacion',
         'occ_fecmodificacion',
         'occ_nrosap',
-        'occ_sedesap'
+        'occ_sedesap',
+        'occ_descargado', // ALTER TABLE tblordencompracab_occ ADD occ_descargado BIT NOT NULL DEFAULT 0
+        'occ_fechadescargado', // ALTER TABLE tblordencompracab_occ ADD occ_fechadescargado DATETIME NULL
+        'occ_usuariodescargado', // ALTER TABLE tblordencompracab_occ ADD occ_usuariodescargado CHAR(8) NULL
     ];
 
     const CREATED_AT = 'occ_feccreacion';
