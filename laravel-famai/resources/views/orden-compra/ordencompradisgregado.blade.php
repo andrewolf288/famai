@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ 'Orden de compra ' . $ordencompra['occ_numero'] }}</title>
+    <title>{{ 'Orden de compra ' . ($ordencompra['occ_nrosap'] ? $ordencompra['occ_nrosap'] : $ordencompra['occ_numero']) }}</title>
     <style>
         * {
             margin: 0;
