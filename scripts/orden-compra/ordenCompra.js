@@ -24,7 +24,7 @@ $(document).ready(() => {
         paging: false,
         searching: false,
         info: false,
-        order: [[12, 'desc']]
+        order: [[13, 'desc']]
     }
 
     function initDataTable(data) {
