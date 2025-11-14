@@ -860,4 +860,168 @@ $(document).ready(function () {
         }
     }
 
+    // -------- FUNCIONALIDAD DE COPIAR DETALLE DE REQUERIMIENTO ---------
+    $('#btn-copiar-detalle').on('click', function () {
+        // Limpiar el input y el mensaje de error
+        $('#numeroRequerimientoInput').val('')
+        $('#error-message-copiar').addClass('d-none').text('')
+        
+        // Mostrar el modal
+        const modal = new bootstrap.Modal(document.getElementById('copiarDetalleRequerimientoModal'))
+        modal.show()
+    })
+
+    // Permitir copiar con Enter
+    $('#numeroRequerimientoInput').on('keypress', async function (event) {
+        if (event.which === 13) {
+            event.preventDefault()
+            await copiarDetalleRequerimiento()
+        }
+    })
+
+    // Botón copiar
+    $('#btn-copiar-requerimiento').on('click', async function () {
+        await copiarDetalleRequerimiento()
+    })
+
+    // Función para copiar el detalle del requerimiento
+    const copiarDetalleRequerimiento = async () => {
+        const numeroRequerimiento = $('#numeroRequerimientoInput').val().trim()
+        const $errorMessage = $('#error-message-copiar')
+        const $btnCopiar = $('#btn-copiar-requerimiento')
+        const $spinner = $('#spinner-copiar')
+
+        // Validar que se haya ingresado un número
+        if (numeroRequerimiento.length === 0) {
+            $errorMessage.removeClass('d-none').text('Por favor, ingrese un número de requerimiento')
+            return
+        }
+
+        try {
+            // Mostrar spinner y deshabilitar botón
+            $spinner.removeClass('d-none')
+            $btnCopiar.prop('disabled', true)
+            $errorMessage.addClass('d-none')
+
+            // Buscar el requerimiento por número
+            const { data: responseRequerimientos } = await client.get(`/requerimientos?odt_numero=${encodeURIComponent(numeroRequerimiento)}`)
+            
+            const requerimientos = responseRequerimientos.data || responseRequerimientos
+            
+            if (!requerimientos || requerimientos.length === 0) {
+                $errorMessage.removeClass('d-none').text('No se encontró un requerimiento con ese número')
+                return
+            }
+
+            // Obtener el primer requerimiento (debería ser único)
+            const requerimiento = requerimientos[0]
+
+            // Obtener los detalles completos del requerimiento usando su ID
+            const { data: requerimientoCompleto } = await client.get(`/requerimiento/${requerimiento.oic_id}`)
+            const requerimientoData = requerimientoCompleto.data
+
+            // Verificar que tenga partes y materiales
+            if (!requerimientoData.partes || requerimientoData.partes.length === 0) {
+                $errorMessage.removeClass('d-none').text('El requerimiento no tiene materiales para copiar')
+                return
+            }
+
+            // Recopilar todos los materiales de todas las partes
+            const materiales = []
+            requerimientoData.partes.forEach(parte => {
+                if (parte.materiales && parte.materiales.length > 0) {
+                    parte.materiales.forEach(material => {
+                        materiales.push(material)
+                    })
+                }
+            })
+
+            if (materiales.length === 0) {
+                $errorMessage.removeClass('d-none').text('El requerimiento no tiene materiales para copiar')
+                return
+            }
+
+            // Agregar cada material a la tabla
+            for (const material of materiales) {
+                const pro_id = material.pro_id || obtenerIdUnico()
+                const pro_codigo = material.producto ? material.producto.pro_codigo : ''
+                const pro_descripcion = material.odm_descripcion || ''
+                // El uni_codigo está directamente en el producto, no en una relación
+                const uni_codigo = material.producto ? (material.producto.uni_codigo || '') : ''
+                const fila_id = obtenerIdUnico()
+
+                const data = {
+                    pro_id: pro_id,
+                    pro_codigo: pro_codigo,
+                    fila_id: fila_id,
+                    odm_descripcion: pro_descripcion,
+                    odm_cantidad: material.odm_cantidad || 1.00,
+                    uni_codigo: uni_codigo,
+                    odm_observacion: '',
+                    odm_tipo: material.odm_tipo || 1,
+                    odm_asociar: material.pro_id !== null,
+                    detalle_adjuntos: []
+                }
+
+                // Crear la fila en la tabla
+                const row = `
+                <tr data-producto="${data.pro_id}" data-fila="${data.fila_id}">
+                    <td>${data.pro_codigo}</td>
+                    <td>
+                        <input type="text" class="form-control descripcion-input" value='${data.odm_descripcion.replace(/'/g, "&#39;")}' />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control cantidad-input" value='${data.odm_cantidad}'/>
+                    </td>
+                    <td>${data.uni_codigo || ''}</td>
+                    <td>
+                        <input type="text" class="form-control observacion-input" value='' />
+                    </td>
+                    <td>
+                        <div class="d-flex justify-content-around">
+                            <button class="btn btn-sm btn-danger btn-detalle-producto-eliminar me-2" data-producto="${data.pro_id}" data-fila="${data.fila_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm btn-primary btn-detalle-producto-adjuntos" data-producto="${data.pro_id}" data-fila="${data.fila_id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `
+
+                $('#tbl-requerimientos tbody').append(row)
+                detalle_requerimiento.push(data)
+            }
+
+            // Cerrar el modal
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('copiarDetalleRequerimientoModal'))
+            modalInstance.hide()
+
+            // Mostrar mensaje de éxito
+            bootbox.alert({
+                title: '<i class="fa fa-check-circle text-success"></i> <span class="text-success">Éxito</span>',
+                message: `Se copiaron ${materiales.length} material(es) del requerimiento ${numeroRequerimiento}`,
+                className: 'bootbox-confirm-modal'
+            })
+
+        } catch (error) {
+            console.error('Error al copiar detalle:', error)
+            const { response } = error
+            if (response && response.status === 404) {
+                $errorMessage.removeClass('d-none').text('No se encontró un requerimiento con ese número')
+            } else {
+                $errorMessage.removeClass('d-none').text('Error al buscar el requerimiento. Por favor, intente nuevamente.')
+            }
+        } finally {
+            // Ocultar spinner y habilitar botón
+            $spinner.addClass('d-none')
+            $btnCopiar.prop('disabled', false)
+        }
+    }
+
 })

@@ -111,6 +111,8 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title">Detalle de requerimiento</h5>
+
+                <button class="btn btn-primary" id="btn-copiar-detalle">Copiar detalle</button>
             </div>
             <div class="card-body">
                 <div class="d-flex flex-row justify-content-between align-items-end">
@@ -321,6 +323,34 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-success" id="btn-importar-requerimientos" disabled>Importar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE COPIAR DETALLE DE REQUERIMIENTO -->
+<div class="modal fade" id="copiarDetalleRequerimientoModal" tabindex="-1" aria-labelledby="copiarDetalleRequerimientoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="copiarDetalleRequerimientoModalLabel">Copiar Detalle de Requerimiento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label for="numeroRequerimientoInput" class="form-label">Número de Requerimiento:</label>
+                        <input type="text" class="form-control" id="numeroRequerimientoInput" placeholder="Ingrese el número de requerimiento" autocomplete="off">
+                    </div>
+                </div>
+                <div id="error-message-copiar" class="alert alert-danger d-none" role="alert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn-copiar-requerimiento">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="spinner-copiar"></span>
+                    Copiar
+                </button>
             </div>
         </div>
     </div>
