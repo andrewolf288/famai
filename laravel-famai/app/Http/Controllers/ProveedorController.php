@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\EntidadBancaria;
+use App\Helpers\UtilHelper;
 use App\Proveedor;
 use App\ProveedorCuentaBanco;
 use Illuminate\Support\Facades\Validator;
@@ -65,6 +66,15 @@ class ProveedorController extends Controller
         }
 
         $results = $queryBuilder->get();
+        
+        // Actualizar cuentas bancarias de cada proveedor antes de devolverlos
+        $user = auth()->user();
+        foreach ($results as $proveedor) {
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($proveedor, $user ? $user->usu_codigo : null);
+            if ($proveedorActualizado) {
+                $proveedor->load(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda']);
+            }
+        }
 
         // Devuelve los materiales en formato JSON
         return response()->json($results);

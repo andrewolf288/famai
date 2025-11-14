@@ -152,6 +152,14 @@ class OrdenCompraController extends Controller
         // consultamos la orden de compra --- aqui necesito un id para consultar la orden de compra
         $ordencomprafind = OrdenCompra::with('proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'elaborador', 'solicitador', 'autorizador', 'formaPago')
             ->where('occ_id', $occ_id)->first();
+        
+        // Actualizar cuentas bancarias del proveedor antes de usarlas
+        if ($ordencomprafind && $ordencomprafind->proveedor) {
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($ordencomprafind->proveedor, $user ? $user->usu_codigo : null);
+            if ($proveedorActualizado) {
+                $ordencomprafind->load(['proveedor.cuentasBancarias.entidadBancaria']);
+            }
+        }
 
         // consultamos el detalle de orden de compra
         $detalleordencomprafind = OrdenCompraDetalle::with('producto', 'detalleMaterial.usuarioCreador', 'detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.cotizaciones.cotizacion')
@@ -794,6 +802,16 @@ class OrdenCompraController extends Controller
             'detalleOrdenCompra.producto.unidad',
             'detalleOrdenCompra.impuesto'
         ])->findOrFail($id);
+        
+        // Actualizar cuentas bancarias del proveedor antes de usarlas
+        if ($ordencompra->proveedor) {
+            $user = auth()->user();
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($ordencompra->proveedor, $user ? $user->usu_codigo : null);
+            if ($proveedorActualizado) {
+                $ordencompra->load(['proveedor.cuentasBancarias.entidadBancaria']);
+            }
+        }
+        
         return response()->json($ordencompra);
     }
 

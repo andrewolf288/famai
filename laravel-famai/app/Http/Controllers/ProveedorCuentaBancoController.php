@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UtilHelper;
 use App\ProveedorCuentaBanco;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,15 @@ class ProveedorCuentaBancoController extends Controller
 
     public function findCuentasBancariasByProveedor($id)
     {
+        // Actualizar cuentas bancarias del proveedor antes de obtenerlas
+        $user = auth()->user();
+        $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($id, $user ? $user->usu_codigo : null);
+        
+        // Si el proveedor no existe, retornar error
+        if (!$proveedorActualizado) {
+            return response()->json(['error' => 'Proveedor no encontrado'], 404);
+        }
+        
         $cuentas = ProveedorCuentaBanco::with(['moneda', 'entidadBancaria'])->where('prv_id', $id)->get();
         return response()->json($cuentas);
     }

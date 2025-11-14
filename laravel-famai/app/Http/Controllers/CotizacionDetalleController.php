@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Cotizacion;
 use App\CotizacionDetalle;
+use App\Helpers\UtilHelper;
 use App\Proveedor;
 use App\Trabajador;
 use Illuminate\Http\Request;
@@ -306,8 +307,19 @@ class CotizacionDetalleController extends Controller
         $cotizacion = Cotizacion::with(['moneda'])
             ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->coc_id);
 
-        $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda'])
-            ->findOrFail($detalleMaterialesCotizar[0]->cotizacion->proveedor->prv_id);
+        $prv_id = $detalleMaterialesCotizar[0]->cotizacion->proveedor->prv_id;
+        
+        // Actualizar cuentas bancarias del proveedor antes de usarlas
+        $proveedor = UtilHelper::actualizarCuentasBancariasProveedor($prv_id);
+        
+        // Si no se encontró el proveedor, intentar obtenerlo de forma tradicional
+        if (!$proveedor) {
+            $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda'])
+                ->findOrFail($prv_id);
+        } else {
+            // Asegurar que las relaciones estén cargadas
+            $proveedor->load(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda']);
+        }
 
         $data = [
             'cotizacion' => $cotizacion,

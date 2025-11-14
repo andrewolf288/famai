@@ -833,6 +833,14 @@ class CotizacionController extends Controller
     private function generarPDF($coc_id, $user = null)
     {
         $cotizacion = Cotizacion::with(['proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'solicitante'])->findOrFail($coc_id);
+        
+        // Actualizar cuentas bancarias del proveedor antes de usarlas
+        if ($cotizacion->proveedor) {
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($cotizacion->proveedor, $user ? $user->usu_codigo : null);
+            if ($proveedorActualizado) {
+                $cotizacion->load(['proveedor.cuentasBancarias.entidadBancaria']);
+            }
+        }
 
         $detalleCotizacion = CotizacionDetalle::with(['producto'])
             ->where('coc_id', $cotizacion->coc_id)
@@ -973,6 +981,16 @@ class CotizacionController extends Controller
 
         // informacion de cotizacion
         $cotizacion = Cotizacion::with(['proveedor.cuentasBancarias.entidadBancaria', 'moneda', 'solicitante'])->findOrFail($id);
+        
+        // Actualizar cuentas bancarias del proveedor antes de usarlas
+        if ($cotizacion->proveedor) {
+            $user = auth()->user();
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($cotizacion->proveedor, $user ? $user->usu_codigo : null);
+            if ($proveedorActualizado) {
+                $cotizacion->load(['proveedor.cuentasBancarias.entidadBancaria']);
+            }
+        }
+        
         $cotizacionDetalle = CotizacionDetalle::with(['producto'])
             ->where('coc_id', $cotizacion->coc_id)
             ->get();
