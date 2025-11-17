@@ -355,42 +355,11 @@ class CotizacionController extends Controller
                 ]);
             }
 
-            // USAR FAM_LOG_Proveedores para buscar bancos del proveedor
-            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parCardCode = ?", [$proveedor->prv_codigo]);
-
-            if (count($bancos) > 1) {
-                throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
-            } elseif (count($bancos) === 1) {
-                ProveedorCuentaBanco::where('prv_id', $proveedor->prv_id)->delete();
-                
-                $bancoInfo = $bancos[0];
-                $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
-                
-                if (!empty($bancoInfo->account_sol) && !empty($bancoInfo->banco_sol)) {
-                    $this->procesarCuentaBancaria(
-                        $proveedor->prv_id,
-                        $bancoInfo->account_sol,
-                        $bancoInfo->banco_sol,
-                        'SOL',
-                        $bancosDisponibles,
-                        $user->usu_codigo
-                    );
-                }
-                
-                if (!empty($bancoInfo->account_usd) && !empty($bancoInfo->banco_usd)) {
-                    $this->procesarCuentaBancaria(
-                        $proveedor->prv_id,
-                        $bancoInfo->account_usd,
-                        $bancoInfo->banco_usd,
-                        'USD',
-                        $bancosDisponibles,
-                        $user->usu_codigo,
-                        $bancoInfo->BIC_SWIFT ?? null,
-                        $bancoInfo->DirBanco ?? null
-                    );
-                }
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($proveedor, $user->usu_codigo);
+            if ($proveedorActualizado) {
+                $proveedor = $proveedorActualizado;
             }
-            
+
 
             // Crear requerimiento para productos excedentes si existen
             $requerimiento_excedente = null;
@@ -1627,46 +1596,12 @@ class CotizacionController extends Controller
             $proveedor = Proveedor::with(['cuentasBancarias.entidadBancaria', 'formaPago'])
                 ->findOrFail($proveedor);
 
-            // USAR FAM_LOG_Proveedores para buscar bancos del proveedor
-            $bancos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parCardCode = ?", [$proveedor->prv_codigo]);
-            if (count($bancos) > 1) {
-                throw new Exception("El RUC {$proveedor->prv_nrodocumento} es ambiguo. Se encontraron " . count($bancos) . " registros.");
-            } elseif (count($bancos) === 1) {
-                ProveedorCuentaBanco::where('prv_id', $proveedor->prv_id)->delete();
-                
-                $bancoInfo = $bancos[0];
-                $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
-                Log::info(json_encode($bancoInfo));
-                Log::info(json_encode($proveedor));
-                if (!empty($bancoInfo->account_sol) && !empty($bancoInfo->banco_sol)) {
-                    Log::info("Se encontro cuenta sol");
-                    $this->procesarCuentaBancaria(
-                        $proveedor->prv_id,
-                        $bancoInfo->account_sol,
-                        $bancoInfo->banco_sol,
-                        'SOL',
-                        $bancosDisponibles,
-                        $user->usu_codigo
-                    );
-                }
-                
-                if (!empty($bancoInfo->account_usd) && !empty($bancoInfo->banco_usd)) {
-                    Log::info("Se encontro cuenta usd");
-                    $this->procesarCuentaBancaria(
-                        $proveedor->prv_id,
-                        $bancoInfo->account_usd,
-                        $bancoInfo->banco_usd,
-                        'USD',
-                        $bancosDisponibles,
-                        $user->usu_codigo,
-                        $bancoInfo->BIC_SWIFT ?? null,
-                        $bancoInfo->DirBanco ?? null
-                    );
-                }
-
-                $proveedor->refresh();
-                $proveedor->load(['cuentasBancarias.entidadBancaria', 'formaPago']);
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($proveedor, $user->usu_codigo);
+            if ($proveedorActualizado) {
+                $proveedor = $proveedorActualizado;
             }
+
+            $proveedor->loadMissing(['cuentasBancarias.entidadBancaria', 'formaPago']);
 
             // buscamos las cotizaciones detalle correspondientes con todas las relaciones necesarias
             $detallesCotizaciones = CotizacionDetalle::with(['detalleMaterial.ordenInternaParte.ordenInterna', 'detalleMaterial.producto', 'cotizacion'])
@@ -1770,54 +1705,4 @@ class CotizacionController extends Controller
         return response()->json($result);
     }
 
-    private function procesarCuentaBancaria($prv_id, $numeroCuenta, $nombreBanco, $moneda, $bancosDisponibles, $usu_codigo, $bicSwift = null, $dirBanco = null)
-    {
-        $nombreBancoNormalizado = $this->normalizarTexto($nombreBanco);
-        
-        // Buscar el banco en la lista de bancos disponibles
-        $bancoEncontrado = $bancosDisponibles->first(function ($banco) use ($nombreBancoNormalizado) {
-            $descripcionNormalizada = $this->normalizarTexto($banco->eba_descripcion);
-            return stripos($descripcionNormalizada, $nombreBancoNormalizado) !== false || 
-                   stripos($nombreBancoNormalizado, $descripcionNormalizada) !== false;
-        });
-        
-        if (!$bancoEncontrado) {
-            $bancoEncontrado = EntidadBancaria::create([
-                'eba_descripcion' => $nombreBanco,
-                'eba_usucreacion' => $usu_codigo,
-                'eba_activo' => 1
-            ]);
-        }
-        
-        ProveedorCuentaBanco::create([
-            'prv_id' => $prv_id,
-            'mon_codigo' => $moneda,
-            'eba_id' => $bancoEncontrado->eba_id,
-            'pvc_numerocuenta' => $numeroCuenta,
-            'pvc_BIC_SWIFT' => $bicSwift,
-            'pvc_DirBanco' => $dirBanco,
-            'pvc_activo' => 1,
-            'pvc_usucreacion' => $usu_codigo,
-            'pvc_tipocuenta' => 'Corriente',
-        ]);
-    }
-    
-    private function normalizarTexto($texto)
-    {
-        $texto = mb_strtolower($texto, 'UTF-8');
-        
-        $texto = str_replace(
-            ['á', 'é', 'í', 'ó', 'ú', 'ñ', 'ü', 'à', 'è', 'ì', 'ò', 'ù'],
-            ['a', 'e', 'i', 'o', 'u', 'n', 'u', 'a', 'e', 'i', 'o', 'u'],
-            $texto
-        );
-        
-        $texto = str_replace(
-            ['Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', 'Ü', 'À', 'È', 'Ì', 'Ò', 'Ù'],
-            ['a', 'e', 'i', 'o', 'u', 'n', 'u', 'a', 'e', 'i', 'o', 'u'],
-            $texto
-        );
-        
-        return $texto;
-    }
 }

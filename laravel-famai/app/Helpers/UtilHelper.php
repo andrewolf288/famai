@@ -188,8 +188,6 @@ class UtilHelper
             } elseif (count($bancos) === 1) {
                 // Eliminar cuentas bancarias existentes
                 ProveedorCuentaBanco::where('prv_id', $proveedor->prv_id)->delete();
-                
-                Log::info("Actualizando cuentas bancarias del proveedor {$proveedor->prv_codigo}: " . json_encode($bancos));
 
                 $bancoInfo = $bancos[0];
                 $bancosDisponibles = EntidadBancaria::where('eba_activo', 1)->get();
@@ -220,8 +218,13 @@ class UtilHelper
                     );
                 }
 
+                $proveedorActualizado = self::actualizarDatosProveedor($proveedor, $bancoInfo, $usu_codigo);
+
+                if ($proveedorActualizado) {
+                    $proveedor = $proveedorActualizado;
+                }
+
                 // Refrescar el proveedor con las relaciones
-                $proveedor->refresh();
                 $proveedor->load(['cuentasBancarias.entidadBancaria', 'cuentasBancarias.moneda']);
             }
 
@@ -240,6 +243,90 @@ class UtilHelper
                 'trace' => $e->getTraceAsString()
             ]);
             // Retornar el proveedor sin actualizar en caso de error
+            return ($proveedor instanceof Proveedor) ? $proveedor : null;
+        }
+    }
+
+    /**
+     * Actualiza la información básica del proveedor utilizando información del stored procedure FAM_LOG_Proveedores
+     *
+     * @param Proveedor|int $proveedor
+     * @param object|null $datosSAP
+     * @param string|null $usu_codigo
+     * @return Proveedor|null
+     */
+    public static function actualizarDatosProveedor($proveedor, $datosSAP = null, $usu_codigo = null)
+    {
+        try {
+
+            $proveedorId = null;
+
+            if ($proveedor instanceof Proveedor) {
+                $proveedorId = $proveedor->prv_id;
+            } elseif (is_int($proveedor) || is_string($proveedor)) {
+                $proveedorId = $proveedor;
+                $proveedor = Proveedor::find($proveedor);
+            }
+
+
+            if (!$proveedor) {
+                Log::warning('Proveedor no encontrado al intentar actualizar datos', [
+                    'proveedor_id' => $proveedorId
+                ]);
+                return null;
+            }
+
+            if (!$usu_codigo) {
+                $user = auth()->user();
+                $usu_codigo = $user ? ($user->usu_codigo ?? 'ADMIN') : 'ADMIN';
+            }
+
+            if (!$datosSAP) {
+                $datos = [];
+
+                if (!empty($proveedor->prv_codigo)) {
+                    $datos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parCardCode = ?", [$proveedor->prv_codigo]);
+                } elseif (!empty($proveedor->prv_nrodocumento)) {
+                    $datos = DB::select("EXEC dbo.FAM_LOG_Proveedores @parRUC = ?", [$proveedor->prv_nrodocumento]);
+                }
+
+                $datosSAP = $datos[0] ?? null;
+            }
+
+            if (!$datosSAP) {
+                return $proveedor;
+            }
+
+            $camposActualizables = [
+                'prv_codigo' => property_exists($datosSAP, 'CardCode') ? $datosSAP->CardCode : null,
+                'prv_nrodocumento' => property_exists($datosSAP, 'RUC') ? $datosSAP->RUC : null,
+                'prv_nombre' => property_exists($datosSAP, 'RazSocial') ? $datosSAP->RazSocial : null,
+                'prv_direccion' => property_exists($datosSAP, 'Direccion') ? $datosSAP->Direccion : null,
+                'prv_contacto' => property_exists($datosSAP, 'Contacto') ? $datosSAP->Contacto : null,
+                'prv_telefono' => property_exists($datosSAP, 'Telefono') ? $datosSAP->Telefono : null,
+                'prv_whatsapp' => property_exists($datosSAP, 'Celular') ? $datosSAP->Celular : null,
+                'prv_correo' => property_exists($datosSAP, 'E_Mail') ? $datosSAP->E_Mail : null,
+            ];
+
+            $datosActualizacion = array_filter($camposActualizables, function ($valor) {
+                return !is_null($valor) && $valor !== '';
+            });
+
+            if (!empty($datosActualizacion)) {
+                $datosActualizacion['prv_usumodificacion'] = $usu_codigo;
+                $datosActualizacion['prv_fecmodificacion'] = now();
+                $proveedor->update($datosActualizacion);
+                $proveedor->refresh();
+            }
+
+            return $proveedor;
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar datos del proveedor', [
+                'prv_id' => $proveedor instanceof Proveedor ? $proveedor->prv_id : null,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return ($proveedor instanceof Proveedor) ? $proveedor : null;
         }
     }

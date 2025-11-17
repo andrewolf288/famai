@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\UtilHelper;
 use App\Producto;
 use App\ProductoProveedor;
 use App\Proveedor;
@@ -295,22 +296,10 @@ class ProductoProveedorController extends Controller
             }
 
             // Actualizar el proveedor en la base de datos si se obtuvieron datos de SAP
-            if ($proveedorSAP) {
-                $proveedor = $item->proveedor;
-                $proveedor->update([
-                    'prv_nrodocumento' => $proveedorSAP->RUC,
-                    'prv_nombre' => $proveedorSAP->RazSocial,
-                    'prv_direccion' => $proveedorSAP->Direccion,
-                    'prv_contacto' => $proveedorSAP->Contacto,
-                    'prv_telefono' => $proveedorSAP->Telefono,
-                    'prv_whatsapp' => $proveedorSAP->Celular,
-                    'prv_correo' => $proveedorSAP->E_Mail,
-                    'prv_usumodificacion' => auth()->user()->usu_codigo,
-                    'prv_fecmodificacion' => now(),
-                ]);
-                
-                // Recargar el modelo para obtener los datos actualizados
-                $proveedor->refresh();
+            $proveedorActualizado = UtilHelper::actualizarDatosProveedor($item->proveedor, $proveedorSAP);
+
+            if ($proveedorActualizado) {
+                $item->setRelation('proveedor', $proveedorActualizado);
             }
 
             $proveedorArray = $item->proveedor->toArray();
