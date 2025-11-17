@@ -1011,27 +1011,29 @@ $(document).ready(async () => {
     })
 
     // --------------- MANEJO DE COTIZACIONES --------------
-    function renderRowCotizacion(detalle, index, proveedor) {
+    function renderRowCotizacion(detalle, index, proveedor = null) {
         let precioUnitario = 0.00
         let descuento = 0.00
         let fechaUltimaCompra = 'N/A'
         const odm_id = []
         const odts = []
-        try {
-            precioUnitario = proveedor.precio_unitario
-            // descuento = proveedor.descuento_porcentaje
-        } catch (error) {
-            console.log(error)
+
+        const precioProveedor = parseFloat(proveedor?.precio_unitario ?? proveedor?.precio_unitario_item ?? proveedor?.precio_unitario_promedio)
+        if (!isNaN(precioProveedor)) {
+            precioUnitario = precioProveedor
         }
 
-        try {
-            fechaUltimaCompra = parseDateSimple(proveedor.prp_fechaultimacompra)
-        } catch (error) {
-            fechaUltimaCompra = 'N/A'
+        const descuentoProveedor = parseFloat(proveedor?.descuento_porcentaje)
+        if (!isNaN(descuentoProveedor)) {
+            descuento = descuentoProveedor
         }
 
-        if (descuento == null || descuento == undefined) {
-            descuento = 0.00
+        if (proveedor?.prp_fechaultimacompra) {
+            try {
+                fechaUltimaCompra = parseDateSimple(proveedor.prp_fechaultimacompra)
+            } catch (error) {
+                fechaUltimaCompra = 'N/A'
+            }
         }
 
         if (!detalle.odm_id && detalle.detalle && Array.isArray(detalle.detalle)) {
@@ -1188,6 +1190,104 @@ $(document).ready(async () => {
         }
     }
 
+    function obtenerOdmIdsDesdeDetalleCotizacion() {
+        const ids = [];
+
+        if (!Array.isArray(detalleCotizacion)) {
+            return ids;
+        }
+
+        detalleCotizacion.forEach((detalle) => {
+            if (!detalle) {
+                return;
+            }
+
+            if (detalle.odm_id !== undefined && detalle.odm_id !== null) {
+                ids.push(detalle.odm_id);
+            }
+
+            if (Array.isArray(detalle.detalle)) {
+                detalle.detalle.forEach((item) => {
+                    if (item?.odm_id !== undefined && item?.odm_id !== null) {
+                        ids.push(item.odm_id);
+                    }
+                });
+            }
+        });
+
+        return [...new Set(ids)];
+    }
+
+    function actualizarDetalleCotizacionConMateriales(materiales = []) {
+        if (!Array.isArray(materiales) || materiales.length === 0) {
+            return;
+        }
+
+        const materialesMap = new Map();
+        materiales.forEach((material) => {
+            if (material?.odm_id !== undefined && material?.odm_id !== null) {
+                materialesMap.set(material.odm_id, material);
+            }
+
+            if (Array.isArray(material?.detalle)) {
+                material.detalle.forEach((detalle) => {
+                    if (detalle?.odm_id !== undefined && detalle?.odm_id !== null) {
+                        materialesMap.set(detalle.odm_id, detalle);
+                    }
+                });
+            }
+        });
+
+        if (materialesMap.size === 0) {
+            return;
+        }
+
+        detalleCotizacion = detalleCotizacion.map((detalle) => {
+            if (!detalle) {
+                return detalle;
+            }
+
+            if (detalle.odm_id !== undefined && detalle.odm_id !== null && materialesMap.has(detalle.odm_id)) {
+                return {
+                    ...detalle,
+                    ...materialesMap.get(detalle.odm_id),
+                };
+            }
+
+            if (Array.isArray(detalle.detalle) && detalle.detalle.length > 0) {
+                let seActualizo = false;
+                const detalleActualizado = detalle.detalle.map((item) => {
+                    const actualizado = materialesMap.get(item.odm_id);
+                    if (actualizado) {
+                        seActualizo = true;
+                        return actualizado;
+                    }
+                    return item;
+                });
+
+                if (seActualizo) {
+                    const referencia = detalleActualizado[0] || {};
+                    const nuevaCantidad = detalleActualizado.reduce((total, item) => {
+                        const cantidad = parseFloat(item?.odm_cantidad || 0);
+                        return total + (isNaN(cantidad) ? 0 : cantidad);
+                    }, 0);
+
+                    return {
+                        ...detalle,
+                        detalle: detalleActualizado,
+                        cantidad: isNaN(nuevaCantidad) ? detalle.cantidad : nuevaCantidad,
+                        pro_id: referencia?.pro_id ?? detalle.pro_id,
+                        pro_descripcion: referencia?.producto?.pro_descripcion ?? detalle.pro_descripcion,
+                        pro_codigo: referencia?.producto?.pro_codigo ?? detalle.pro_codigo,
+                        uni_codigo: referencia?.producto?.uni_codigo ?? detalle.uni_codigo,
+                    };
+                }
+            }
+
+            return detalle;
+        });
+    }
+
     // * Reasignar codigo
     $("#tbl-cotizaciones-materiales").on("click", ".asignar-codigo", async function() {
         const odm_ids = $(this).data("odm-id");
@@ -1341,23 +1441,8 @@ $(document).ready(async () => {
 
             if (!confirmacion) { return; }
             
-            // 1. Obtener los IDs de los materiales seleccionados
-            const idsSeleccionados = [];
-            const filas = $('#tbl-cotizaciones-materiales tbody tr');
-            
-            filas.each(function() {
-                const index = $(this).data('index');
-                if (index !== undefined && detalleCotizacion[index]) {
-                    const detalle = detalleCotizacion[index];
-                    if (detalle.odm_id) {
-                        idsSeleccionados.push(detalle.odm_id);
-                    } else if (detalle.detalle) {
-                        detalle.detalle.forEach(d => {
-                            if (d.odm_id) idsSeleccionados.push(d.odm_id);
-                        });
-                    }
-                }
-            });
+            // 1. Obtener los IDs de los materiales seleccionados desde memoria
+            const idsSeleccionados = obtenerOdmIdsDesdeDetalleCotizacion();
             
             if (idsSeleccionados.length > 0) {
                 try {
@@ -1365,23 +1450,22 @@ $(document).ready(async () => {
                         odm_ids: idsSeleccionados
                     });
                     
-                    detalleCotizacion = materialesActualizados;
+                    actualizarDetalleCotizacionConMateriales(materialesActualizados);
                 } catch (error) {
                     console.error('Error al obtener datos actualizados:', error);
-                    detalleCotizacion = despliegueMaterialesResumido || [];
                 }
-            } else {
-                detalleCotizacion = [];
             }
             
             // Obtener los productos actualizados de la cotización
             const productosCotizacion = detalleCotizacion
-                .filter(detalle => detalle.pro_id !== null && detalle.pro_id !== undefined)
+                .filter(detalle => detalle?.pro_id !== null && detalle?.pro_id !== undefined)
                 .map(detalle => detalle.pro_id);
+
+            const productosUnicos = [...new Set(productosCotizacion)];
 
 
             // Hacer la consulta actualizada de proveedores
-            const formatDataProveedores = { productos: productosCotizacion };
+            const formatDataProveedores = { productos: productosUnicos };
             const { data } = await client.post('/ultimas-compras/producto', formatDataProveedores);
 
 
@@ -1414,6 +1498,9 @@ $(document).ready(async () => {
             let content = '';
             
             detalleCotizacion.forEach((detalle, index) => {
+                if (!detalle) {
+                    return;
+                }
                 const proveedor = data.find(p => p.pro_id == detalle.pro_id);
                 const rowHtml = renderRowCotizacion(detalle, index, proveedor);
                 if (rowHtml) {
@@ -1940,6 +2027,9 @@ $(document).ready(async () => {
         console.log("Detalle de cotizacion")
         console.log(detalleCotizacion)
         detalleCotizacion.forEach((detalle, index) => {
+            if (!detalle) {
+                return;
+            }
             // const CopiaDetalle = { ...detalle };
             // if (CopiaDetalle.odm_id === undefined) {
             //     CopiaDetalle.detalle.forEach(detalleElement => {
