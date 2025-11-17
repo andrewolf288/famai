@@ -53,18 +53,16 @@ $(document).ready(() => {
                 className: 'all',
                 targets: [0,1,2,3,8,9,4,5]
             },
-        ],
-        columnDefs: [
             {
                 className: 'none',
                 targets: [6,7,10,11,12,13]
             },
             {
-                targets: 8,
+                targets: 10,
                 render: DataTable.render.datetime('DD/MM/YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm:ss')
             }
         ],
-        order: [[8, 'desc']],
+        order: [[10, 'desc']],
         initComplete: function() {
             const table = this.api();
             $('#filtro-nro-ot').val('');
@@ -130,6 +128,10 @@ $(document).ready(() => {
         let content = ''
         data.forEach((ordenInterna, index) => {
             const habilitadoEditar = ordenInterna.oic_estado === "INGRESO" || ordenInterna.oic_estado === "REABIERTO" ? true : false
+            const fechaAprobacionRaw = ordenInterna.oic_fechaaprobacion
+            const fechaAprobacionDisplay = fechaAprobacionRaw !== null ? parseDateSimple(fechaAprobacionRaw) : 'N/A'
+            const fechaAprobacionTimestamp = fechaAprobacionRaw ? new Date(fechaAprobacionRaw).getTime() : null
+            const fechaAprobacionOrderAttr = Number.isFinite(fechaAprobacionTimestamp) ? `data-order="${fechaAprobacionTimestamp}"` : ''
             content += `
                 <tr>
                     <td>${ordenInterna?.odt_numero ?? 'N/A'}</td>
@@ -137,7 +139,7 @@ $(document).ready(() => {
                     <td>${ordenInterna.cliente?.cli_nombre ?? 'N/A'}</td>
                     <td>${ordenInterna.oic_equipo_descripcion ?? 'N/A'}</td>
                     <td>${ordenInterna.oic_componente ?? 'N/A'}</td>
-                    <td>${ordenInterna.oic_fechaaprobacion !== null ? parseDateSimple(ordenInterna.oic_fechaaprobacion) : 'N/A'}</td>
+                    <td ${fechaAprobacionOrderAttr}>${fechaAprobacionDisplay}</td>
                     <td>${ordenInterna.area?.are_descripcion ?? 'N/A'}</td>
                     <td class="text-center">${ordenInterna.total_materiales}</td>
                     <td>
