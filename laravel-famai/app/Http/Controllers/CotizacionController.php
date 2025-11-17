@@ -15,7 +15,6 @@ use App\OrdenInternaPartes;
 use App\Parte;
 use App\Producto;
 use App\Proveedor;
-use App\ProveedorCuentaBanco;
 use App\Trabajador;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -1107,7 +1106,10 @@ class CotizacionController extends Controller
         try {
             DB::beginTransaction();
 
-            $proveedorRequest = $request->input('proveedor');
+            $user = auth()->user();
+            $usuarioAutenticado = $user ? $user->usu_codigo : 'ADMIN';
+
+            $proveedorRequest = $request->input('proveedor', []);
             
             // validacion de cotizacion
             $validatorCotizacion = validator($request->all(), [
@@ -1138,12 +1140,6 @@ class CotizacionController extends Controller
             // validacion de proveedor
             $validatorProveedor = validator($proveedorRequest, [
                 'prv_id' => 'required|exists:tblproveedores_prv,prv_id',
-                'prv_correo' => 'nullable|email',
-                'prv_direccion' => 'nullable|string',
-                'prv_contacto' => 'nullable|string',
-                'prv_telefono' => 'nullable|string',
-                'prv_whatsapp' => 'nullable|string',
-                'cuentas_bancarias' => 'required|array|min:1',
             ]);
 
             if ($validatorProveedor->fails()) {
@@ -1158,33 +1154,14 @@ class CotizacionController extends Controller
 
             $validatedDataProveedor = $validatorProveedor->validated();
 
-            // actualizamos informacion de proveedor
-            $proveedor = Proveedor::findOrFail($validatedDataProveedor['prv_id']);
-            $proveedor->update([
-                'prv_correo' => $validatedDataProveedor['prv_correo'],
-                'prv_direccion' => $validatedDataProveedor['prv_direccion'],
-                'prv_contacto' => $validatedDataProveedor['prv_contacto'],
-                'prv_telefono' => $validatedDataProveedor['prv_telefono'],
-                'prv_whatsapp' => $validatedDataProveedor['prv_whatsapp']
-            ]);
+            $proveedor = Proveedor::with('cuentasBancarias.entidadBancaria')
+                ->findOrFail($validatedDataProveedor['prv_id']);
 
-            // actualizamos las cuentas
-            foreach ($validatedDataProveedor['cuentas_bancarias'] as $cuenta) {
-                if (isset($cuenta['pvc_id'])) {
-                    $cuentaBancaria = ProveedorCuentaBanco::findOrFail($cuenta['pvc_id']);
-                    $cuentaBancaria->update([
-                        'pvc_numerocuenta' => $cuenta['pvc_numerocuenta'],
-                        'mon_codigo' => $cuenta['mon_codigo'],
-                        'eba_id' => $cuenta['eba_id'],
-                    ]);
-                } else {
-                    ProveedorCuentaBanco::create([
-                        'prv_id' => $proveedor->prv_id,
-                        'pvc_numerocuenta' => $cuenta['pvc_numerocuenta'],
-                        'mon_codigo' => $cuenta['mon_codigo'],
-                        'eba_id' => $cuenta['eba_id'],
-                    ]);
-                }
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($proveedor, $usuarioAutenticado);
+            if ($proveedorActualizado) {
+                $proveedor = $proveedorActualizado->load(['cuentasBancarias.entidadBancaria']);
+            } else {
+                $proveedor->loadMissing(['cuentasBancarias.entidadBancaria']);
             }
 
             // actualizamos la cotizacion
