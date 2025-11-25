@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Producto extends BaseModel
+class Producto extends Model
 {
     public $timestamps = true;
     protected $table = 'tblproductos_pro';

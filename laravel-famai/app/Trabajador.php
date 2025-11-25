@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Trabajador extends BaseModel
+class Trabajador extends Model
 {
     public $timestamps = true;
     protected $table = 'tbltrabajadores_tra';

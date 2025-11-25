@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EntidadBancaria extends BaseModel
+class EntidadBancaria extends Model
 {
     public $timestamps = true;
     protected $table = 'tblentidadbancaria_eba';

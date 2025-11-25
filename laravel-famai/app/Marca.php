@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Marca extends BaseModel
+class Marca extends Model
 {
     public $timestamps = true;
     protected $table = 'tblproductosmarcas_pma';

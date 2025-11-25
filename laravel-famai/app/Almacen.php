@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Almacen extends BaseModel
+class Almacen extends Model
 {
     public $timestamps = true;
     protected $table = 'tblalmacenes_alm';

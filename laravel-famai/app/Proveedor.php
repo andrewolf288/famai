@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Proveedor extends BaseModel
+class Proveedor extends Model
 {
     public $timestamps = true;
     protected $table = 'tblproveedores_prv';

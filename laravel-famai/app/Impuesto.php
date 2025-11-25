@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Impuesto extends BaseModel
+class Impuesto extends Model
 {
     public $timestamps = true;
     protected $table = 'tblimpuestos_imp';

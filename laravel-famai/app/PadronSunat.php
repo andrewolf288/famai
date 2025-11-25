@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PadronSunat extends BaseModel
+class PadronSunat extends Model
 {
     protected $table = 'tblPadronSunat_XPS';
 

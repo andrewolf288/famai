@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrdenInterna extends BaseModel
+class OrdenInterna extends Model
 {
     public $timestamps = true;
     protected $table = 'tblordenesinternascab_oic';

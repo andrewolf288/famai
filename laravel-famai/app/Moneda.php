@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Moneda extends BaseModel
+class Moneda extends Model
 {
     public $timestamps = true;
     protected $table = 'tblmonedas_mon';

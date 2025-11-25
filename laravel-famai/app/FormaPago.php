@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FormaPago extends BaseModel
+class FormaPago extends Model
 {
     public $timestamps = true;
     protected $table = 'tblformaspago_fpa';

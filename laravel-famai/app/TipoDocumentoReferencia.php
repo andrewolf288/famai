@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TipoDocumentoReferencia extends BaseModel
+class TipoDocumentoReferencia extends Model
 {
     public $timestamps = true;
     protected $table = 'tbltiposdocumentoreferencia_tdr';

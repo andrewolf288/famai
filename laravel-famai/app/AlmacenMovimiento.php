@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AlmacenMovimiento extends BaseModel
+class AlmacenMovimiento extends Model
 {
     public $timestamps = true;
     protected $table = 'tblalmacenmovimientoscab_amc';
