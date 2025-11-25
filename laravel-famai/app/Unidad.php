@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Unidad extends Model
+class Unidad extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblunidades_uni';

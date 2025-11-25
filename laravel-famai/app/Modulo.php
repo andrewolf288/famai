@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Modulo extends Model
+class Modulo extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblmodulos_mol';

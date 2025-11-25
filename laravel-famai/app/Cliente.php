@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Cliente extends Model
+class Cliente extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblclientes_cli';

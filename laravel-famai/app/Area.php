@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Area extends Model
+class Area extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblareas_are';

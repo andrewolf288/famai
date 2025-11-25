@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrdenTrabajo extends Model
+class OrdenTrabajo extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblordenesdetrabajo_odt';

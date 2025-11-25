@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrdenInternaMaterialesAdjuntos extends Model
+class OrdenInternaMaterialesAdjuntos extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblordenesinternasdetmaterialesadjuntos_oma';

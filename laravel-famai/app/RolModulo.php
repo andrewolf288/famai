@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RolModulo extends Model
+class RolModulo extends BaseModel
 {
     public $timestamps = false;
     protected $table = 'tblrolesmodulos_rmo';

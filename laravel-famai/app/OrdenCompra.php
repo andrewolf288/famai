@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrdenCompra extends Model
+class OrdenCompra extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblordencompracab_occ';

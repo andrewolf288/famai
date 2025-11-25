@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class Reporte extends Model
+class Reporte extends BaseModel
 {
     protected $connection = 'sqlsrv';
     

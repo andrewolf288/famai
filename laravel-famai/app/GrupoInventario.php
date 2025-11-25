@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class GrupoInventario extends Model
+class GrupoInventario extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblproductosgruposinventario_pgi';

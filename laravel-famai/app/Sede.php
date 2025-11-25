@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Sede extends Model
+class Sede extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblsedes_sed';

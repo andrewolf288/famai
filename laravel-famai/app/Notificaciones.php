@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Notificaciones extends Model
+class Notificaciones extends BaseModel
 {
     public $timestamps = false;
     protected $table = 'tblnotificaciones_ntf';

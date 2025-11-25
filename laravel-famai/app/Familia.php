@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Familia extends Model
+class Familia extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblproductosfamilias_pfa';

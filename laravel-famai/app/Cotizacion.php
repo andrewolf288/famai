@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Cotizacion extends Model
+class Cotizacion extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblcotizacionescab_coc';

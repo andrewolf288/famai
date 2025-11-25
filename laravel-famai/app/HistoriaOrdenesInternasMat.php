@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class HistoriaOrdenesInternasMat extends Model
+class HistoriaOrdenesInternasMat extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblhistorialordenesinternasmateriales_him';

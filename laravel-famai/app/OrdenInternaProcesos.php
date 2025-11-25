@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OrdenInternaProcesos extends Model
+class OrdenInternaProcesos extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblordenesinternasdetprocesos_odp';

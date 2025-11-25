@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Ubigeo extends Model
+class Ubigeo extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblubigeos_ubi';

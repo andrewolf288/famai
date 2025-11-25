@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Parte extends Model
+class Parte extends BaseModel
 {
     public $timestamps = true;
     protected $table = 'tblordenesinternaspartes_oip';
