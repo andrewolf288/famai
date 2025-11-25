@@ -31,6 +31,15 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
+     * Los campos que deben ser tratados como fechas
+     */
+    protected $dates = [
+        'usu_ultimoacceso',
+        'usu_feccreacion',
+        'usu_fecmodificacion'
+    ];
+
+    /**
      * AGREGAR ESTO:
      * Formato de fecha sin milisegundos - Compatible con SQL Server 2019
      */
