@@ -741,6 +741,14 @@ $(document).ready(async () => {
                     <td>${index + 1}</td>
                     <td class="descripcion-file">${archivo.oca_descripcion}</td>
                     <td class="text-center">
+                        <button type="button" class="btn btn-info btn-sm btn-preview-archivo-orden-compra">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
+                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
+                            </svg>
+                        </button>
+                    </td>
+                    <td class="text-center">
                         <button type="button" class="btn btn-danger btn-sm btn-eliminar-archivo-orden-compra">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                 <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
@@ -834,6 +842,56 @@ $(document).ready(async () => {
         archivosAdjuntosOrdenCompra.splice(index, 1)
         renderizarTablaAdjuntosPrincipal()
     })
+
+    // -------- PREVIEW DE ARCHIVOS ADJUNTOS ---------
+    // Mostrar preview al hacer click en el botón
+    $('#tabla-archivos-adjuntos-modal-orden-compra').on('click', '.btn-preview-archivo-orden-compra', function() {
+        const row = $(this).closest('tr')
+        const index = row.data('index')
+        const archivo = archivosAdjuntosOrdenCompra[index]
+        
+        mostrarPreviewArchivo(archivo.oca_file)
+    })
+
+    // Función para mostrar el preview del archivo
+    function mostrarPreviewArchivo(file) {
+        const previewContent = $('#previewArchivoContent')
+        previewContent.empty()
+        
+        if (!file) {
+            previewContent.html('<p class="text-muted">No se puede mostrar el preview</p>')
+            const modal = new bootstrap.Modal(document.getElementById('previewArchivoModal'))
+            modal.show()
+            return
+        }
+        
+        const fileType = file.type
+        const fileUrl = URL.createObjectURL(file)
+        
+        if (fileType.startsWith('image/')) {
+            const img = $('<img>')
+            img.attr('src', fileUrl)
+            img.addClass('img-fluid')
+            img.css('max-height', '450px')
+            img.attr('alt', 'Preview')
+            previewContent.append(img)
+        } else if (fileType === 'application/pdf') {
+            const iframe = $('<iframe>')
+            iframe.attr('src', fileUrl)
+            iframe.css({
+                'width': '100%',
+                'height': '450px',
+                'border': 'none'
+            })
+            previewContent.append(iframe)
+        } else {
+            previewContent.html('<p class="text-muted">Tipo de archivo no soportado para preview</p>')
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('previewArchivoModal'))
+        modal.show()
+    }
+
 
     // --------- CREACION DE ORDEN DE COMPRA ----------
     $("#guardar-orden-compra").on('click', function () {

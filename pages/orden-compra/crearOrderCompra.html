@@ -543,7 +543,7 @@
                     <!-- Subir archivo -->
                     <div class="col-md-4">
                         <label for="fileUploadOrdenCompra" class="form-label">Subir archivo</label>
-                        <input class="form-control" type="file" id="fileUploadOrdenCompra">
+                        <input class="form-control" type="file" id="fileUploadOrdenCompra" accept="image/*,application/pdf">
                     </div>
 
                     <!-- Descripción del archivo -->
@@ -566,8 +566,9 @@
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th class="col-2">Item</th>
-                                <th class="col-8">Descripción</th>
+                                <th class="col-1">Item</th>
+                                <th class="col-7">Descripción</th>
+                                <th class="col-2 text-center">Preview</th>
                                 <th class="col-2 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -576,6 +577,24 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA PREVIEW DE ARCHIVO -->
+<div class="modal fade" id="previewArchivoModal" tabindex="-1" aria-labelledby="previewArchivoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewArchivoModalLabel">Preview del Archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center" style="max-height: 500px; overflow: auto;">
+                <div id="previewArchivoContent"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
