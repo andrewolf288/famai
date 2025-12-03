@@ -1926,7 +1926,7 @@ $(document).ready(async () => {
         }
 
         // extraemos la informacion correspondiente
-        const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index))
+        const dataSeleccionada = indicesSeleccionados.map(index => despliegueMaterialesResumido[index])
         const dataSeleccionadaMateriales = []
         dataSeleccionada.forEach(detalle => {
             detalle.detalle.forEach(detalleElement => {
@@ -2079,7 +2079,7 @@ $(document).ready(async () => {
                 return;
             }
 
-            const dataSeleccionada = despliegueMaterialesResumido.filter((detalle, index) => indicesSeleccionados.includes(index));
+            const dataSeleccionada = indicesSeleccionados.map(index => despliegueMaterialesResumido[index]);
 
             dataSeleccionada.forEach(materialOriginal => {
                 materialOriginal.detalle.forEach(detalle => {
