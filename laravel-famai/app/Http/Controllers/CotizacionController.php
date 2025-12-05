@@ -890,28 +890,33 @@ class CotizacionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Buscar la cotización junto con sus detalles y archivos
             $cotizacion = Cotizacion::with(['detalleCotizacion', 'detalleCotizacionArchivos'])->findOrFail($id);
 
-            // Eliminamos los archivos relacionados a la cotización
-            foreach ($cotizacion->detalleCotizacionArchivos as $archivo) {
-                $urlArchivo = $archivo->cda_url;
-                // Eliminar archivo físico del disco
-                Storage::disk('public')->delete($urlArchivo);
-                // Eliminar el registro de detalleCotizacionArchivos
-                $archivo->delete();
-            }
-
-            // Eliminamos los detalles de la cotización
             foreach ($cotizacion->detalleCotizacion as $detalle) {
                 $odm_id = $detalle->odm_id;
                 if ($odm_id != null) {
-                    // comprobamos si es la unica cotizacion del material
+                    $material = OrdenInternaMateriales::find($odm_id);
+                    if ($material && $material->odm_estado == 'ODC') {
+                        DB::rollBack();
+                        return response()->json([
+                            'error' => 'No se puede anular la cotización. El material "' . $material->odm_descripcion . '" ya se encuentra en una orden de compra.'
+                        ], 400);
+                    }
+                }
+            }
+
+            foreach ($cotizacion->detalleCotizacionArchivos as $archivo) {
+                $urlArchivo = $archivo->cda_url;
+                Storage::disk('public')->delete($urlArchivo);
+                $archivo->delete();
+            }
+
+            foreach ($cotizacion->detalleCotizacion as $detalle) {
+                $odm_id = $detalle->odm_id;
+                if ($odm_id != null) {
                     $cotizacionesDetalle = CotizacionDetalle::where('odm_id', $odm_id)->count();
                     if ($cotizacionesDetalle == 1) {
-                        // buscamos el detalle de material
                         $material = OrdenInternaMateriales::findOrFail($odm_id);
-                        // si el detalle de material es un estado diferente de ODC
                         if ($material->odm_estado != 'ODC') {
                             $material->update([
                                 'odm_estado' => 'REQ',
@@ -923,7 +928,6 @@ class CotizacionController extends Controller
                 $detalle->delete();
             }
 
-            // Finalmente, eliminamos la cotización principal
             $cotizacion->delete();
 
             DB::commit();

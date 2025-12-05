@@ -1,14 +1,11 @@
 $(document).ready(() => {
-    // URL ENDPOINT
     const apiURL = '/cotizaciones'
 
-    // referencias de filtros
     const filterSelector = $('#filter-selector')
     const filterInput = $('#filter-input')
     const filterButton = $('#filter-button')
     const filterFechas = $('#filter-dates')
 
-    // -------- MANEJO DE FECHA ----------
     $("#fechaDesde").datepicker({
         dateFormat: 'dd/mm/yy',
     }).datepicker("setDate", new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -17,7 +14,6 @@ $(document).ready(() => {
         dateFormat: 'dd/mm/yy',
     }).datepicker("setDate", new Date());
 
-    // Opciones de DataTable
     const dataTableOptions = {
         destroy: true,
         responsive: true,
@@ -86,7 +82,7 @@ $(document).ready(() => {
                                     <path fill-rule="evenodd" d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2zM4.165 13.668c.09.18.23.343.438.419.207.075.412.04.58-.03.318-.13.635-.436.926-.786.333-.401.683-.927 1.021-1.51a11.7 11.7 0 0 1 1.997-.406c.3.383.61.713.91.95.28.22.603.403.934.417a.86.86 0 0 0 .51-.138c.155-.101.27-.247.354-.416.09-.181.145-.37.138-.563a.84.84 0 0 0-.2-.518c-.226-.27-.596-.4-.96-.465a5.8 5.8 0 0 0-1.335-.05 11 11 0 0 1-.98-1.686c.25-.66.437-1.284.52-1.794.036-.218.055-.426.048-.614a1.24 1.24 0 0 0-.127-.538.7.7 0 0 0-.477-.365c-.202-.043-.41 0-.601.077-.377.15-.576.47-.651.823-.073.34-.04.736.046 1.136.088.406.238.848.43 1.295a20 20 0 0 1-1.062 2.227 7.7 7.7 0 0 0-1.482.645c-.37.22-.699.48-.897.787-.21.326-.275.714-.08 1.103"/>
                                 </svg>
                             </button>
-                            <button class="btn btn-sm ${cotizacion.coc_estado === 'RPR' ? 'btn-outline-secondary' : 'btn-outline-danger'} btn-cotizacion-eliminar me-1" data-cotizacion="${cotizacion.coc_id}" ${cotizacion.coc_estado === 'RPR' ? 'disabled' : ''}>
+                            <button class="btn btn-sm btn-outline-danger btn-cotizacion-eliminar me-1" data-cotizacion="${cotizacion.coc_id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
                                     <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
                                 </svg>
@@ -117,36 +113,29 @@ $(document).ready(() => {
     })
 
     filterButton.on('click', () => {
-        // seleccionamos el valor del selector
         const filterField = filterSelector.val().trim()
-        // seleccionamos el valor del criterio de busqueda
         const filterValue = filterInput.val().trim()
 
         let filteredURL = apiURL
 
-        // primero aplicamos el filtro de fechas
         const fechaDesde = transformarFecha($('#fechaDesde').val())
         const fechaHasta = transformarFecha($('#fechaHasta').val())
         filteredURL += `?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}`
 
-        // debemos adjuntar el filtro de busqueda por criterio
         if (filterField.length !== 0 && filterValue.length !== 0) {
             filteredURL += `&${filterField}=${encodeURIComponent(filterValue)}`
         }
         initPagination(filteredURL, initDataTable, dataTableOptions)
     })
 
-    // inicializamos la paginacion con datatable
     initPagination(`${apiURL}?fecha_desde=${moment().startOf('month').format('YYYY-MM-DD')}&fecha_hasta=${moment().format('YYYY-MM-DD')}`, initDataTable, dataTableOptions)
 
-    // FUNCION PARA VER DETALLE DE COTIZACION
     $('#data-container').on('click', '.btn-cotizacion-detalle', async function () {
         const id = $(this).data('cotizacion')
         try {
             const { data } = await client.get(`/cotizacion-detalle/${id}`)
             const { agrupado, detalle_materiales } = data
 
-            // Llenamos los datos agrupados
             let simbolo = ''
             $('#tbl-cotizacion-detalle-agrupado tbody').empty()
             agrupado.forEach(agrupado => {
@@ -177,7 +166,6 @@ $(document).ready(() => {
                 </tr>
             `)
 
-            // Llenamos los datos de los materiales especifico
             $('#tbl-cotizacion-detalle-especifico tbody').empty()
             console.log(detalle_materiales)
             detalle_materiales.forEach(detalle => {
@@ -207,7 +195,6 @@ $(document).ready(() => {
                 `)
             })
 
-            // abrimos el modal
             const modalDetalleCotizacion = new bootstrap.Modal(document.getElementById('detalleCotizacionModal'))
             modalDetalleCotizacion.show()
         } catch (error) {
@@ -216,13 +203,11 @@ $(document).ready(() => {
         }
     })
 
-    // FUNCTION PARA EDITAR COTIZACION
     $('#data-container').on('click', '.btn-cotizacion-editar', function () {
         const id = $(this).data('cotizacion')
         window.location.href = `cotizacion/editar/${id}`
     })
 
-    // FUNCION PARA ELIMINAR COTIZACION
     $('#data-container').on('click', '.btn-cotizacion-eliminar', async function () {
         const id = $(this).data('cotizacion')
         if (!confirm('¿Desea eliminar esta cotización?')) {
@@ -234,11 +219,14 @@ $(document).ready(() => {
             initPagination(URL, initDataTable, dataTableOptions)
         } catch (error) {
             console.log(error)
-            alert('Error al eliminar la cotización')
+            const message = error.response?.data?.error || 'Error al eliminar la cotización'
+            bootbox.alert({
+                title: 'Error',
+                message: message
+            })
         }
     })
 
-    //FUNCION PARA REACTIVAR COTIZACION
     $('#data-container').on('click', '.btn-cotizacion-reactivar', async function () {
         const id = $(this).data('cotizacion')
         if (!confirm('¿Desea habilitar esta cotización nuevamente?')) {
@@ -250,11 +238,10 @@ $(document).ready(() => {
             initPagination(URL, initDataTable, dataTableOptions)
         } catch (error) {
             console.log(error)
-            alert('Error al eliminar la cotización')
+            alert('Error al reactivar la cotización')
         }
     })
 
-    // FUNCION PARA GENERAR PDF
     $('#data-container').on('click', '.btn-cotizacion-pdf', async function () {
         const id = $(this).data('cotizacion')
         try {
@@ -274,7 +261,6 @@ $(document).ready(() => {
         }
     })
 
-    // FUNCION PARA CAMBIAR EL ESTADO DE LA COTIZACION
     $('#data-container').on('click', '.btn-cambiar-estado-cotizacion', function () {
         const coc_id = $(this).data('cotizacion')
         const estado = $(this).text()
@@ -301,7 +287,6 @@ $(document).ready(() => {
                 }
             })
         }
-
     })
 
     function showModalPreview(pdfUrl) {
