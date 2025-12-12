@@ -218,6 +218,19 @@ class UtilHelper
                     );
                 }
 
+                // Procesar cuenta del Banco de la Nación
+                if (!empty($bancoInfo->account_nacion)) {
+                    ProveedorCuentaBanco::create([
+                        'prv_id' => $proveedor->prv_id,
+                        'mon_codigo' => 'SOL',
+                        'eba_id' => 3,
+                        'pvc_numerocuenta' => $bancoInfo->account_nacion,
+                        'pvc_activo' => 1,
+                        'pvc_usucreacion' => $usu_codigo,
+                        'pvc_tipocuenta' => 'Corriente',
+                    ]);
+                }
+
                 $proveedorActualizado = self::actualizarDatosProveedor($proveedor, $bancoInfo, $usu_codigo);
 
                 if ($proveedorActualizado) {
