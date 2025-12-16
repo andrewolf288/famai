@@ -608,6 +608,12 @@ class OrdenInternaMaterialesController extends Controller
             });
         }
 
+        if ($tipo === 'serviciosterceros') {
+            $query->whereHas('ordenInternaParte.ordenInterna', function ($q) {
+                $q->where('mrq_codigo', 'STO');
+            });
+        }
+
         // filtro de orden de trabajo
         // local.ERROR: Array to string conversion {"userId":"ADMIN   "
         Log::info('odt_numero: ' . json_encode($odt_numero));

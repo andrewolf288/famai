@@ -338,6 +338,8 @@ $(document).ready(async () => {
         $('#titulo-pagina').text('Logística requerimientos - Parada')
     } else if (tipoParam === 'compraventa') {
         $('#titulo-pagina').text('Logística requerimientos - Compra y Venta')
+    } else if (tipoParam === 'serviciosterceros') {
+        $('#titulo-pagina').text('Logística requerimientos - Servicios Terceros OT')
     } else {
         $('#titulo-pagina').text('Logística requerimientos')
     }
