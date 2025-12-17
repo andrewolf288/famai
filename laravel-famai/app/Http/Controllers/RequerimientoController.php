@@ -101,7 +101,7 @@ class RequerimientoController extends Controller
                 }
 
                 // REQUERIMIENTOS SIN NECESIDAD DE VALIDAR
-                $noValidar = ['STK', 'MEN', 'PAR', 'CYV'];
+                $noValidar = ['STK', 'MEN', 'PAR', 'CYV', 'STO'];
 
                 OrdenInternaMateriales::create([
                     'opd_id' => $requerimiento->partes[0]->opd_id,
