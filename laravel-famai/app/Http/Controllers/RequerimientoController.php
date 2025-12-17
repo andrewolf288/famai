@@ -517,7 +517,7 @@ class RequerimientoController extends Controller
                 }
 
                 // REQUERIMIENTOS SIN NECESIDAD DE VALIDAR
-                $noValidar = ['STK', 'MEN', 'PAR', 'CYV'];
+                $noValidar = ['STK', 'MEN', 'PAR', 'CYV', 'STO'];
                 
                 // creamos el detalle de material
                 $ordenInternaDetalleMaterial = OrdenInternaMateriales::create([
