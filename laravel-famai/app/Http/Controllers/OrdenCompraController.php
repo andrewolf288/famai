@@ -371,23 +371,9 @@ class OrdenCompraController extends Controller
                 ]);
             }
 
-            // actualizamos las cuentas
-            foreach ($validatedDataProveedor['cuentas_bancarias'] as $cuenta) {
-                if (isset($cuenta['pvc_id'])) {
-                    $cuentaBancaria = ProveedorCuentaBanco::findOrFail($cuenta['pvc_id']);
-                    $cuentaBancaria->update([
-                        'pvc_numerocuenta' => $cuenta['pvc_numerocuenta'],
-                        'mon_codigo' => $cuenta['mon_codigo'],
-                        'eba_id' => $cuenta['eba_id'],
-                    ]);
-                } else {
-                    ProveedorCuentaBanco::create([
-                        'prv_id' => $proveedor->prv_id,
-                        'pvc_numerocuenta' => $cuenta['pvc_numerocuenta'],
-                        'mon_codigo' => $cuenta['mon_codigo'],
-                        'eba_id' => $cuenta['eba_id'],
-                    ]);
-                }
+            $proveedorActualizado = UtilHelper::actualizarCuentasBancariasProveedor($proveedor, $user->usu_codigo);
+            if ($proveedorActualizado) {
+                $proveedor = $proveedorActualizado;
             }
 
             // creacion de la orden de compra
