@@ -40,22 +40,22 @@ class ExportarOrdenesCompraCsvJob implements ShouldQueue
             [
                 "sed_codigo" => 10,
                 "occ_tipo" => 'SUM',
-                "value" => 929
+                "value" => 1002
             ],
             [
                 "sed_codigo" => 10,
                 "occ_tipo" => 'SER',
-                "value" => 930
+                "value" => 1003
             ],
             [
                 "sed_codigo" => 20,
                 "occ_tipo" => 'SUM',
-                "value" => 931
+                "value" => 1004
             ],
             [
                 "sed_codigo" => 20,
                 "occ_tipo" => 'SER',
-                "value" => 932
+                "value" => 1005
             ]
         ];
         // Ruta donde se guardaran los archivos
