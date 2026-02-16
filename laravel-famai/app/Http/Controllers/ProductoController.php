@@ -157,7 +157,7 @@ class ProductoController extends Controller
         if ($query === null) {
             return response()->json(['error' => 'El parámetro de consulta es requerido'], 400);
         }
-
+        //OnHand new - old OnOrder
         $symbol = '+';
         $subqueries = explode($symbol, $query);
         $queryBuilder = DB::connection('sqlsrv_secondary')
@@ -168,7 +168,7 @@ class ProductoController extends Controller
                 'T0.ItemName as pro_descripcion',
                 'T0.BuyUnitMsr as uni_codigo',
                 'T1.WhsCode',
-                DB::raw('MAX(T1.OnOrder) as alp_stock'),
+                DB::raw('MAX(T1.OnHand) as alp_stock'),
                 'T0.CntUnitMsr',
                 'T1.AvgPrice',
                 'T0.validFor',
