@@ -34,7 +34,8 @@ class OrdenInternaMateriales extends Model
         'odm_feccreacion',
         'odm_usumodificacion',
         'odm_fecmodificacion',
-        'odm_solped' // ALTER TABLE tblordenesinternasdetmateriales_odm ADD odm_solped VARCHAR(255) NULL
+        'odm_solped', // ALTER TABLE tblordenesinternasdetmateriales_odm ADD odm_solped VARCHAR(255) NULL
+        'odm_auditoria'
     ];
 
     const CREATED_AT = 'odm_feccreacion';

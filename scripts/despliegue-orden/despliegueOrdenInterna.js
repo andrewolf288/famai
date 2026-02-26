@@ -105,7 +105,7 @@ $(document).ready(async () => {
                     </td>
                     <td>${producto?.pro_codigo || 'N/A'}</td>
                     <td style="max-width: 500px; white-space: wrap;">${material.odm_descripcion}</td>
-                    <td>${material.odm_observacion || 'N/A'}</td>
+                    <td>${material.odm_observacion || 'N/A' } ${material?.odm_auditoria || '' }</td>
                     <td class="text-center">${material.odm_cantidad}</td>
                     <td class="text-center">${producto?.unidad?.uni_codigo || 'N/A'}</td>
                     <td class="text-center">${producto?.stock?.alp_stock || "0.00"}</td>

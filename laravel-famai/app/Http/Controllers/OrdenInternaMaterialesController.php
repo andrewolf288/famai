@@ -349,7 +349,7 @@ class OrdenInternaMaterialesController extends Controller
             
             $cantidadPendienteOriginal = $detalleMaterial->odm_cantidadpendiente;
             
-            $detalleMaterial->odm_observacion = "Ajuste de cantidad (" . $cantidadPendienteOriginal . ") por " . $user->usu_nombre . " el " . Carbon::now()->format('d/m/Y H:i:s');
+            $detalleMaterial->odm_auditoria = "Ajuste de cantidad (" . $cantidadPendienteOriginal . ") por " . $user->usu_nombre . " el " . Carbon::now()->format('d/m/Y H:i:s');
             $detalleMaterial->odm_usumodificacion = $user->usu_codigo;
             $detalleMaterial->odm_cantidadordenada = $cantidadPendienteOriginal + $detalleMaterial->odm_cantidadordenada;
             $detalleMaterial->odm_cantidadpendiente = 0;
