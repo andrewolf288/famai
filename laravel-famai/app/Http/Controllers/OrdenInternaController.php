@@ -617,10 +617,31 @@ class OrdenInternaController extends Controller
             DB::commit();
 
             return response()->json($ordeninterna, 200);
-        } catch (Exception $e) {
-            // hacemos rollback y devolvemos el error
+        } catch (ValidationException $e) {
+
             DB::rollBack();
-            return response()->json(["error" => $e->getMessage()], 500);
+
+            Log::error('VALIDACION FALLIDA', [
+                'errores' => $e->errors()
+            ]);
+
+            return response()->json([
+                "error" => "Validación fallida",
+                "detalle" => $e->errors()
+            ], 422);
+
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            Log::error('ERROR ORDEN INTERNA', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                "error" => $e->getMessage()
+            ], 500);
+
         }
     }
 
