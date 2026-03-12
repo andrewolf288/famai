@@ -518,7 +518,7 @@ class OrdenInternaController extends Controller
                 foreach ($detalle_materiales as $material) {
                     $validatorMaterial = Validator::make($material, [
                         'odm_descripcion' => 'required|string',
-                        'odm_cantidad' => 'required|numeric|min:1',
+                        'odm_cantidad' => 'required|numeric|gt:0',//correcion para aceptar numeros mayores a 0
                         'odm_item' => 'required|integer',
                         'odm_observacion' => 'nullable|string',
                         'odm_tipo' => 'required|integer',
@@ -622,7 +622,8 @@ class OrdenInternaController extends Controller
             DB::rollBack();
 
             Log::error('VALIDACION FALLIDA', [
-                'errores' => $e->errors()
+                'errores' => $e->errors(),
+                'request' => $request->all()
             ]);
 
             return response()->json([
