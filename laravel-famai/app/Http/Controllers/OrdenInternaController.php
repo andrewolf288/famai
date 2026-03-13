@@ -134,7 +134,9 @@ class OrdenInternaController extends Controller
 
     public function show($id)
     {
-        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso', 'partes.materiales.detalleAdjuntos', 'partes.materiales' => function($query) {
+        $ordenInterna = OrdenInterna::with(['cliente', 'area', 'trabajadorOrigen', 'trabajadorMaestro', 'trabajadorAlmacen', 'partes.parte', 'partes.materiales.producto', 'partes.procesos.proceso', 'partes.materiales.detalleAdjuntos',
+        'partes.materiales.ordenesCompra',
+        'partes.materiales' => function($query) {
                 $query->withCount('cantidadHistorialMateriales');
             }])
             ->findOrFail($id);

@@ -530,10 +530,13 @@ $(document).ready(async function () {
 
     // carga de detalle de materiales en tabla
     function cargarProductosDetalle(id_detalle_parte) {
+        console.log("cargando detalles")
+        console.log(id_detalle_parte)
         $('#tbl-orden-interna-productos tbody').empty()
         // buscamos el detalle de la parte correspondiente
         const findElement = buscarDetalleParte(id_detalle_parte)
         const { materiales } = findElement
+        console.log(materiales)
         materiales.forEach(element => {
             const row = `
             <tr data-id-producto="${element.producto?.pro_codigo ?? ''}" data-id-detalle="${element.odm_id}" class="table-primary">
@@ -579,20 +582,39 @@ $(document).ready(async function () {
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
                             </svg>
                         </button>
-                        <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-1" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
-                            C
-                        </button>
-                        <button class="btn btn-sm ${element["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-1" ${element["odm_tipo"] == 4 ? 'disabled' : ''}>
-                            X
-                        </button>
-                        <button class="btn btn-sm ${element["odm_tipo"] == 5 ? 'btn-secondary' : 'btn-success'} btn-detalle-recuperado-cliente" ${element["odm_tipo"] == 5 ? 'disabled' : ''}>
-                            R
-                        </button>
+                        ${
+                            element.ordenes_compra.length > 0
+                                ? `<button 
+                                    class="btn btn-sm btn-info btn-detalle-proporcionado-cliente me-1 w-100"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="right"
+                                    title="Ya tiene una orden de compra"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588z"/>
+                                        <circle cx="8" cy="4.5" r="1"/>
+                                    </svg>
+                                </button>`
+                                : `
+                                <button class="btn btn-sm ${element["odm_tipo"] == 3 ? 'btn-secondary' : 'btn-primary'} btn-detalle-proporcionado-cliente me-1" ${element["odm_tipo"] == 3 ? 'disabled' : ''}>
+                                    C
+                                </button>
+                                <button class="btn btn-sm ${element["odm_tipo"] == 4 ? 'btn-secondary' : 'btn-danger'} btn-detalle-nopedir-cliente me-1" ${element["odm_tipo"] == 4 ? 'disabled' : ''}>
+                                    X
+                                </button>
+                                <button class="btn btn-sm ${element["odm_tipo"] == 5 ? 'btn-secondary' : 'btn-success'} btn-detalle-recuperado-cliente" ${element["odm_tipo"] == 5 ? 'disabled' : ''}>
+                                    R
+                                </button>
+                                `
+                        }
                     </div>
                 </td>
             </tr>`
             $('#tbl-orden-interna-productos tbody').append(row)
         })
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el))
     }
 
     // funcion para mostrar el historial de materiales
