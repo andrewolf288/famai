@@ -353,7 +353,22 @@ class OrdenCompraController extends Controller
             // }
 
             if ($proveedores->count() === 0) {
+
+                $tipo_documento = 'CEX';
+                $doc = trim($validatedDataProveedor['prv_nrodocumento']);
+                if (preg_match('/^\d{8}$/', $doc)) {
+                    $tipo_documento = 'DNI';
+                } elseif (preg_match('/^\d{11}$/', $doc)) {
+                    $tipo_documento = 'RUC';
+                } else {
+                    $tipo_documento = 'CEX';
+                }
+                Log::info('Tipo de documento detectado ORDEN COMPRA', [
+                    'tipo_documento' => $tipo_documento,
+                    'numero_documento' => $doc
+                ]);
                 $proveedor = Proveedor::create([
+                    'tdo_codigo' => $tipo_documento,
                     'prv_nombre' => $validatedDataProveedor['prv_nombre'],
                     'prv_nrodocumento' => $validatedDataProveedor['prv_nrodocumento'],
                     'prv_correo' => $validatedDataProveedor['prv_correo'],
